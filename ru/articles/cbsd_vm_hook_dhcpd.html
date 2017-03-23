@@ -125,8 +125,11 @@ service dhcpd restart
 и всем остальным устройствам в вашей сети, если они их попросят. Более того, если в вашей сети есть еще один DHCPD сервер, вы также этим можете нарушить его работу.</p>
 <p>Чтобы этого избежать, просто заблокируйте сетевой трафик от портов, по которым dhcpd во вне. Если интерфейс - <strong>em0</strong>, это можно например через <a href="http://man.freebsd.org/ipfw/8" target="_blank">ipfw</a>:</p>
 <pre class="cli">
-ipfw add deny tcp from me to any dst-port 67-68 via em0 out
-ipfw add deny udp from me to any dst-port 67-68 via em0 out
+/sbin/ipfw add 5000 deny tcp from me to any dst-port 67-68 via em0 out
+/sbin/ipfw add 5001 deny udp from me to any dst-port 67-68 via em0 out
+
+/sbin/ipfw add 5000 deny tcp from any to not me dst-port 67-68 via em0 in
+/sbin/ipfw add 5001 deny udp from any to not me dst-port 67-68 via em0 in
 </pre>
 <p>Другой метод решения - вы можете указать dhcpd работать только на тех (tap<strong>X</strong>) интерфейсах, которые создаются при запуске виртуальной машины.</p>
 </div>
@@ -339,13 +342,13 @@ service dhcpd restart
 % cp -a /mnt/* /FreeBSD/
 % umount /mnt
 % mkdir /root/etc
-% cat > /root/etc/inetd.conf <<EOF
+% cat &gt; /root/etc/inetd.conf &lt;&lt;EOF
 tftp   dgram   udp     wait    root    /usr/libexec/tftpd      tftpd -l -s /FreeBSD
 tftp   dgram   udp6    wait    root    /usr/libexec/tftpd      tftpd -l -s /FreeBSD
 EOF
 
-% echo "/FreeBSD -ro -alldirs" > /etc/exports
-% echo "192.168.0.2:/FreeBSD /mnt nfs rw 0 0" > /FreeBSD/etc/fstab
+% echo "/FreeBSD -ro -alldirs" &gt; /etc/exports
+% echo "192.168.0.2:/FreeBSD /mnt nfs rw 0 0" &gt; /FreeBSD/etc/fstab
 
 % sysrc inetd_enable="YES"
 % sysrc inetd_flags="-wW -C 60 /root/etc/inetd.conf"

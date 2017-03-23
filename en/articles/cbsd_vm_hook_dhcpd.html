@@ -127,8 +127,11 @@ by default - creating a tap interface that will be bridged to the uplink interfa
 all other devices in your network, if they ask them. Moreover, if there is another DHCPD server on your network, you can also disrupt it. </p>
 <p>To avoid this, simply block network traffic from the ports on which dhcpd is on the outside. If the interface - <strong>em0</strong>, it is possible, for example, via <a href="http://man.freebsd.org/ipfw/8" target="_blank">ipfw</a>:</p>
 <pre class="cli">
-ipfw add deny tcp from me to any dst-port 67-68 via em0 out
-ipfw add deny udp from me to any dst-port 67-68 via em0 out
+/sbin/ipfw add 5000 deny tcp from me to any dst-port 67-68 via em0 out
+/sbin/ipfw add 5001 deny udp from me to any dst-port 67-68 via em0 out
+
+/sbin/ipfw add 5000 deny tcp from any to not me dst-port 67-68 via em0 in
+/sbin/ipfw add 5001 deny udp from any to not me dst-port 67-68 via em0 in
 </pre>
 <p>Another method of solving - you can specify dhcpd to work only on those (tap<strong>X</strong>) interfaces, which are created when the virtual machine starts.</p>
 </div>
@@ -341,13 +344,13 @@ demonstrated in this short demo: <a href="https://youtu.be/mz8GrWE8Xis" target="
 % cp -a /mnt/* /FreeBSD/
 % umount /mnt
 % mkdir /root/etc
-% cat > /root/etc/inetd.conf <<EOF
+% cat &gt; /root/etc/inetd.conf &lt;&lt;EOF
 tftp   dgram   udp     wait    root    /usr/libexec/tftpd      tftpd -l -s /FreeBSD
 tftp   dgram   udp6    wait    root    /usr/libexec/tftpd      tftpd -l -s /FreeBSD
 EOF
 
-% echo "/FreeBSD -ro -alldirs" > /etc/exports
-% echo "192.168.0.2:/FreeBSD /mnt nfs rw 0 0" > /FreeBSD/etc/fstab
+% echo "/FreeBSD -ro -alldirs" &gt; /etc/exports
+% echo "192.168.0.2:/FreeBSD /mnt nfs rw 0 0" &gt; /FreeBSD/etc/fstab
 
 % sysrc inetd_enable="YES"
 % sysrc inetd_flags="-wW -C 60 /root/etc/inetd.conf"

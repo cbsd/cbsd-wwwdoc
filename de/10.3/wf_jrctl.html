@@ -1,0 +1,154 @@
+<h1><span>Jail limits control</span></h1>
+	
+	<h2><a name="jrctl_cmd">jrctl, jrctl-tui commands</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl
+			% cbsd jrctl-tui
+		</pre>
+		<strong>Description</strong>:
+		<p><strong>CBSD</strong> supports many of FreeBSD's mechanisms for enforcing limits on a jail's resource usage.</p>
+	</div>
+	
+	<h2><a name="filequota">File quotas</a></h2>
+	<div class="block">
+		<p>Floating file quotas are only possible for jails residing on <strong>ZFS</strong>-file system. For systems stored on <strong>UFS</strong> a similar restrictions can be enforced using an md(4)-based vnode file/image and making use of <strong>mdsize</strong> for the jail).</p>
+	</div>
+
+	<h2><a name="renice">Renice prioritization</a></h2>
+	<div class="block">
+		<p><strong>CBSD</strong> uses <a href="http://www.freebsd.org/cgi/man.cgi?query=renice&amp;sektion=8" target="_blank">renice(8)</a> to prioritize each jail's access to the CPU. This makes it possible to select different priorities on a per jail basis and give the most impoartant jails the highest share of CPU time.  For example, you may want to have your distcc jail set to a low priority, give your web server medium and the jail hosting the databse the highest priority. The actual priorization is taken care of by <strong>nice</strong> which gets the value for each jail from jail rctl. The values set here correspond to the behavior of nice(1)&nbsp;— the lowest integer resulting in the highest priority.
+    <p>Renice example:
+		<p>1) Let's create an AMP jail and have it run a php script that performs some work (such as <a href="/en/misc/bench.zip" target="_blank">bench.zip</a> taken from <a href="http://www.php-benchmark-script.com/" target="_blank">http://www.php-benchmark-script.com/</a>). We then clone the jail, calling the first <strong>highprio1</strong> and the second <strong>lowprio1</strong>. Using <strong>cbsd jrctl-tui</strong> we give the first the highest possible priority <strong>-20</strong>, and set the second jail to the lowest priority of <strong>20</strong>. In addition we limit the jail to one core through <strong>cpuset</strong> with <strong>cbsd jconfig</strong> (single-core systems are hard to come by these days and smart schedulers do not allow for a clean experiment without taking this step ;-).</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls display=jid,jname,ip4_addr,cpuset
+			16   highprio1   10.0.0.121/24  4
+			17   lowprio1    10.0.0.122/24  4
+		</pre>
+		<p>— jid 16 is the higher prioritised jail while jid 17&nbsp;— is set to a lower priority. Both run on the fourth core.</p>
+		<p>make poll <strong>top</strong> state congestion <strong>php-fpm</strong> with JID output:</p>
+		<pre class="brush:bash;ruler:true;">
+		% export iter=1
+		% while [ 1 ]; do
+			printf "Iter: $iter" ;
+			iter=$((iter+1))
+			top -jab | grep php
+			sleep 1
+		done
+		</pre>
+		<p>We launch the script on both IPs at the same time:</p>
+		<pre class="cli">
+	% fetch -T 300 -o /dev/stdout http://10.0.0.121 &amp; fetch -T 300 -o /dev/stdout http://10.0.0.122 &amp; 
+	[1] 65985
+	[2] 65986
+	
+	--------------------------------------
+	|        PHP BENCHMARK SCRIPT        |
+	--------------------------------------
+	Start : 2014-01-06 16:28:59
+	Server : @10.0.0.121
+	PHP version : 5.4.23
+	Platform : FreeBSD
+	--------------------------------------
+	test_math                 : 12.870 sec.
+	test_stringmanipulation   : 15.896 sec.
+	test_loops                : 8.968 sec.
+	test_ifelse               : 7.864 sec.
+	--------------------------------------
+	Total time:               : 45.598 sec.
+	
+	--------------------------------------
+	|        PHP BENCHMARK SCRIPT        |
+	--------------------------------------
+	Start : 2014-01-06 16:29:02
+	Server : @10.0.0.122
+	PHP version : 5.4.23
+	Platform : FreeBSD
+	--------------------------------------
+	test_math                 : 32.632 sec.
+	test_stringmanipulation   : 18.053 sec.
+	test_loops                : 6.323 sec.
+	test_ifelse               : 5.504 sec.
+	--------------------------------------
+	Total time:               : 62.512 sec.
+	
+	[2]    Done                          fetch -T 300 -o /dev/stdout http://10.0.0.122
+	[1]  + Done                          fetch -T 300 -o /dev/stdout http://10.0.0.121
+		</pre>
+		<p>and we can soon observe the following output from top:</p>
+		<pre class="cli">
+	Iter: 1
+	65101  16 www           1  35  -20 32548K 11456K CPU4    4   0:35  20.56% php-fpm: pool www (php-fpm)
+	65587  17 www           1  52   20 32548K 11456K RUN     4   0:32   0.00% php-fpm: pool www (php-fpm)
+	Iter: 2
+	65101  16 www           1  60  -20 32548K 11456K RUN     4   0:36  25.98% php-fpm: pool www (php-fpm)
+	65587  17 www           1  42   20 32548K 11456K CPU4    4   0:33   2.10% php-fpm: pool www (php-fpm)
+	Iter: 3
+	65101  16 www           1  60  -20 32548K 11456K CPU4    4   0:36  26.27% php-fpm: pool www (php-fpm)
+	65587  17 www           1  94   20 32548K 11456K RUN     4   0:33   8.59% php-fpm: pool www (php-fpm)
+	Iter: 4
+	65101  16 www           1  61  -20 32548K 11456K CPU4    4   0:37  31.69% php-fpm: pool www (php-fpm)
+	65587  17 www           1  95   20 32548K 11456K RUN     4   0:34   9.47% php-fpm: pool www (php-fpm)
+	Iter: 5
+	65101  16 www           1  62  -20 32548K 11456K CPU4    4   0:37  35.60% php-fpm: pool www (php-fpm)
+	65587  17 www           1  95   20 32548K 11456K RUN     4   0:34  11.18% php-fpm: pool www (php-fpm)
+	Iter: 6
+	65101  16 www           1  64  -20 32548K 11456K CPU4    4   0:38  38.96% php-fpm: pool www (php-fpm)
+	65587  17 www           1  96   20 32548K 11456K RUN     4   0:34  12.79% php-fpm: pool www (php-fpm)
+	..
+		</pre>
+		<p>The jail with jid 16 is getting a larger share of the available CPU cycles and executes almost 1.5 times faster.</p>
+	</div>
+	
+	<h2><a name="rctl">RACCT/RCTL framework</a></h2>
+	<div class="block">
+		<p>If your kernel has support RACCT/RCTL, you can set limits on the jail and watch the current statistics for jail resources. To do this, there is a command <strong>cbsd jrctl</strong>, which arguments
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl mode=apply  ...
+		</pre>
+		<p>and</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl mode=unset  ...
+		</pre>
+		<p>automatically called for the install or removal of limits when working <strong>jstart</strong> or <strong>jstop</strong> respectively. By command:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl mode=show
+		</pre>
+		<p>you can see current statistics on the jail resources consumed, which can be used to generate reports and graphs for loading jail, as well as the <strong>CBSD</strong> daemon used to generate recommendations on the need to add new resources and for overload warnings.</p>
+		<p>By command:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl
+		</pre>
+		<p>without arguments you cat see default limits on all jails. Through argument <strong>display</strong> you can specify the fields for output data. If <strong>display</strong> is not specified, the value takes from <em>$workdir/etc/defaults/jrctl.conf</em> file, which you can change at its discretion via <em>$workdir/etc/jrctl.conf</em></p>
+		<p>You can edit the limits through</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl-tui jname=jname
+		</pre>
+		<p>or, if you build a hosting and want to create limits on non-interactively, you can generate a file <em>$workdir/$jname/jail.limits</em></p>
+		<p>By jrctl you can set the following limits jail:</p>
+		<p>a) All you can do a framework FreeBSD <a href="http://man.freebsd.org/rctl/8" target="_blank">rctl(8)</a>:</p>
+		<pre class="cli">
+	cputime 	   CPU time, in seconds
+	datasize	   data size, in bytes
+	stacksize	   stack size, in bytes
+	coredumpsize	   core dump size, in bytes
+	memoryuse	   resident set size, in bytes
+	memorylocked	   locked memory, in bytes
+	maxproc 	   number of processes
+	openfiles	   file descriptor table size
+	vmemoryuse	   address space limit, in bytes
+	pseudoterminals    number of PTYs
+	swapuse 	   swap usage, in bytes
+	nthr		   number of threads
+	msgqqueued	   number of queued SysV messages
+	msgqsize	   SysV message queue size, in bytes
+	nmsgq		   number of SysV message queues
+	nsem		   number of SysV semaphores
+	nsemop		   number of SysV semaphores modified in a single semop(2) call
+	nshm		   number of SysV shared memory segments
+	shmsize 	   SysV shared memory size, in bytes
+	wallclock	   wallclock time, in seconds
+		</pre>
+		<p class="text-center"><img src="/img/jrctl1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jrctl2.png" alt="" /></p>
+	</div>

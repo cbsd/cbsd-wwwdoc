@@ -1,0 +1,62 @@
+	<h1><span>Создание jail через dialog меню</span></h1>
+	
+	<h2><a name="jcreate_cmd">Команда jcreate, jconstruct-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler=true;">
+		% cbsd jconstruct-tui
+		</pre>
+		<pre class="brush:bash;ruler=true;">
+		% cbsd jcreate jconf=/path/to/conf.jconf
+		</pre>
+	</div>
+	
+	<div class="block">
+		<strong>Описание:</strong>
+		<p>Клетка создается по заранее сформированному конфигурационному файлу через <strong>cbsd jcreate jconf=path_to_cfg</strong>.
+		Для формирования конфигурации, можно воспользоваться <strong>cbsd jconstruct</strong> (в режиме диалога вопрос-ответ),
+		либо через <a href="http://man.freebsd.org/dialog/1" target="_blank">dialog(1)</a> интерфейс <strong>cbsd jconstruct-tui</strong>, либо через WEB интерфейс.
+		При корректно настроеном <a href="https://wiki.freebsd.org/pkgng" target="_blank"><strong>pkg.conf</strong></a> и рабочем репозитории, есть возможность 
+		предустановить в клетку готовые пекеджи, маркировав их через <strong>pkglist</strong> меню. В целях безопасности, рекомендуется использовать официальный <strong>pkg</strong> репозиторий FreeBSD или 
+		<a href="/ru/articles/cbsd_cpr.html" target="_blank">создавать свои собственные</a> версии сборок ПО.
+		</p>
+		<p>Примечание: если репозиторий недоступен, пункт <strong>pkglist</strong> при <strong>cbsd jconstruct-tui</strong> диалога выбора пекеджей не выведет.</p>
+		<p>Примечание: мульти-репозитории и возможность их выбора при создании клетки пока не реализовано, используется репозиторий из основного pkg.conf.</p>
+	</div>
+	<div class="warning">
+		<p>Внимание! Поскольку список и выбор пекеджей формируется по pkg.conf мастер машины, имейте ввиду, что наполнение выбранных пекеджей по списку сработает лишь в том случае, если архитектура и версия клетки совпадает с нодой.</p>
+	</div>
+	<div class="block">
+		<p>Для создания через DIALOG:</p>
+		<pre class="brush:bash;ruler=true;">
+		% cbsd jconstruct-tui
+		</pre>
+		<p>Это же меню для создания jail доступно при конфигурировании <strong>CBSD</strong> через bsdconfig</p>
+		<p class="text-center"><img src="/img/cbsd_syntax3.png" alt="" /></p>
+		<p>Если <strong>jconstruct-tui</strong> отработала корректно, по окончанию будет задан вопрос о создании клетки. В случае
+		положительно ответа, <strong>jcreate</strong> будет выполнен на новую конфигурацию автоматически. В противном случае,
+		скрипт выведет путь к конфигурационному файлу (в $workdir/tmp), по которой можно создать клетку.</p>
+	</div>
+	<!--# include file="/ru/changeroot.html" -->
+	<div class="block">
+		<p>Вы можете переопределить параметр <strong>jailskeldir</strong>="$workdir/share/jail-skel", прописанный в <em>$workdir/etc/defaults/jail-freebsd-default.conf</em> для указания альтернативного каталога темплейтов, файлы в котором перезапишут оригинальные файлы базы при создании клетки. Для этого, создайте файл <strong>jail-freebsd-XXXXX.conf</strong> в каталоге <em>$workdir/etc</em> и впишите свое значение.</p>
+		<p>Подробнее смотрите: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">Профили для создания jail</a></p>
+	</div>
+	<div class="block">
+		<p><strong>Пример</strong> (заполнение jname, fqdn, ips полей + GO):</p>
+		<pre class="brush:bash;ruler=true;">
+		% cbsd jconstruct-tui
+		</pre>
+		<p class="text-center"><img src="/img/jcreate1.png" alt="" /></p>
+		<p>Если репозиторий сконфигурирован корректно, можно выбрать пекеджи на установку. Используйте первый символ названия порта для
+		более быстрого поиска и пробел для маркировки:</p>
+		<p class="text-center"><img src="/img/jcreate2.png" alt="" /></p>
+		<p>Обязательное поле для заполнения: короткое (одним словом) имя клетки. Это имя будет использоваться для идентификации jail:</p>
+		<p class="text-center"><img src="/img/jcreate3.png" alt="" /></p>
+		<p>Обязательное поле для заполнения: полное (с доменом) имя клетки. Это имя будет использовано как hostname клетки:</p>
+		<p class="text-center"><img src="/img/jcreate4.png" alt="" /></p>
+		<p>Обязательное поле для заполнения: IP адрес клетки. Может иметь сетевой префикс через запись вида IP/prefix.</p>
+		<p>Для установки более одного IP адреса, воспользуйтесь редактированием файла <strong>rc.conf</strong> клетки, описанным в <a href="/ru/<!--#echo var="version" -->/wf_jconfig_ssi.html" target="_blank">конфигурации клетки</a></p>
+		<p class="text-center"><img src="/img/jcreate5.png" alt="" /></p>
+		<p>При вызове пункта <strong>GO</strong>, система предложит создать клетку немедленно, автоматически запустив <strong>cbsd jcreate jconf=..</strong>. В противном случае, будет выведен путь к сохраненной конфигурации для запуска команды <strong>cbsd jcreate</strong> вручную:</p>
+		<p class="text-center"><img src="/img/jcreate6.png" alt="" /></p>
+	</div>

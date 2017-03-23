@@ -1,0 +1,18 @@
+	<h1><span>Клонирование jail</span></h1>
+	
+	<h2><a name="jclone_cmd">Команда jclone</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jclone
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrclone
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Выполняет клонирование jail в новый. В качестве обязательных аргументов, указывается источник/оригинал клетки через <strong>old</strong>,новое имя через аргумент <strong>new</strong> и FQDN (hostname) через <strong>host_hostname</strong>. В качестве необязательного&nbsp;— новые ip адреса через <strong>ip4_addr</strong> (если IP несколько, адреса указываются через запятую без пробелов)</p>
+		<p><strong>Пример:</strong> клонирование клетки jail2 в jail3 со сменой имени хоста <strong>host_hostname</strong> и ip адреса <strong>ip4_addr</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jclone old=jail2 new=jail3 host_hostname=jail3.my.domain ip4_addr=10.0.0.22/24
+		</pre>
+		<p class="text-center"><img src="/img/jclone1.png" alt="" /></p>
+	</div>

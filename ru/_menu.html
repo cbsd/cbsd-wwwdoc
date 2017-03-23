@@ -1,0 +1,31 @@
+<!--#if expr="$uri = /\/[a-z]{2}/(.*)/" --><!--#set var="data" value="$1" --><!--#else --><!--#set var="data" value="about.html" --><!--#endif -->
+			<ul class="menu-main">
+				<li><a href="/ru/about.html">О проекте</a>
+				</li><li>
+					<a href="/ru/news.html">Новости</a>
+				</li><li>
+					<a href="https://bsdclusters.convectix.com/projects">Форум</a>
+				</li><li>
+					<a href="/ru/screenshots.html">Скриншоты</a>
+				</li><li>
+				</li><li>
+					<a href="/en/tutorial.html">Tutorial</a>
+				</li><li>
+					<a href="/ru/downloads.html">Скачать</a>
+				</li><li>
+					<a href="/ru/docs.html">Документация »</a>
+					<ul class="submenu">
+						<li><a href="/ru/articles.html">Статьи/HowTo</a></li>
+						<li><a href="/en/press.html">Ссылки на сторонние статьи</a></li>
+					</ul>
+				</li><li>
+					<a href="/ru/feedback.html">Обратная связь »</a>
+				</li><li>
+					<a href="#">Lang »</a>
+					<ul class="submenu">
+						<li><a href="/ru/<!--#echo var="data" -->">Русский</a></li>
+						<li><a href="/en/<!--#echo var="data" -->">English</a></li>
+						<li><a href="/de/<!--#echo var="data" -->">Deutsch</a></li>
+					</ul>
+				</li>
+			</ul>

@@ -1,0 +1,129 @@
+	<h1><span>Профили для создания jail</span></h1>
+	
+	<h2><a name="jail_profiles">Команды jcreate</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jcreate
+		</pre>
+		<p><strong>Описание</strong></p>
+		<p>Допустим, вам необходимо штамповать однотипные клетки, в которых должен быть установлен и настроен некоторый список ПО, например, клетка с WEB сервером nginx, отдающим index.html. Вы можете создать клетку (например jail1), провести все необходимые настройки и сделать экспорт клетки. После чего, когда вам будет необходим новый инстанс, выполняете команду:</p>
+		<pre class="brush:bash;ruler:true;">
+   % cbsd jimport jname=jail1 newjname=jail2
+		</pre>
+		<p>Создавая на основе имиджа jail1 копию в новую клетку под именем jail2. Также, для этих целей можно использовать команду <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jclone_ssi.html">jclone</a>. Тем не менее, это не всегда бывает удобно (особенно с точки зрения поддержания ПО в актуальном состоянии в оригинальной клетке), поэтому воспользуемся возможностью накладывать профили и применять альтернативные <strong>skel</strong>-каталоги для применения нужных нам изменений на-лету при создании клетки.</p>
+		<p><strong>Пример</strong>:</p>
+		<h2>1) Создание <strong>jconf</strong>:</h2>
+		<p>Если вы хотите создавать неинтерактивные сценарии (без вашего участия), создадим шаблон, по которому будут создавать новые клетки <strong>CBSD</strong> скрипты. Для этого запустим <strong>cbsd jconstruct-tui</strong> и на вопрос "Do you want to create jail immediately?" ответим отрицательно. В этом случае будет выведена команда для <strong>jcreate</strong> и путь к jconf - это и есть конфигурация, по которой создается клетка. Либо ее можно написать вручную, например:</p>
+		<pre class="brush:bash;ruler:true;">
+% mkdir /root/share
+% cat > /root/share/nginx.jconf << EOF
+jname="jail1";
+path="/usr/jails/jails/jail1";
+host_hostname="jail1.my.domain";
+ip4_addr="DHCP";
+mount_devfs="1";
+allow_mount="1";
+allow_devfs="1";
+allow_nullfs="1";
+mount_fstab="/usr/jails/jails-fstab/fstab.jail1";
+arch="amd64";
+mkhostsfile="1";
+devfs_ruleset="4";
+ver="10.1";
+basename="";
+baserw="0";
+mount_src="0";
+mount_obj="0";
+mount_kernel="0";
+mount_ports="1";
+astart="1";
+data="/usr/jails/jails-data/jail1-data";
+vnet="0";
+applytpl="1";
+mdsize="0";
+rcconf="/usr/jails/jails-rcconf/rc.conf_jail1";
+floatresolv="1";
+
+exec_poststart="0";
+exec_poststop="";
+exec_prestart="0";
+exec_prestop="0";
+
+exec_master_poststart="0";
+exec_master_poststop="0";
+exec_master_prestart="0";
+exec_master_prestop="0";
+pkg_bootstrap="1";
+user_pw_root='rootpw'
+interface="auto"
+jailskeldir="/root/share/nginx-jail"
+pkglist="/root/share/pkglist.txt";
+exec_start="/bin/sh /etc/rc"
+exec_stop="/bin/sh /etc/rc.shutdown"
+EOF
+		</pre>
+		<p>Где наиболее важно для нас:</p>
+		<ul>
+			<li><strong>jail1</strong> - имя клетки</li>
+			<li><strong>user_pw_root</strong> - параметр, устанавливающий соответствующий пароль пользователю root (вы можете также просто править master.passwd файл в skel каталоге для этого)</li>
+			<li><strong>ip4_addr="DHCP"</strong> - заставляет CBSD брать первый свободный IP из диапазона nodepool</li>
+			<li><strong>jailskeldir="/root/share/nginx-jail"</strong> - альтернативый путь к <strong>skel</strong>-каталогу, применяемому после создания клетки</li>
+			<li><strong>pkglist="/root/share/pkglist.txt"</strong> - путь к файлу, определяющему набор ПО в клетку при ее создании</li>
+		</ul>
+
+		<h2>2) Создание pkglist.txt</h2>
+		<p>Просто перечислям origin или packagename того ПО, что хотим получить в клетке:</p>
+		<pre class="cli">
+% cat > /root/share/pkglist.txt << EOF
+www/nginx
+shells/bash
+EOF
+		</pre>
+
+		<h2>3) skel-каталог</h2>
+		<p>Кастомизируем каталог дополнительных файлов, которые будут скопированы в jail. А именно - пропишем nginx в rc.conf внутри клетки и положим в <em>/usr/local/www/nginx/index.html</em> какой-нибудь текст на отдачу:</p>
+		<pre class="brush:bash;ruler:true;">
+% cp -a /usr/local/cbsd/share/jail-skel /root/share/nginx-jail
+% mkdir -p /root/share/nginx-jail/usr/local/www/nginx
+% cat > /root/share/nginx-jail/usr/local/www/nginx/index.html << EOF
+&lt;html&gt;
+   &lt;body&gt;
+      &lt;pre&gt;
+      It's been a hard day's night
+      And I've been working like a dog
+      It's been a hard day's night
+      I should be sleeping like a log
+      &lt;/pre&gt;
+   &lt;/body&gt;
+&lt;/html&gt;
+EOF
+% sysrc -f /root/share/nginx-jail/etc/rc.conf nginx_enable="YES"
+		</pre>
+
+		<h2>4) Создание, запуск</h2>
+		<p>Создаем клетку, запускаем и проверяем:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd jcreate jconf=/root/share/nginx.jconf
+% cbsd jstart jail1
+% curl http://X.Y.N.M
+      It's been a hard day's night
+      And I've been working like a dog
+      It's been a hard day's night
+      I should be sleeping like a log
+		</pre>
+
+		<h2>Профиль для jconstruct-tui</h2>
+		<p>Если вы хотите подобные клетки создавать вручную, выбирая когда это надо необходимые skel-каталоги или настройки по-умолчанию, создайте в каталоге $workdir/etc файл с именем jail-freebsd-<strong>XXXX</strong>.conf с минимальным содержимым:
+		<pre class="cli">
+jail_profile="XXX"
+		</pre>
+		<p>где XXX - имя вашего профиля. Профиль <strong>vnet</strong> в CBSD создан как пример, вы посмотреть его в <em>$workdir/etc/defaults/jail-freebsd-vnet.conf</em></p>
+		<p>В свою очередь, он переписывает значения по-умолчанию из профиля defaults: <em>jail-freebsd-default.conf</em></p>
+		<p>Если же вы редко используете профиль по-умолчанию и хотите, чтобы CBSD по-умолчанию предлагала ваш профиль, измените значение default_profile выставив его в имя вашего профиля:</p>
+		<pre class="brush:bash;ruler:true;">
+echo 'default_profile="XXX"' > ~cbsd/etc/jail-freebsd-default.conf
+		</pre>
+		</div>
+		<div class="warning">
+		<p>Обратите внимание, что файлы в $workdir/etc/defaults не редактируются - также, как в /etc/defaults. Если вы хотите переназначить значения по-умолчанию, копируйте из каталога $workdir/etc/defaults файл под тем же именем в каталог $workdir/etc и меняйте</p>
+		</div>

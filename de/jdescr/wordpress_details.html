@@ -1,0 +1,37 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>Wordpress FreeBSD jail image</span></h1>
+	<div class="block">
+	<p><a href="https://wordpress.org/" target="_blank">WordPress</a> is a free and open source blogging tool and a content management system (CMS) based on PHP and MySQL, which runs on a web hosting service.
+	Features include a plug-in architecture and a template system. WordPress is used by more than 22.0% of the top 10 million websites as of August 2013.
+	WordPress is the most popular blogging system in use on the Web, at more than 60 million websites.
+	</p>
+	<p>For installing Wordpress <strong>CBSD</strong> jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=wordpress
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=wordpress ver=10.1
+		</pre>
+		<p>If you hosted on another ( non 10.1 ) FreeBSD version.</p>
+		<p>Execute <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">imghelper</a> that asks you for some questions required for the installation of the jail:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper jname=wordpress bootstrap=/usr/jails/jails-system/wordpress/bin/bootstrap.sh
+		</pre>
+		<p>where: <em>/usr/jails/</em> is workdir for <strong>CBSD</strong>.
+		<p class="text-center"><img src="/img/wordpress1.png" alt="" /></p>
+		<p>Now Wordpress ready to use. Do not forget to set <em>astart=1</em> in <strong>cbsd jconfig jname=wordpress</strong> if you want to start jail automatically. By starting jail via</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart wordpress
+		</pre>
+		<p>a clean Wordpress installation in the jail will be available for access via <strong>http://FQDN</strong></p>
+		<!--# include file="/en/changeroot.html" -->
+		<p>For non-interactive and automatic deploying (for example you create hosting with lots of WP installation for customer) you can use: </p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=wordpress install rootpw= wordpresspw= fqdn=
+		</pre>
+		<p class="text-center"><img src="/img/wordpress2.png" alt="" /></p>
+	</div>
+<!--# include file="/en/_end.html" -->

@@ -1,0 +1,132 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>Modification which are carried out by <strong>CBSD</strong> scripts in FreeBSD</span></h1>
+	<div class="block">
+		<p>Due to the fact that the course taken by <strong>CBSD</strong> is focused on a large number of functional relationship for the provision  of an integrated solution, the system for their work makes or proposes to make a number of specific settings.  This page describes where and why these changes are necessary. It is also important to fully uninstall <strong>CBSD</strong> ;-)</p>
+	</div>
+	
+	<h2><a name="rcconf">Файл /etc/rc.conf</a></h2>
+	<div class="block">
+		<p>The following settings in /etc/rc.conf affects by <strong>CBSD</strong> to work correctly.</p>
+		<ul>
+			<li>1) <em>rcshutdown_timeout</em>
+			<p>This parameter adjusts the time of processing the sequence of shutdown rc.shutdown files — if after this timestop the process does not transfer control system would kill him.  For servers having a large number of jails, which in turnmay work to stop the long and sensitive to  killing services (eg database), the default value (120) is extremely small. In this regard,  <strong>CBSD</strong> change it at the first initialization.</p>
+			<p>If you want to keep the default value and stop the redefine parameter when <strong>cbsd initenv</strong>,  simply duplicate the parameter value from /etc/defaults/rc.conf: <strong>CBSD</strong> will not change the setting if in /etc/rc.conf its already sets:</p>
+			<pre class="brush:bash;ruler:true;">
+				% grep rcshutdown_timeout /etc/defaults/rc.conf >> /etc/rc.conf
+			</pre>
+			</li>
+			<li>2) <em>sshd_flags and default SSHd port in master node</em>
+				<p>As in the case with <strong>rcshutdown_timeout</strong> in <em>/etc/rc.conf</em>, in absence of a <em>/etc/rc.conf</em> parameter <strong>sshd_flags</strong>,  <em>cbsd initenv</em> prompts you to change the port (22) default daemon <strong>sshd</strong>  on port 22222 by running it through this setup:</p>
+				<pre class="brush:bash;ruler:true;">
+					sshd_flags="-oPort=22222"
+				</pre>
+				<p>Be extremely careful about this change.  If you want to keep the standard flags sshd daemon, duplicate entry for sshd_flags from file /etc/defaults/rc.conf in  /etc/rc.conf and <strong>CBSD</strong> will not offer change.</p>
+				<p>Also, you may want to disable host name resolv via DNS, which can significantly speed up connections between nodes, extending the entry in /etc/rc.conf to</p>
+				<pre class="brush:bash;ruler:true;">
+					sshd_flags="-oUseDNS=no -oPort=22222"
+				</pre>
+				<p>If you want sshd listening port 22222 as well as the standard 22, this record will be correct:</p>
+				<pre class="brush:bash;ruler:true;">
+					sshd_flags="-oPort=22 -oPort=22222 -oUseDNS=no"
+				</pre>
+				<p>22222 instead of the default port 22 is proposed to change some the following reasons:</p>
+				<ul>
+					<li> to this port comes less scanners for sshd bruteforce. Of course, this argument is not serious ;-) and if you want protection from brute force, just look at utilities <strong>security/{bruteblock,denyhosts}</strong>;</li>
+					<li> Ideology of <strong>CBSD</strong> with nodes implies a connection between a server via ssh and it is desirable that a unique/selected port sshd (in this case 22222), always identified <strong>sshd</strong> serving <ins><strong>node</strong></ins>.</li>
+				</ul>
+				<p>In practice, different ports sshd on the master node and jail is useful because if you suddenly forget what kind of node on running your jail <strong>jail1024.my.domain</strong>, you can always be sure that when connecting to the host <strong>jail1024.my.domain</strong> on the 22222 port you will certainly get to the physical node serving this jail.  The second point — that the jail with the parameter <em>oninterface=0</em> and have the same basic system with IP. In addition, this setting will prevent port conflicts between a nodes sshd and sshd service in the jail.</p>
+				<p>Also note that, while parameter <strong>applytpl=1</strong> and the creation of new jail, <strong>CBSD</strong> in the same way configures port in jail to port 2222 (however, sshd_enable default remains in NO). This change is also driven by a desire to identify jail unique port number. That, in turn, are useful for configuration management systems, such as <a href="http://www.ansible.com/home" target="_blank"><strong>Ansible</strong></a>, introducing the names of jail in a single domain (eg jail1024.<strong>j</strong>.my.domain) and use the mask of <strong>.j.</strong> in the zone  system will apply certain filters to know the correct port for establishing a connection. A similar example of <strong>CBSD</strong> and <strong>Ansible</strong> will be described in a separate article.</p>
+				<p>In order not to edit scripts on servers which is make ssh connection to node or cells, it is recommended to use the possibility of ~/.ssh/config, where you can specify the ports for a particular host or hosts mask, for example:</p>
+				<pre class="brush:bash;ruler:true;">
+					# this server on 22 default ssh port
+					Host otherserver.my.domain
+					Port 22
+					User root
+					
+					# mask for jails which have records in blabla.j.my.domain zones:
+					Host *.j.*
+					Port 2222
+					
+					# Default records - all host on 22222 port
+					Host *
+					ControlMaster auto
+					ControlPath ~/.ssh/sockets/%r@%h:%p
+					Port 22222
+					StrictHostKeyChecking no
+					UserKnownHostsFile /dev/null
+				</pre>
+			</li>
+			<li>3) <em>devfs_load_rulesets</em></li>
+		</ul>
+		<p>This parameter is needed to initialize the devfs rule. By default, new jail will use <strong>4</strong> ruleset (see /etc/defaults/devfs.rules). However, the default setting devfs_load_rulesets in /etc/defaults/rc.conf is set to NO, which in turn will open up in jails all devices in <strong>/dev</strong>,  that in the general case — is undesirable. to change the number of rule sets for a specific jail you can via <strong>cbsd jconfig</strong></p>
+		<p>4) <em>cbsdd_enable, cbsdrsyncd_enable, cbsdrsyncd_flags, cbsd_workdir</em></p>
+		<p>The following entries are required in /etc/rc.conf for correct operation <strong>CBSD</strong>, which proposes to make the installation script initenv:</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsdrsyncd_enable="YES"
+			cbsdrsyncd_flags="--config=/usr/jails/etc/rsyncd.conf"
+			cbsdd_enable="YES"
+			cbsd_workdir="/usr/jails"
+		</pre>
+		<p>cbsddrsyncd is a script which is run rsyncd with an alternative configuration file on port 1873. If you do not plan to transfer jails through <strong>cbsd jcoldmigrate</strong>, you can prefer to turn it off via:</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsdrsyncd_enable="NO"
+		</pre>
+	</div>
+	
+	<h2><a name="loader.conf">/boot/loader.conf file, kernel modules, net.inet.ip.fw.default_to_accept</a></h2>
+	<div class="block">
+		<p>In that case, if you use <strong>cbsd natcfg, cbsd naton </strong> or answer <strong>yes</strong> to the question of using NAT during <strong>cbsd initenv</strong>,  the system may leave (with your consent) in your <strong>/boot/loader.conf </strong> the following entries:</p>
+		<pre class="brush:bash;ruler:true;">
+			pf_load=YES
+			ipfw_load=YES
+			ipfw_nat_load=YES
+			libalias_load=YES
+			net.inet.ip.fw.default_to_accept=1
+		</pre>
+		<p>depending on whether NAT is used. NAT rules themselves are written in the directory structure <strong>CBSD</strong>.</p>
+		<p>Params</p>
+		<pre class="brush:bash;ruler:true;">
+			net.inet.ip.fw.default_to_accept=1
+		</pre>
+		<p>role in the <strong>CBSD</strong> not play, but it is included for reasons that IPFW module by default disables all,  and at the time of setting <strong>cbsd </strong> some users can not configure ipfw rules (or configure with error),  which would entail the loss of access to the system. Keep in mind that this option causes the last rule <strong>65535</strong> as follows:</p>
+		<pre class="brush:bash;ruler:true;">
+			allow ip from any to any
+		</pre>
+		<p>More: <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/firewalls-ipfw.html" target="_blank">FreeBSD handbook::Firewalls-ipfw</a></p>
+		<p>In addition, at the start of NAT (<strong>cbsd naton</strong>), this call is made in system:</p>
+		<pre class="brush:bash;ruler:true;">
+			% sysctl -qn net.inet.ip.forwarding=1
+			% sysctl -qn net.inet6.ip6.forwarding=1
+		</pre>
+		<p>for the correct functioning of NAT, and at start of <strong>vnet</strong>-jails (VIMAGE), <strong>if_bridge</strong> module will be automatically loaded.</p>
+		<p>Note that <strong>CBSD</strong> does not remove a record from a /boot/loader.conf on deinstall, or for example,  if you switch from one NAT framework to another (for example, first-configured PF, then switched to IPFW), then module in loader.conf for pf is remain.</p>
+	</div>
+	
+	<h2><a name="sudoers">/usr/local/etc/sudoers.d/cbsd_sudoers file</a></h2>
+	<div class="block">
+		<p>Most of the <strong>CBSD</strong> commands requires superuser role, and therefore the use utility <strong>sudo</strong> and the follow configuration file /usr/local/etc/sudoers.d/cbsd_sudoers:</p>
+		<pre class="brush:bash;ruler:true;">
+			Defaults     env_keep += "workdir DIALOG NOCOLOR"
+			Cmnd_Alias   CBSD_CMD = /usr/jails/sudoexec/*,/usr/local/cbsd/sudoexec/*
+			cbsd   ALL=(ALL) NOPASSWD: CBSD_CMD
+		</pre>
+		<p>These records can run scripts with root authority in the following directories:</p>
+		<pre class="brush:bash;ruler:true;">
+			/usr/jails/sudoexec/
+			/usr/local/cbsd/sudoexec/
+		</pre>
+		<p>and without the need to enter a password <strong>root</strong></p>
+	</div>
+	
+	<h2><a name="ipfw">IPFW rule for jail traffic counting</a></h2>
+	<div class="block">
+		<p>Currently, if the question <strong>Enable IPFW</strong> is affirmative and IPFW enabled on the system, ipfw will be used for traffic counters of jail when it starts and stopping. In this case, the range of rules for the installation of meters fixed in the file $workdir/cbsd.conf. By default, its range between 99 and 2000:</p>
+		<pre class="brush:bash;ruler:true;">
+		fwcount_st = "99"
+		fwcount_end = "2000"
+		</pre>
+		<p>In this latest rule (2000) will be used to set NAT rules, if IPFW selected as a NAT. Accordingly, if you are planning to write their own rules, you need to exclude this range (or adjust it in the configuration file) to go after other rules counters (> fwcount_end).  Currently, looking for an alternative way to calculate the traffic jail.</p>
+	</div>
+<!--# include file="_end.html" -->

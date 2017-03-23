@@ -1,0 +1,35 @@
+	<h1><span>Virtual Machine Configuring</span></h1>
+	<h2><a name="bconfig_cmd">commands: bconfig, bset</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bconfig
+			% cbsd bset
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Configuring the Virtual Machine Settings</p>
+		<p>Each virtual machine <strong>CBSD</strong> stores the settings in the SQLite3 database. To change the settings of a VM can serve command <strong>cbsd bconfig</strong>, TUI launches menu for changing the basic settings.</p>
+		<p>Description of relevant parameters, you can read on the page <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcreate_ssi.html">VM create</a>
+	</div>
+	<h2><a name="execscript">Custom scripts for starting and stopping action on jail</a></h2>
+	<div class="block">
+		<p>You can write your own scripts to be executed within the jail and in the master host on startup and shutdown of the environment. For this, the system directory of jail ( <em><strong>$workdir</strong>/jails-system/<strong>$jname</strong>/</em> ) have the following directories:</p>
+		<ul>
+			<li><strong>master_poststart.d</strong> - scripts for executing in the master host after jail starts (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>master_poststop.d</strong> - scripts for executiong in the master host after jail stops (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>master_prestart.d</strong> - scripts for executing in master host before jail starts (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>master_prestop.d</strong> - scripts for execution in master host after jail stops (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>start.d</strong> - scripts for execution within jail when jail is starts. Analog of parameter <strong>exec.start</strong> from original <em>jail.conf</em></li>
+			<li><strong>stop.d</strong> - scripts for execution within jail when jail is starts. Analog of parameter <strong>exec.stop</strong> from original <em>jail.conf</em></li>
+			<li><strong>remove.d</strong> - (since CBSD 11.0.10) scripts for execution on remove command</li>
+		</ul>
+		<p>Write scripts to the <em>master_\*</em> directories can be useful if at the start-stop jail you need to perform some action is not associated with content of environment - for example, create a ZFS snapshot, put rules in IPFW and etc.</p>
+		<p>In scripts, you can use CBSD variables, such as <strong>$jname, $path, $data, $ip4_addr</strong>, for example, by placing a script (with execute permission) in <em>/usr/jails/jails-system/jail1/master_poststart.d/notify.sh</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+		#!/bin/sh
+		echo "Jail $jname started with $ip4_addr IP and placed on $path path" | mail -s "$jname started" root@example.net
+		</pre>
+		<p>You will receive notification upon startup cells by email: root@example.net</p>
+		<p>The functionality of execution custom scripts and the availability of variables in environments can play a big role in the integration of <strong>CBSD</strong> and external applications, such as <strong>Consul</strong></p>
+		<p>As an example of use, see the article <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">Example of using CBSD/bhyve and ISC-DHCPD (Serve IP address in bhyve through pre/post hooks)</a></p>
+		<p>As an example of use, see the article <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_hook_consul.html">Example of using CBSD/jail and Consul (Register/unregister jail's via pre/post hooks, in Consul)</a></p>
+	</div>

@@ -1,0 +1,221 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>FreeBSD in packages</span></h1>
+	<!-- Тэги: <strong>велосипед</strong> -->
+
+	<div class="block">
+		<p>Дистрибьюция FreeBSD в виде монолитной базы является предметом ненависти у одной группы системных инженеров и в то же время предметом гордости у другой. Доводы обоих весьма понятны.</p>
+		
+		<p>Довольно грустно, когда в процессе работы внезапно и срочно необходимы утилиты вроде <strong>ping, finger, ssh, telnet, traceroute</strong> и их нет под рукой. И довольно весело, когда одной командой можно поставить все необходимое без лишнего хлама.</p>
+		
+		<p>Между тем не многие критики "толстой базы" FreeBSD знают, что с крайне бородадых времен разработчиками ОС ведутся <a href="http://www.freebsd.org/doc/en/books/porters-handbook/makefile-options.html" target="_blank"><em>KNOBS</em></a>-ы — определенные переменные, специфичные для того или иного приложения.</p>
+		
+		<p>С помощью них, например, собирают кастомайженные базы через <a href="http://www.freebsd.org/cgi/man.cgi?query=src.conf&amp;apropos=0&amp;sektion=0&amp;manpath=FreeBSD+9.2-RELEASE&amp;arch=default&amp;format=html" target="_blank">src.conf</a>. Остается лишь решить вопрос построения репозитория в автоматическом режиме и методов его дистрибьюции, с чем нам может помочь <strong>pkgng</strong>. Следующими парой строчек <strong>sh</strong>-сценария ( сырцы тут: <a href="https://github.com/olevole/base2pkg/" target="_blank">base2pkg</a> ) решается один из самых наистрашнейших минусов FreeBSD, которым десятилетиями пугают молодежь камрады с Ubuntu.</p>
+		
+		<p>Всю работу по автоматическому построению списка файлов, соответствующих тому или иному KNOBs и построению файлов MANIFEST, необходимые для создания <strong>pkg</strong>, выполняет скрипт <a href="https://github.com/olevole/base2pkg/blob/master/makepkg" target="_blank">makepkg</a>.</p>
+		
+		<p>Алгоритм работы не идеален (ввиду большого количества циклов installworld), но прост: один раз собирается FreeBSD база с опциями по-умолчанию (или со всеми возможными опциями вообще), после чего в цикле из всех возможных <strong>KNOBs</strong> выполняется installworld WITHOUT_<em>KNOBS</em> и сравниваются файлы с оригиналом. Список файлов, присутствующие в инсталляции по-умолчанию и отсутствующие в базе с WITHOUT_<em>KNOBS</em> и используются для создания пекеджа с именем <em>knobs</em>. Для того, чтобы операция не изнашивала циклами installworld диск, все операции по-умолчанию выполняются на <strong>md(4)</strong> диске, что требует ~basesize x 2 (окола 1 Гб).</p>
+		
+		<p>Список всех возможных KNOBS описан в файле <strong>/usr/share/mk/bsd.own.mk</strong> в <em>__DEFAULT_YES_OPTIONS</em> и <em>__DEFAULT_NO_OPTIONS</em> переменных, отражающие все опции и с какими именно создается база по-умолчанию. Этот список нам понадобятся, поэтому выпишем их в отдельном файле <a href="https://github.com/olevole/base2pkg/blob/master/knobs.inc" target="_blank"><em>knobs.inc</em></a>.</p>
+		
+		<p>Перед запуском подразумевается, что в <strong>/usr/src</strong> находятся исходные коды FreeBSD и имеются объектные файлы сборки (стадия <em>buildworld</em>), те, операция</p>
+		<pre class="brush:bash;ruler:rule;">
+		% make -C /usr/src buildworld 
+		</pre>
+		
+		<p>прошла успешно.</p>
+		
+		<p>Запуск скрипта:</p>
+		<pre class="cli">
+	  % /makepkg.sh 
+	* WIP: defaultbase. Knobs 0 from 114
+	* WIP: acct. Knobs 0 from 114
+	* WIP: acpi. Knobs 1 from 114
+	* WIP: amd. Knobs 2 from 114
+	* WIP: apm. Knobs 3 from 114
+	* WIP: arm_eabi. Knobs 4 from 114
+	...
+		</pre>
+		
+		<p>По окончанию отработки, в текущем каталоге со скриптом, в <strong>txz/</strong> каталоге будут сфомированы соотетствующие пакеты:</p>
+		<pre class="cli">
+	  % ls -1 txz/
+	freebsd-acct-9.2.258493.txz
+	freebsd-acpi-9.2.258493.txz
+	freebsd-amd-9.2.258493.txz
+	freebsd-apm-9.2.258493.txz
+	freebsd-at-9.2.258493.txz
+	freebsd-atm-9.2.258493.txz
+	freebsd-audit-9.2.258493.txz
+	freebsd-authpf-9.2.258493.txz
+	..
+		</pre>
+	</div>
+	<div class="warning">
+		<p><em>Примечание:</em> Третья цифра в версии соответствует ревизии SVN дерева исходных кодов. Если утилиты svn нет в системе, будет подставлен результат <em>data %s</em>.</p>
+	</div>
+	<div class="block">
+		<p>Таким образом, вы можете обеспечить свои сервера, которые находятся на промежуточных версиях ( например STABLE_X или вовсе на HEAD-ветках ) бинарным обновлением.</p>
+	</div>
+	<div class="warning">
+		<p><em>Примечание2:</em> поскольку пакетов много, имеет смысл сделать кумулятивный Meta-пакет <strong>freebsd-base</strong>, содержащий в качестве зависимостей все другие пекеджи базы.</p>
+	</div>
+	<div class="block">
+		<p>Последним шагом создадим <strong>pkg</strong>-каталог через <em>pkg repo</em> и закинем результат на доступный HTTP WEB сервер для раздачи.</p>
+		<pre class="brush:bash;ruler:rule;">
+		% cd txz/
+		% pkg repo .
+		</pre>
+	</div>
+	
+	<h2><a name="epilog">Эпилог</a></h2>
+	<div class="block">
+		<p>Чисто теоретически, в <strong>pkgng</strong> таким образом можно обернуть абсолютно всю базу, включая разные ядра ОС и обеспечить альтернативу бинарного обновления через <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/articles/freebsd-update-server/index.html" target="_blank">FreeBSD update server</a>, однако привычное поведение <strong>pkg</strong> при любой ошибке делать <em>deinstall</em> устанавливаемого пакета по манифесту, делает не очень надеждым данный способ: неприятно будет потерять файлы в каталоге <em>/lib/*</em> если что-то пойдет не так. Конечно, через <strong>pkg hold <em>package</em></strong> можно заморозить состояние пакета, поставив иммунитет на обновления и тп.</p>
+		
+		<p>Однако гораздо лучшим решением будет создание микро-базы (например средствами <a href="http://www.freebsd.org/cgi/man.cgi?query=picobsd&amp;apropos=0&amp;sektion=0&amp;manpath=FreeBSD+9.2-RELEASE&amp;arch=default&amp;format=html" target="_blank"><strong>picobsd</strong></a>, которая идет в составе FreeBSD, или <a href="http://mfsbsd.vx.sk/" target="_blank">mfsBSD</a>. Оба инструмента по-умолчанию создают рабочую базу FreeBSD объемем ~20-30 Мб, не подверженную обновлению в pkg, которая будет проливаться на ваш хостинг/парк серверов, а уже сверху через <strong>pkg</strong> доставлять все, что заблагорассудится.</p>
+		
+		<p>Наслаждаемся результатом:</p>
+		<pre class="cli">
+	  % pkg install freebsd-openssh freebsd-zoneinfo freebsd-examples freebsd-games
+	Updating repository catalogue
+	The following 4 packages will be installed:
+
+		Installing freebsd-openssh: 9.2.258493
+		Installing freebsd-zoneinfo: 9.2.258493
+		Installing freebsd-examples: 9.2.258493
+		Installing freebsd-games: 9.2.258493
+
+	The installation will require 9 MB more space
+
+	2 MB to be downloaded
+
+	Proceed with installing packages [y/N]: y
+	freebsd-openssh-9.2.258493.txz        100%  886KB 886.0KB/s 886.0KB/s   00:00
+	freebsd-zoneinfo-9.2.258493.txz       100%  108KB 108.3KB/s 108.3KB/s   00:00    
+	freebsd-examples-9.2.258493.txz       100%  378KB 378.5KB/s 378.5KB/s   00:00
+	freebsd-games-9.2.258493.txz          100%  868KB 867.8KB/s 867.8KB/s   00:00
+	Checking integrity... done
+	[1/4] Installing freebsd-openssh-9.2.258493... done
+	[2/4] Installing freebsd-zoneinfo-9.2.258493... done
+	[3/4] Installing freebsd-examples-9.2.258493... done
+	[4/4] Installing freebsd-games-9.2.258493... done
+		</pre>
+		
+		<pre class="cli">
+	  % pkg info
+	freebsd-acct-9.2.258493        FreeBSD base
+	freebsd-acpi-9.2.258493        FreeBSD base
+	freebsd-amd-9.2.258493         FreeBSD base
+	freebsd-apm-9.2.258493         FreeBSD base
+	freebsd-at-9.2.258493          FreeBSD base
+	freebsd-atm-9.2.258493         FreeBSD base
+	freebsd-audit-9.2.258493       FreeBSD base
+	freebsd-authpf-9.2.258493      FreeBSD base
+	freebsd-binutils-9.2.258493    FreeBSD base
+	freebsd-bluetooth-9.2.258493   FreeBSD base
+	freebsd-boot-9.2.258493        FreeBSD base
+	freebsd-bsd_cpio-9.2.258493    FreeBSD base
+	freebsd-bsnmp-9.2.258493       FreeBSD base
+	freebsd-calendar-9.2.258493    FreeBSD base
+	freebsd-cddl-9.2.258493        FreeBSD base
+	freebsd-cpp-9.2.258493         FreeBSD base
+	freebsd-crypt-9.2.258493       FreeBSD base
+	freebsd-ctm-9.2.258493         FreeBSD base
+	freebsd-cxx-9.2.258493         FreeBSD base
+	freebsd-dict-9.2.258493        FreeBSD base
+	freebsd-examples-9.2.258493    FreeBSD base
+	freebsd-floppy-9.2.258493      FreeBSD base
+	freebsd-forth-9.2.258493       FreeBSD base
+	freebsd-freebsd_update-9.2.258493 FreeBSD base
+	freebsd-games-9.2.258493       FreeBSD base
+	freebsd-gcov-9.2.258493        FreeBSD base
+	freebsd-gdb-9.2.258493         FreeBSD base
+	freebsd-gpib-9.2.258493        FreeBSD base
+	freebsd-gpio-9.2.258493        FreeBSD base
+	freebsd-groff-9.2.258493       FreeBSD base
+	freebsd-html-9.2.258493        FreeBSD base
+	freebsd-inet6-9.2.258493       FreeBSD base
+	freebsd-info-9.2.258493        FreeBSD base
+	freebsd-installlib-9.2.258493  FreeBSD base
+	freebsd-ipfilter-9.2.258493    FreeBSD base
+	freebsd-ipfw-9.2.258493        FreeBSD base
+	freebsd-ipx-9.2.258493         FreeBSD base
+	freebsd-jail-9.2.258493        FreeBSD base
+	freebsd-kerberos-9.2.258493    FreeBSD base
+	freebsd-legacy_console-9.2.258493 FreeBSD base
+	freebsd-lib32-9.2.258493       FreeBSD base
+	freebsd-locales-9.2.258493     FreeBSD base
+	freebsd-locate-9.2.258493      FreeBSD base
+	freebsd-lpr-9.2.258493         FreeBSD base
+	freebsd-mail-9.2.258493        FreeBSD base
+	freebsd-mailwrapper-9.2.258493 FreeBSD base
+	freebsd-make-9.2.258493        FreeBSD base
+	freebsd-man-9.2.258493         FreeBSD base
+	freebsd-ndis-9.2.258493        FreeBSD base
+	freebsd-netcat-9.2.258493      FreeBSD base
+	freebsd-netgraph-9.2.258493    FreeBSD base
+	freebsd-nis-9.2.258493         FreeBSD base
+	freebsd-nls-9.2.258493         FreeBSD base
+	freebsd-ns_caching-9.2.258493  FreeBSD base
+	freebsd-ntp-9.2.258493         FreeBSD base
+	freebsd-openssh-9.2.258493     FreeBSD base
+	freebsd-openssl-9.2.258493     FreeBSD base
+	freebsd-pc_sysinstall-9.2.258493 FreeBSD base
+	freebsd-pf-9.2.258493          FreeBSD base
+	freebsd-pmc-9.2.258493         FreeBSD base
+	freebsd-portsnap-9.2.258493    FreeBSD base
+	freebsd-ppp-9.2.258493         FreeBSD base
+	freebsd-profile-9.2.258493     FreeBSD base
+	freebsd-quotas-9.2.258493      FreeBSD base
+	freebsd-rcmds-9.2.258493       FreeBSD base
+	freebsd-rcs-9.2.258493         FreeBSD base
+	freebsd-rescue-9.2.258493      FreeBSD base
+	freebsd-routed-9.2.258493      FreeBSD base
+	freebsd-sendmail-9.2.258493    FreeBSD base
+	freebsd-sharedocs-9.2.258493   FreeBSD base
+	freebsd-syscons-9.2.258493     FreeBSD base
+	freebsd-sysinstall-9.2.258493  FreeBSD base
+	freebsd-tcsh-9.2.258493        FreeBSD base
+	freebsd-telnet-9.2.258493      FreeBSD base
+	freebsd-textproc-9.2.258493    FreeBSD base
+	freebsd-usb-9.2.258493         FreeBSD base
+	freebsd-utmpx-9.2.258493       FreeBSD base
+	freebsd-wireless-9.2.258493    FreeBSD base
+	freebsd-zfs-9.2.258493         FreeBSD base
+	freebsd-zoneinfo-9.2.258493    FreeBSD base
+		</pre>
+		
+		<pre class="cli">
+	  %  which mail portsnap gdb
+	/usr/bin/mail
+	/usr/sbin/portsnap
+	/usr/bin/gdb
+
+	  % pkg which /usr/bin/mail
+	/usr/bin/mail was installed by package freebsd-mail-9.2.258493
+
+	  % pkg which /usr/bin/gdb
+	/usr/bin/gdb was installed by package freebsd-gdb-9.2.258493
+
+	  % pkg remove freebsd-mail freebsd-gdb freebsd-portsnap
+	Deinstallation has been requested for the following 3 packages:
+
+			freebsd-mail-9.2.258493
+			freebsd-gdb-9.2.258493
+			freebsd-portsnap-9.2.258493
+
+	The deinstallation will free 11 MB
+
+	Proceed with deinstalling packages [y/N]: y
+	[1/3] Deleting freebsd-mail-9.2.258493... done
+	[2/3] Deleting freebsd-gdb-9.2.258493... done
+	[3/3] Deleting freebsd-portsnap-9.2.258493... done
+
+	  % which mail portsnap gdb
+	mail: Command not found.
+	portsnap: Command not found.
+	gdb: Command not found.
+		</pre>
+
+		<p>PS: В данной реализации не учтены возможные конфликты по устанавливаемым файлам ( поскольку сборка сделана из общей базы, то при установке пакета <strong>freebsd-examples</strong> всегда будет выдаваться руганть о коллизиях некоторых файлов ), а также не учтены зависимости. Например, пакет <strong>freebsd-openssh</strong> и <strong>freebsd-openssl</strong> зависят от пакета <strong>freebsd-crypto</strong>.</p>
+	</div>
+<!--# include file="/ru/_end.html" -->

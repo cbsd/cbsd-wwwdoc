@@ -1,0 +1,82 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>Building and upgrading bases</span></h1>
+	
+	<h2><a name="knowit">General information</a></h2>
+	<div class="block">
+		<p>Commands:</p>
+		<pre class="brush:bash;rule:true">
+			% cbsd srcup
+			% cbsd buildworld
+			% cbsd installworld
+			% cbsd world
+		</pre>
+		<p><em>remark</em>: "base" refers to a catalog containing a full copy/hierarchy of FreeBSD OS files.</p>
+		<p>For the creation of new jails (or starting jails which require a RO mounted base), a copy of base is necessary. Described below are the steps needed to get the initial FreeBSD sources from the project's SVN repository (<a href="http://svn.freebsd.org/" target="_blank">http://svn.freebsd.org</a>), its compilation and installation in a separate  directory which will act as base. These actions are necessary, if you don't want to use pre compiled versions available on <a href="ftp://ftp.freebsd.org" target="_blank">ftp://ftp.freebsd.org</a> or <a href="http://www.bsdstore.ru" target="_blank">http://bsdstore.ru</a>,  which can be retrieved with the <strong>cbsd repo</strong> command. Also, by manually building becomes possible to not only get releases, but also individual branches.</p>
+		<p>building or updating consists of the following three steps:</p>
+		<ul>
+			<li>
+				Receiving or updating of the initial FreeBSD source code through <strong>cbsd srcup</strong>:
+				Receiving or updating of an source code for that FreeBSD version at which in the moment works the current node:
+				<pre class="brush:bash;rule:true">
+					% cbsd srcup
+				</pre>
+				Receiving or updating of an source code for the concrete FreeBSD version, for example, for 10.1:
+				<pre class="brush:bash;rule:true">
+					% cbsd srcup ver=10.1
+				</pre>
+				Receiving or updating of source code for STABLE (for example, for RELENG_10):
+				<pre class="brush:bash;rule:true">
+					% cbsd srcup ver=10 stable=1
+				</pre>
+				These commands, at existence of source code in SVN, will fill catalogs <em>$workdir/src/src_$ver</em>
+			</li>
+			<li>
+				Compilation of source code via <strong>cbsd buildworld</strong>:
+				The result received from a step 1, can be used for base compilation. World compilation, at existence <em>$workdir/src/src_$ver</em> dir for current node version:
+				<pre class="brush:bash;rule:true">
+					% cbsd buildworld
+				</pre>
+				Thus, objective files, at existence from the last build, won't be cleaned (make clean). If in the repeated builds there was a unsuccess, it is meaningful to force to clean old system <strong>.o</strong>-files with clean params:
+				<pre class="brush:bash;rule:true">
+					% cbsd buildworld clean=1
+				</pre>
+				By default, multiline assembly, where number of <strong>job</strong>s equally to number of cores (sysctl -n hw.ncpu). The num ofr parallel jobs is regulated through the <strong>maxjobs</strong> parameter, for example, for build in one job:
+				<pre class="brush:bash;rule:true">
+					% cbsd buildworld maxjobs=1
+				</pre>
+				At compilation, the personal <a href="http://www.freebsd.org/cgi/man.cgi?query=src.conf&amp;sektion=5" target="_blank">src.conf(5)</a> can be used , in which it is possible to specify standard KNOBS-y. The src.conf file should placed in the catalog $workdir/etc/ and have name <strong>src-</strong><em>basename</em><strong>.conf</strong>, where basename — any name of configuration. For example, in default <strong>CBSD</strong> installation there are file <strong>/usr/jails/etc/src-lite.conf</strong>. For base build with certain src.conf, it is necessary to specify <em>basename</em> parameter:
+				<pre class="brush:bash;rule:true">
+					% cbsd buildworld basename=lite
+				</pre>
+				The next operation over building result (installworld), also should contain <em>basename=</em> parameter, as the result of building will be placed in <em>$workdir/basejail/base_$basename_$arch_$ver</em> directory, where $basename — is name of configuartion.
+				Other params of  buildworld:
+				<ul>
+					<li><em>ver</em>  — to specify the concrete version of source code</li>
+					<li><em>arch</em> — build for concrete architecture</li>
+					<li><em>stable</em> — build for RELENG_X branch</li>
+				</ul>
+			</li>
+			<li>
+				Base installation via <strong>cbsd installworld</strong>:
+				The result received from a step 2, it is possible to use for installation of the new base in <em>${workdir}/basejail/base_*</em> directory, from where it will be already mounted in the RO mode, or to be formed a new jails.
+				For install of files for the current version of system:
+				<pre class="brush:bash;rule:true">
+					% cbsd installworld
+				</pre>
+				Installation of files for version 10.1 builded with src.conf named as <em>lite</em>:
+				<pre class="brush:bash;rule:true">
+					% cbsd installworld basename=lite ver=10.1
+				</pre>
+				other params for installworld:
+				<ul>
+					<li><em>arch</em> — install for concrete architecture</li>
+					<li><em>stable</em> — install for RELENG_X branch</li>
+				</ul>
+			</li>
+		</ul>
+		<p><strong>cbsd world</strong> command is sequence for <strong>cbsd buildworld && cbsd installworld</strong></p>
+		<p>When you have the base in <em>${workdir}/basejail</em>,you can go to the <a href="/en/<!--#echo var="version" -->/wf_jcreate_ssi.html">jail creation</a>.</p>
+	</div>
+<!--# include file="_end.html" -->

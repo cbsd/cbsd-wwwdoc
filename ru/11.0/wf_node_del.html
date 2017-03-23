@@ -1,0 +1,14 @@
+	<h1><span>Удаление нод</span></h1>
+	
+	<h2><a name="noderemove_cmd">Команда node mode=remove</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=remove
+		</pre>
+		<p>Команда <strong>cbsd node mode=remove  node=nodename</strong> удаляет приватный ключ и записи о удаленной машине из каталога <em>$workdir/.rssh</em>. Имя, указанное в node= должно совпадать с тем написанием, которое выводится по <strong>cbsd node mode=list</strong>.</p>
+		<p>Пример:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=remove node=backup1.mydomain.ru
+		</pre>
+	</div>
+

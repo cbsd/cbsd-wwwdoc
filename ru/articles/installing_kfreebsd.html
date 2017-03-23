@@ -1,0 +1,85 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>Создание GNU/kFreeBSD окружения в <strong>CBSD</strong> jail</span></h1>
+	<!-- Тэги: <strong>HowTo</strong> -->
+	
+	<div class="block">
+		<p>Данный HowTo описывает инструкцию <em>step-by-step</em> для получения Debian kFreeBSD в <strong>cbsd jail</strong>. Данная клетка может быть полезна для знакомства с проектом <a href="http://www.debian.org/ports/kfreebsd-gnu/">Debian GNU/kFreeBSD</a>, или для людей, привыкших к утилитам и файловой иерархии Debian kFreeBSD ( репозиторий <strong>.deb</strong> пакетов собирается и официально поддерживается разработчиками Linux Debian ), или просто Fun-а ради.</p>
+		
+		<p><strong>Прим:</strong><em> Если вы не хотите настраивать это вручную, можете воспользоваться  <a href="/en/jdescr/kfreebsd_details.html">клеткой kfreebsd</a> из репозитория <strong>CBSD</strong></em></p>
+		
+		<p>Устанавливаем порт <strong>debootrap</strong> для получения базовой системы Debian из соответствующего репозитория ( на момент написания статьи это репозиторий для <em>wheezy</em> )</p>
+		
+		<pre class="brush:bash;ruler:rule;">
+		% make -C /usr/ports/sysutils/debootstrap install
+		</pre>
+		
+		<p>Подгружаем необходимые для его работы модули:</p>
+		<pre class="brush:bash;ruler:rule;">
+		% kldload fdescfs linprocfs linsysfs tmpfs
+		</pre>
+		
+		<p>Создаем через <strong>cbsd jconstruct-tui</strong> клетку с именем произвольным именем (например <em>kfreebsd</em>), в котором изменяем значение параметров по-умолчанию на следующие:</p>
+		
+		<ul>
+			<li> *jname* — имя клетки на ваше усмотрение</li>
+			<li> *fqdn* — hostname клетки, на ваше усмотрение</li>
+			<li> *ip4_addr* — IP адрес клетки, на ваше усмотрение</li>
+			<li> *ver* — Вместо цифр пишем зарезервированное слово <strong>empty</strong>, тк это не FreeBSD jail и версия базы не требуется.</li>
+			<li> *baserw* — устанавливаем в 1 (YES). Тк это не FreeBSD jail, обычная база FreeBSD не подойдет.</li>
+			<li> *srcmount* — 0 (NO). Тк монтировать дерево исходных кодов в клетку незачем.</li>
+			<li> *portsmount* — 0 (NO). Тк монтировать дерево портов в клетку незачем.</li>
+			<li> *applytpl* — 0 (NO). Тк применяемые изменения только для FreeBSD клеток.</li>
+			<li> *floatresolv* — 1 (YES). /etc/resolv.conf для ресолвера клетки имеет тот же синтаксис</li>
+		</ul>
+	</div>
+	<div class="warning">
+		<p><strong>Прим:</strong> Если данная операция производится на ZFS, после создания клетки необходимо примонтировать созданный (пустой) датасет: <strong>zfs mount -a</strong> или <strong>zfs mount &lt;FS&gt;/kfreebsd</strong></p>
+	</div>
+	<div class="block">
+		<p>Наполнение клетки данными <strong>Debian kFreeBSD wheezy</strong>:</p>
+		<pre class="brush:bash;ruler:rule;">
+		% debootstrap wheezy /usr/jails/jails-data/kfreebsd-data http://cdn.debian.net/debian
+		</pre>
+		
+		<p>Для подавления ошибки <strong>getpwname</strong> от jail v2, скопируем привычный <em>/etc/passwd</em> в клетке, конвертируя из Debian в FreeBSD формат (пути указаны для клетки с именем kfreebsd):</p>
+		<pre class="brush:bash;ruler:rule;">
+		% awk -F : '{printf("%s:%s:%s:%s::0:0:%s:%s:%s\n", $1,$2,$3,$4,$5,$6,$7); }' /usr/jails/jails-data/kfreebsd-data/etc/passwd > /usr/jails/jails-data/kfreebsd-data/etc/master.passwd
+		</pre>
+		<pre class="brush:bash;ruler:rule;">
+		% pwd_mkdb -d /usr/jails/jails-data/kfreebsd-data/etc -p /usr/jails/jails-data/kfreebsd-data/etc/master.passwd
+		</pre>
+		
+		<p>Зайдем в корень клетки, назначим пароль пользователью root и перегенерируем shadow password файл:</p>
+		<pre class="brush:bash;ruler:rule;">
+		% chroot /usr/jails/jails-data/kfreebsd-data bash
+		% passwd root
+		% vipw
+		% vipw -s
+		</pre>
+		
+		<p>Пропишем в fstab для клетки о необходимости монтирования необходимых в работе файловых систем в клетку.</p>
+		
+		<p>В файл <strong>/usr/jails/jails-fstab/fstab.kfreebsd.local</strong> (если клетка названа kfreebsd):</p>
+		<pre class="brush:bash;ruler:rule;">
+		linproc /proc linprocfs rw 0 0
+		linsys /sys linsysfs rw 0 0
+		tmpfs /lib/init/rw tmpfs rw 2 0
+		</pre>
+		
+		<p>В <strong>cbsd jconfig</strong> клетки изменить параметры останова и запуска клетки с FreeBSD-related на Debian-specific:</p>
+		<pre class="brush:bash;ruler:rule;">
+		exec_start="/bin/sh /etc/init.d/rc 3";
+		exec_stop="/bin/sh /etc/init.d/rc 0";
+		</pre>
+		
+		<p>Запускаем клетку, указыаем соответствующие зеркала в <strong>/etc/apt/sources.list</strong> если надо, наслаждаемся apt-get и прочим волшебством.</p>
+		
+		<p>PS: <strong>Debian GNUk/kFreeBSD</strong> не является бинарно-совместимым с линукс окружением, это всего лишь сборка ПО в <strong>.deb</strong> пакеты, работающия на ядре FreeBSD (таковы цели проекта).</p>
+		
+		<p>Если вы хотите острых ощущений с <em>Linux-in-FreeBSD</em> jail, попробуйте <strong>centos</strong> клетку (работает через линуксятор, 32bit).</p>
+		
+		<p>PS2: Если вам нужен настоящий взрослый гипервизор под FreeBSD, в котором можно запустить Linux guest полноценно — присмотритесь к проекту BSD Hypervisor ( <strong>BHyVe</strong> )</p>
+		
+		<p>Have fun!</p>
+	</div>
+<!--# include file="/ru/_end.html" -->

@@ -1,0 +1,15 @@
+	<h1><span>Копирование файлов из/в клетки</span></h1>
+	
+	<h2><a name="nodescp_cmd">Команда jailscp</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% jail1:remotefile1 localfile1 [ localfile2 jail2@:remotefile2 ]
+		</pre>
+		<p>Команда <strong>cbsd jailscp</strong> позволяет копировать файлы из/на файловые системы jail. Синтаксис аргументов аналогичен команде <a href="http://man.freebsd.org/scp/1" target="_blank">scp(1)</a></p>
+		<p>Если вы копируете из/в клетку, которая не локальна, те, расположена на удаленной ноде, копирование возможно только при наличие id_rsa ключей к удаленной ноде. Кроме этого, при наличие <strong>rootkeyfile</strong> для ноды, соединение для пользователя <strong>root</strong> будет предпочитаться пользователю <strong>cbsd</strong>, что позволит вам записывать файлы в jail не только в каталогах, владелец которых <strong>cbsd</strong></p>
+		<p><strong>Пример:</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jailscp
+		</pre>
+		<p class="text-center"><img src="/img/jailscp1.png" alt="" /></p>
+	</div>

@@ -1,0 +1,90 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>Installing <strong>CBSD</strong></span></h1>
+	
+	<h2><a name="req">Installing CBSD</a></h2>
+	<div class="block">
+		<p><strong>CBSD</strong> — is a collection of tools simplifying the work with jails scripts, which will work on any hardware that runs FreeBSD. This guide assumes that you are installing <strong>CBSD</strong> on a freshly installed FreeBSD system as a number of configuration files <a href="custom_freecbsd.html"> can be changed during install.</a></p>
+		
+		
+		<ul>
+		<p> For full functionality the following requirements are desirable:</p>
+			<li>FreeBSD version greater or equal of 10.0-RELEASE.</li>
+			<li><strong>amd64</strong> architecture, because the development of <strong>CBSD</strong> is carried out under this architecture.</li>
+			<li>ZFS file system, due to the use of several ZFS features.</li>
+			<li>kernel with RACCT/RCTL and VIMAGE support (<strong>CBSD</strong> can fetch out a kernel from own repository with your consent)</li>
+		</ul>
+	</div>
+	<h2><a name="version">CBSD versioning</a></h2>
+	<div class="block">
+		  <p>The first two digits of the <strong>CBSD</strong> version indicate the FreeBSD version for which it was developed and tested. Version 10.1.3 means that scripts were written for FreeBSD 10.1. The third number is the <strong>CBSD</strong> version.</p>
+	</div>
+	<h2><a name="preparing">Preparing the system and installing <strong>CBSD</strong></a></h2>
+	<div class="block">
+		<p><strong>1a) Installing from ports or packages</strong></p>
+		<p><strong>CBSD</strong> can be installed from FreeBSD ports:</p>
+		<pre class="brush:bash;ruler:true;">
+			% make -C /usr/ports/sysutils/cbsd install
+		</pre>
+		<p>or as a package:</p>
+		<pre class="brush:bash;ruler:true;">
+			% pkg install cbsd
+		</pre>
+		<p><strong>1b) Installing experimental (development) version of <strong>CBSD</strong> from github</strong></p>
+		<em>( For developers or contributors, or those who want to take advantage of new features at the expense of stability and reliability )</em>
+		<p>a) First install the required dependencies: <strong>libssh2, sudo, rsync, sqlite3</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% pkg install sudo libssh2 rsync sqlite3 git libxo
+		</pre>
+		<p>or from the ports:</p>
+		<pre class="brush:bash;ruler:true;">
+			% make -C /usr/ports/security/sudo install
+			% make -C /usr/ports/security/libssh2 install
+			% make -C /usr/ports/net/rsync install
+			% make -C /usr/ports/databases/sqlite3 install
+			% make -C /usr/ports/devel/git install
+			% make -C /usr/ports/devel/libxo install
+		</pre>
+		<p>b) get the latest version of <strong>CBSD</strong> from <a href="https://github.com/" target="_blank">github</a>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% git clone https://github.com/cbsd/cbsd.git /usr/local/cbsd
+		</pre>
+		<p>c) create a <strong>CBSD</strong> user (when installing from ports or pkg's this is unnecessary):</p>
+		<pre class="brush:bash;ruler:true;">
+			%  pw useradd cbsd -s /bin/sh -d /nonexistent -c "cbsd user"
+		</pre>
+		<p>d) create links of the rc.d scripts to start <strong>CBSD</strong> at system startup and create link to bsdconfig module (when installing from ports and pkg's it is unnecessary):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cd /usr/local/etc/rc.d
+			% ln -s /usr/local/cbsd/rc.d/cbsdd
+			% ln -s /usr/local/cbsd/rc.d/cbsdrsyncd
+			% mkdir -p /usr/local/libexec/bsdconfig
+			% ln -s /usr/local/cbsd/share/bsdconfig/cbsd /usr/local/libexec/bsdconfig/cbsd
+		</pre>
+		<p><strong>2) Ininital setup</strong></p>
+		<p>In the classic install, there are two copies of <strong>CBSD</strong>. One of them (<em>/usr/local/cbsd</em>), contains a distribution kit, initial code and configuration files by default. This copy can qlwo be used to manage jails in case the main copy is damaged (for example after an incorrect update).  Scripts to work with can be found in the environment variable <strong>workdir</strong>.</p>
+		<p>To initialize the main working copy of <strong>CBSD</strong> we need to run <strong>initenv</strong>, while setting the environment variable <strong>workdir</strong> to the location of the working directory. We then answer a series of questions to complete the configuration. The file system for <strong>CBSD</strong> (or rather, the directory <strong>jails-data</strong> in it) needs to be large enough to accommodate the jail's data. After finalizing the location of the working directory, ensure it is set as the home directory for <strong>CBSD</strong> user (in this case the working directory in /usr/jails):</p>
+		<p>Initialization with the working catalogue into <em>/usr/jails</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% env workdir="/usr/jails" /usr/local/cbsd/sudoexec/initenv
+		</pre>
+		<p>The start dialogue will appear with questions on how to configure <strong>CBSD</strong>. Pressing Enter with no entered values will set system defaults. Once done updating <strong>CBSD</strong> it is necessary to run initenv again. After the first run of initenv it can be started through <strong>CBSD</strong> without specifying the <strong>env</strong> variable again and the working dir variable will be stored in <em>/etc/rc.conf</em>.</p>
+		<p>On first initialization the following questions will be asked:</p>
+		<ul>
+			<li><strong>Please fill nodename</strong> — Node name. If you plan on working with several nodes, this name should be unique. It is recommended to use a name, or full hostname (including domain). This name is used when working with remote hosts. Example: node1.my.domain.</li>
+			<li><strong>Please fill nodeip</strong> — Working and static IP address of a node. It shouldn't be an alias and it is desirable to register this IP on a separate interface (free from any other except a management-traffic). For example: 192.168.1.2</li>
+			<li><strong>Please fill nodeloc</strong> — Information strings for helpful information in the web interface. Geographic location might be an example of values used here.</li>
+			<li><strong>Please fill jnameserver</strong> — List of IP DNS servers to be inserted in the newly created jail's <em>/etc/resolv.conf</em>. If several addresses are added, they must be separated by commas. It is recommended to setup the master-node server for caching DNS queries.</li>
+			<li><strong>Please fill nodeippool</strong> — The list of subnets in which jails may be started. If adding more than one network use space as delimer. For example: 10.0.0.0/24 192.168.1.128/29</li>
+			<li><strong>Please fill natip</strong> — This specivies the IP address which will represent itself as NAT for private addresses. Usually it is IP of your node. For example: 192.168.1.2</li>
+			<li><strong>Please fill fbsdrepo</strong> — Whether or not to use an official FreeBSD repository for base/templates. Expected answers are 1 or 2 . If on official FreeBSD servers base it is not revealed — <strong>CBSD</strong> repository is used.  For example: 1.</li>
+			<li><strong>Please fill zfsfeat</strong> — Whether to use features of ZFS (clones, snapshots). The answer 1 or 2 is expected. The question won't be asked, if the host system is started not on ZFS.</li>
+			<li><strong>Configure NAT for RFC1918 Network?</strong> — Whether to use network address translation (NAT) for private addresses. When jails are created in RFC1918 networks, it is necessary to enable this for internet access. For example: 1.</li>
+			<li><strong>Which one NAT framework should be use: [pf or ipfw]</strong>- What tool for NAT to prefer. Recommended — pf. For example: 1</li>
+		</ul>
+	</div>
+	<div class="warning">
+		<p><strong>Warning:</strong> These settings can be changed at a later time via the command <strong>cbsd initenv-tui</strong> or <strong>bsdconfig cbsd</strong>, or in a file <em>${workdir}/var/db/local.sqlite</em>, which is a SQLite3 database.</p>
+	</div>
+<!--# include file="_end.html" -->

@@ -1,0 +1,67 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>NOC Project FreeBSD jail image</span></h1>
+	<div class="block">
+	<p><a href="http://nocproject.org" target="_blank">NOC Project</a> is the scalable, high-performance and open-source OSS system for ISP, service and content providers. Major features are:
+	<ul>
+		<li><strong>Telecom-specific modules</strong></li>
+		<ul>
+			<li>&nbsp;&nbsp; - Network Inventory</li>
+			<li>&nbsp;&nbsp; - IP Address Management</li>
+			<li>&nbsp;&nbsp; - VLAN Management</li>
+			<li>&nbsp;&nbsp; - Service Activation</li>
+			<li>&nbsp;&nbsp; - Configuration Management</li>
+			<li>&nbsp;&nbsp; - Fault Management</li>
+			<li>&nbsp;&nbsp; - DNS Provisioning</li>
+			<li>&nbsp;&nbsp; - Performance Management</li>
+			<li>&nbsp;&nbsp; - Peering Management</li>
+			<li>&nbsp;&nbsp; - Knowledge Base</li>
+		</ul>
+		<li><strong>Vendor-agnostic</strong></li>
+		<ul>
+			<li>&nbsp;&nbsp; - Over 30 supported vendors, from CPEs to core MPLS routers</li>
+		</ul>
+		<li><strong>Battle-proven</strong></li>
+		<ul>
+			<li>&nbsp;&nbsp; - Used by small and large companies worldwide</li>
+		</ul>
+		<li><strong>Leverages mature and proven open-source technologies</strong></li>
+		<ul>
+			<li>&nbsp;&nbsp; - Python</li>
+			<li>&nbsp;&nbsp; - PostgreSQL</li>
+			<li>&nbsp;&nbsp; - MongoDB</li>
+			<li>&nbsp;&nbsp; - Django</li>
+			<li>&nbsp;&nbsp; - ExtJS</li>
+		</ul>
+		<li><strong>Integration</strong></li>
+		<ul>
+			<li>&nbsp;&nbsp; - REST/JSON API</li>
+			<li>&nbsp;&nbsp; - Python API</li>
+		</ul>
+		<li><strong>Established professional community</strong></li>
+		<ul>
+			<li>&nbsp;&nbsp; - DevTeam and Community</li>
+		</ul>
+		<li><strong>BSD License</strong></li>
+	</ul>
+	</p>
+	<p>For installing NOC <strong>CBSD</strong> jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=noc
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=noc ver=10.1
+		</pre>
+		<p>If you hosted on another ( non 10.1 ) FreeBSD version.</p>
+		<p>a clean NOC Project installation in the jail will be available for access via <strong>http://FQDN</strong></p>
+		<!--# include file="/en/changeroot.html" -->
+		<p>Web interface administrative credentials are:</p>
+<pre class="cli">
+User: admin
+Password: admin
+</pre>
+		<p class="text-center"><img src="/img/nocproject1.png" alt="" /></p>
+	</div>
+<!--# include file="/en/_end.html" -->

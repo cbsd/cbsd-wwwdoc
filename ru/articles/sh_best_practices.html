@@ -1,0 +1,469 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>Shell scripting best practices</span></h1>
+	<!-- Тэги: <strong>best practices</strong> -->
+	
+	<div class="block">
+		<p>Данный текст — нарост из опыта <strong>sh</strong>-скриптования, некий style которым я руководствуюсь при написании скриптов на <strong>sh</strong> на <strong>*nix</strong> платформах. Часть из них — лишь мои персональные предпочтения.</p>
+	</div>
+	
+	<h2><a name="tmpfiles">Временные файлы</a></h2>
+	<div class="block">
+		<p>* Если скрипту необходимо хранить временные данные в промежуточных файлах, используйте <strong>mktemp(1)</strong> для автоматического
+		создания уникальный временных файлов в /tmp каталоге, гарантирующую уникальность, или спользуйте $$ (pid) в названии временного файла.</p>
+	</div>
+	
+	<h2><a name="post-action">Post-action, подчищаем за собой по выходу из скрипта</a></h2>
+	<div class="block">
+		<p>* Если скрипт создает временные файлы, по завершению (в том числе аварийному) он должен за собой все подчищать (или выполнить какие-то другие post-функции). Для этого пользуемся фунционалом <strong>trap</strong>, не забывая перечислить возможные сигналы, по которым скрипт может завершиться.</p>
+		
+		<p>Для удобства, пишем не номера сигналов, а их макросы, например:</p>
+		<pre class="brush:bash;ruler:true;">
+		trap "rm -rf /tmp/myprogdir; rm -f /tmp/mytmp" HUP INT ABRT BUS TERM EXIT
+		</pre>
+		
+		<p>Если по ходу выполнения скрипта вы хотите дописывать trap, удобно это делать через отдельную переменную, например:</p>
+		<pre class="brush:bash;ruler:true;">
+		#!/bin/sh
+
+		TRAP="echo Bye"
+		trap "${TRAP}" EXIT
+
+		do_something()
+
+		trap "${TRAP}; echo Cul8r" EXIT
+
+		do_something_else()
+		</pre>
+	</div>
+	
+	<h2><a name="docs">Документируем</a></h2>
+	<div class="block">
+		<p>* в начале функций пишем краткое описание функции, какие параметры и в качестве чего она принимает и что получается на выходе.</p>
+		<pre class="brush:bash;ruler:true;">
+		..
+		#algebral sum for $1 and $2, return $res as result
+		function sum()
+		{
+		..
+		</pre>
+	</div>
+	
+	<h2><a name="locals">Объявляем локальные переменные функции</a></h2>
+	<div class="block">
+		<p>* Все переменные, которые нужны только функции, описываем как локальные (также, это защита от того, что вы переназначите уже где-то ранее объявленную и где-то позже используемую переменную, например <strong>TERM</strong>, <strong>LANG</strong>, <strong>IFS</strong> и тд.</p>
+		
+		<p>Также, локальные переменные удобно условиться писать с подчеркивания, а переменные окружения — в верхнем регистре.</p>
+		
+		<p>Например:</p>
+		<pre class="brush:bash;ruler:true;">
+		#algebral sum for $1 and $2, return $res as result
+		function sum() {
+			local _a _b
+
+			[ -z "${1}" -o -z "${2}" ] &amp;&amp; return 1
+			_a=$1
+			_b=$2
+			res=$(( _a + _b ))
+		}
+
+		sum 2 5
+		echo ${res}
+		</pre>
+	</div>
+	
+	<h2><a name="buildin">Предпочитайте build-in операции внешним утилитам.</a></h2>
+	<div class="block">
+		<p>При математических операциях, пользуемся встроенной в sh математикой, а не внешними утилитами как *bc* или *expr*.</p>
+		
+		<p>Например, вместо `expr $a=$a+1`, делаем:</p>
+		<pre class="brush:bash;ruler:true;">
+		a=$(( a + 1 ))
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+		  b=$(( a / 2 ))
+		</pre>
+		
+		<p>Для парсинга par=val используйте %% и ##, например</p>
+		<pre class="brush:bash;ruler:true;">a="hostname-value"</pre>
+		
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:true;">
+		p1=`echo $a |tr -d "-" |awk '{printf $1}'`
+		p2=`echo $a |tr -d "-" |awk '{printf $1}'`
+		</pre>
+		
+		<p>Делаем:</p>
+		<pre class="brush:bash;ruler:true;">
+		p1=${a%%-*}
+		p2=${a##*-}
+		</pre>
+		
+		<p>или</p>
+		<pre class="brush:bash;ruler:true;">
+		p1=${a%-*}
+		p2=${a#*-}
+		</pre>
+		
+		<p>пример, когда необходимо распарить из файла:</p>
+		<pre class="brush:bash;ruler:true;">
+		while read line; do
+			line=${line%%=*}
+		done < /path/to/file
+		</pre>
+	</div>
+	
+	<h2><a name="ifxor">Логические И-ИЛИ вместо if-then блоков, continue/return/break</a></h2>
+	<div class="block">
+		<p>Стараемся избегать большого количества if; then; fi конструкций, там где это возможно, заменяем их логичискими *И — &amp;&amp;* или *ИЛИ — ||*.</p>
+		
+		<p>Например:</p>
+		
+		<p>Конструкции вида:</p>
+		<pre class="brush:bash;ruler:true;">
+		if [ $a -gt 10 ]; then
+			if [ $b -ne 10 ]; then 
+				if [ $z "${t}" ]; then 
+						...
+				fi
+				exit   //выйдем если b не равно 10
+			fi
+			exit //выйдем, если a меньше 10
+		fi
+		</pre>
+		
+		<p>Стаемся не раздувать и пишем так:</p>
+		<pre class="brush:bash;ruler:rule;">
+		[ $a -ne 10 ] &amp;&amp; exit
+		[ $b -gt 10 ] &amp;&amp; exit
+		...
+		</pre>
+		
+		<p>(читаем как: если условие правильно, то выполним то что после &amp;&amp; )</p>
+		<p>либо</p>
+		<pre class="brush:bash;ruler:rule;">
+		[ $a -gt 10 ] || exit
+		[ $b -ne 10 ] || exit
+		</pre>
+		
+		<p>(читаем как: если условие правильно, идем дальше, иначе, выполним то что после || )</p>
+		
+		<p>Простые конструкции без *else/elif* с одной командой внутри, заменяем на &amp;&amp;</p>
+		
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		if [ -n "$filled_par" ]; then
+			echo "ok"
+		fi
+		</pre>
+		
+		<p>Пишем:</p>
+		<pre class="brush:bash;ruler:rule;">
+		[ -n "$filled_par" ] &amp;&amp; echo "ok"
+		</pre>
+		
+		<p>Если внутри конструкции идет уже больше двух++ команд, то вместо <strong>&amp;&amp; ||</strong> наоборот ухудшают читаемость и в данном случае лучше использовать <strong>*if / fi*</strong> блоки:</p>
+		
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		[ -n "$filled_par" ] &amp;&amp; echo "ok" &amp;&amp; date &amp;&amp; echo "Cool"
+		</pre>
+		<p>или</p>
+		<pre class="brush:bash;ruler:rule;">
+		[ -n "$filled_par" ] &amp;&amp; { 
+			echo "ok" 
+			date
+			echo "Cool"
+		}
+		</pre>
+		<p>пишем:</p>
+		<pre class="brush:bash;ruler:rule;">
+		if [ -n "$filled_par" ]; then
+			echo "ok" 
+			date
+			echo "Cool"
+		fi
+		</pre>
+		
+		<p>Если внутри цикла идет проверка переменной, не раздувайте код на if / else, используйте оператор continue:</p>
+		<p>Вместо</p>
+		<pre class="brush:bash;ruler:rule;">
+		 for i in PARAM; do
+		   if [ "${i}" = "name" ]; then
+			  do something
+				and something else
+				 and something else
+				  and something else
+					and something else
+					  and something else
+					   and something else
+						and many-many other action here
+			else
+			   nop ;(
+			fi
+		done
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		 for i in PARAM; do
+		   [ "${i}" != "name" ] &amp;&amp; continue
+			  do something
+				and something else
+				 and something else
+				  and something else
+					and something else
+					  and something else
+					   and something else
+						and many-many other action here
+
+		done
+		</pre>
+		
+		<p>Аналогично с функциями и оператором return:</p>
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		# argument $1 is mandatory
+		# show one hundred $1 here
+		function checkit()
+		{
+		local _i
+
+
+		if [ -n "${1}" ]; then
+			for _i in `jot 0 1000`; do
+				echo ${1}
+			done
+		else
+			echo "argument is mandatory"
+		fi
+		}
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		# argument $1 is mandatory
+		# show one hundred $1 here
+		function checkit()
+		{
+		local _i
+
+			[ -z "${1}" ] &amp;&amp; echo "argument is mandatory" &amp;&amp; return 1
+			for _i in `jot 0 1000`; do
+				echo ${1}
+			done
+		}
+		</pre>
+	</div>
+	
+	<h2><a name="stderr">Stderr и функция err()</a></h2>
+	<div class="block">
+		<p>Ошибки необходимо выводить в stderr: echo "Error"  >&amp;2. Удобно вывод ошибок обернуть в отдельную процедуру err и использовать ее через &amp;&amp; :</p>
+		<pre class="brush:bash;ruler:rule;">
+		# fatal error. Print message then quit with exitval
+		err()
+		{
+			exitval=$1
+			shift
+			echo -e "$*" 1>&amp;2
+			exit $exitval
+		}
+
+		[ -z "${must_be_not_empty}" ] &amp;&amp; err 1 "param must_be_not_empty is empty"
+		</pre>
+	</div>
+	
+	<h2><a name="brackets">Скобки процедур</a></h2>
+	<div class="block">
+		<p>Скобкам начала процедур и конца отдаем перенос строчки. Например:</p>
+		<p>плохо читаемо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		err() {
+		echo "hi" }
+		</pre>
+		
+		<p>намного лучше:</p>
+		<pre class="brush:bash;ruler:rule;">
+		err()
+		{
+			echo "hi"
+		}
+		</pre>
+	</div>
+	
+	<h2><a name="ifclose">Закрытие if и отступы</a></h2>
+	<div class="block">
+		<p>При условии if/then, закрывающая fi должна всегда находится на уровне соответствующего if, например:</p>
+		<p>плохо читаемо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		if true;
+			then
+				echo "lol"
+		fi
+		</pre>
+		
+		<p>намного лучше:</p>
+		<pre class="brush:bash;ruler:rule;">
+		if true; then
+			echo "lol"
+		fi
+		</pre>
+	</div>
+	
+	<h2><a name="cases">Cases и отступы</a></h2>
+	<div class="block">
+		<p>Конец case (*;;*) должен находиться на уровне конца сценария этого кейса.</p>
+		<p>Например:</p>
+		<p>плохо читаемо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		case $value in
+			1) do_something ;;
+			2) if [ 1 -eq 1 ]; then
+					echo "Great!"
+				fi
+			;;
+		esac
+		</pre>
+		
+		<p>намного лучше:</p>
+		<pre class="brush:bash;ruler:rule;">
+		case $value in
+			1) do_something 
+				;;
+			2) if [ 1 -eq 1 ]; then
+					echo "Great!"
+				fi
+				;;
+		esac
+		</pre>
+	</div>
+	
+	<h2><a name="slashes">Экранируйте переменные и указывайте границы переменных</a></h2>
+	<div class="block">
+		<p>Всегда указывайте границы переменной через <strong>{</strong> и <strong>}</strong></p>
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		echo $value
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		  echo ${value}
+		</pre>
+		
+		<p>Переменные со строковым содержим, экранируйте кавычками</p>
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		if [ -f ${myfile} ]; then
+		..
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		if [ -f "${myfile}" ]; then
+		..
+		</pre>
+	</div>
+	
+	<h2><a name="unnecessary">Избегайте лишних телодвижений</a></h2>
+	<div class="block">
+		<p>Каждый вызов утилит — это отдельная и порой ненужная работа для ОС</p>
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		cat file | grep something
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		grep somethins file
+		</pre>
+		
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		cat file | command
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		command < file
+		</pre>
+		
+		<p>Используйте heredoc там, где собираетесь использовтаь большое количество <strong>echo</strong></p>
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		echo "Hello"
+		echo "World"
+		echo "My name is ${name}"
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		cat << EOF
+		Hello
+		World
+		My name is ${name}
+		EOF
+		</pre>
+		
+		<p>Избегайте лишних cat, grep там, где позволяет справится с обработкой функционал одной утилиты:</p>
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		cat file |grep test |awk '{printf $2}' 
+		</pre>
+		
+		<p>Пишите:</p>
+		<pre class="brush:bash;ruler:rule;">
+		awk '/test/{print $2}' file
+		</pre>
+	</div>
+	
+	<h2><a name="ifs">Используйте IFS для установки разделителя</a></h2>
+	<div class="block">
+		<p>Вместо:</p>
+		<pre class="brush:bash;ruler:rule;">
+		#!/bin/sh
+
+		myvalue="one|two|three"
+
+		for i in `echo $myvalue|tr "|" " "`; do
+			echo $i
+		done
+		</pre>
+		
+		<p>Используйте:</p>
+		<pre class="brush:bash;ruler:rule;">
+		#!/bin/sh
+
+		myvalue="one|two|three"
+
+		IFS="|"
+		for i in $myvalue; do
+			echo ${i}
+		done
+		</pre>
+	</div>
+	
+	<h2><a name="shuse">Используйте возможность sh немедленно завершить выполнение скрипта при критических ошибках</a></h2>
+	<div class="block">
+		<p>Устанавливайте флаг немедленного завершения при возвращаемых кодах ошибок != 0</p>
+		<pre class="brush:bash;ruler:rule;">
+		set +o errexit
+		set -o errexit
+		</pre>
+		
+		<p>снимая и устанавливая принудительное завершение скрипта на тех участках кода, ошибки в которых фатальны для дальнейшего выполнения.</p>
+		<p>Используйте <strong>true</strong> для тех команд, которые не фатальны но идут в участке, который помечен завершаемый при любой ошибке.</p>
+		<p>Например:</p>
+		<pre class="brush:bash;ruler:rule;">
+		#!/bin/sh
+
+		set -e  # no all error is critical
+
+		mkdir /tmp/ole.$$
+
+		# this is produce error, couse -r needed for remove dir
+		rm -f /tmp/ole.$$ ||true
+
+		rmdir /tmp/ole.$$
+		</pre>
+	</div>
+<!--# include file="/ru/_end.html" -->

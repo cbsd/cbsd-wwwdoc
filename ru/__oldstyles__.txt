@@ -1,0 +1,62 @@
+	<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	
+	<link type="text/css" rel="stylesheet" href="/sh/styles/shCoreDefault.css"/>
+	<script type="text/javascript" src="/js/scripts.js"></script>
+	<script type="text/javascript" src="/sh/scripts/shCore.js"></script>
+	<script type="text/javascript" src="/sh/scripts/shBrushBash.js"></script>
+	<script type="text/javascript" src="/sh/scripts/shBrushCpp.js"></script>
+	<link href="/css/styles.css" rel="stylesheet" />
+	
+	
+	
+	
+	
+HTML5 разметка...
+
+<body>
+<header></header>
+<nav>
+     <ul>
+       <li><a></a></li>
+       <li><a></a></li>
+     </ul>
+</nav>
+<section id="content">
+   <section  id="main">
+        <article>
+              <header></header>
+               <p></p>
+        <article>
+        <article>
+              <header></header>
+               <p></p>
+        <article>
+        <article>
+              <header></header>
+               <p></p>
+        <article>
+  </section>
+   <section id="sec">
+        <article>
+              <header></header>
+               <p></p>
+        <article>
+        <article>
+              <header></header>
+               <p></p>
+        <article>
+  </section>
+</section>
+<aside>
+        <article>
+              <header></header>
+               <p></p>
+        <article>
+         <nav> <a>links?</a></nav>
+</aside>
+<footer>       
+         <article>
+              <header></header>
+               <p></p>
+        <article>
+<footer>

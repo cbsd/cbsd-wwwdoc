@@ -1,0 +1,15 @@
+	<h1><span>List of nodes</span></h1>
+	
+	<h2><a name="nodelist_cmd">node mode=list command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=list
+		</pre>
+	<p>The command <strong>cbsd node mode=list</strong> show name of the nodes RSA which keys were received through <strong>cbsd node add</strong>. Too most it is possible to receive, having seen the catalog <em>$workdir/.rssh</em>, in  which there are keys.</p>
+	<p>Through argument <strong>display</strong> you can specify the fields for output data. If <strong>display</strong> is not specified, the value takes from <em>$workdir/etc/defaults/node.conf</em> file, which you can change at its discretion via <em>$workdir/etc/node.conf</em></p>
+	<p><strong>Example:</strong></p>
+	<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=list
+		</pre>
+		<p class="text-center"><img src="/img/nodelist1.png" alt="" /></p>
+	</div>

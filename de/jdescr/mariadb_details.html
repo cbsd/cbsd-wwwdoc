@@ -1,0 +1,27 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>MariaDB FreeBSD jail image</span></h1>
+	<div class="block">
+	<p><a href="https://mariadb.org/" target="_blank">MariaDB</a> an enhanced, drop-in replacement for MySQL.</p>
+	<p>For installing MariaDB <strong>CBSD</strong> jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=mariadb
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=mariadb ver=10.1
+		</pre>
+		<p>If you hosted on another ( non 10.1 ) FreeBSD version.</p>
+		<p>Execute <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">imghelper</a> that asks you for some questions required for the installation of the jail:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper jname=mariadb bootstrap=/usr/jails/jails-system/mariadb/bin/bootstrap.sh
+		</pre>
+		<p>where: <em>/usr/jails/</em> is workdir for <strong>CBSD</strong>.
+		<!--# include file="/en/changeroot.html" -->
+		<p>For non-interactive and automatic deploying (for example you create hosting with lots of MariaDB installation for customer) you can use: </p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=mariadb install mypw= host= network=
+		</pre>
+	</div>
+<!--# include file="/en/_end.html" -->

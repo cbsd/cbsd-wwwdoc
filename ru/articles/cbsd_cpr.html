@@ -1,0 +1,260 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>Сборка своих репозиториев ПО для FreeBSD через <strong>CBSD</strong> cpr</span></h1>
+	<h2><a name="main_info">Общая информация</a></h2>
+	<div class="block">
+		<!-- Тэги: <strong>howto</strong> -->
+		<p>Эта статья внезапно устарела. Обновленная версия: <a href="https://forums.bsdstore.ru/viewtopic.php?t=7">https://forums.bsdstore.ru/viewtopic.php?t=7</a></p>
+		<br>
+		<p>//Draft, unformatted</p>
+		<p>Одна из бесконечных задач системных инженеров заключается в работе по установке и поддержанию в актуальном состоянии программного обеспечения серверов и рабочих станций.</p>
+		<p>Также, в целях безопасности и надежности, желательно иметь сборки на своих ресурсах, а не публичных серверах. Даже официальные репозитории подвержены различным инцидентам с перебоями и взломам, в результате которых вы можете оказаться в ситуации, когда определенное ПО необходимо срочно получить/обновить/пересобрать с другими ключами, а репозиторий который вы не контроллируете — недоступен.</p>
+		<p>Помимо этого, сам процесс обновления должен подразумевать возможность отката на предыдущее состояние, если по каким-то причинам новые версии работают некорректно.</p>
+		<p>Хорошо, когда для решения этой задачи используется резервное копирование или, что гораздо практичнее, использовать снэпшот файловой системы: например, перед работами сделать <strong>ZFS snapshot</strong> для клетки, и при любых проблемах после обновления в течении секунды вернуть состояние обратно.</p>
+		<p>Однако, занимаясь работой по построению инфраструктуры для собственного репозитория, вы можете заложить возможность версионности на уровне репозитория, что при комбинировании с подстраховкой на клиенте сводит риск попасть в неблагоприятное положение на нет.</p>
+		<p>Кроме этого, сборочная ферма может быть одна, а обслуживать она в состоянии не одну сотню систем</p>
+		<p>Когда я начинал писать <strong>cbsd cpr</strong>, уже давно были известны аналогичные функционалы в виде <strong>TinderBox</strong> и <strong>Poudriere</strong>, однако в каждом из этих решений мне чего-то не хватало.</p>
+		
+		<p>Требования, которые предьявляла моя задача:</p>
+		
+		<ul>
+			<li>Сборка производится по заранее сгенерированныму списку ПО.</li>
+			<li>Сборка каждого отдельного репозитория/версии производится в изолированном окружении (включая собственный кеш <strong>ccache</strong> (опционально) для компиляции, который накапливается при каждых повторных сборках в пределах версии и ветки);</li>
+			<li>При сборке окружения, используется база и ядро, используемые <strong>CBSD</strong>, соответственно, при необходимости иметь более свежую версию базы или ядра, можно воспользоваться <strong>cbsd repo</strong> для получения объектов из репозитория, или <strong>cbsd svnup/buildworld/kernel*</strong> для сборки с нуля.</li>
+			<li>Каждый набор ПО (или один и тот же список) может использовать свою собственную <strong>версию опций портов</strong> (/var/db/ports) и персональный <strong>make.conf</strong> файл и иметь именованный репозиторий, например в таком виде:
+				<ul>
+					<li><strong>nox</strong> — WITHOUT_X11, набор ПО для серверного окружения, без поддержки X — этот набор ПО используется на production-серверах.</li>
+					<li><strong>devnox</strong> — тот же набор ПО и опция WITHOUT_X11, но софт собран с дебагом и поддержкой DTRACE; этот набор ПО используется на dev-клетках, где идет разработка и профилирование проектов.</li>
+					<li><strong>xorg</strong> — X11-based GUI приложения. Данный набор содержит xorg, kde, gnome, мультимедия, офисные приложения, IDE для разработки и прочий инструментарий, характерный для рабочих станций.</li>
+					<li><strong>otherver</strong> — какой-то альтернативный набор опций или версии ПО, который могут предпочесть пользователи хостинга.</li>
+				</ul>
+			<li>Иметь возможность использовать больше одного билдера ПО, в этом случае сценарии репозитория и опции портов реплицировалась (например через csync2) на соответствующие билдеры: если в процессе сборки репозитория <strong>nox</strong> вы выбрали некоторые опции для одного порта, то собирая тот же репозиторий <strong>nox</strong> на другом сервере или другой версии, вывода окна со списом опций уже не будет — он синхронизируется с сервера, которая прошла этот путь первой.</li>
+			<li>Иметь возможность задействовать для компиляции свободные ресурсы серверов через distcc. В этом случае, на нужных серверах скачивалась и запускалась клетка <strong>distcc</strong> с минимальным <strong>nice</strong>, что при сборке не мешало работать остальным сервисам.</li>
+			<li>Иметь версионность каталогов, куда сохраняются новые сборки. В один момент времени только один сет является активным, переключение происходит сменой симлинка. Кроме этого, при наличии нескольких <strong>download</strong> серверов, требуется время для полной синхронизации, поэтому проливка осуществляется в неактивную (slave) зону и по факту полной сихронизации, одномоментно переключается.</li>
+			<li>Конечные хосты забирают готовые пекеджи не с билдеров, а с соответствующих <strong>downloads</strong>-серверов, которых может быть несколько. Таким образом, зеркала отдающие пекеджи, не зависят от здоровья самих билдеров.</li>
+			<li>Протоколирование работы скрипта ведется в /tmp каталоге chroot окружения:</p>
+			<ul>
+				<li>— build.log — общий лог процесса сборки</li>
+				<li>— packages.log — лог на этапе pkg create</li>
+				<li>— port_log* — временные файлы лога компиляции индивидуального порта, удаляющиеся автоматически при успешной сборке порта</li>
+			</ul>
+			</li>
+			<li>Каждая версия репозитория может иметь свой собственный E-mail для уведомлений о начале-конце сборки.</li>
+			<li>Каждую сборку можно запустить с параметром <strong>pause=1</strong>, что по окончанию сборки система будет ожидать нажатия клавиши. А пока это не сделано — можно зайти в chroot окружение, просмотреть проблемы и исправить их вручную.</li>
+			<li>порты монтируются в chroot окружение из мастер системы, либо каждое окружение имеет свою копию портов.</li>
+		</ul>
+		
+		<p><strong>Схематичный рисунок сборочной фермы:</strong></p>
+		<p class="text-center"><img src="/img/bldfarm.png" alt="" /></p>
+		<p>Для комфортной работы напишем переключатель версионности каталогов.</p>
+		<p>Принцип работы данного скрипта простая. Допустим, у нас есть локация <strong>/home/web/pkg.bsdstore.ru/</strong> для хранения пекеджей, где:</p>
+		<p><strong>/home/web/pkg.bsdstore.ru/master</strong> — это SymbolicLink на активный set с билдами. Этот же путь является Docroot для WEB сервера и его имя никогда не меняется.</p>
+		<p><strong>/home/web/pkg.bsdstore.ru/1</strong> — первый физический каталог, содержащий один набор данных</p>
+		<p><strong>/home/web/pkg.bsdstore.ru/2</strong> — второй физический каталог, содержащий предыдущую (или следующую) версию набора данных</p>
+		<p>симлинк master будет указывать лишь на какой-то конкретный каталог, при каждом запуске скрипта указывая по кругу на следующий.</p>
+		<pre class="brush:bash;ruler:true;">
+		#!/bin/sh
+		# When use with config file, follow variable must be set, sample:
+		# _PATH="/usr/symlinks"
+		# _RANGE="1 2 3"
+		# _MASTER_LINK="master"
+		# _SLAVE_LINK="slave"
+		# _ACTION="next"
+		# _X=1  #if action=set
+		# _Y=2  #if action=set
+		#
+		# or by command line:
+		# ./symlink_changer -p /usr/symlinks -r "1 2 3" -m master -s slave -a next
+		#
+
+		err() {
+			exitval=$1
+			shift
+			echo "$*" 1>&amp;2
+			exit $exitval
+		}
+
+		get_symlink() {
+			local _res
+
+			[ -z $1 ] &amp;&amp; return 1
+			_res=`readlink ${_PATH}/${1}`
+			[ $? -ne 0 ] &amp;&amp; return 1
+			printf `basename ${_res}`
+		}
+
+		get_next() {
+			local _cur _test _first _count
+
+			_test="${_PATH}/${1}"
+			_cur=0
+			_count=0
+
+			for i in ${_RANGE}; do
+				[ ${_count} -eq 0 ] &amp;&amp; _first=${i}  ## store first element
+				[ ${_cur} -eq 1 ] &amp;&amp; printf ${i} &amp;&amp; return 0
+				[ "${_PATH}/$i" = "${_test}" ] &amp;&amp; _cur=1
+				_count=$(( _count + 1 ))
+			done
+
+			printf ${_first}
+		}
+
+		get_prev() {
+			local _cur _test _first _count _REVSLOTS
+			_test="${_PATH}/${1}"
+			_cur=0
+			_count=0
+			_REVSLOTS=`echo ${_RANGE} | tr " " "\n" |sort -r`
+
+			for i in ${_REVSLOTS}; do
+				[ ${_count} -eq 0 ] &amp;&amp; _first=${i}  ## store first element
+				[ ${_cur} -eq 1 ] &amp;&amp; printf ${i} &amp;&amp; return 0
+				[ "${_PATH}/$i" = "${_test}" ] &amp;&amp; _cur=1
+				_count=$(( _count + 1 ))
+			done
+
+			printf ${_first}
+		}
+		# create or change new layout by
+		# $1 - new dir for master link
+		# $2 - new dir for slave
+		sym_action() {
+			local _masterdir _slavedir
+			[ -z "${1}" -o -z "${2}" ] &amp;&amp; return 1
+
+			_masterdir="${_PATH}/${1}"
+			_slavedir="${_PATH}/${2}"
+
+			[ ! -d "${_masterdir}" ] &amp;&amp; mkdir "${_masterdir}"
+			[ ! -d "${_slavedir}" ] &amp;&amp; mkdir "${_slavedir}"
+
+			# ln -sf not work correctly here - create symlink in old master folder
+			cd ${_PATH}
+			rm -f "${_PATH}/${_MASTER_LINK}" &amp;&amp; /bin/ln -s "${1}" "${_MASTER_LINK}"
+			rm -f "${_PATH}/${_SLAVE_LINK}" &amp;&amp; /bin/ln -s "${2}" "${_SLAVE_LINK}"
+		}
+
+		usage() {
+			echo "$0 -c confpath -p path -r \"range\" -m masterlink_name -s slavelink_name -a action [-x dir1] [-y dir2]"
+			echo "action must be: next, prev, set"
+			echo "when action = set, x/y = is new masterdir/slavedir"
+			exit
+		}
+
+
+		# MAIN()
+		while getopts "c:p:r:m:s:a:x:y:" opt; do
+				case "$opt" in
+				c) _conf="$OPTARG" ;;
+				p) _path="$OPTARG" ;;
+				r) _range="$OPTARG" ;;
+				m) _master_link="$OPTARG" ;;
+				s) _slave_link="$OPTARG" ;;
+				a) _action="$OPTARG" ;;
+				x) _x="$OPTARG" ;;
+				y) _y="$OPTARG" ;;
+				*) usage ;;
+				esac
+				shift $(($OPTIND - 1))
+		done
+
+		[ -n "${_conf}" -a -f "${_conf}" ] &amp;&amp; . ${_conf}
+
+		[ -n "${_path}" ] &amp;&amp; _PATH=${_path}
+		[ -n "${_range}" ] &amp;&amp; _RANGE=${_range}
+		[ -n "${_master_link}" ] &amp;&amp; _MASTER_LINK=${_master_link}
+		[ -n "${_slave_link}" ] &amp;&amp; _SLAVE_LINK=${_slave_link}
+		[ -n "${_action}" ] &amp;&amp; _ACTION=${_action}
+		[ -n "${_x}" ] &amp;&amp; _X=${_x}
+		[ -n "${_y}" ] &amp;&amp; _Y=${_y}
+
+		[ -z "${_ACTION}" ] &amp;&amp; err 1 "Give me action"
+		[ -z "${_PATH}" -o -z "${_MASTER_LINK}" -o -z "${_SLAVE_LINK}" -o -z "${_RANGE}" ] &amp;&amp; err 1 "not all neccesary variable has been set"
+		cd ${_PATH} || err 1 "Cant cwd to ${_PATH}"
+
+		# init area
+		_curmaster=`eval get_symlink ${_MASTER_LINK}`
+		_curslave=`eval get_symlink ${_SLAVE_LINK}`
+
+		case "${_ACTION}" in
+		"next")
+				_master=`eval get_next ${_curmaster}`
+				_slave=`eval get_next ${_master}`
+				;;
+		"prev")
+				_master=`eval get_prev ${_curmaster}`
+				_slave=${_curmaster}
+				;;
+		"set")
+				_master="${_X}"
+				_slave="${_Y}"
+				;;
+		*)
+				err 1 "No action set"
+				;;
+		esac
+
+		sym_action ${_master} ${_slave}
+		</pre>
+	</div>
+	<h2><a name="cpr">Howto: Работа с cpr скриптом</a></h2>
+	<div class="block">
+		<p>Текущее расположение скриптов на <a href="https://github.com/olevole/cbsd-cpr" target="_blank">GitHub</a>.</p>
+		<p>Клонирем скрипты например в домашний каталог пользователя root:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cd /root
+		% git clone https://github.com/olevole/cbsd-cpr.git
+		</pre>
+		<p>Создаем файл списка ПО, которое <strong>cpr</strong> должен собрать. Назовем файл <strong>task1</strong>.list и наполним его например таким содержимым:</p>
+		<pre class="cli">
+/usr/ports/databases/mariadb55-server
+/usr/ports/databases/postgresql93-server
+/usr/ports/lang/php55
+/usr/ports/www/nginx-devel
+/usr/ports/misc/mc
+		</pre>
+		<p>Если вы создадите файл с <strong>имя_проекта</strong>_make.conf, данный файл будет использоваться как /etc/make.conf при сборке репозитория. Например, вы можете сразу определить несколько <strong>KNOBS</strong>-ов, дабы они применялись на все опции портов. В нашем примере, создадим файл <strong>task1_make.conf</strong> с таким содержимым:</p>
+		<pre class="brush:bash;ruler:true;">
+		OPTIONS_UNSET+= NLS
+		OPTIONS_UNSET+= EXAMPLES
+		OPTIONS_UNSET+= DOCS
+		OPTIONS_UNSET+= MAN
+		OPTIONS_UNSET+= X11
+		
+		OPTIONS_SET+= PKGNG
+		WITH_BDB_VER=6
+		DEFAULT_VERSIONS=php=55
+		</pre>
+		<p>Что равносильно WITHOUT_NSS=yes, WITHOUT_EXAMPLES=yes, WITHOUT_DOCS=yes, WITHOUT_MAN=yes, WITHOUT_X11=yes</p>
+		<p>Запуск скрипта:</p>
+		<pre class="brush:bash;ruler:true;">
+		% ./build -v версия_базы -m имя_задачи> -r имя_группы_опций -n1 -p1
+		</pre>
+		<p>Где:</p>
+		<ul>
+			<li>Версия базы - версия базы FreeBSD для которой необходимо собрать пекеджи. Например: <strong>-v 10.0</strong></li>
+			<li>Имя задачи - имя файла list. Например: <strong>-m task1</strong></li>
+			<li>Имя группы опций - обычно совпадает с именем задачи. Но, если у вас много задач и для всех подходят одни и те же опции, вы можете использовать одну группу опций. Данные опции сохраняются в каталоге <em>${workdir}/var/db/ports-имя</em> и при отработке <strong>cpr</strong> монтируются через nullfs в /var/db/ports внутри chroot окружения. Например: <strong>-r task1</strong>. Внимание! Если вы допустили ошибку и в спешке выбрали не ту опцию, просто зайдите в каталог <em>${workdir}/var/db/ports/ports-task1</em> и сотрите соответствующий каталог для появления окна опций в следующей сборке.</li>
+			<li>-n: Признак нового репозитория или продолжения. Если <strong>-n1</strong>, то cpr создаст chroot окружение и будет собирать все с нуля. Если <strong>-n0</strong>, то в режиме продолжения. Второй вариант удобен, если первичная сборка закончилась неудачей и хочется ее повторить. При этом, те порты что уже были собраны в первом заходе, собираться не будут. Внимание: после каждого обновления дерева портов необходим запуск в режиме -n1, иначе ранее собранные версии портов могут быть уже устаревшими</li> 
+			<li>-p: Сделать ли паузу до нажатия клавиши перед тем, как начать собирать пекеджи. Это дает возможность зайти в chroot и поправить проблемные порты вручную, если таковый имеются</li>
+		</ul>
+		<p>В описываемом примере, запуск производим следующей строчкой</p>
+		<pre class="brush:bash;ruler:true;">
+		% ./build -v 10.0 -m task1 -r task1 -n1 -p1
+		</pre>
+		<p>Вначале будет выполнен <strong>make config-recursive</strong> для выбора всех опций учавствующего в сборке ПО для того, чтобы сам процесс сборки прошел без интерактивного участия, когда опция может всплыть у какого-то порта где-то в середине работы.</p>
+		<p>В редких случаях ввиду ошибок в зависимостях, вы можете увидеть зацикливание при отработке config. Если вы видете, что один и тот же порт постоянно повторяется, нажмите 1 раз Ctrl+C для выхода из этого цикла</p>
+		<p>По факту сборки по, если вы запускали с паузой, будет выведено сообщение</p>
+		<pre class="cli">
+ ...
+ Working on /usr/ports/misc/mc. 1 ports left. 
+ Pause before create pkg.
+ You can enter in chroot via: chroot /root/jails/tmp/task1-10.0
+ Press any key to continue
+		</pre>
+		<p>Вы можете зайти в chroot и проверить наличие файлов <strong>port_log*</strong>. Если их нет, сборка прошла успешно. Если они есть, вы можете посмотреть из-за чего тот или иной порт не собрался</p>
+		<p>Скрипт <strong>cpr</strong> по окончанию работы автоматически проверит наличие этих файлов и если ошибки есть, содержимое файлов будет выслано на email указанный в $workdir/etc/defaults/cpr.conf (параметр CBSDCPR) и выведено в консоль</p>
+		<p>Если же ошибок нет (или вы в ручную поправили ошибки в chroot, собрали софт и удалили файлы port_log*), то скрипт создаст пекеджи, которые затем можно раздавать через WEB сервер или использовать локально через схему file:/// в pkg.conf для локального обновления</p>
+		<p>Путь на который настроены скрипты для генерации .txz: указывается через парамет dstdir= (смотрите внутрь скрипта build)</p>
+	</div>
+<!--# include file="/ru/_end.html" -->

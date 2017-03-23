@@ -1,0 +1,67 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>FreeBSD: Bhyve ( virtualization of xBSD and Linux )</span></h1>
+<h2><a name="intro"><span>Introduction</span></a></h2>
+	<div class="block">
+			<p> <a href="http://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank"><strong>Bhyve</strong></a> -hypervisor is kindly open now by <a href="http://www.netapp.com/us/" target="_blank">NetAPP</a> (having their achievements based on FreeBSD OS) under the BSD license and is currently included in the box/base version of OS FreeBSD, unlike some similar projects that are not part of the OS and (or modify them for the kernel), you must first download and install. In other words, all of the FreeBSD since 10.0, able to run OpenBSD, NetBSD and Linux-based virtual systems right out of the box.</p>
+			<p>Experimenting with a huge number of bhyve arguments, I pretty quickly an overwhelming desire to have <a href="http://petitecloud.org/" target="_blank"><strike>PetiteCloud</strike> CLI</a> <strong>CBSD</strong>, but instead bhyve jail, as it is very highly configurable hypervisor and swim in its settings can be long enough to launch the first environment. </p>
+			<div class="warning">
+				<p><strong>Note:</strong> ( Besides the already mentioned project <a href="http://petitecloud.org/" target="_blank">PetiteCloud</a> ) on <a href="http://bhyve.org/vmrc/" target="_blank">vmrc</a>, developed by <a href="http://callfortesting.org/" target="_blank">Michael Dexter</a> + <a href="https://github.com/michaeldexter" target="_blank">his GITHUB account</a>
+			</div>
+			<p>Second thought - that the code <strong>CBSD</strong> a lot of action primitives inherent and for virtual environments. In addition, when working with gusts FreeBSD, part of potentially useful functions intersect with what we would like to see in cbsd4bhyve. In this regard, there was a thought in <strong>CBSD</strong> 10.0.4 if you do not add support bhyve directly in the code, then do it as a module for <strong>CBSD</strong>.</p>
+			<p>What are the pros (except for the fact that FreeBSD is able to be fast host system) can be obtained with FreeBSD as a host, and Linux / OpenBSD / NetBSD as a guest?
+			The options are many and the question is unlikely to ever be closed. For example, the ability to use HASTD and iscsi to use NAS, is the ability to limit <strong>cputime</strong> or <strong>pcpu</strong> on a virtual machine, it is possible to use Link Aggregation,
+			aggregating multiple physical network cards in one trunk and feed it into a virtual systems. It is an opportunity to infiltrate NetGraph hooks in traffic from systems that do not possess NetGraph. This is an opportunity to use <strong>GELI</strong>-crypto partition, <strong>FIB</strong>, <strong>nice</strong>. Opportunity to
+			using ZFS snapshots and cloning to obtain file system inside the virtual systems that are about snapshots are not even aware. Allowing for example to do TimeMachine Linux/ext3/ext4/xfs/btrfs, while
+			rollbacking did not depend on the file system and killed operability guest OS - just outside the virtual system to make an API for managing snapshots. Which is very beneficial 
+			you can use the hosting Linux/BSD systems. Also, you can perform bulk actions - for example, having one image of the virtual system to make 100 clonings means ZFS, parallel mount the image and modifying the configuration in its own way.<p>
+			<p>Currently, in the wrapper bhyve <strong>CBSD</strong> available version on github and implemented as commands jails, but beginning with the letter <strong>b</strong>:</p>
+			<ul>
+				<li><strong>jstart</strong> (jail start) -> <strong>bstart</strong> (bhyve start)</li>
+				<li><strong>jstop</strong> (jail stop) -> <strong>bstop</strong> (bhyve stop)</li>
+				<li><strong>jls</strong> (jail list) -> <strong>bls</strong> (bhyve list)</li>
+				<li><strong>jconstruct-tui</strong> (jail constructor) -> <strong>bconstruct-tui</strong> (bhyve constructor)</li>
+				<li>etc.</li>
+			</ul>
+			<p>Sample demo:</p>
+			<ul>
+				<li><a href="http://youtu.be/SOgxQEyu2kI" target="_blank">bhyve demo: FreeBSD as host and Linux CentOS x86 as guest</a></li>
+				<li><a href="http://youtu.be/EJLBiYj5C_M" target="_blank">bhyve demo: FreeBSD as host and FreeBSD as guest, created by cbsd jail2iso script</a></li>
+			</ul>
+			<p><a href="/ru/articles/bhyve_vs_jails.html">Jails vs Bhyve articles (russian version only)</a></p>
+	<div>
+<h2><a name="intro"><span>Please note</span></a></h2>
+<div class="block">
+<p>1.</p>
+<p>Currently, the development of bhyve support functional in <strong>CBSD</strong> is an experimental and not in priority. Use it in a production environment is not recommended.</p>
+<p>If you have any problems with the launch bhyve vm and want to debug problem, you can use script and configuration file, which generates<strong>CBSD</strong> to start bhyve virtual machine.
+Startup script bhyve - <em>$workdir/share/bhyverun.sh</em>, that as an argument expects the path to the config file. For example, for a virtual machine named <strong>debian1</strong> and with workdir /usr/jails, this file is - <em>/usr/jails/jails-system/debian1/bhyve.conf</em>.
+This script will allow you to try to run the virtual machine without reference to the any problems of <strong>CBSD</strong> (which deals only with the creation of images, NICs and generation bhyve.conf). If the study of the script without <strong>CBSD</strong>
+will not bring clarity, it makes sense to write the appropriate mailing list <a href="http://lists.freebsd.org/mailman/listinfo/freebsd-virtualization" target="_blank">FreeBSD virtualization</a>.</p>
+<p>2.</p>
+<p>Some of the Linux guest, are loaded through grub-bhyve (the authors contend bhyve this inconvenience - a matter of time) are loaded through the points the way to vmlinuz and initramfs. For example: <em>/vmlinuz-3.10.0-123.el7.x86_64</em>.</p>
+<p>Since the corresponding setting is registered in the profile of the virtual machine, the upgrade version of the Linux kernel in the guest, the profile will indicate old or no longer existing file. Unfortunately, in such distributions (RHEL, CentOS, Oracle) 
+when updates need to track this point and edit profiles (for example, by creating a copy of the profile of the etc/defaults and put under a new name in the /etc). In some flavors of Linux, the kernel file names are constant (but can be a symbolic link, and specify the desired kernel). In such distributions update kernels should not be a name change and, accordingly, such a problem they are not exposed. 
+Examples of such "right" Linux distributions: <strong>Debian, Ubuntu</strong>. Additionally, it should be said that as a solution to this problem can also be loading a virtual machine through the EFI (and grub2-efi port)</p>
+<p>3.</p>
+<p>To work with bhyve via <strong>CBSD</strong>, in the base system should also be been installed following packages:</p>
+<ul>
+	<li>grub-bhyve  ( pkg install grub-bhyve <strong>or</strong> make -C /usr/ports/sysutils/grub-bhyve install )</li>
+	<li>tmux ( pkg install tmux <strong>or</strong> make -C /usr/ports/sysutils/tmux install )</li>
+</ul>
+<p>In addition, the kernel of your node must have modules <strong>if_bridge, if_tap, vmm</strong>. If the kernel configuration they are not available, you can load them via:</p>
+	<ul>
+		<li><strong>/boot/loader.conf</strong>:
+			<pre class="cli;">
+if_bridge_load="YES"
+if_tap_load="YES"
+vmm_load="YES"
+			</pre></li>
+		<li><strong>/etc/rc.conf</strong>:
+			<pre class="cli;">
+kld_list="if_bridge if_tap vmm"
+			</pre></li>
+	</ul>
+</div>
+<!--# include file="_end.html" -->

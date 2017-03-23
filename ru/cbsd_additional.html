@@ -1,0 +1,123 @@
+<!--# include file="_start.html" -->
+	<h1><span>Что необходимо знать о <strong>CBSD</strong></span></h1>
+	
+	<h2><a name="knowit">Общая информация</a></h2>
+	<div class="block">
+		<p><strong>CBSD</strong> представляет из себя дополнительный уровень абстракции над <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">Jail framework</a> и частью функционала FreeBSD.</p>
+		<p>Некоторый список этого функционала, задействованного в <strong>CBSD</strong>:</p>
+		<ul>
+			<li>vnet (VIMAGE)</li>
+			<li>zfs</li>
+			<li>racct/rctl</li>
+			<li>ipfw/pf/ipfilter</li>
+			<li>carp</li>
+			<li>hastd</li>
+			<li>bhyve</li>
+		</ul>
+		<p>Многие эти подсистемы не имеют непосредственного отношения к <strong>jail</strong>, однако, позволяют <strong>CBSD</strong> (являющейся связующим звеном между этими компонентами) предоставить администратору системы более расширенную и комплексную систему для решения задач. Если вы столкнулись с какой-либо проблемой (например не стартует или пропала клетка, не знаете где лежат данные клетки и настройки cbsd, возникает какая-то ошибка в конфигурации и тд), то информация ниже&nbsp;— дя вас.</p>
+		<p>Во-первых, глава <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/jails.html" target="_blank">FreeBSD Jails</a>  обязательна для изучения, чтобы понимать, что представляет из себя jail в обычном виде.</p>
+		<p>Во-вторых, полезно знать о иерархии файловой системы <strong>CBSD</strong>. Условимся в документации использовать следующие именования и значения:</p>
+		<ul>
+			<li><strong>Нода</strong>&nbsp;— физический сервер/единица ресурсов.</li>
+			<li><strong>Клетка</strong>&nbsp;— Jail, изолированное окружение со своим набором ПО/сервисом. В них могут быть как серверные компоненты (DNS, Apache/nginx, postfix) так и графические окружения. Клетки делятся на два типа&nbsp;— сервисные и целостные.</li>
+			<li><strong>Облако</strong>&nbsp;— Ферма/кластер, связанные между собой нодами, одноранговая полноправная сеть (каждая нода может делать задачи другой посредством <strong>CBSD</strong>)</li>
+			<li><strong>База</strong>&nbsp;— в контексте <strong>CBSD</strong>&nbsp;— копия базовой системы FreeBSD.</li>
+			<li><strong>CBSD</strong>&nbsp;— некая сущность, имеющая контроль над нодой(ами) и определенными подсистемами FreeBSD, способная предоставлять упрощенные и единые действия (API) над нодами, клетками и предоставляющая ACL и разграничение прав для клиентов <strong>CBSD</strong></li>
+			<li><strong>$workdir</strong>&nbsp;— рабочий каталог <strong>CBSD</strong> на нодах, инициализируется через cbsd initenv при первом запуске. Обычно <em>/usr/jails</em>.</li>
+			<li><strong>$jname</strong>&nbsp;— Какое-то имя клетки, учавствующей в примере.</li>
+		</ul>
+		<p>&nbsp;</p>
+		
+		<p>Вся рабочие данные <strong>CBSD</strong> находится в каталоге <strong>$workdir</strong> (например <em>/usr/jails</em>), он же является домашним каталогом для пользователя <strong>CBSD</strong> и вы всегда можете быстро перейти в него по команде:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cd ~cbsd
+		</pre>
+		<p>Самые важные данные находятся в каталоге <strong>$workdir/jails-data/$jname-data</strong>, поскольку это непосредственно корень файловой системы клетки с именем <strong>$jname</strong>, если клетка создана с флагом <strong>baserw=1</strong>, либо содержит те данные клетки, которые накладываются на стандартный <strong>$workdir/basejail/$basename</strong> в каталоге <strong>${workdir}/jails</strong></p>
+		<p>Учитывая, что базу вы всегда можете получить через сборку исходных кодов или скачав с репозитория, то для миграции jail на любой другой проект по управлению клетками самое главное&nbsp;— это иметь консистентные данные в этом каталоге.</p>
+		<p><em>Примечение:</em> если использовать тип клетки md, то в каталог $workdir/jails-data/$jname будет содержать имидж клетки.</p>
+		<p><em>Примечание2:</em> если вы используете ZFS и обнаружили, что данные каталоги пусты (при остановленной клетке), проверьте вывод команды:</p>
+		<pre class="brush:bash;ruler:true;">
+		% zfs list
+		</pre>
+		<p>cbsd может размонтировать данные когда клетка неактивна. Для доступа к данным выполните:</p>
+		<pre class="brush:bash;ruler:true;">
+		% zfs mount соответствующая_$jname_файловая_система
+		</pre>
+		<p>Второе по значимости в иерархии каталогов <strong>CBSD</strong> могут выступать конфигурационные файлы для создания клетки, которые располагаются в каталоге <em>$workdir/var/db/</em>. Все параметры клетки сохраняются в SQLite3 файле, на который указывает симлинк <em>${workdir}/var/db/local.sqlite</em> в таблице <a href="https://github.com/cbsd/cbsd/blob/master/share/local-jails.schema" target="_blank">jails</a>. Схема таблицы описана в файле <em>${workdir}/share/local-jails.schema</em> Например, для того чтобы посмотреть все клетки на ноде и их ip адреса:</p>
+		<pre class="brush:bash;ruler:true;">
+		% sqlite3 /usr/jails/var/db/local.sqlite "select jname,ip4_addr from jails"
+		</pre>
+		<p>Когда клетка запускается, <strong>CBSD</strong> генерирует <a href="http://www.freebsd.org/cgi/man.cgi?query=jail.conf&amp;sektion=5" target="_blank">jail.conf(5)</a> файл из данных SQLite3 командой</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jmkrcconf jname=jailname
+		</pre>
+		<p>Вы можете использовать эту команду, если хотите перейти с <strong>CBSD</strong> обратно на базовый вариант (потеряв функционал <strong>CBSD</strong>)</p>
+		<p>Каталог <em>$workdir/jails-system/</em> служит в качестве дополнительного места хранения служебной информации к клеткам, например в нем могут быть конфигураторы сервисов, файл с описанием клетки, статистика по трафику и потребляемым ресурсам, GELI-образы клетки и тд.</p>
+		<p>Служебная информация для нужд самой <strong>CBSD</strong> находится в каталоге $workdir/db. Например, информация о списке добавленных нод, инвентаризация как локальной ноды так и удаленных и тд.</p>
+		<p>Важными в плане безопасности, является каталоги <em>${workdir}/.rssh</em> и <em>${workdir}/.ssh</em>, в котором находятся приватные RSA ключи от пользователя <strong>CBSD</strong> с удаленных нодах и с локальной соответственно. Следите за тем, чтобы данные этих каталогов были недоступены для других пользователей системы. Кроме того, вам может быть интересна информация о <a href="/ru/cbsd_geli.html">GELI криптовании</a>. По-умолчанию, читать ключ может только системный пользователь <strong>CBSD</strong>.</p>
+		<p>И наконец в-третьих, обязательно ознакомьтесь с модификациями, которые производит <strong>CBSD</strong> в вашей конфигурации: <a href="custom_freecbsd.html">Модификации, которые выполняют скрипты <strong>CBSD</strong> в FreeBSD</a></p>
+	</div>
+	
+	<h2><a name="hier">Иерархия <strong>CBSD</strong> каталога</a></h2>
+	<div class="block">
+		<table class="images">
+			<tr><td class="bg-gray">${workdir}/.rssh/</td><td>Каталог для хранения приватных ключей удаленных нод. Файлы добавляются и удаляются через команду <strong>cbsd node</strong></td></tr>
+			<tr><td class="bg-gray">${workdir}/.ssh</td><td>Здесь хранится приватный и публичный ключ непосредственно данной ноды. Формируется на этапе инициализации при команде cbsd initenv. Именно отсюда будут забирать публичный ключ удаленные хосты по команде cbsd node mode=add. Имя, заданное на этапе initenv в вопросе nodename должен совпадать с написанием  имени в аргументе node= при команде cbsd node mode=add. Имя файла ключа является md5 суммой от этого имени.</td></tr>
+			<tr><td class="bg-gray">${workdir}/basejail</td><td>Здесь хранятся готовые к использованию базы и ядра FreeBSD (результат cbsd buildworld/buildkernel, cbsd installworld/installkernel или cbsd repo action=get sources=base/kernel)</td></tr>
+			<tr><td class="bg-gray">${workdir}/etc</td><td>Конфигурационные файлы, необходимые для работы cbsd</td></tr>
+			<tr><td class="bg-gray">${workdir}/export</td><td>Каталог по-умолчанию, в который будет сохраняться экспортированная в файл клетка (при команде cbsd jexport jname=$jname, в этом каталоге появится файл $jname.img)</td></tr>
+			<tr><td class="bg-gray">${workdir}/import</td><td>Каталог по-умолчанию, из которого будет импортирован jail (при cbsd jimport jname=$jname, будет развернута клета $jname)</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails</td><td>В данном каталоге находятся точка монтирования корня для jail-ов, использующих baserw=0.</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails-data</td><td>В этом каталоге лежат данные клетки. Именно этим местам необходим бекап для сохранности данных клетки. Также, если клетка использует baserw=1, эти каталоги являются корнем клетки при ее старте</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails-fstab</td><td>fstab файл для клеток. Синтаксис обычный для FreeBSD за тем лишь исключением, что путь к точке монтирования пишется относительно корня jail (запись <strong>/usr/ports /usr/ports nullfs rw 0 0</strong> в файле fstab.$jname означает, что из мастер-ноды каталог /usr/ports будет примонтирован при запуске в ${workdir}/jails/$jname/usr/ports)</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails-system</td><td>Этот каталог может содержать какие-то вспомогательные скрипты, относящиеся к клетке (например скрипты-wizard-ы для настройки, конфигураторы и пр) а также, сохраняется трафик клетки, если используется ipfw и ее описание. Данный каталог учавствует при jimport/jexport операциях и мигрировании клеток</td></tr>
+			<tr><td class="bg-gray">${workdir}/var</td><td>Каталог который содержит различную системную информацию cbsd. Например, в ${workdir}/var/db находится инвентаризация локальных и удаленных нод если они были добавлены</td></tr>
+			<tr><td class="bg-gray">/usr/local/cbsd</td><td>Копия оригинальных файлов <strong>CBSD</strong> устанавливаемая портом. Также, содержит рабочие скрипты в каталоге <strong>sudoexec</strong></td></tr>
+		</table>
+	</div>
+	
+	<h2><a name="traffic">Подсчет трафика jail</a></h2>
+	<div class="block">
+		<p>В данный момент, для подсчета трафика jail используются правила <strong>count</strong> у фильтра <strong>ipfw</strong>. <strong>CBSD</strong> назначает для счетчиков номера правил из диапазона <strong>99&nbsp;— 2000</strong> (можно изменить в cbsd.conf). Поэтому будьте внимательны и следите за тем, чтобы ваши правила IPFW следовали после указанного диапазона.</p>
+		<p><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html">Чуть более подробно о подсчете трафика jail</a></p>
+	</div>
+
+	<h2><a name="expose">Expose: проброс портов из мастер хоста в jail</a></h2>
+	<div class="block">
+		<p>В данный момент, для проброса tcp/udp портов используются правила <strong>fwd</strong> у фильтра <strong>ipfw</strong>. <strong>CBSD</strong> назначает для счетчиков номера правил из диапазона <strong>2001&nbsp;— 2999</strong> (можно изменить в cbsd.conf). Поэтому будьте внимательны и следите за тем, чтобы ваши правила IPFW следовали после указанного диапазона.</p>
+		<p><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_expose_ssi.html">Чуть более подробно о expose</a></p>
+	</div>
+
+	<h2><a name="secrsyncd"><span>О rsync-based копировании данных между нодами</span></a></h2>
+	<div class="block">
+		 <p>Если вы активируете <strong>cbsdrsyncd</strong>, имейте ввиду, что это обычный <strong>rsyncd(1)</strong> демон, который смотрит в конкретный <em>$jail-data</em> каталог и защищен только средствами rsync и паролем, который генерирует <strong>CBSD</strong> через:</p>
+		 <pre class="brush:bash;ruler:true;">
+		 head -c 30 /dev/random | uuencode -m - | tail -n 2 | head -n1
+		 </pre>
+		 <p>В данный момент используется передача через daemon, а не rsync over ssh по той причине избегания открывания доступа для пользователя root. Соответственно, в качестве дополнительной защиты, рекомендуется закрывать порт <strong>1873/tcp</strong> который использует <stgrong>CBSD</strong> от недоверенных лиц и использовать для nodeip отдельный management интерфейс, либо использовать шифрованные каналы связи между нодами (например IPSec)</p>
+	</div>
+	
+	<h2><a name="color"><span>ANSII Color</span></a></h2>
+	<div class="block">
+		<p>По-умолчанию, <strong>CBSD</strong> выводит текст в цвете (используя управляющие последовательности ANSII). Если по каким-то причинам цвет неприятен, либо вы используете вывод от утилит <strong>CBSD</strong> в своих скриптах, которым последовательность ANSII мешает, вы можете запретить цвет через переменную окружения NOCOLOR=1. Например, команда</p>
+		<pre class="brush:bash;ruler:true;">
+		% env NOCOLOR=1 cbsd jls
+		</pre>
+		<p>запретит использование цвета при выводе заголовка.</p>
+	</div>
+	
+	<h2><a name="troubles">Если что-то пошло не так</a></h2>
+	<div class="block">
+		<p>В случае, если при выполнении утилит <strong>CBSD</strong> возникают ошибки и <a href="/<!--#echo var="lang" -->/cmdsyntax_cbsd.html#cmddebug">Debug отработки CBSD команд</a> ясности не дал, рекомендуется оформить проблему в баг-трекере проекта: <a href="https://github.com/cbsd/cbsd/issues" target="_blank">cbsd issues</a> или сообщить об ошибке по email: <strong>CBSD</strong> <em>at</em> <strong>bsdstore.ru</strong></p>
+		<p>Делайте резервные копии каталогов ${workdir}/var/db, ${workdir}/var/db, ${workdir}/jails-fstab, ${workdir}/jails-system и, конечно же, данные клеток в каталоге ${workdir}/jails-data</p>
+		<p>Если вы будете восстанавливать Jail из бекапа, вам потребуется файл ${workdir}/jails-system/${jname}/rc.conf_${jname}&nbsp;— после того как каталоги jails-data и jails-fstab клетки вы вернете обратно в структуру $workdir каталогов, скопируйте данный rc.conf_${jname} в каталог ${workdir}/jails-rcconf/&nbsp;— после этого, по команде</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jls
+		</pre>
+		<p>Jail будет выводится в списке в статусе Unregister. По команде</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jregister jname=$jname
+		</pre>
+		<p>вы вернете клетку в общий пул и рабочее состояние.</p>
+	</div>
+<!--# include file="_end.html" -->

@@ -1,0 +1,32 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>GITLab jail</span></h1>
+	<div class="block">
+	<p>For installing Gitlab cbsd jail just follow this steps (for FreeBSD 10 and above):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=gitlab
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=gitlab ver=10.0
+		</pre>
+		<p>If you hosted on another ( non 10.0 ) FreeBSD version. After image downloading please set correct name and ip address of the jail and run a <strong>install script</strong> that asks you for FQDN of WEB server and gitlab:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=gitlab gitlabinstall
+		</pre>
+		<p>After pressing <strong>Install</strong>, you get an standart GitLab init-script question:</p>
+		<pre class="brush:bash;ruler:true;">
+			<em>Do you want to continue (yes/no)?</em>
+		</pre>
+		<p>Type 'yes' for begin initialization.</p>
+		<p class="text-center"><img src="/img/gitlab2.png" alt="" /></p>
+		<p>Now Gitlab ready to use. Do not forget to set <em>astart=1</em> in <strong>cbsd jconfig jname=gitlab</strong> if you want for starting jail automatically. By the starting jail via</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart gitlab
+		</pre>
+		<p>a clean GitLab installation in the jail will be available for accessing via <strong>http://FQDN</strong> with default login: <strong>admin@local.host</strong>  and default password: <strong>5iveL!fe</strong></p>
+		<p class="text-center"><img src="/img/gitlab1.png" alt="" /></p>
+		<!--# include file="/en/changeroot.html" -->
+	</div>
+<!--# include file="/en/_end.html" -->

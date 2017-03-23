@@ -1,0 +1,96 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<h1><span>taskd</span></h1>
+<h2><a name="intro"><span>Описание</span></a></h2>
+	<div class="block">
+			<p>Начиная с версии 10.0.6, в <strong>CBSD</strong> идет функционал, позволяющий создавать очередь разовых задач на выполнение (как правило, отложенных на какое-то время или просто долгих).</p>
+			<p>Частично, данный функционал использует сама <strong>CBSD</strong> для постановки собственных внутренних задач для локальной или удаленной ноды, однако, вы также можете использовать эту возможность.</p>
+			<p>В качестве хранилища очереди задач и их параметров, служит SQLite3 база. Вы можете сконфигурировать различное поведение и обработку задачи:</p>
+				<ul>
+					<li>Указать пользователя,  от которого будет выполнена команда</li>
+					<li>Указать удаленную ноду. В этом случае <strong>CBSD</strong> автоматически внесет задачу в taskd-очередь удаленного сервера и будет отслеживать ее выполнение.</li>
+					<li>Указать альтернативный logfile или выключить протоколирование вовсе.</li>
+					<li>Получать результат отработки задачи на Email.</li>
+					<li>Конфигурировать политику ротации логов (удалять лог автоматически если код выполнения - 0, успешно; удалять лог автоматически в любом случае; удалять лог автоматически после X записей или по N времени устаревания).</li>
+					<li>Указать зависимость (цепочку) одной задачи от другой - определенная задача будет находится в <em>Pending</em> до тех пор, пока не выполнится зависимость.</li>
+				</ul>
+			<p>Для вывода списка текущей очереди задач служит команда <strong>cbsd taskls</strong>:</p>
+			<pre class="cli">
+root@dev:~ # cbsd taskls
+ID  STATUS      OWNER  CMD                               LOGFILE           ERRCODE
+1   Complete    root   cd /usr/ports && svn up           /tmp/taskd.1.log  32512
+2   Complete    root   cbsd repo action=get sources=base /tmp/taskd.2.log  0
+3   Complete    root   cbsd svnup                         /tmp/taskd.3.log  0
+4   Complete    root   cbsd buildworld                   /tmp/taskd.4.log  0
+5   Complete    root   cbsd installworld                 /tmp/taskd.5.log  0
+6   Complete    root   cd /usr/ports && svn up           /tmp/taskd.6.log  0
+7   In Progress root   cbsd j2slave jname=owncloud       /tmp/taskd.7.log  0
+			</pre>
+			<p>где:
+			<ul>
+				<li><strong>ID</strong> - порядковый и уникальный номер задачи, назначается системой при поступлении</li>
+				<li><strong>STATUS</strong> - может иметь 3 состояния: <em>Pending</em> (в очереди на обработку), <em>In progress</em> - в процессе работы, <em>Complete</em> - задача завершена</li>
+				<li><strong>OWNER</strong> - кто поставил задачу. Может содержать либо имя пользователя, либо имя удаленной ноды, которая поставила задачу на этом сервере</li>
+				<li><strong>CMD</strong> - непосредственно задача</li>
+				<li><strong>LOGFILE</strong> - лог отработки задачи, по-умолчанию сохраняется в /tmp/taskd.<strong>$ID</strong>.log. Вы можете при создании джоба указать альтернативный лог или выключить вовсе</li>
+				<li><strong>ERRCODE</strong> - код выполненной задачи</li>
+			</ul>
+			</p>
+			<p>Задачи запускаются в параллельном режиме, однако через конфигурационный файл <em>$etcdir/taskd.conf</em> регулируется лимит на количество параллельных задач, которая система может выполнять одномоментно.</p>
+			<p>Новые задачи запускаются мгновенно по факту поступления, однако, если лимит параллельных задач превышен, часть последних задач будет находится в статусе <em>Pending</em> ожидая своей очереди.</p>
+			<p>Через параметр <strong>after</strong> при постановке одной задачи, вы можете указать JOB ID той задачи, до окончания выполнения которой новая задача не запустится. Кроме этого, новая задача при завершении
+			зависимой, запустится только в том случае, если код завершения задачи-зависимости - <strong>0</strong> (отработала без ошибки), в противном случае новая задача наследует <strong>errcode</strong> и запущена не будет.
+			Данный функционал удобен, когда вам нужно выполнять ряд зависимых друг от друга задач последовательно, например:
+			<pre class="cli">
+cbsd task mode=new cbsd svnup    //запускаем обновление исходных кодов
+cbsd task mode=new after=1 cbsd world //запускаем сборку мира после отработки svnup, если его job=1
+cbsd task mode=new after=2 cbsd kernel //запускаем сборку ядра после отработки world, если его job=2
+cbsd task mode=new cbsd jcoldmigrate jname=jail1 node=n1.node.org // запустить холодную миграцию клетки jail1 на ноду n1.node.org
+cbsd task mode=new cbsd after=5 jremove jail1 // удалить slave-клетку jail1 с текущей ноды, если миграция (job 5) прошла успешно.
+			</pre>
+			<p>ID job-а новой задачи можно получить из SQL, или обработать вывод при постановке задачи - привязанный ей ID выводится в stdout.</p>
+			<p>Вы можете настроить нотификацию на email для своих задач через файл <em>$etcdir/taskd.conf</em>, перезаписав стандартные параметры из <em>$etcdir/defaults/taskd.conf</em></p>
+			<pre class="cli">
+root_rcpt="root@localhost"                       # default contact for mail notification or root owner
+lastoutput_num="10"                             # how many last strins from the log send to mail
+max_simul_jobs="10"                             # max run simultaneous proccesses of nexttask
+loop_timeout="60"                               # timeout between forced checking the queue if no events, in seconds
+</pre>
+			<p>где:
+			<ul>
+				<li><strong>root_rcpt</strong> - контактный email(ы, через запятую для нескольких) на который пойдет уведомление по факту завершения задачи. Например, если вы хотите получать на определенный email письма от задач, owner которых cbsdweb, необходимо добавить запись: cbsdweb_rcpt="you@email.here"</li>
+				<li><strong>lastoutput_num</strong> - вставить в письмо последние <strong>N</strong> строчек вывода выполненной задачи.</li>
+				<li><strong>max_simul_jobs</strong> - ограничение на количество параллельно выполняемых задач, если число задач превышено - последние задачи будут дожидаться выполнение первых.</li>
+				<li><strong>loop_timeout</strong> - интервал между форсированной проверкой очереди новых задач.</li>
+			</ul>
+			</p>
+			<p>По факту выполнения задачи вам будут приходить письма примерно следующего содержания:</p>
+			<pre class="cli">
+----------  Forwarded Message  ----------
+Subject: CBSD dev.my.domain: task 6 is completed
+Date: Thursday 29 May 2014, 00:54:06
+From: Charlie Root <root@dev.my.domain>
+To: your_email@my.domain
+
+cmd: cd /usr/ports && svn up
+runtime: 14 minutes
+errcode: 0
+
+last 10 lines of task log (/tmp/taskd.6.log):
+
+Restored 'audio/zynaddsubfx/pkg-plist'
+Restored 'audio/zynaddsubfx/Makefile'
+Restored 'audio/zynaddsubfx/distinfo'
+Restored 'audio/zynaddsubfx/pkg-descr'
+D    graphics/py-gvgen/pkg-plist
+U    graphics/py-gvgen/distinfo
+U    graphics/py-gvgen/pkg-descr
+U    graphics/py-gvgen/pkg-message
+U    graphics/py-gvgen/Makefile
+Updated to revision 355654.
+-----------------------------------------
+</pre>
+			<p>Нотификация от системных задач, которые ставит <strong>CBSD</strong> сама себе локально или на удаленную ноду, приходить на email не будут, кроме этого, постановщик задач в этом случае сам следит за концом задачи, анализирует отработку и удаляет лог задачи</p>
+			<p>Для постановки задачи служит команда <strong>cbsd task</strong>. В случае, если указывается аргумент <em>node=XXXX</em>, задача будет создана на удаленной ноде, при этом, в списке задач на локальной машине вы сможете отслеживать ее состояние.</p>
+	<div>
+<!--# include file="_end.html" -->

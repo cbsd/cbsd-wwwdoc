@@ -1,0 +1,35 @@
+	<h1><span>jail cold migration</span></h1>
+	
+	<h2><a name="jcoldmigrate_cmd">jcoldmigrate command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jcoldmigrate
+		</pre>
+		<strong>Description</strong>:
+	<p><strong>cbsd jcoldmigrate</strong> does cold (with stoping) migration jail from one node to another. Argmument <strong>node</strong> point for destination node. Preliminary, RSA/DSA key for remote node must be added via <strong>cbsd node mode=add</strong> operation. Also, on a remote node service rsyncd should work (<strong>cbsdrsync</strong>).</p>
+	<p>By default, the jail status on a new node is inherited&nbsp;— if the jail worked, it also will be automatically started on a new node. If the jail didn't work&nbsp;— remains in Off status. To operate, what status should be on a remote jail not is dependent on a condition on the original, it is possible through parameter <strong>start</strong>.</p>
+	<p>Jail on the source, after successful <strong>jcoldmigrate</strong> will be stoped and switch to <strong>Slave</strong> status (unregister).  In rc.conf file of jail on the destination node there will be a record where this jail came from.</p>
+	<p>Notes: For jcoldmigrate, the next action is performed (in process they pass automatically and aren't visible)</p>
+	<ul>
+		<li>copy configuration files to remote node, status of jail set to Slave on remote node (<strong>cbsd j2prepare</strong>)
+		<li>exec rsync, which does a full copy of the directory with data to remote node (<strong>cbsd j2slave</strong>)
+		<li>stop jails (if running) on the source node (<strong>cbsd j2slave</strong>)
+		<li>one more rsync job, for synchronization of those files which be modified
+		<li>switch jail status on source to Slave (<strong>cbsd jswmode</strong>)
+		<li>switch jail status to master on the remote node (<strong>cbsd rexe + jswmode</strong>)
+		<li>If jail was running&nbsp;— start jail on remode node (<strong>cbsd rexe + cbsd jstart</strong>)
+	</ul>
+	<p><strong>Example</strong></p>
+	<p>make cold migration for jail amp123 to netsnap node):</p>
+	<pre class="brush:bash;ruler:true;">
+			% cbsd jcoldmigrate node=netsnap jname=amp123
+	</pre>
+	<p><em>on the destionation node anything isn't present now:</em></p>
+	<p class="text-center"><img src="/img/jcoldmigrate1.png" alt="" /></p>
+	<p><em>from node cbuilder64 migrate jail amp123 to netsnap:</em></p>
+	<p class="text-center"><img src="/img/jcoldmigrate2.png" alt="" /></p>
+	<p><em>jail amp123 on netsnap was started automatically:</em></p>
+	<p class="text-center"><img src="/img/jcoldmigrate3.png" alt="" /></p>
+	</div>
+
+

@@ -1,0 +1,19 @@
+	<h1><span>Jail cloning</span></h1>
+	
+	<h2><a name="jclone_cmd">jclone command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jclone
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrclone
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Creates a clone of a given jail. The command requires the name of the original jail (passed with <strong>old</strong>) as well as a name for the clone, specified with <strong>new</strong> and a FQDN (hostname) with <strong>host_hostname</strong>. Optionally a new IP Address can be given with the  <strong>ip4_addr</strong> parameter (multiple IPs need to be separated by commas).</p>
+		<p><strong>Example:</strong></p>
+		<p>cloning jail jail2 to jail3 with changes ip address <strong>ip4_addr</strong> and name of hosts <strong>host_hostname</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jclone old=jail2 new=jail3 host_hostname=jail3.my.domain ip4_addr=10.0.0.22/24
+		</pre>
+		<p class="text-center"><img src="/img/jclone1.png" alt="" /></p>
+	</div>

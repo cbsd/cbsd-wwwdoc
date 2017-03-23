@@ -1,0 +1,86 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<h2><a name="cmdsyntax">Синтаксис команд CBSD</a></h2>
+<div class="block">
+	<p>Все команды начинаются с&nbsp;префикса <em>cbsd</em> (если вы не в <a href="/ru/cbsdsh.html#cbsdsh">CBSD CLI</a>):</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jls
+		% cbsd jstop jname
+		% cbsd jstart jname
+		% cbsd node mode=list
+		...
+	</pre>
+	<p>Команды <strong>CBSD</strong> могут принимать аргументы, записываемые в&nbsp;виде &laquo;param=value&raquo;.</p>
+	<p><strong>CBSD</strong> команды могут иметь как обязательные аргументы, так и&nbsp;аргументы, являющие опциональными. Порядок аргументов роли не&nbsp;играет.</p>
+</div>
+<h2><a name="cmdhelp">Аргументы команд и описание</a></h2>
+<div class="block">
+	<p>Для того, чтобы получить краткую информацию о&nbsp;том или ином скрипте, а&nbsp;также получить список обязательных и&nbsp;опциональных аргументов, используйте аргумент <em>--help</em> для соответствующей команды:</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd &lt;cmd&gt; --help
+	</pre>
+
+	<p>Например, получить справку по&nbsp;jls:</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jls --help
+	</pre>
+	<p>Результат:</p>
+	<pre class="cli">
+	[jail] List jail and status
+	require: 
+	opt: alljails shownode display node header
+	alljails=1 - get jaillist from remote node
+	shownode=1 - show nodename for jails
+	node= only for current node
+	header=0 don't print header
+	display= list by comma for column. Default: jid,jname,ip4_addr,host_hostname,path,status
+	External help: http://www.bsdstore.ru/10.0.2/html/wf_jls_en.html
+	</pre>
+	<p>В&nbsp;первой строчке в&nbsp;квадратных скобках указывается имя модуля, к&nbsp;которому относится команда ( jail в&nbsp;данном случае ), а&nbsp;также краткая информация по&nbsp;функциям.</p>
+	<p>В&nbsp;строчке с&nbsp;<strong>require:</strong> перечисляются обязательные аргументы, без указания которых работа команды невозможна.</p>
+	<p>В&nbsp;строчке с&nbsp;<strong>opt: </strong> перечисляются необязательные аргументы ( тем не&nbsp;менее, в&nbsp;зависимости от&nbsp;режима работы утилиты, в&nbsp;разных случаях они могут быть обязательны )</p>
+	<p>В&nbsp;следующих строчках идет краткое описание аргументов, если она есть.</p>
+	<p>Также, может присутствовать ссылка на&nbsp;документацию ( External help ). Она может указывать как на&nbsp;сайт, так и&nbsp;на&nbsp;локальный файл, если устанавливалась документация.</p>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax1.png" alt="" />
+	</p>
+	<p>Некоторые команды, ожидающие в качестве параметра имя клетки, могут быть интерактивные, выведя список клеток (в том числе на удаленных нодах ) на выбор. Для этого, достаточно просто запустить команду без аргумента. Примеры этих команд:</p>
+	<p><strong>cbsd jlogin, cbsd blogin, cbsd jconfig, cbsd bconfig, cbsd jstop, cbsd bstop, cbsd jstart, cbsd bstart</strong> и тд.</p>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax2.png" alt="" />
+	</p>
+	<p>Кроме этого, <strong>CBSD</strong> инсталлируется в виде модуля для базовой утилиты <strong>bsdconfig</strong> (добавляет себя в конце списка), в который сгруппированы некоторые </strong>-tui</strong> утилиты, 	поэтому, некоторые элементы управления CBSD вы можете выполнять через диалоговый интерфейс, запустив <strong>bsdconfig cbsd</strong>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax3.png" alt="" />
+	</p>
+</div>
+<h2><a name="cmdinter">Интерактивность, цвет в выводе результата</a></h2>
+<div class="block">
+	<p>По-умолчанию, вывод в консоль производится в цветном режиме. Если цвет вам мешает (например, вы используете какие-то свои сценарии для работы с <strong>CBSD</strong> командами), вы можете использовать в переменной окружения параметр NOCOLOR=1</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jls
+		% env NOCOLOR=1 cbsd jls
+	</pre>
+	<p>Некоторые команды могут быть интерактивны - в процессе работы задать корректирующий вопрос. Например, если вы запускаете jail, требующий базу FreeBSD 10.1 и этой базы у вас нет, <strong>CBSD</strong> задаст вопрос на скачивание базы</p>
+	<p>Это поведение может быть не подходящее, если вы пишите свои скрипты вокруг <strong>CBSD</strong>. В этом случае, вы можете дописывать параметр <strong>inter=0</strong> в каждой команде. Это заставляет <strong>CBSD</strong> принять решение по-умолчанию, когда возникает вопросительная ситуация</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jstart inter=0 jname=XXX
+		% cbsd jcreate inter=0 jconf=/path/to/jconf
+	</pre>
+</div>
+<h2><a name="cmddebug">Debug отработки CBSD команд</a></h2>
+<div class="block">
+	<p>Для включения дебага через <strong>sh xtrace</strong> и трассировки операций, используйте аргумент <em>--debug</em> после CBSD команд, например:</p>
+	<pre class="brush:bash;ruler:true;">
+		% env NOCOLOR=1 cbsd node --debug mode=add node=192.168.1.222 pw=very_strong_plain_password port=22
+		% env NOCOLOR=1 cbsd jls --debug
+	</pre>
+</div>
+<h2><a name="cmdoutput">Вывод в XML, JSON, HTML и человеческом формате</a></h2>
+<div class="block">
+	<p>Начиная с версии 10.1.5, <strong>CBSD</strong> может выводить информацию не только в понятном человеческом формате, но и в HTML, XML и JSON для более удобного машинного парсинга и просто на радость киборгов</p>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax4.png" alt="" />
+	</p>
+</div>
+<!--# include file="_end.html" -->

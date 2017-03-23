@@ -1,0 +1,152 @@
+<!--# include file="_start.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>Encrypting images with &nbsp;cbsd geli</span></h1>
+	<div class="block">
+		<p>There are situations where the information posted on the server's hard drive should preferably be stored in encrypted form. For example, you are setting up a server with important information in any foreign datacenter . There are real cases (author familiar with the case not by hearsay ) when disgruntled employees datacenter can take a few minutes to turn off your server , under any pretext ( breaks technical work — not uncommon) , make an image of the hard drive and turn back , that you will look like rebooting the server , while all the information is from third parties became individuals. Either you rent VDS / VPS, where a stranger to you, not only the data center , but also the server and media.</p>
+		<p>In such cases, resort to encrypt that data leakage which is undesirable. Currently, <strong>CBSD</strong> has a script wrapper <strong>geli</strong> для работы с working with encrypted images through GELI&nbsp;framework. As well as before using <strong>cbsd</strong> is highly desirable to get acquainted with &nbsp;original man for &nbsp;<a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail</a>, and in this context, it is strongly recommended to read the following information:</p>
+		<ul>
+			<li><a href="http://www.freebsd.org/cgi/man.cgi?query=geli&amp;sektion=8" target="_blank">man geli</a></li>
+			<li>paragraph 18.14.2&nbsp;в <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/disks-encrypting.html" target="_blank">Encrypting Disk Partitions</a></li>
+		</ul>
+		<p>Before using <strong>cbsd geli</strong>.</p>
+		<p>Working with GELI assumed the following scenario:</p>
+		<ul>
+			<li>Encryption be only selected data. Since the encryption operation is dependent primarily on your CPU resource consumption will always be higher , and I/O — lower than when working with data on the encrypted partition. Instead of encrypting the entire jail, you can choose to encrypt only important path inside the jail, for example: <em>/root, /home/user, /var/db/mysql, /usr/local/etc</em> etc, while the logs, database, or all of the third party software that you installed via pkg/ports — can be left unencrypted. Also, besides the encryption of these jails, you may want to encrypt the directory <em>$workdir/.rssh</em>, which keeps cbsd ID_RSA keys remote machines and <em>$workdir/.ssh</em> which is your own key to the user cbsd.</li>
+			<li>Each encrypted device is assigned their own password/passphrase to decrypt. However, they will all be stored on the system image of <strong>CBSD</strong>, which in turn will be encrypted master- key. In other words, as you trust your own server, if necessary, to include one or another encrypted partition, <strong>CBSD</strong> itself will apply the correct key when using of encrypted image. At the same keys for their decryption is stored in a file, which in turn is encrypted with your password and activated manually.</li>
+		</ul>
+		<p>For common understanding, we denote the following conventions:</p>
+		<ul>
+			<li><strong>${dbdir}</strong>&mdash;&nbsp;directory <em>$workdir/var/db</em>, where <em>workdir</em>&nbsp;&mdash; is path to initialized of <strong>CBSD</strong>. For example: <em>/usr/jails/var/db</em></li>
+			<li><strong>MASTER_GELI</strong>&mdash;&nbsp;your password encrypted image, which <strong>CBSD</strong> will look for clues to the rest geli attach operations. Located on the file system as a file <em>${dbdir}/master_geli.img</em></li>
+		</ul>
+		<div class="warning">
+			<p><strong>Attention!</strong>  Removing or defacing this file would make it impossible to connect all remaining crypted images automatically and mount these images will only be possible if you remember what the image which password you assigned to the &nbsp;<strong>cbsd geli mode=init file=</strong> stage. In this regard, make regular backups of the file.</p>
+		</div>
+		<ul>
+			<li><strong>key directory</strong>&mdash;&nbsp;mounted image of <strong>MASTER_GELI</strong> file into <em>${dbdir}/geli</em> directory. To avoid possible damage due to incorrect unmount (server failure, loss of power, improper shutdown), the resource is connected in Read-only mode and re-mount in rw only for modifications.</li>
+		</ul>
+	</div>
+	
+	<h2><a name="geliinit">cbsd geli initialization</a></h2>
+	<div class="block">
+		<p>To start working with an encrypted partition on the node, you must create <strong>MASTER_GELI</strong> file and come up with a password for it. Use a strong password, because it gives access to all other keys. To use the command of initialization: <strong>cbsd geli mode=initmaster</strong>.</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd geli mode=initmaster
+			Initialization. Please set master password for geli base image
+			Enter new passphrase:
+		</pre>
+		<p>Secondary running this command will give the question to enter the password, or the command will work without any output, if the file already initialized and mounted automatically at $dbdir/geli. Successful initialization file contents of the file mounted to the directory $dbdir/geli, let the rest of the scripts access to keys for other images.</p>
+		<p><em>Note</em>:</p>
+		<p>By default, the image is created for storage of keys equal to 5Mb with AES-XTS algorithm. This setting is in the file <em>${workdir}/etc/defaults/geli.conf</em> and can be changed via the corresponding entries in &nbsp;<em>$workdir/etc/geli.conf</em></p>
+	</div>
+	
+	<h2><a name="imageinit">Initialization geli-images for <strong>CBSD</strong> use</a></h2>
+	<div class="block">
+		<p>GELI Initialization of image should be before you start it up and mounting the write data. To initialize, use the command:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd geli mode=init file=/path/to/file
+		</pre>
+		<p>When you first start geli init file /path/to/file will perform the following steps:</p>
+		<ul>
+			<li>1) if path begins with $workdir (eg, <strong>CBSD</strong> installed in /usr/jails, and cbsd init executed with settings <strong>mode=init file=/usr/jails/jails-system/jail1/root.img</strong>), then&nbsp;logic of script path $workdir removed out of the way and this location is used to generate key file name via md5. Such an operation is needed for those cases, if you migrate from one jail to another node and various $workdir — if not cut workdir, then md5 key names will be different. If the path is a file that is not in $workdir, the path remains unchanged.</li>
+			<li>2) <strong>cbsd geli</strong> script prompts you to password for the file in the file = variable and stores it in a file $dbdir/geli/md5_from_result_of_step_1</li>
+			<li>3) Executing of <strong>geli attach</strong> with this key, and displays the name of the resulting device, such as:
+			<pre class="brush:bash;ruler:true;">
+				/dev/md1.eli
+			</pre>
+			you can already format and fill the data that will be encrypted.</li>
+		</ul>
+		<p>As is the case with initmaster, if you start a second init file — the system without question it presents, if the key already exists.</p>
+	</div>
+	<div class="block">
+		<p class="text-center">Schematically, the interaction with <strong>CBSD</strong> GELI script with the system looks like this:</p>
+		<p class="text-center"><img src="/img/cbsd_geli1.png" alt="" /></p>
+	</div>
+	<h2><a name="mountpoints">Using jails fstab to list of crypted images and &nbsp; mount points</a></h2>
+	<div class="block">
+		<p>For example, that jail <em>jail1</em> on startup mount crypted image in directory /usr/home/web inside the environment, on the local <em>fstab</em> file of jails stored the name of the image file and the file system type sets to <strong>geli</strong>, for example:</p>
+		<pre class="brush:bash;ruler:true;">
+			webhome.img /usr/home/web geli rw 0 0
+		</pre>
+		<p>In this case, the file <em>webhome.img</em> must me store in the directory <em>/usr/jails/jails-system/jail1/</em> (when workdir = /usr/jails).
+		<p>If you store the crypto image is not in <em>/usr/jails/jails-system/<strong>$jname</strong>/</em> directory, it is necessary to prescribe the full path starting with /. for example:</p>
+		<pre class="brush:bash;ruler:true;">
+			/data/images/webhome.img /usr/home/web geli rw 0 0
+		</pre>
+		<p>However, storage for <strong>.img</strong> files of jails <em>/usr/jails/jails-system/<strong>$jname</strong>/</em> is recommended, because the directory <em>jails-system/$jname</em> participates in the operations of migration, <strong>jimport</strong> and <strong>jexport</strong>. Otherwise, you will have to carry their own image file.</p>
+		<p>Keep in mind, when after booting server you have no init the <strong>CBSD</strong> geli (cbsd geli mode=initmaster), which after the password has access to the keys to decrypt the images and jails is starting, <strong>CBSD</strong> can not find a key to decrypt the image and the crypto directory is not be mounted. Therefore, as a rule, crypto jails should have a flag autostart is off(<strong>astart=0</strong>).</p>
+	</div>
+	<h2><a name="mountpoints">A practical example</a></h2>
+	<div class="block">
+	<p>Suppose we have a jail named <strong>private1</strong>, wherein the base files, configuration, and third party software installed from ports we encrypt is not required, since all this so you can download on the Internet. However, the contents of the user's home directory <strong>web</strong> mounted in <em>/usr/home/web</em> inside the jail must be encrypted.</p>
+	<p>Since the server load, we will need to manually enter master password, do yourself sending message to email for those cases where the server can be restarted without our knowledge. For this <em>/etc/crontab</em> drop the line:</p>
+	<pre class="brush:bash;ruler:true;">
+	@reboot root /bin/echo "Incident date: `/bin/date`"| mail -s "`/bin/hostname` rebooted" your_mail@my.domain
+	</pre>
+	<p>, where <em>your_mail@my.domain</em> - is your E-mail.</p>
+	<p>Perform initialization of master-image <strong>CBSD</strong>, where will be stored all the keys to the images. You will be prompted to enter the passphrase for decrypting this image again to initialize it immediately. Do not forget it.</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd geli mode=initmaster
+	Initialization. Please set master password for geli base image
+	Enter new passphrase:
+	Reenter new passphrase: 
+	Attaching geli base image. Please use master password.
+	Enter passphrase:
+	Init complete: /usr/jails/var/db/master_geli.img
+	</pre>
+	<p>Highly desirable to make backups of the file <em>/usr/jails/var/db/master_geli.img</em>, because without it (or with a damaged file) and not remembering personal passwords (step below) to decrypt a particular course, you can not access them.</p>
+	<p>The same command and the phrase on the next boot the node you activate access to the rest of the keys.</p>
+	<p>Create an image of sufficient volume, which will be located Encrypting File System. For example, create the image of 10 Gbytes (means that the jails has already been created and jail1 directory <em>/usr/jails/jails-system/private1</em> exist in filesystem):</p>
+	<pre class="brush:bash;ruler:true;">
+	% cd /usr/jails/jails-system/private1
+	% truncate -s 10g home_web.img
+	</pre>
+	<p>Initialize GELI on this file. A phrase that you enter for the decryption will be saved as a file within the encrypted master password image <em>/usr/jails/var/db/master_geli.img</em>, you created above.</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd geli mode=init file=/usr/jails/jails-system/private1/home_web.img
+	Metadata backup can be found in /var/backups/md1.eli and
+	can be restored with the following command:
+	
+	# geli restore /var/backups/md1.eli /dev/md1
+	
+	/dev/md1.eli
+	</pre>
+	<p>The <strong>/dev/md1.eli</strong> file in output is currently initialized GELI-image, which now need to create a file system.</p>
+	<p>You can verify that the file corresponds exactly to the image md1 /usr/jails/jails-system/private1/home_web.img, looking at the output of the command:</p>
+	<pre class="brush:bash;ruler:true;">
+	% mdconfig -vl
+	md0     vnode    5120K  /usr/jails/var/db/master_geli.img
+	md1     vnode      10G  /usr/jails/jails-system/private1/home_web.img
+	</pre>
+	<p>Create a file system:</p>
+	<pre class="brush:bash;ruler:true;">
+	% newfs -U -n -m0 /dev/md1.eli 
+	</pre>
+	<p>It now remains to add to fstab of jail inforation about GELI image and mount point. Open or create a file <em>/usr/jails/jails-fstab/fstab.private1.local</em> and add string:</p>
+	<pre class="brush:bash;ruler:true;">
+	home_web.img /usr/home/web geli rw 0 0
+	</pre>
+	<p>Create empty directory /usr/home/web inside the jails, which will be the mount point:</p>
+	<pre class="brush:bash;ruler:true;">
+	% mkdir -p /usr/jails/jails-data/private1-data/usr/home/web
+	</pre>
+	<p>Additionally, make sure that the private1 jail will not try to run automatically, as in this case, without the primary initialization of <strong>CBSD</strong> GELI, jail will start with a empty <em>/usr/home/web</em>:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd jset jname=private1 astart=0
+	% cbsd jls display=jname,astart
+	JNAME     ASTART
+	private1  0
+	</pre>
+	<p>After that run the jail and remains convinced that the directory is mounted:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd jstart private1
+	% mount | grep "/usr/home/web"
+	/dev/md1.eli on /usr/jails/jails/private1/usr/home/web (ufs, local, soft-updates)
+	</pre>
+	<p>After each reboot the OS, you need to go on a one-time server and initialize the master-GELI image through command:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd geli mode=initmaster
+	</pre>
+	<p>Then before the next boot, <strong>CBSD</strong> be able to use individual keys for decrypt images for starting and stopping the jails themselves.</p>
+	</div>
+<!--# include file="_end.html" -->

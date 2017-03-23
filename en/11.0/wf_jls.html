@@ -1,0 +1,35 @@
+	<h1><span>Jails list</span></h1>
+	<h2><a name="jls_cmd">jls command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls
+		</pre>
+		<strong>Description</strong>:
+		<p>Show the list of jails on a local node or for all added nodes. Through argument <strong>display</strong> you can specify the fields for output data. If <strong>display</strong> is not specified, the value takes from <em>$workdir/etc/defaults/jls.conf</em> file, which you can change at its discretion via <em>$workdir/etc/jls.conf</em></p>
+		<p>All possible options for the sample described in the <em>$workdir/share/jail-arg</em> file</p>
+		<ul>
+			<li><strong>JID</strong> — Jail ID</li>
+			<li><strong>JNAME</strong> — jail name</li>
+			<li><strong>IP4_ADDR</strong> — list of assigned IP addresses (IPv4,IPv6)</li>
+			<li><strong>HOST_HOSTNAME</strong> — FQDN jail</li>
+			<li><strong>PATH</strong> — root filesystem for jail</li>
+			<li><strong>STATUS</strong> — On (running), Off (stoped), Unregister (jail has its rc.conf (old format) but not in the SQL database)</li>
+		</ul>
+		<p>Note: Jail in the unregister status may be insert to SQL database via command: <strong>cbsd jregister</strong>. Also, they are automatically converted on <em>Upgrading</em> stage of <strong>cbsd initenv</strong> command. In a case when to the local server are added a key of remote of nodes, it is possible to receive  the list of all jails in a farm via</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsd jls alljails=1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsd jls alljails=1 shownode=1
+		</pre>
+		<p>for output with node name where jail are hosted. In the output from cbsd jls alljails, it is possible to see only active jails (in status On)</p>
+		<p><strong>Example</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls
+		</pre>
+		<p class="text-center"><img src="/img/jls1.png" alt="" /></p>
+		<p>Conclusion customized data (Attention, dashes fields may mean that version of <strong>CBSD</strong> on the remote node is older. Respectively, SQL query in its database does not find relevant records)</p>
+		<p class="text-center"><img src="/img/jls2.png" alt="" /></p>
+	</div>
+

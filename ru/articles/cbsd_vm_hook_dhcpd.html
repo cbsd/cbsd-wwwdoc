@@ -1,0 +1,369 @@
+<!--# include file="/ru/_start.html" -->
+<h1><span>Пример использования CBSD/bhyve и ISC-DHCPD</span></h1>
+<div class="block">
+	<p>Данная статья демонстрирует некоторые варианты использования <strong>CBSD</strong> master/pre/post хуков для интеграции окружений под <strong>CBSD</strong> с внешними сервисами.</p>
+
+	<p>Если прочесть описание функционала master/pre/post хуков, то данная возможность позволяет встравить выполнение пользовательских скриптов в различные 
+стадии жизни виртуального окружения. При этом, в этих скриптах доступны значения переменных данного окружения, поэтому вы можете идентифицировать
+события с конкретным окружением и/или использовать эти параметры в каких-то своих целях.</p>
+
+<p>Одна из задач, которые вам нужно решить при работе с виртуальными окружениями - это управление сетевыми настройками внутри виртуальной машины.</p>
+<p>Это сделать не очень сложно, если у вас есть собственный образ виртуального окружения, в который вы можете встроить свои собственные скрипты (например,
+так работает <strong>vm_obtain</strong> метод в <a href="https://clonos.tekroutine.com" target="_blank">ClonOS</a>), или работать с виртуальной машиной через virtio-console. Но этот метод не подходит, если:</p>
+
+<ul>
+	<li>Вы устанавливаете виртуальную машину с нуля, используя ISO образ полученный с сайта разработчиков;</li>
+	<li>Вы используете большое количество совершенно разных дистрибутивов, в каждом из которых свой метод инициализации сетевых настроек;</li>
+</ul>
+
+<p>В этом случае, самый универсальный способ, подходящий любым ОС  - это использование стандартного протокола инициализации сетевых настроек <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol" target="_blank">DHCP</a>.</p>
+
+<p>Давайте попробуем на примере этой задачи показать, как можно использовать функционал master/pre/post хуков при работе с виртуальными окружениями, с использованием <strong>isc-dhcpd</strong> 
+в связке с <strong>CBSD</strong> для управления IP адресами bhyve.</p>
+
+<p>Вместо <strong>isc-dhcpd</strong>, может выступать любой другой сервер DHCP, например <a href="http://www.thekelleys.org.uk/dnsmasq/doc.html" target="_blank">DNSMasq</a>, схема будет примерно одинакова:</p>
+<p>DHCPD сервер позволяет сконфигурировать сетевую подсеть. Кроме этого, вы можете фиксировать пары MAC адреса и IP. Другими словами, зная конкретный MAC адрес,
+вы конфигурируете DHCPD сервер выдавать ему фиксированный, заранее определенный  IP адрес.</p>
+<p>MAC адресами у нас заведует <strong>CBSD</strong>, поэтому наша цель - где-то на стадии запуска контейнера, сконфигурировать DHCP на выдачу IP адреса, который
+мы укажем в <strong>CBSD</strong> для MAC адреса, который выдаст (или мы сами назначим) данному виртуальному окружению.</p>
+<p>Схематично, блок-схема работы должна получится у вас примерно такая:</p>
+
+<p class="text-center"><img src="/img/cbsd_bhyve_dhcpd.png" alt="" /></p>
+
+<p>Мы предполагаем, что <strong>CBSD</strong> у вас уже установлена и сконфигурирована, и ее версия не ниже <strong>11.0.10</strong></p>
+<p>1) Установим пакет <strong>isd-dhcpd</strong> через <a href="http://man.freebsd.org/pkg/8" target="_blank">pkg</a>:</p>
+<pre class="brush:bash;ruler:rule;">
+% pkg install net/dhcpd
+</pre>
+<p>или из портов:</p>
+<pre class="brush:bash;ruler:rule;">
+% env BATCH=no make -C /usr/ports/net/dhcpd install
+</pre>
+<p>2) Следующим шагом будет определение сети, которая будет использована в автоматической конфигурации и написании соответствующего блока конфигурационного
+файла для <strong>DHCP</strong>. Допустим, наша сеть будет <i>198.168.0.0/24</i>, DNS будем брать от <strong>Google</strong>, а шлюз по-умолчанию будет <strong>192.168.0.1</strong>:</p>
+
+<p>Создадим каталог <i>/root/etc</i>:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir /root/etc
+</pre>
+
+<p>и поместим в каталоге файл <i>/root/etc/dhcpd.conf</i> с начальной конфигурацией. Она может выглядеть следующим образом:</p>
+<pre class="cli">
+option domain-name "example.com";
+option domain-name-servers 8.8.8.8,8.8.4.4;
+option subnet-mask 255.255.255.0;
+default-lease-time 600;
+max-lease-time 7200;
+
+subnet 192.168.0.0 netmask 255.255.255.0 {
+        range 192.168.0.2 192.168.0.254;
+        option broadcast-address 192.168.0.255;
+        option routers 192.168.0.1;
+}
+</pre>
+
+<p>Этим мы обозначили сеть, за которую ответственнен dhcpd.</p>
+
+<p>К сожалению, на момент написания этой статьи, конфигурационный файл dhcpd.conf не поддерживает возможность подключать 
+отдельные конфигурационные файлы или указывать каталоги с экстра конфигурацией (либо автор плохо искал), поэтому нам необходим скрипт,
+который будет управлять второй частью конфигурационного файла dhcpd.conf, добавляя при запуске виртуальной машины
+запись соответствия IP адреса и MAC для первого сетевого интерфейса гвеста.</p>
+
+<p>MAC адрес и IP адрес мы будем знать на этапе master/pre/post <strong>CBSD</strong>. Кроме того, чтобы у нас не возникало дубликатов с записями, 
+записи к той или иной виртуальной машине идентифицируем каким-либо признаком (например, через комментарий), по которому будем находить 
+старые записи и удалять перед добавлением новой. Для этой цели, нам также пригодится переменная <strong>$jname</strong>.</p>
+
+<p>Итак, на входе мы будем получать три параметра - имя виртуального окружения, физический адрес (MAC) первого интерфейса и IP адрес. 
+На выходе - добавим  в <i>/root/etc/dhcpd.conf</i> привязку адреса и мака и перезагрузим dhcpd демон. В конце скрипта, перезагружаем dhcpd для применения новой конфигурации.</p>
+
+<p>Пишем скрипт:</p>
+
+<pre class="cli">
+#!/bin/sh
+DHCPD_CONF="/root/etc/dhcpd.conf"
+
+# fatal error. Print message then quit with exitval
+err() {
+        exitval=$1
+        shift
+        echo "$*" 1>&2
+        exit $exitval
+}
+
+[ -z "${jname}" ] && err 1 "no jname variable"
+[ -z "${nic_hwaddr0}" ] && err 1 "no nic_hwaddr0 variable"
+[ -z "${ip4_addr}" ] && err 1 "no ip4_addr variable"
+[ ! -r "${DHCPD_CONF}" ] && err 1 "no ${DHCPD_CONF}"
+
+# Remove old records for this host if exist
+if grep "CBSD-AUTO-${jname}" ${DHCPD_CONF} >/dev/null 2>&1; then
+	/bin/cp -a ${DHCPD_CONF} /tmp/dhcpd.tmp.$$
+	trap "/bin/rm -f /tmp/dhcpd.tmp.$$" HUP INT ABRT BUS TERM EXIT
+	grep -v "CBSD-AUTO-${jname}" /tmp/dhcpd.tmp.$$ > ${DHCPD_CONF}
+fi
+
+# Insert new records into config file
+printf "host ${jname} { hardware ethernet ${nic_hwaddr0}; fixed-address ${ip4_addr}; } # CBSD-AUTO-${jname}\n" >> ${DHCPD_CONF}
+
+service dhcpd restart
+</pre>
+
+<p>И кладем его в каталог <i>/root/bin</i> под именем <i>/root/bin/make_cbsd_dhcpd.sh</i>:
+
+<p>Для того, чтобы DHCPD запускался вместе с системой, активируем его через rc.conf. Также, укажем альтернативный путь к конфигурационному файлу <i>/root/etc/dhcpd.conf</i>:
+Также, желательно указать интерфейс, на котором DHCPD будет обслуживать виртуальные машины. В моем случае, bhyve машины будут запускаться
+по-умолчанию - создавая tap интерфейс, который будет бриджеваться на uplink интерфейс. На моем сервере это сетевой интерфейс <strong>em0</strong>:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% sysrc dhcpd_enable="YES"
+% sysrc dhcpd_flags="-c /root/etc/dhcpd.conf em0"
+</pre>
+
+<div class="warning">
+<p>Внимание! Будьте аккуратны, если запускаете DHCPD на скоммутированном физическом интерфейсе. Поскольку ваш сервер будет выдавать адреса не только виртуальным окружениям bhyve, но также 
+и всем остальным устройствам в вашей сети, если они их попросят. Более того, если в вашей сети есть еще один DHCPD сервер, вы также этим можете нарушить его работу.</p>
+<p>Чтобы этого избежать, просто заблокируйте сетевой трафик от портов, по которым dhcpd во вне. Если интерфейс - <strong>em0</strong>, это можно например через <a href="http://man.freebsd.org/ipfw/8" target="_blank">ipfw</a>:</p>
+<pre class="cli">
+ipfw add deny tcp from me to any dst-port 67-68 via em0 out
+ipfw add deny udp from me to any dst-port 67-68 via em0 out
+</pre>
+<p>Другой метод решения - вы можете указать dhcpd работать только на тех (tap<strong>X</strong>) интерфейсах, которые создаются при запуске виртуальной машины.</p>
+</div>
+
+
+<p>Ну что ж. Все элементы готовы, осталось только их связать между собой.</p>
+<p>Нам потребуется хук <strong>master_prestart</strong>, поскольку действия нам необходимо выполнить на хостер системе и в момент, предшествующий 
+непосредственно запуску виртуальной машины. Это директория <i>master_prestart.d</i> в системном персональном каталоге окружения: <i>$workdir/jail-system/$jname</i></p>
+<p>
+<p>где:</p>
+<ul>
+	<li><strong>$workdir</strong> - путь, с которым проинициализирована CBSD (обычно <i>/usr/jails</i>)</li>
+	<li><strong>$jname</strong> - имя виртуального окружения. Например: freebsd1</li>
+</ul>
+<p>Для обеспечения запуска хуков, нам достаточно положить выполняемый скрипт внутри соответствующего каталога.
+Это несложно, если у вас 1-2 постоянных окружения. Что делать, если вы планируете иметь большее количество виртуалок и более того,
+планируете достаточно часто удалять и создавать их? Мы должны будем всегда помнить о необходимости положить скрипт.</p>
+
+<p>Давайте немного усложним решаемую задачу, но облегчим свою жизнь в будущем, переложив еще одну проблему на автоматику.</p>
+<p>Для этого, воспользуемся профилями <strong>CBSD</strong>, а в частности, даже не будем создавать для наших DHCP машин отдельный профиль,
+достаточно переназначить путь где брать каталоги с хуками в шаблоне по-умолчанию.</p>
+
+<p>Создадим каталог <i>/root/share</i>, где будем хранить альтернативный контент system-каталогов для вновь создаваемых окружений:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir /root/share
+</pre>
+
+<p>Скопируем стандартное дерево каталогов из дистрибутива <strong>CBSD</strong>, оно не содержит никаких скриптов:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% cp -a ~cbsd/share/jail-system-default /root/share
+</pre>
+
+<p>Пожалуй, скрипт, добавляющий записи в dhcpd.conf у нас получился достаточно универсальный и нам не нужно копировать его в каждое создаваемое
+окружение. Мы обойдемся символическими ссылками, которые будут указывать на него. Для этого, зайдем в каталог <strong>master_prestart.d</strong> 
+темплейта и укажем через <a href="http://man.freebsd.org/pkg/1" target="_blank">ln</a> на исходный скрипт:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% cd /root/share/jail-system-default/master_prestart.d
+% ln -sf  /root/bin/make_cbsd_dhcpd.sh
+</pre>
+
+<p>И переназначим путь к skel-каталогу на нашу копию, через конфигурационный файл <i>~cbsd/etc/bhyve-default-default.conf</i>,
+параметры в котором будут перезаписывать параметры файла <i>~cbsd/etc/defaults/bhyve-default-default.conf</i></p>
+
+<pre class="brush:bash;ruler:rule;">
+echo 'systemskeldir="/root/share/jail-system-default"' > ~cbsd/etc/bhyve-default-default.conf
+</pre>
+
+<p>Вот и Все! Нам остается только запускать <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcreate_ssi.html">cbsd bconstruct-tui</a> и штамповать виртуальные машины с указанными IP адресами в настройке <strong>ip4_addr</strong>.</p>
+<p>Имейте ввиду, что на том интерфейсе, где вы запускаете DHCPD (в нашем случае это интерфейс <strong>em0</strong>, вы должны иметь хотя бы один IP адрес из той подсети, которую раздаете через DHCPD</p>
+<p>Поскольку в нашем случае шлюз по-умолчанию является этот сервер, мы просто назначили 192.168.0.1 адрес в качестве алиаса на <strong>em0</strong>.</p>
+
+
+<br><br>
+<h1><span>CBSD/bhyve и PXE boot: бездисковая загрузка bhyve виртуалок по сети</span></h1>
+<p>Начиная с версии 11.0.12, <strong>CBSD</strong> поддерживает возможность загрузки виртуальных машин bhyve через PXE протокол.</p>
+<p>Для того, чтобы активировать загрузку bhyve по PXE, используйте меню <strong>vm_boot</strong> для выбора варианта 'net' boot device</p>
+<p class="text-center"><img src="/img/cbsd_bhyve_pxe1.png" width="800" height="600" alt="" /></p>
+<p>Далее, нам необходимо будет доработать скрипт из первой части статьи таким образом, чтобы для некоторых серверов мы могли использовать дополнительные строчки конфигурации в dhcpd.conf, относящиеся к PXE/bootp протоколу загрузки. Такие как:</p>
+<pre class="cli">
+  filename "filename"
+  option root-path "nfspath"
+</pre>
+<p>Для того, чтобы не "зашивать" параметры PXE индивидуально разным виртуальным машинам, давайте условимся иметь в системном каталоге окружения ( <i>$workdir/jails-system/$jname</i> ) некий файл, при наличие которого, все его содержимое
+будет перенесено as-is в блок:</p>
+<pre class="cli">
+   host $jname {
+     ...
+     // custom settings //
+     ...
+    
+   }
+</pre>
+<p>Таким образом, делаем наш скрипт хука более гибким, поскольку мы теперь вправе вписывать любые dhcpd настройки касательно конкретной виртуальной машины в файл, который всегда лежит в иерархии системных каталогов данного
+окружения. Это позволяет нам не терять этот файл при операция клонирования, импортирования-экспортирования и так талее. Пускай это будет файл с именем: <i>dhcpd_extra.conf</i></p>
+<p>Улучшенный скрипт будет выглядеть <a href="/en/misc/make_cbsd_dhcpd.sh">следующим образом</a>: </p>
+<pre class="cli">
+#!/bin/sh
+# Helper for integration CBSD/bhyve and isc-dhcpd
+# We assume bhyve have correct 'ip4_addr' settings
+# To add dhcpf.conf extra-config (e.g. bootp-related) for
+#    hosts ${jname} {  ..  }
+#    please use file in ${jailsysdir}/${jname}/dhcpd_extra.conf
+#    << all content from this file will be dropped to { } block
+#
+DHCPD_CONF="/root/etc/dhcpd.conf"
+
+. /etc/rc.conf
+
+workdir="${cbsd_workdir}"
+
+set -e
+. ${workdir}/cbsd.conf
+. ${workdir}/nc.subr
+set +e
+
+export NOCOLOR=1
+
+# $1 - ip test
+# return 0 if ip4
+# return 1 if ip6
+# return 2 if DHCP
+# return 3 if unknown
+ip_type()
+{
+	case "${1}" in
+		*\.*\.*\.*)
+			return 0
+			;;
+		*:*)
+			return 1
+			;;
+		[Dd][Hh][Cc][Pp])
+			return 2
+			;;
+		*)
+			return 3
+			;;
+	esac
+}
+
+[ -z "${jname}" ] && err 1 "no jname variable"
+[ -z "${nic_hwaddr0}" ] && err 1 "no nic_hwaddr0 variable"
+[ -z "${ip4_addr}" ] && err 1 "no ip4_addr variable"
+[ ! -r "${DHCPD_CONF}" ] && err 1 "no ${DHCPD_CONF}"
+
+EXTRA_CONF="${jailsysdir}/${jname}/dhcpd_extra.conf"
+
+ip_type ${ip4_addr}
+
+ret=$?
+
+case "${ret}" in
+	0)
+		echo "IPv4 detected"
+		;;
+	1)
+		echo "IPv6 detected"
+		;;
+	2)
+		# Fake DHCP - we need learn to get IPS from real dhcpd (tap iface + mac ?)
+		tmp_addr=$( dhcpd )
+		ip4_addr=${tmp_addr%%/*}
+		# check again
+		ip_type ${ip4_addr}
+		ret=$?
+		case "${ret}" in
+			0|1)
+				# update new IP
+				cbsd bset ip4_addr="${ip4_addr}" jname="${jname}"
+				;;
+			*)
+				err 0 "Can't obtain DHCP addr"
+				;;
+		esac
+		;;
+	*)
+		err 0 "Unknown IP type: ${ip4_addr}"
+		;;
+esac
+
+# Remove old records for this host if exist
+if grep "CBSD-AUTO-${jname}" ${DHCPD_CONF} >/dev/null 2>&1; then
+	/bin/cp -a ${DHCPD_CONF} /tmp/dhcpd.tmp.$$
+	trap "/bin/rm -f /tmp/dhcpd.tmp.$$" HUP INT ABRT BUS TERM EXIT
+	grep -v "CBSD-AUTO-${jname}" /tmp/dhcpd.tmp.$$ > ${DHCPD_CONF}
+fi
+
+# Insert new records into config file
+cat &gt;&gt; ${DHCPD_CONF} &lt;&lt;EOF
+host ${jname} {					# CBSD-AUTO-${jname}
+	hardware ethernet ${nic_hwaddr0};	# CBSD-AUTO-${jname}
+	fixed-address ${ip4_addr};		# CBSD-AUTO-${jname}
+EOF
+
+if [ -r "${EXTRA_CONF}" ]; then
+	echo "Found extra conf: ${EXTRA_CONF}"
+	cat ${EXTRA_CONF} |while read _line; do
+		cat &gt;&gt; ${DHCPD_CONF} &lt;&lt;EOF
+	${_line}				# CBSD-AUTO-${jname}
+EOF
+	done
+fi
+
+cat &gt;&gt; ${DHCPD_CONF} &lt;&lt;EOF
+}				# CBSD-AUTO-${jname}
+EOF
+
+service dhcpd restart
+</pre>
+<p>И кладем этот скрипт вместо старого <i>/root/bin/make_cbsd_dhcpd.sh</i></p>
+<p>Теперь, нам остается создать файл dhcpd_extra.conf в тех системных каталогах виртуальных машин, которые будут загружаться по PXE, где главную роль будут играть такие параметры, как:</p>
+<pre class="cli">
+     filename "FreeBSD/install/boot/pxeboot" ;
+     option root-path "192.168.0.1:/b/tftpboot/FreeBSD/install/" ;
+</pre>
+<p>Остальная настройка - это тривиальная конфигурация tftpboot и NFS сервисов, отдающие нужные вам файлы</p>
+<p>Вы можете найти большое количество статей о конфигурировании PXE сервера в интернете, а также на официальном сайте FreeBSD: 
+<a href="https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/network-diskless.html" target="_blank">the Handbook entry on diskless booting.</a></p>
+<p>Либо, вы можете сделать это по шагам ниже. Эти команды использовались для создания PXE загрузки,
+продемонстрированное в этом коротком демо ролике: <a href="https://youtu.be/mz8GrWE8Xis" target="_blank">Bhyve PXE Boot via CBSD</a>.
+<p>В данном примере, наш сервер имеет IP адрес: 192.168.0.2 и мы загружаем по PXE окружение, скопированное с инсталляционного ISO образа FreeBSD 11.0-R</p>
+</p>
+<pre class="brush:bash;ruler:rule;">
+% mkdir /FreeBSD
+% wget https://download.freebsd.org/ftp/releases/amd64/amd64/ISO-IMAGES/11.0/FreeBSD-11.0-RELEASE-amd64-disc1.iso
+% mount_cd9660 /dev/`mdconfig -a -t vnode -f ./FreeBSD-11.0-RELEASE-amd64-disc1.iso` /mnt
+% cp -a /mnt/* /FreeBSD/
+% umount /mnt
+% mkdir /root/etc
+% cat > /root/etc/inetd.conf <<EOF
+tftp   dgram   udp     wait    root    /usr/libexec/tftpd      tftpd -l -s /FreeBSD
+tftp   dgram   udp6    wait    root    /usr/libexec/tftpd      tftpd -l -s /FreeBSD
+EOF
+
+% echo "/FreeBSD -ro -alldirs" > /etc/exports
+% echo "192.168.0.2:/FreeBSD /mnt nfs rw 0 0" > /FreeBSD/etc/fstab
+
+% sysrc inetd_enable="YES"
+% sysrc inetd_flags="-wW -C 60 /root/etc/inetd.conf"
+% sysrc nfs_server_enable="YES"
+% sysrc mountd_enable="YES"
+
+% service nfsd restart
+% service mountd restart
+% service inetd restart
+</pre>
+<p>На этом загрузка bhyve по PXE готова. Остается создать виртуальную машину, в 'cbsd bconfig' выбрать метод загрузки 'net'</p>
+<p>И написать extra-настройки для данной виртуальной машины в файле dhcpd_extra.conf</p>
+<p>Например, если $workdir в вашей системе - <i>/usr/jails</i>, а вы конфигурируете PXE загрузку виртуальной машины с именем freebsd1, 
+то в каталоге <i>/usr/jails/jails-system/freebsd1</i> должен лежать файл dhcpd_extra.conf с таким содержимым:</p>
+<pre>
+     filename "loader.efi" ;
+     option root-path "192.168.0.2:/FreeBSD/" ;
+</pre>
+<hr>
+</div>
+<!--# include file="/ru/_end.html" -->

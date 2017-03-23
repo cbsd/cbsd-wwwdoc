@@ -1,0 +1,89 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+	<h1><span>Установка CBSD</span></h1>
+	
+	<h2><a name="req">Требования</a></h2>
+	<div class="block">
+		<p>Поскольку <strong>CBSD</strong>&nbsp;— это лишь ряд упрощающих работу с клетками скриптов, вам подойдет любое оборудование, на котором запустится FreeBSD. Предполагается, что cbsd устанавливается на абсолютно чистую и свежеустановленную FreeBSD, поскольку настройки ряда конфигурационных файлов <a href="custom_freecbsd.html">будут изменены</a>. Для полноценной работы, желательно иметь:</p>
+		<ul>
+			<li>версию FreeBSD не ниже 10.0-RELEASE.</li>
+			<li>архитектуру <strong>amd64</strong>, ввиду того, что разработка ведется под нее.</li>
+			<li>файловую систему ZFS, ввиду использования предлагаемых ZFS ряда возможностей.</li>
+			<li>ядро с поддержкой RACCT/RCTL и VIMAGE (<strong>CBSD</strong> может выкачать нужное ядро из своего репозитория с вашего согласия)</li>
+		</ul>
+	</div>
+
+	<h2><a name="version">Версионность cbsd</a></h2>
+	<div class="block">
+		<p>Первые две цифры версии cbsd кореллирует с версиями FreeBSD, для которых она разрабатывалась и тестировалась. Версия 10.1.3 означает, что скрипты писались и тестировались на FreeBSD 10.1. Третья цифра означает версию cbsd.</p>
+	</div>
+	
+	<h2><a name="preparing">Установка и подготовка к работе</a></h2>
+	<div class="block">
+		<p><strong>1a) Установка из портов или пакетов</strong></p>
+		<p><strong>CBSD</strong> можно установить через дерево портов FreeBSD:</p>
+		<pre class="brush:bash;ruler:true;">
+			% make -C /usr/ports/sysutils/cbsd install
+		</pre>
+		<p>или из pkg репозитория:</p>
+		<pre class="brush:bash;ruler:true;">
+			% pkg install cbsd
+		</pre>
+		<p><strong>1b) Установка эксперементальной (разрабатываемой) версии CBSD из github</strong></p>
+		<em>( Для разработчиков и контрибьюторов или тех, кто хочет воспользоваться новыми возможностями в ущерб стабильности и надежности )</em>
+		<p>a) Предварительно необходимо установить необходимые зависимости: <strong>libssh2, sudo, rsync, sqlite3</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% pkg install sudo libssh2 rsync sqlite3 git libxo
+		</pre>
+		<p>или из портов:</p>
+		<pre class="brush:bash;ruler:true;">
+			% make -C /usr/ports/security/sudo install
+			% make -C /usr/ports/security/libssh2 install
+			% make -C /usr/ports/net/rsync install
+			% make -C /usr/ports/databases/sqlite3 install
+			% make -C /usr/ports/devel/git install
+			% make -C /usr/ports/devel/libxo install
+		</pre>
+		<p>b) получить последнюю версию <strong>CBSD</strong> из <a href="https://github.com/" target="_blank">github</a></p>:
+		<pre class="brush:bash;ruler:true;">
+			% git clone https://github.com/cbsd/cbsd.git /usr/local/cbsd
+		</pre>
+		<p>c) Необходимо создать пользователя cbsd (при установке из портов или пакета, этот шаг не нужен)</p>
+		<pre class="brush:bash;ruler:true;">
+			%  pw useradd cbsd -s /bin/sh -d /nonexistent -c "cbsd user"
+		</pre>
+		<p>d) создайте ссылки rc.d скриптов для запуска cbsd при старте системы и ссылку на модуль bsdconfig (при установке из портов этого делать ненужно):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cd /usr/local/etc/rc.d
+			% ln -s /usr/local/cbsd/rc.d/cbsdd
+			% ln -s /usr/local/cbsd/rc.d/cbsdrsyncd
+			% mkdir -p /usr/local/libexec/bsdconfig
+			% ln -s /usr/local/cbsd/share/bsdconfig/cbsd /usr/local/libexec/bsdconfig/cbsd
+		</pre>
+		<p><strong>2) Первичная инициализация</strong></p>
+		<p>В классической инсталляции, cbsd содержится в двух копиях. Одна из них (<em>/usr/local/cbsd</em>), содержит дистрибутив, исходный код и конфигурационные файлы по-умолчанию. Также, эта копия может использоваться для управления клетками в случае, если основная копия повреждена (например некорректно обновилась и тд).  Указатель того, с каким каталогом скриптов работать, является переменная окружения <em>workdir</em>.</p>
+		<p>Для инициализации рабочей (основной) копии cbsd, служит команда <strong>initenv</strong>, с запуском которой в первом вызове необходимо указать через переменную окружения <em>workdir</em> расположение рабочего каталога, а также ответить на ряд вопросов. Файловая система, куда инициализируется <strong>CBSD</strong> (а точнее, каталог <strong>jails-data</strong> в нем) должен быть достаточного объема для размещения данных клеток. Определившись с выбором где размещать рабочий каталог, первым делом укажите его в качестве домашнего каталога для пользователя cbsd (в нашем случае рабочий каталог в <em>/usr/jails</em>):</p>
+		<p>Инициализация с рабочим каталогом в <em>/usr/jails</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% env workdir="/usr/jails" /usr/local/cbsd/sudoexec/initenv
+		</pre>
+		<p>При первом запуске проследует диалог вопрос-ответ по основным настройкам ноды. Ожидаемые примеры ввода система пишет в качестве примера (e.g.), нажатие Enter без заполнения ввода приведет к использованию значения, предложенного в качестве примера. После каждого обновления cbsd, initenv необходимо вызывать вновь. Последующие разы initenv можно запускать через cbsd (настройка рабочего каталога сохраняется в <strong>/etc/rc.conf</strong>).</p>
+		<p>При первичной инициализации могут встретиться следующие вопросы:</p>
+		<ul>
+			<li><strong>Please fill nodename</strong>&nbsp;— Имя ноды. Если будет работа с несколькими нодами, это имя должно быть уникальным. Рекомендуется использовать имя, аналогичное hostname. Именно это имя используется при работе с данным серверов через удаленных хосты. Пример: node1.my.domain.</li>
+			<li><strong>Please fill nodeip</strong>&nbsp;— Рабочий и постоянный IP ноды. Он не должен быть alias-ом и желательно прописывать данный IP на отдельно скоммунтированный (свободный от любого другого кроме management-трафика) интерфейс. Например: 192.168.1.2</li>
+			<li><strong>Please fill nodeloc</strong>&nbsp;— Информативная строчка. Будет использоваться в будущем в WEB интерфейсе. Здесь можно оставить информацию о географической расположенности этой ноды. Например: USA, Dallas DC.</li>
+			<li><strong>Please fill jnameserver</strong>&nbsp;— Список IP DNS серверов, устанавливаемых в <em>/etc/resolv.conf</em> созданных и запускаемых клеток. Если адресов несколько, они должны указываться через запятую. Рекомендуется поднимать на master-ноде DNS сервер для кеширования запросов.</li>
+			<li>Соответственно, при использовании кеширующего DNS, если IP адрес ноды например 192.168.1.2, используйте этот адрес в jnameserver.</li>
+			<li><strong>Please fill nodeippool</strong>&nbsp;— Список подсетей, в которых дозволено запускаться клеткам. Если сетей несколько&nbsp;— используется пробел в качестве разделителя. Например: 10.0.0.0/24 192.168.1.128/29</li>
+			<li><strong>Please fill natip</strong>&nbsp;— Здесь необходимо ввести IP адрес, который будет выступать в качестве NAT для приватных адресов. Обычно это IP вашей ноды. Например: 192.168.1.2</li>
+			<li><strong>Please fill fbsdrepo</strong>&nbsp;— Использовать ли официальный репозиторий FreeBSD для получения base. Ожидается ответ 1 или 2. Если на серверах FreeBSD базы не обнаружено&nbsp;— используется репозиторий cbsd. Например: 1.</li>
+			<li><strong>Please fill zfsfeat</strong>&nbsp;— Использовать ли возможности файловой системы ZFS (клоны, снапшоты). Ожидается ответ 1 или 2. Вопроса не будет, если система запущена не на ZFS.</li>
+			<li><strong>Configure NAT for RFC1918 Network?</strong>&nbsp;— Использовать ли трансляцию приватных адресов? Если клетки создаются в RFC1918 сетях, необходимо включить. Например: 1.</li>
+			<li><strong>Which one NAT framework should be use: [pf or ipfw]</strong>&nbsp;— Какой инструмент для NAT предпочесть. Рекомендуемый&nbsp;— pf. Например: 1</li>
+		</ul>
+	</div>
+	<div class="warning">
+		<p><strong>Внимание:</strong> в дальнейшем, эти настройки можно изменить через команду <strong>cbsd initenv-tui</strong> или <strong>bsdconfig cbsd</strong>, либо в файле <em>${workdir}/var/db/local.sqlite</em>, являющейся SQLite3 базой.</p>
+	</div>
+<!--# include file="_end.html" -->

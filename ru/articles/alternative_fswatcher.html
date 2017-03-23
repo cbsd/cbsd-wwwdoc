@@ -1,0 +1,277 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>Альтернативные источники получения модификаций FS</span></h1>
+	<!-- Тэги: <strong>мысли в слух; велосипед</strong> -->
+	
+	<div class="block">
+		<p>Один из популярных вопросов системных инженеров является задача по детализации и выявлению, какие процессы порождают определенные модификации на файловой системе, а также, где и какие файлы модифицируются в целом.</p>
+		
+		<p>Например, если вы разрабатываете <strong>Embedded</strong>-устройство с FreeBSD в качестве firmware, установленной на MicroSD — и вам жизненно необходимо собрать статистику, какие файлы постоянно модифицируются, дабы эти места не представляли опасность для носителя информации с низким количеством циклов запись-форматирование.</p>
+		
+		<p>Готовых решений для подобных задач — тьма (<strong>FAM,tripware,csync2</strong> и различные решения, базирующиеся на <strong>kqueue/inotify</strong> механизмах)</p>
+		
+		<p>Кроме пользы, приносимой подобными утилитами системным администраторам, подобные источники могут служить отправной точкой для реализации распределенных файловых систем, что в свою очередь, как правило, тесно связано с задачами по построению горизонтально масштабируемых ферм.</p>
+		
+		<p>Не всегда сервера могут находится в непосредственной близости друг с другом, а под рукой может не быть FibreChannel между серверами и кластерная файловая система на устойчивых линках.</p>
+		
+		<p>К тому же, популярные решения как <strong>Linux DRDB</strong> и <strong>FreeBSD HASTD</strong> работают на raw-партишенах, находясь ниже уровня файловой системы и обслуживат байт-в-байт большие куски данных, что иногда может быть избыточно.</p>
+		
+		<p>Например, из большого количества каталогов на жестком диске, вам нужно реплицировать только несколько, но разбросанные по всей иерархии:</p>
+		<pre class="brush:bash;ruler=true;">
+		/usr/local/etc/nginx
+		/root/etc
+		/usr/home/web/sites.my.domain
+		</pre>
+		
+		<p>при этом в репликации каталога <strong>/usr/home/web/sites.my.domain</strong> вам необходимо задать маску для исключений файлов, скажем, с расширением <strong>.php$</strong></p>
+		
+		<p>В этом случае, <strong>DRDB/HASTD</strong> будут могут выглядеть избыточно, особенно при репликации между дата-центрами на линках с высоким latency и желании иметь <strong>DFS</strong> в режиме <strong>multi-master</strong></p>
+		
+		<p>И если на работу периодически сканирующих локации программ вроде <strong>csync2</strong> без слез смотреть невозможно (огромные всплески I/O),
+		то решения на базе <strong>inotify/kqueue-based</strong> с первого взгляда, подходят идеально.</p>
+		
+		<p>Проблемы начинаются, если вы хотите следить за файловой системой с миллионом каталогов и файлов (неэффективность использования классических FS в таких случаях оставим в стороне — в жизни случается всякое ;-)</p>
+		
+		<p>И <strong>inotify</strong> и <strong>kqueue</strong> решения в подобных случаях, превращают сервер в тыкву, поскольку на каждый вложенный каталог требуется отдельный дескриптор, рекурсивно следить на всеми подкаталогами — нельзя.</p>
+		
+		<p>Обдумывая возможные варианты реализации подобной DFS для реализации своей маленькой CDN сети, обратил внимание на давно известный функционал <strong>AUDITd</strong> в FreeBSD, имеющий во всех частях ядра хуки и позволяющий через фильтры выводить громадное количество событий, в том числе и <strong>fo</strong> (открытие), <strong>fw</strong> (запись), <strong>fc</strong> (закрытие) файлов.</p>
+		
+		<p>При этом — никакого слежения ненадо, все работает событийно, независимо от используемой FS.</p>
+		
+		<p>В связи с чем, можно сделать элементарный <strong>Auditd-based watcher</strong>:</p>
+		<pre class="brush:cpp;ruler=true;">
+		/*
+		#1. Sample of /etc/security/audit_control:
+		dir:/var/audit
+		#реагируем только за file/dir creation и write операциями
+		flags:+fc,+fd,+fw
+		minfree:5
+		naflags:+fc,+fd,+fw
+		policy:cnt,argv
+		filesz:1M
+		expire-after:10M
+
+		2) service auditd onestart
+
+		3) How to use:
+		 cc mypr.c -o mypr -lbsm
+		 ./mypr &lt;watchdirectory&gt;
+		*/
+
+		#include &lt;bsm/libbsm.h&gt;
+
+		#include &lt;stdio.h&gt;
+		#include &lt;stdlib.h&gt;
+		#include &lt;unistd.h&gt;
+		#include &lt;string.h&gt;
+		#include &lt;regex.h&gt;
+		#include &lt;fcntl.h&gt;
+		#include &lt;sys/types.h&gt;
+		#include &lt;sys/stat.h&gt;
+		#include &lt;libgen.h&gt;
+
+		const char *auditpipe = "/dev/auditpipe";
+
+		//skip for modification under /dev and sockets file
+		int file_is_special(char *fp)
+		{
+			struct stat sb;
+			int f,n;
+
+			f = open( fp, O_RDONLY );
+			if( f < 0 ) {
+				return 2;
+			}
+			n = fstat( f, &amp;sb );
+
+			if( n < 0 ) {
+				close(f);
+				return 2;
+			}
+
+		if ((sb.st_mode &amp; S_IFMT) == S_IFREG ) n=0;
+			else n=1;
+		close(f);
+		return n;
+		}
+		int regex_match(char *tp,char *t1)
+		{
+		regex_t preg;
+		regmatch_t substmatch[1];
+		const char *ss = "";
+		int match=0;
+
+		regcomp(&amp;preg, tp, REG_EXTENDED);
+		if ( regexec(&amp;preg, t1, 1, substmatch, 0) == 0 )
+			{
+			char *ns = malloc(substmatch[0].rm_so + 1 + strlen(ss) + (strlen(t1) - substmatch[0].rm_eo) + 2);
+			  memcpy(ns, t1, substmatch[0].rm_so+1);
+			  memcpy(&amp;ns[substmatch[0].rm_so], ss, strlen(ss));
+			  memcpy(&amp;ns[substmatch[0].rm_so+strlen(ss)], &amp;t1[substmatch[0].rm_eo],
+						strlen(&amp;t1[substmatch[0].rm_eo]));
+			  ns[ substmatch[0].rm_so + strlen(ss) +
+				  strlen(&amp;t1[substmatch[0].rm_eo]) ] = 0;
+			  match=1;
+			  free(ns);
+		   } else {
+			  match=0;
+		   }
+		   regfree(&amp;preg);
+		   return match;
+		}
+		static int
+		print_path(FILE *fp, char *dst)
+		{
+				u_char *buf;
+				char sbuf[1024];
+				tokenstr_t tok;
+				int reclen;
+				int bytesread;
+				int part;
+				int raw=1;
+
+				while ((reclen = au_read_rec(fp, &amp;buf)) != -1) {
+						bytesread = 0;
+						part=0;
+						while (bytesread < reclen) {
+								if (-1 == au_fetch_tok(&amp;tok, buf + bytesread,
+									reclen - bytesread))
+										break;
+								bytesread += tok.len;
+								//token id ?
+								if ((tok.id == 35)&amp;&amp;(regex_match(dst,tok.tt.path.path))) {
+									if (file_is_special(tok.tt.path.path)==0) { 
+									   printf("%s\n", tok.tt.path.path);
+									   fflush(stdout);
+									}
+								}
+						 }
+						free(buf);
+				}
+				return (0);
+		}
+
+		int
+		main(int argc, char **argv)
+		{
+				int ch;
+				int i;
+				FILE *fp;
+				char *dst;
+
+		if (argc!=2) {
+				printf("Give me destination dir\r\n");
+				exit(1);
+		}
+		i=sizeof(argv[1]);
+		dst=malloc(i+3);
+		snprintf(dst,i+3,"^%s",argv[1]);
+
+		for (i = optind; i < argc; i++) {
+						fp = fopen(auditpipe, "r");
+						if ((fp == NULL) || (print_path(fp,dst) == -1))
+								perror(argv[i]);
+						if (fp != NULL)
+								fclose(fp);
+		}
+
+		return (1);
+		}
+		</pre>
+		
+		<p>Что дальше делать с поступающими данными? Все что угодно: кормить анализаторам и делать статистику на аггресивность-частоту записи, приземлять в различные API для проливки файлов в различные <strong>GoogleCloud/Amazon/CDN</strong></p>
+		
+		<p>Следует учитывать, что <strong>/dev/auditpipe</strong> имеет определенный буфер и чисто теоретически, под большим <strong>DoS</strong>-м изменений на файловой системе возможны потери событий, если следить в <strong>real-time</strong> (в AUDITd есть отдельный флаг <strong>cnt</strong>, блокирующий выполнение кода до тех пор, пока AUDITd не обработает событие, те, на уровне AUDITD потерть быть не должно).</p>
+		
+		<p>На практике же, даже без данного флага, мои попытки через random-генератор устроить флуд в виде огромного количества модификаций на файловой системе в несколько потоков, потерь не выявили (однако нагрузка на обработчик/auditd возрастала до 20% со стороны процессора).</p>
+		
+		<p>На базе подобных открытий, для cbsd+csync2 (впоследствии, csync2 был выкинут — локи при апдейте SQLite3 базы делали схему медлительной) был написан демон примерно следующей реализации: (в его задачу входила реплика <strong>/usr/jails/jails-data/jail-XXX</strong> — данных клеток на N-ое количество серверов):</p>
+		
+		<ul>
+			<li> замена сканирования у csync2 на событийность, предоставляемую AUDIT. Те, csync2 не требовалось сканировать все файлы: все что менялось на ФС, обрабатывалось и скармливалось соотв. демоном.</li>
+			<li> Демон работал не с <strong>/dev/auditpipe</strong>, а с <strong>/var/audit/current</strong> 
+			(поскольку это был своего рода журнал, по которому упавшие ноды могли «догнать» состояние, а также, один источник модификаций можно было обработать различными инстансами)</li>
+			<li> Через <strong>kqueue</strong> механизмы, производилось слежение за <strong>/var/audit/current</strong> для своевременных переключений при ротации журнала.</li>
+			<li> про ротации или удалении/создании нового файла, журнал читается и обрабатывается до конца EOF, сохраняя смещение/позицию в памяти, используемую при следующем открытии через <strong>fseek(fp,journal_offset, SEEK_SET)</strong></li>
+			<li> изменения проливались не моментально, а накапливались в определенную очередь (например в 5 слотов/записей), которую перед проливкой можно обработать на предмет сортировки дубляжей (не обрабатывать дважды один и тот же файл, проливать лишь его последнее состояние)</li>
+			<li> Кроме этого, имелся таймер по бездействию, по которому очередь, не заполнившаяся до 5, уходила на синхронизацию</li>
+		</ul>
+		
+		<p>Работа демона с выводом очереди (очередь установлена в 5 записей):</p>
+		<pre class="brush:bash;ruler=true;">
+		./a.out /usr/jails/jails/jail1 /tmp jail1
+		Cant open audit journal. Sleeping for a while...
+		Cant open audit journal. Sleeping for a while...
+		</pre>
+		
+		<p>— сервис каждые N секунд пробует открыть <strong>/var/audit/current</strong> — симлинк, которым управляет AUDITd. Если auditd не запущен, то файла нет, поэтому демон погружается в спячку на N секунду</p>
+		
+		<p>После команды</p>
+		<pre class="brush:bash;ruler=true;">
+		service auditd onestart
+		Starting auditd.
+		</pre>
+		
+		<p>Демон просыпается и начинается цикл чтения-обработки журнала, периодически переоткрывая файл когда AUDITd производит ротацию</p>
+		<pre class="brush:bash;ruler=true;">
+		Cant open audit journal. Sleeping for a while...
+		Symlink to /var/audit/20121013182808.not_terminated
+		</pre>
+
+		<pre class="brush:bash;ruler=true;">
+		root@b9-64:/var/audit # service auditd onerestart
+		Trigger sent.
+		Starting auditd.
+		</pre>
+
+		<pre class="brush:bash;ruler=true;">
+		Symlink change detected from [/var/audit/20121013182808.not_terminated] to [/var/audit/20121013183048.not_terminated], reopen
+		Symlink to /var/audit/20121013183048.not_terminated
+		</pre>
+		
+		<p>(вывод при выполнении cbsd jstop jail1 &amp;&amp; cbsd jstart jail1)</p>
+		<pre class="brush:bash;ruler=true;">
+		5,Q: /usr/jails/jails/jail1/var/run/syslog.pid
+		4,Q: /usr/jails/jails/jail1/var/run/logpriv
+		3,Q: /usr/jails/jails/jail1/var/run/log
+		2,Q: /usr/jails/jails/jail1/var/run/sendmail.pid
+		1,Q: /usr/jails/jails/jail1/var/spool/clientmqueue/sm-client.pid
+		5,Q: /usr/jails/jails/jail1/var/run/ld-elf.so.hints
+		4,Q: /usr/jails/jails/jail1/var/run/cron.pid
+		3,Q: /usr/jails/jails/jail1/var/spool/lock/clean_var
+		2,Q: /usr/jails/jails/jail1/var/run/clean_var
+		1,Q: /usr/jails/jails/jail1/var/.diskless
+		5,Q: /usr/jails/jails/jail1/var/run/clean_var
+		</pre>
+		
+		<p>При достижении очереди в 5 записей, вызывается процедура на обновление файлов на удаленных нодах по соответствующему списку.</p>
+		
+		<p>Вместо эпилога: Механизмы AUDITd на уровне ядра выглядят неплохой альтернативой, а главное — более легковесной при огромном количестве файлов. 
+		Что, в свою очередь, открывает еще один и довольно простой из вариантов реализации DFS master->many slave и, чуть посложнее но и интереснее: multimaster</p>
+		
+		<p>К слову, ядро FreeBSD/Solaris и MacOSX, имеют одинаковый код AUDITd (в Линуксе он другой, но я не интересовался насколько он близок по функционалу) и кроме него имеют еще одно мощное средство, которое можно использовать для подобных задач — <strong>DTRACE</strong>.</p>
+		
+		<p>Например, на языке <strong>D</strong> следить за открытием файлов можно так:</p>
+		<pre class="brush:cpp;ruler=true;">
+		BEGIN
+		{
+			dir = $1;
+			dirlen = strlen(dir);
+		}
+
+		syscall::open*:entry
+		/
+		arg1 &amp; (O_WRONLY | O_RDWR) &amp;&amp;
+			substr(copyinstr(arg0),0,dirlen))==dir
+		/
+		{
+			printf("%s\n",copyinstr(arg0));
+		}
+		</pre>
+		
+		<p>(именно на базе DTRACE-проб в FreeBSD 9.1+ появился <strong>filemon(4)</strong> — функционал, позволяющий запускать приложение и видеть его работу с дескрипторами.</p>
+		
+		<p>Более того, в моих нагрузочных тестах, где под флудом модификаций на FS AUDITd прогружал CPU до 20%, DTRACE в качестве источника на тех же нагрузках cpu выше 2-4% не поднимал.</p>
+		
+		<p>Дополнительно хочется добавить что <strong>AUDITD/DTRACE</strong> не единственные дешевые варианты получения модификаций из ядра и без следящих элементов, например, таким источником могут выступать различные proxy-like FS, например <strong>nullfs</strong>.</p>
+	</div>
+<!--# include file="/ru/_end.html" -->

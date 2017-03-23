@@ -1,0 +1,23 @@
+	<h1><span>Удаление клетки</span></h1>
+	
+	<h2><a name="jremove_cmd">Команда jremove</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jremove jail1 jail2 ..
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Удаление jail затрагивает все файлы, так или иначе связанные с клеткой:</p>
+		<ul>
+			<li>a) fstab для данного jail</li>
+			<li>b) каталог или ZFS файловую систему с данными jail</li>
+			<li>c) статистику и описание клетки</li>
+			<li>d) снапшоты, если были</li>
+		</ul>
+		<p>В случае, если <strong>jremove</strong> запускается на работающую клетку, клетка будет остановлена автоматически.</p>
+		<p>&nbsp;</p>
+		<p><strong>Пример</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jremove jail1
+		</pre>
+		<p class="text-center"><img src="/img/jremove1.png" alt="" /></p>
+	</div>

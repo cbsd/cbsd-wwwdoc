@@ -1,0 +1,83 @@
+<h1><span>Other methods of creating jail:</span></h1>
+<h2><a name="jcreate2_cmd">jcreate command, part 2</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jconstruct
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jcreate jconf=/path/to/conf.jconf
+		</pre>
+	</div>
+	
+	<div class="block">
+		<strong>description</strong>:
+		<p>If DIALOG-based script jconstruct-tui for some reason did not come for create configuration of the new jails, you can use the script, dialogue like "question and answer" <strong>jconstruct</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconstruct
+		</pre>
+		<p>Which specifies the same question as the tui-version. Also, the configuration can avoid the formation without additional interactive utilities, for example building systems that automatically create the necessary jails.</p>
+		<p>Example of a standard configuration for <strong>jcreate</strong> might look like:</p>
+		<pre class="brush:bash;ruler:true;">
+		jname="jail1";
+		path="/usr/jails/jails/jail1";
+		host_hostname="jail1.my.domain";
+		ip4_addr="10.0.0.24/24";
+		mount_devfs="1";
+		allow_mount="1";
+		allow_devfs="0";
+		allow_nullfs="0";
+		mount_fstab="/usr/jails/jails-fstab/fstab.jail1";
+		arch="amd64";
+		mkhostsfile="1";
+		devfs_ruleset="4";
+		ver="10.0";
+		basename="";
+		slavenode="0";
+		baserw="0";
+		basename="";
+		mount_src="0";
+		mount_obj="";
+		mount_kernel="0";
+		mount_ports="1";
+		astart="1";
+		data="/usr/jails/jails-data/jail1-data";
+		vnet="0";
+		applytpl="1";
+		mdsize="0";
+		rcconf="/usr/jails/jails-rcconf/rc.conf_jail1";
+		floatresolv="1";
+		exec_start="/bin/sh /etc/rc";
+		exec_stop="/bin/sh /etc/rc.shutdown";
+		
+		exec_poststart="0";
+		exec_poststop="0";
+		exec_prestart="0";
+		exec_prestop="0";
+		
+		exec_master_poststart="0";
+		exec_master_poststop="0";
+		exec_master_prestart="0";
+		exec_master_prestop="0";
+		interface="auto";
+		jailskeldir="${sharedir}/jail-skel"
+	</pre>
+	<div class="warning">
+		<p>Note parameters <strong>arch</strong> and <strong>ver</strong>. Values ​​of them may be "i386", "amd64" for arch and "9.2", "10.0", "10.1" "11" and so on, depending on the version of the base, which would you prefer for jail. Values <em>native</em> in these parameters force <strong>CBSD</strong> always take the version and architecture that is running the node, which makes the floating version. So, if you use a template with arch="native", ver="native" and switch from FreeBSD 10.2 to 11.0, it will use the 11.0 version of the base. If you want to fix a specific version - specify version instead <em>native</em>.</p>
+	</div>
+	<p>If you want to create jail with installed some packages from <strong>pkg</strong> repository, in this configuration must have an <strong>pkglist</strong> pointing to a file with a list of packages, for example:</p>
+	<pre class="brush:bash;ruler:true;">
+		pkglist="/tmp/newjail.txt";
+	</pre>
+	<p>The /tmp/newjail.txt file might look like:</p>
+	<pre class="brush:bash;ruler:true;">
+	mc
+	lynx
+	nginx-devel
+	lsof
+	</pre>
+	<p><strong>cbsd jcreate</strong> remove file pointed by <strong>pkglist</strong> variables after jail create</p>
+</div>
+<!--# include file="/en/changeroot.html" -->
+<div class="block">
+	<p>By default, the directory specified by <strong>jailskeldir</strong> will be used as source files that will be added (or they will be overwritten with standard files) into a jail automatically when applytpl=1. Accordingly, you can create any configuration templates and content environments that will be copied when creating a new jail.</p>
+</div>

@@ -1,0 +1,15 @@
+	<h1><span>Copying files from/to jail filesystem</span></h1>
+	
+	<h2><a name="jailscp_cmd">jailscp command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% jail1:remotefile1 localfile1 [ localfile2 jail2@:remotefile2 ]
+		</pre>
+		<p>The <strong>cbsd jailscp</strong> command allows you to copy files between your host filesystem that of a jail. The syntax is similar the one used by <a href="http://man.freebsd.org/scp/1" target="_blank">scp(1)</a></p>
+		<p>Copying files to and from remote jails is only possible if the necessary ssh keys are available. When a <strong>rootkeyfile</strong> for remote node is present, the connection will default to using <strong>root</strong> privileges rather than those of the <strong>cbsd</strong> user. This allow you to write files to any directory in the jail, not those owned by <strong>cbsd</strong></p>
+		<p><strong>Example:</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jailscp
+		</pre>
+		<p class="text-center"><img src="/img/jailscp1.png" alt="" /></p>
+	</div>

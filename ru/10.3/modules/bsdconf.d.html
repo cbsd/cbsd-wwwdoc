@@ -1,0 +1,37 @@
+	<h1><span>Работа с passwd(1), sysrc(8), service(8) в jail через CBSD</span></h1>
+	
+	<h2><a name="bsdconf_cmd">Команды passwd, sysrc, service</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd passwd
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd sysrc
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd service
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Команды из модуля <strong>bsdconf.d</strong> - это обертки вокруг стандартных FreeBSD <a href="http://man.freebsd.org/sysrc/8" target="_blank">sysrc(8)</a>, <a href="http://man.freebsd.org/service/8" target="_blank">service(8)</a>, <a href="http://man.freebsd.org/passwd/1" target="_blank">passwd(1)</a>  для добавления аргумента <strong>jname</strong> для более удобной работы с сервисами и парлями клетки из мастер-хоста.</p>
+		<p>Через аргумент <strong>jname=</strong> указывается клетка, все что идет после (кроме passwd, у которой возможен еще user=) - не анализируется и относиться к соответствующим утититам как есть.</p>
+		<p><strong>Пример1:</strong> Пометить сервис sshd в клетке jail1 активный:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd sysrc jname=jail1 sshd_enable="YES"
+		</pre>
+		<p><strong>Пример2:</strong> Получить список сервисов в клетке jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd sysrc jname=jail1 service -l
+		</pre>
+		<p><strong>Пример3:</strong> Запустить sshd в клетке jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd service jname=jail1 sshd start
+		</pre>
+		<p><strong>Пример4:</strong> Сменить пароль root в клетке jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg passwd
+		</pre>
+		<p><strong>Пример5:</strong> Сменить пароль web в клетке jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg passwd user=web
+		</pre>
+	</div>

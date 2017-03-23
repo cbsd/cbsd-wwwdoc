@@ -1,0 +1,60 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h2><a name="shsqlite">About <strong>CBSD</strong> shell and SQLite3</a></h2>
+<div class="block">
+	<p>Almost all <strong>CBSD</strong> code is written in <strong>sh</strong> for the following reasons:</p>
+	<ul>
+		<li>Unlike interpreters for bash, perl, python etc. the <strong>sh</strong> interpreter comes in at just over 100 KB. This creates a lot less overhead</li>
+		<li><strong>CBSD</strong> is geared towards system engineers, who may not know <strong>Perl, Python, Lua, C,</strong> or <strong>Go</strong> etc., but shell scripting is a key skill in this field (or at least should be ;-)</li>
+		<li>There is no need for a lot of parsing or use mathematical functions. We are mainly working with external tools or APIs</li>
+	</ul>
+	<p>Nevertheless, <strong>sh</strong> comes with many restrictions (mainly when working with lines) which make writing scripts difficult. To alleviate this <strong>CBSD</strong> comes with its own fork of /bin/sh  which brings the additional functionality described in this document</p>
+	<p>So if you want to change/add somethin in <strong>CBSD</strong> or its modules, you have enough knowledge on the usual sh and extend several function.</p>
+</div>
+<h2><a name="cbsdsh">cbsdsh</a></h2>
+<div class="block">
+	<p>cbsdsh modified version of /bin/sh currently has the following additions to regular /bin/sh:</p>
+	<ul>
+		<li>- Added <strong>strlen</strong> to determine the length of a string</li>
+		<li>- Added function <strong>is_number</strong> to determine whether the number is.</li>
+		<li>- cbsdsh linked with SQLite3 to SQL databases to be able to work <em>inline</em> in the shell and thus scenarios:
+			<pre class="brush:bash;ruler:true;">
+cbsd@home> pwd
+/tmp
+
+cbsd@home> uname -r
+11.0-CURRENT
+
+cbsd@home> cbsdsql local SELECT dsk_controller,dsk_path,dsk_slot FROM bhyvedsk WHERE jname=\"debian1\"
+ahci-hd|dsk1.vhd|0
+
+cbsd@home>
+			</pre>
+		</li>
+			<li>- Added function <strong>cbsdsql</strong> as built-in shell function to query in SQL, as the second argument is the base, all other - the SQL query itself. As the name of the database file name appears directly in <em>$workdir/var/db/</em>, while the path and file extension <em>.sqlite</em> should not be written. For example, if you want a list of jails with remote nodes node2, information which is in SQLite file <em>/usr/jails/var/db/node2.sqlite</em> and the contents of which (in new versions of CBSD) is replicated from a source in the shell so you can write:
+		<pre class="brush:bash;ruler:true;">
+...
+cbsdsql node2 SELECT jname FROM jails
+		</pre>
+		<p>or assign the result SQL command shell-variable, then disassembled it to selected variables:</p>
+			<pre class="brush:bash;ruler:true;">
+_res=$( cbsdsh local SELECT ip4_addr,jname,status FROM jails )
+sqllist ${_res} ip4_addr jname status
+echo "Jail name: ${jname}; IPs: ${ip4_addr}; Jail status: ${status}
+			</pre>
+		</li>
+	</ul>
+	<p>If you are in <strong>cbsdsh</strong>, then before <strong>CBSD</strong> command you do not need to enter a prefix <strong>cbsd</strong>:</p>
+	<p class="text-center"><img src="/img/cbsdsh1.png" alt="" /></p>
+	<p><stong>CBSD</strong> in the SQLite3 uses to store settings jail for the following reasons:</p>
+	<ul>
+		<li>Store and especially to work with so many parameters in normal ascii-files very hard</li>
+		<li>SQLite3 does not require a running DB server and highly portably</li>
+		<li>Many utilities OS reasons beyond our control may change its method of storage. For example, up to 10 versions of FreeBSD, jail was configured via the command line, starting with version 10, the original cell and started their own config files in YAML. Not to suffer from such changes and rewrite all the scripts work with these configs bred in a single procedure, the rest of the subsystem work with their "non-volatile" API. In addition, SQL database is a "universal" storage from which you can easily create any other noSQL/xml/yaml data</li>
+		<li>Instead SQLite3 can be easily linked with an external database MySQL, PgSQL, which will act as a central "registry" for the entire farm, with no need to rewrite the script. Also, data replication from node to node is not needed because all nodes update and read one the central registry.</li>
+		<li>Each node on the record works only with its own SQLite3 file (symbolic link <em>$workdir/var/db/local.sqlite</em>), all files deleted nodes are in the same directory but under their own names , so the local node does not work depending on the status information from a remote node. </li>
+	</ul>
+	<p>Modules and command who have little work with external tools, but with a lot of strings work and mathematics (helpers <strong>CBSD</strong> for some services, among them), it is convenient to write in LUA (which is not yet built into cbsdsh ;-) )</p>
+</div>
+<!--# include file="_end.html" -->

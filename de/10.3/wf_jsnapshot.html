@@ -1,0 +1,54 @@
+	<h1><span>Jails snapshot (zfs-only)</span></h1>
+	
+	<h2><a name="jsnapshot_cmd">jsnapshot command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot
+		</pre>
+		<strong>Description</strong>:
+		<p>A variety of operations on jails become available through jsnapshot when the node is kept on a ZFS filesystem and <strong>zfsfeat</strong> is set to 1 in <strong>$workdir/nc.inventory</strong>. The <strong>mode</strong> parameter is used to specify which of the following actions are taken:</p>
+		<ul>
+			<li><strong>list</strong> — show a list of existing snapshots for the selected jail</li>
+			<li><strong>create</strong> — create a snapshot</li>
+			<li><strong>destroy</strong> — delete a specific snapshot of the jail</li>
+			<li><strong>destroyall</strong> — remove all of the jail's snapshots</li>
+			<li><strong>clone</strong> — clone an existing snapshot into new jail</li>
+			<li><strong>rollback</strong> — rollback the selected jail to current snapshot state</li>
+		</ul>
+		
+		<p>Additional arguments:</p>
+		<ul>
+			<li><strong>jname</strong> — specifies the jail upon which the action will be performed</li>
+			<li><strong>snapname</strong> — gives the snapshot a name</li>
+		</ul>
+		<p>It should be kept in mind that snapshots follow a tree structure. This means, if you created a series of snapshots : <strong>1,2,3,4</strong> and roll back to snapshot <strong>2</strong>, then the snapshots <strong>3</strong> and <strong>4</strong> will be lost, since from the point of snapshot <strong>2</strong> they did not exist yet. Also use a unique name for a snapshot at creation. You can specify snapname=gettimeofday. In this case, the system automatically sets the current timestamp as the name for the new snapshot. When listing snapshots, you can use modifiers to customize output fields with arguments to <strong>display=</strong></p>
+		<p><strong>Example</strong>:</p>
+		<p>create snapshot named <em>gromozeka</em> for <strong>jail1</strong> jail:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=create jname=jail1 snapname=gromozeka
+		</pre>
+		<p>create snapshot named <em>zelepuka</em> for <strong>jail1</strong> jail:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=create jname=jail1 snapname=zelepuka
+		</pre>
+		<p>Run jail1 and stop after some modification:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart jail1
+			..
+			% cbsd jexec jname=jail1 cp /bin/date /root
+			% cbsd jexec jname=jail1 file -s /root/date
+			/root/date: ELF 64-bit LSB executable, x86-64, version 1 (FreeBSD), dynamically linked (uses shared libs), for FreeBSD 9.0 (900506), stripped
+			% cbsd jstop jail1
+			..
+		</pre>
+		<p>Rollback jail1 to snapshot zelepuka state:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=rollback snapname=zelepuka jname=jail1
+			% cbsd jstart jail1
+			...
+			% cbsd jexec jname=jail1 file -s /root/date
+			/root/date: ERROR: cannot open `/root/date' (No such file or directory)
+		</pre>
+		<p class="text-center"><img src="/img/jsnapshot1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jsnapshot2.png" alt="" /></p>
+	</div>

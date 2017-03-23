@@ -1,0 +1,219 @@
+<!--# include file="/en/_start.html" -->
+	<h1><span>FreeBSD: Xorg in&nbsp;jail</span></h1>
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h2><a name="intro"><span>Introduction</span></a></h2>
+	<div class="block">
+		<p>Traditionally, it&nbsp;is&nbsp;assumed that FreeBSD&nbsp;&mdash; decent choice as&nbsp;a&nbsp;server&nbsp;OS, but on&nbsp;the role as&nbsp;a&nbsp;modern workstation suitable weak. Apologists and just hotheads on&nbsp;both sides of&nbsp;this opinion give different pros and cons and this article is&nbsp;not about this stupid dispute. Instead, there will also attempt to&nbsp;relate and fantasize about seemingly completely different technologies, such as&nbsp;Xorg and Jail, and demonstrated one of&nbsp;the scenarios with FreeBSD as&nbsp;a&nbsp;workstation.</p>
+		<p>Not so&nbsp;rare on&nbsp;the Internet you can find information about what additional properties from the *nix system acquires user running Xorg-based application <a href="http://www.freebsd.org/cgi/man.cgi?query=chroot&amp;sektion=8" target="_blank"><strong>chroot(8)</strong></a>.</p>
+		<p>There may be&nbsp;many reasons, one of&nbsp;them&nbsp;&mdash; you like to&nbsp;experiment with different numbers of&nbsp;environments and do&nbsp;not really want to&nbsp;convert the file system in&nbsp;the trash (and possibly receive conflicts between one or&nbsp;another application on&nbsp;the file system.)</p>
+		<p>Also, do&nbsp;not last role security. No&nbsp;one can guarantee that any installed software, whether <strong>skype</strong>, <strong>mc</strong>, <strong>screen</strong>, <strong>firefox</strong> and&nbsp;so, at&nbsp;the first update, due to&nbsp;an&nbsp;unfortunate typo in&nbsp;the code will scan randomly your home directory for <strong>id_rsa</strong> keys and <strong>known_hosts</strong>, <strong>.mysql_history, .bash_history</strong> and all your settings from an&nbsp;account <em>~/.local</em>, <em>~/.config</em> , <em>~/.kde4</em> and send them to&nbsp;the developer&rsquo;s website as&nbsp;necessary for further development of&nbsp;software updates statistics. Thus, chroot allows in&nbsp;this case to&nbsp;keep your eggs in&nbsp;one basket, which in&nbsp;itself&nbsp;&mdash; perfect.</p>
+		<p>If&nbsp;<strong>chroot</strong> deal with&nbsp;it, one might ask&nbsp;&mdash; &laquo;what can give jail startup it&nbsp;Xorg&raquo;. Chances are, if&nbsp;you know the differences between jail and chroot and since you are reading this article, the answer is&nbsp;found and you can proceed to&nbsp;the next chapter. If&nbsp;not, then:</p>
+		<p>The main difference in&nbsp;this respect from jail chroot, a&nbsp;grouping of&nbsp;processes by&nbsp;ID (<strong>jid</strong>), which may participate in&nbsp;certain activities as&nbsp;an&nbsp;audit only for these processes, the ability to&nbsp;gather statistics through RACCT, setting limits through <a href="http://www.freebsd.org/cgi/man.cgi?query=rctl&amp;sektion=8" target="_blank"><strong>rctl(8)</strong></a> (useful for profiling applications). And, of&nbsp;course, binding network addresses, the ability to&nbsp;stack isolated and separate routing tables for all jailed processes.</p>
+		<p>The remaining additional advantages can already provide specific jail management utility. So, what can you get from X-jail, depends on&nbsp;your knowledge and imagination, and <strong>FreeBSD</strong> as&nbsp;usual, playing only a&nbsp;tool for the task.</p>
+		
+		<p>Bring their own particular cases that receives and uses the author.</p>
+		<p>In&nbsp;the case of&nbsp;<strong>CBSD/jail/FreeBSD</strong>, an&nbsp;opportunity&nbsp;to:</p>
+		<ul>
+			<li>downloaded from the repository environment preconfigured with various embodiments of&nbsp;the popular Windows Manager: <strong>KDE4, Fluxbox, Gnome3, LXDE</strong> and so&nbsp;on;</li>
+			<li>convenient option to&nbsp;export and import the image;</li>
+			<li>repciation via <strong>zrep</strong> for incremental backup;</li>
+			<li>opportunity to&nbsp;apply file snapshots;</li>
+			<li>opportunity to&nbsp;using <a href="http://www.freebsd.org/cgi/man.cgi?query=cpuset&amp;sektion=1" target="_blank"><strong>cpuset(1)</strong></a> to&nbsp;bind all&nbsp;X applications on&nbsp;a&nbsp;specific core or&nbsp;core group;</li>
+			<li>You can use different limits for the entire cell, whereas the chroot, you can apply through the limits <a href="http://www.freebsd.org/cgi/man.cgi?query=limit&amp;sektion=1" target="_blank"><strong>limit(1)</strong></a> only user or&nbsp;PID, which is&nbsp;not so&nbsp;convenient.</li>
+			<li>In&nbsp;the case of&nbsp;chroot and having multiple&nbsp;IP alias-s in&nbsp;the system as&nbsp;a&nbsp;source ip&nbsp;for a&nbsp;connection, the application will always use the first IP. In&nbsp;the case of&nbsp;jail and having multiple&nbsp;IP, you can restrict the&nbsp;IP for applications to&nbsp;only those that you need. In&nbsp;this case you can use <strong>PF/IPFW</strong> to&nbsp;calculate the X-traffic applications emulate the &laquo;bad&raquo; network, adding delay or&nbsp;loss on&nbsp;the net this jail, playing with traffic bandwith, etc. to&nbsp;study the work of&nbsp;an&nbsp;application under different conditions.</li>
+			<li>If&nbsp;you have multiple workstations via jail you can make a&nbsp;&laquo;floating&raquo; environment in&nbsp;a&nbsp;simpler way: for any station you would not&nbsp;be, you are always in&nbsp;the same environment, all history, all received email, even if&nbsp;it&nbsp;was adopted with the work station to&nbsp;another&nbsp;&mdash; always with you. You do&nbsp;not need to&nbsp;update the software directly in&nbsp;3&nbsp;systems if&nbsp;you ispoluete 3&nbsp;working system and a&nbsp;set of&nbsp;software changes.</li>
+		</ul>
+		
+	</div>
+	<h2><a name="intro"><span>What is&nbsp;required for X-jail</span></a></h2>
+	<div class="block">
+		<p>To&nbsp;Xorg worked successfully in&nbsp;jail, it&nbsp;is&nbsp;necessary to&nbsp;remove the restrictions jailed processes to&nbsp;access <em>/dev/io</em> and <em>/dev/kmem</em> devices. Already <a href="http://www.leidinger.net/blog/2007/04/07/a-desktop-environment-in-a-jail/" target="_blank">long time</a> there are patches of&nbsp;Alexander Leidinger aka <a href="http://www.leidinger.net/" target="_blank">netchild</a>, optionality that provide these settings. And now, as&nbsp;far as&nbsp;I&nbsp;know, Jammie Gritton <a href="http://lists.freebsd.org/pipermail/svn-src-head/2014-January/055578.html" target="_blank">gave a&nbsp;jolt to&nbsp;the discussion</a> the possible inclusion of&nbsp;patches in&nbsp;one form or&nbsp;another in&nbsp;the base. You can apply the patch and recompile your kernel yourself, or&nbsp;you can use the command:</p>
+	
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=kernel
+		</pre>
+		<p>And get a&nbsp;kernel with patches applied from the repository <strong>CBSD</strong>.</p>
+		<div class="warning">
+			<p><strong>Attention:</strong> Due to&nbsp;resource limitations, this patch is&nbsp;applied only for the FreeBSD kernel 11&nbsp;aka HEAD (as&nbsp;of&nbsp;this writing) in&nbsp;the repository <strong>CBSD</strong></p>
+		</div>
+		<div class="warning">
+			<p><strong>Attention:</strong> <strong>allow_kmem</strong> option violates the concept of jail security and should be used for containerization ONLY YOUR X-jails. Do not enable this feature in the jail that have the potential attackers access.</p>
+		</div>
+		<p>In&nbsp;the presence of&nbsp;these patches, configuration <strong>CBSD</strong> jail will have the option <strong>allow_kmem</strong>, which can be&nbsp;set through <strong>cbsd jset</strong> or&nbsp;<strong>cbsd jconfig</strong></p>
+		<p>In&nbsp;addition, you may need to&nbsp;add a&nbsp;separate rule for <a href="http://www.freebsd.org/cgi/man.cgi?query=devfs.ruleset&amp;sektion=5" target="_blank"><strong>devfs.ruleset(5)</strong></a>, appropriate devices to&nbsp;become visible in&nbsp;the <em>/dev</em> directory in&nbsp;jail. For example this content:</p>
+		<pre class="brush:bash;ruler:true;">
+			[devfsrules_unhide_xorg=8]
+			add include $devfsrules_hide_all
+			add include $devfsrules_unhide_basic
+			add include $devfsrules_unhide_login
+			add path agpgart unhide
+			add path console unhide
+			add path consolectl unhide
+			add path dri unhide
+			add path 'dri/*' unhide
+			add path io unhide
+			add path 'nvidia*' unhide
+			add path sysmouse unhide
+			add path mem unhide
+			add path pci unhide
+			add path tty unhide
+			add path ttyv0 unhide
+			add path ttyv1 unhide
+			add path ttyv8 unhide
+		</pre>
+		<p>and specify the appropriate number <strong>8</strong>&nbsp;in&nbsp;<strong>devfs_ruleset</strong> parameter from jail config.</p>
+		<p>The configuration is&nbsp;completed and further work on&nbsp;the launch of&nbsp;Xorg in&nbsp;jail is&nbsp;no&nbsp;different from the usual steps:</p>
+		<ul>
+			<li>Install software</li>
+			<li>Generate <em>/etc/X11/xorg.conf</em> (if&nbsp;necessary) and create <em>~/.xinitrc</em>
+			<li>Run X</li>
+		</ul>
+		<div class="warning">
+			<p><strong>Attention:</strong> allow_kmem option violates the concept of jail security and should be used for containerization <strong>ONLY YOUR</strong> X-jails. Do not enable this feature in the jail that have the potential attackers access.</p>
+		</div>
+		<a href="http://youtu.be/YcfmRnxHRKY" target="_blank">Short demo of XJail from scratch</a>.
+	</div>
+	<h2><a name="kdejail"><span>Full Example Step-by-Step: KDE4 in xjail with NVIDIA GL</span></a></h2>
+	<div class="block">
+	<p>For Radeon/Intel graphics user steps are the same, except for installation of nvidia-settings, nvidia-driver and /usr/src</p>
+        <p>Initial state - installed from scratch FreeBSD, without ports and source tree system</p>
+	<p><strong>1)</strong> Install <strong>CBSD</strong> and init workdir:</p>
+	<pre class="brush:bash;ruler:true;">
+% pkg install cbsd
+% env workdir="/usr/jails" /usr/local/cbsd/sudoexec/initenv
+% service cbsdd start
+	</pre>
+
+	<p>2) We need a mouse, turn the service <strong>moused</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% sysrc moused_enable="YES"
+	</pre>
+	<p>3) Create jail with <strong>kde4</strong> name. In submenu <strong>pkglist</strong> choose MANUAL and write what software we need in a jail: <strong>x11/xorg x11/kde4</strong>:</p>
+	<p>The rest of the software and settings - at your discretion.</p>
+	<p>4) We need a kernel with patches. You can build your own for instructions <a href="https://lists.freebsd.org/pipermail/freebsd-current/2013-May/041872.html">FreeBSD maillist</a> or receive from <strong>CBSD</strong> repository:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd repo action=get sources=kernel
+	</pre>
+	<p>5) Install new kernel into <em>/boot/kernel</em>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd upgrade target=kernel
+	</pre>
+	<p>6) Reboot system to new kernel:</p>
+	<pre class="brush:bash;ruler:true;">
+% shutdown -r now
+	</pre>
+	<p>7) In the settings jail solve <strong>allow_kmem</strong> and change <strong>devfs_ruleset</strong> any non-existent (for example <strong>99</strong>). In this case, will be open all <em>/dev</em>. If you all to open inappropriately - use the information above to create your <strong>ruleset</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd jstop kde4
+% cbsd jset jname=kde4 allow_kmem=1
+% cbsd jset jname=kde4 devfs_ruleset=99
+	</pre>
+	other than that (only for NVIDIA users) ask <strong>CBSD</strong> to mount <em>/usr/src</em> in jail. It is necessary to build <strong>nvidia-driver</strong> port (from which the need <strong>libGL.so</strong> in environment)
+	<pre class="brush:bash;ruler:true;">
+% cbsd jset jname=kde4 mount_src=1
+	</pre>
+	<p>Instead <strong>jset</strong> You can use the TUI configurator: <strong>cbsd jconfig jname=kde4</strong></p>
+	<p>8) Only for NVIDIA users: we need a source tree <em>/usr/src</em> to build <em>x11/nvidia-drivers</em></p>
+	<p>To do this, fill <em>/usr/src</em> and <em>/usr/ports</em> relevant content. Or, you can ask it to do <strong>CBSD</strong></p>
+	<p>For receive <em>/usr/ports</em> from <strong>SVN FreeBSD</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd portsup
+	</pre>
+	<p>For receive <em>$workdir/src/src\*</em> (which we will create a symlink to not keep two copies) from <strong>SVN FreeBSD</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd srcup
+% rmdir /usr/src ( or, on ZFS installation, remove pseudo-fs: <strong>zfs destroy zroot/usr/src</strong> )
+% ln -sf ~cbsd/src/src_10.1/src /usr/src
+	</pre>
+	<p>(If the version of FreeBSD does not 10.1, the path will be different)</p>
+	<p>9) Only for NVIDIA users: install dependencies <strong>nvidia-driver</strong> repository of the installation and removal <strong>nvidia-driver</strong>. In addition, we need <strong>glproto</strong></p>
+	<pre class="brush:bash;ruler:true;">
+% pkg install x11/glproto x11/nvidia-driver 
+% pkg remove nvidia-driver
+	</pre>
+	<p>10) Only for NVIDIA users: Install the NVIDIA driver from ports:</p>
+	<pre class="brush:bash;ruler:true;">
+	env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+	</pre>
+	<p>11) Only for NVIDIA users: prescribes module <strong>nvidia.ko</strong> in autoload, increase <strong>ipc.shmall</strong> as advised by the port:
+	<pre class="brush:bash;ruler:true;">
+% sysrc kld_list="nvidia"
+% echo "kern.ipc.shmall=1310720" >> /etc/sysctl.conf
+	</pre>
+	<p>11) The same actions, but for users with <strong>Intel</strong> graphics: just add into <em>/boot/loader.conf</em>:</p>
+	<pre class="brush:bash;ruler:true;">
+	hw.vga.textmode=1                                                                                                                                                                                                                                                              
+	drm_load="YES"                                                                                                                                                                                                                                                                 
+	drm2_load="YES"                                                                                                                                                                                                                                                                
+	i915kms_load="YES"
+	</pre>
+	<p>12) Restarting the server (or load modules manually), run and prepare jail:</p>
+	<pre class="brush:bash;ruler:true;">
+% shutdown -r now
+% cbsd jstart kde4
+% cbsd jlogin kde4
+	</pre>
+	<p>13) Subsequent steps are performed in the environment. Inside the jail expose dbus to autostart</p>
+	<pre class="brush:bash;ruler:true;">
+% sysrc dbus_enable="YES"
+% service dbus start
+	</pre>
+	<p>14) Install <strong>nvidia-driver</strong> into jail by analogy with paragraph <strong>9</strong> and <strong>10</strong></p>
+<pre class="brush:bash;ruler:true;">
+% pkg install x11/glproto x11/nvidia-driver 
+% pkg remove nvidia-driver
+% env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+</pre>
+	<p>15) If you do not know how to write still working <strong>xorg.conf</strong> from scrath, better to generate it via <strong>nvidia-xconfig</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% pkg install x11/nvidia-xconfig
+% nvidia-xconfig
+	</pre>
+	<p>Users with Intel can take advantage with X staff:</p>
+	<pre class="brush:bash;ruler:true;">
+% X -configure
+	</pre>
+	<p>And copy the generated <em>/root/xorg.conf.new</em> in <em>/etc/X11/xorg.conf</em></p>
+	<p>Append in the generated <em>/etc/X11/xorg.conf</em> the <strong>ServerFlags</strong> section:</p>
+	<pre class="cli;">
+Section "ServerFlags"
+       Option         "AutoAddDevices" "off"
+       Option         "AutoEnableDevices" "off"
+       Option         "AllowEmptyInput" "off"
+EndSection
+</pre>
+	<p>16) Create a user xuser, if you have not done so when creating jail:</p>
+	<pre class="brush:bash;ruler:true;">
+% pw useradd xuser -m -s /bin/csh
+	</pre>
+	<p>17) Go to the user, write standard <strong>~/.xinitrc</strong> and run KDE:</p>
+	<pre class="brush:bash;ruler:true;">
+% su - xuser
+% echo startkde >> ~/.xinitrc
+% xinit
+	</pre>
+	<p>It may be useful to make additional settings</p>
+	<p>18) Mount Linux-specific FS, for normal Linux-applications in the jail. To do this, the master node to create a local fstab to jail with this content:</p>
+	<p>файл <em>/usr/jails/jails-fstab/fstab.kde4.local</em></p>
+	<pre class="cli;">
+	linprocfs       /usr/compat/linux/proc  linprocfs       rw      0       0
+	</pre>
+	<p>19) If you plan to synchronize the jail to another server and periodically run on another node, and the configuration of the second node is different, it is best to save the xorg.conf in the master node and create a script that will copy it every once in to /etc/X11/ in the jail. 
+	The same must be done for the other node</p>
+	<p>Делается в мастер ноде</p>
+	<pre class="brush:bash;ruler:true;">
+% cp /usr/jails/jails-data/kde4-data/etc/X11/xorg.conf /etc/X11
+</pre>
+<p>In <em>/usr/jails/jails-system/kde4/master_poststart.d</em> directory create new script <strong>xorg.sh</strong> with such content:</p>
+<pre class="cli;">
+#!/bin/sh
+cp -a /etc/X11/xorg.conf ${data}/etc/X11/xorg.conf
+</pre>
+<p>Make script executable:</p>
+<pre class="brush:bash;ruler:true;">
+% chmod +x /usr/jails/jails-system/kde4/master_poststart.d/xorg.sh
+</pre>
+<p>You can also do with /etc/resolv.conf and /etc/hosts if necessary</p>
+	</div>
+<!--# include file="_end.html" -->

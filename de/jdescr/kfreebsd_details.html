@@ -1,0 +1,23 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>KFreeBSD jail</span></h1>
+	<div class="block">
+	<p>Current ( <a href="http://www.debian.org/ports/kfreebsd-gnu/" target="_blank">Debian GNU/kFreeBSD</a> ) project/environment which is running on FreeBSD kernel can be interesting to people who are liked tools and file system hierarchy of Linux Debian</p>
+	<p>For installing kFreeBSD cbsd jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd repo action=get sources=img name=kfreebsd
+	</pre>
+	<p>or</p>
+	<pre>
+		% cbsd repo action=get sources=img name=kfreebsd ver=10.1
+	</pre>
+	<p>If you hosted on another ( non 10.1 ) FreeBSD version. By the starting jail via</p>
+	<pre>
+	      % cbsd jstart kfreebsd
+	</pre>
+	<p>you got a clean kFreeBSD installation in FreeBSD jail.</p>
+	<!--# include file="/en/changeroot.html" -->
+	<p class="text-center"><img src="/img/kfreebsd1.png" alt="" /></p>
+	</div>
+<!--# include file="/en/_end.html" -->

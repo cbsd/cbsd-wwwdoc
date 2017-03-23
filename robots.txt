@@ -1,0 +1,3 @@
+Host: www.bsdstore.ru
+User-Agent: *
+

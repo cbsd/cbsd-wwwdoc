@@ -1,0 +1,98 @@
+<!--# include file="_start.html" -->
+	<h1><span>Документация</span></h1>
+	<h2><a name="docs">Общая информация</a></h2>
+	<div class="block">
+		<ul>
+			<li><a href="cbsd_additional.html">Что необходимо знать о CBSD</a></li>
+			<li><a href="cbsdweb.html">CBSD WEB интерфейс</a></li>
+			<li><a href="cbsdsh.html">О CBSD shell и SQLite3</a></li>
+			<li><a href="installing_cbsd.html">Установка CBSD</a></li>
+			<li><a href="base_cbsd.html">Сборка и обновление мира</a></li>
+			<li><a href="cmdsyntax_cbsd.html">Синтаксис команд CBSD</a></li>
+			<li><a href="cbsd_rcconf.html">Параметры клеток CBSD</a></li>
+			<li><a href="cbsd_vnet.html">cbsd jail и VIMAGE (vnet)</a></li>
+			<li><a href="cbsd_qemu_usermode.html">cbsd и Qemu User mode</a></li>
+			<li><a href="cbsd_geli.html">О криптованных имиджах и CBSD</a></li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_repo_ssi.html">Работа с репозиторием</a> :: repo, repo-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">Как работает хелпер для CBSD образа</a> :: imghelper</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_history_ssi.html">История команд CBSD</a> :: CBSD history</li>
+			<li><a href="custom_freecbsd.html">Модификации, которые выполняют скрипты CBSD в FreeBSD</a></li>
+			<li><a href="cbsd_taskd.html">cbsd taskd</a> :: task, taskls</li>
+			<li><a href="xorg_in_jail.html">FreeBSD: Xorg в jail</a></li>
+			<li><a href="bhyve.html">FreeBSD: CBSD и bhyve</a></li>
+			<li><a href="xen.html">FreeBSD: CBSD и XEN</a></li>
+		</ul>
+	</div>
+	<h2><a name="jailsflow">Работа с jail</a></h2>
+	<div class="block">
+		<p><a href="/ru/workflow_cbsd.html">Одним файлом</a></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_ssi.html">Создание jail через dialog меню</a> :: jcreate, jconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_secondary_ssi.html">Другие методы создание jail</a> :: jcreate, jconstruct</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">Профили для создания jail</a> :: jcreate, jconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html">Конфигурации jail</a> :: jconfig</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jstop_jstart_ssi.html">Запуск и останов jail</a> :: jstart, jstop, jrestart</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jorder_ssi.html">Очередность запуска jail</a> :: jorder</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jremove_ssi.html">Удаление jail</a> :: jremove</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrename_ssi.html">Переименовывание jail</a> :: jrename</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jupgrade_ssi.html">Обновление jail</a> :: jupgrade</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_natcfg_ssi.html">Работа с NAT</a> :: natcfg, naton, natoff</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jls_ssi.html">Список jail</a> :: jls</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jlogin_ssi.html">Логин в jail</a> :: jlogin</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jget_ssi.html">Работа с параметрами jail</a> :: jset,jget</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jclone_ssi.html">Клонирование jail</a> :: j[r]clone</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jsnapshot_ssi.html">Снапшоты (zfs-only)</a> :: jsnapshot</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jexport_ssi.html">Экспорт jail</a> :: jexport</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jimport_ssi.html">Импорт jail</a> :: jimport</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jbackup_ssi.html">Бекап и репликация jail</a> :: jbackup</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jdescr_ssi.html">Описание jail</a> :: jdescr</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcoldmigrate_ssi.html">Холодная миграция jail</a> :: jcoldmigrate</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrctl_ssi.html">Управление лимитами jail</a> :: jrctl, jrctl-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_ddns_ssi.html">Динамический DNS и jail</a> :: ddns</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jail2iso_ssi.html">Получение ISO и USB Memstick загрузочных образов из клеток</a> :: jail2iso</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jlocate_ssi.html">Поиск клеток в ферме</a> :: jwhereis, jailmapdb</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailscp_ssi.html">Копирование файлов в/из файловых систем клеток</a> :: jailscp</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html">Пара слов о подсчете трафика jail</a> :: fwcounters</li>
+		</ul>
+		<p><h2>Хелперы/Модули</h2></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/pkg.d_ssi.html">Работа с ПО и pkg(7) в jail через CBSD</a> :: pkg.d</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/bsdconf.d_ssi.html">Работа с passwd(1), sysrc(8), service(8) в jail через CBSD</a> :: bsdconf.d</li>
+		</ul>
+		<p><h2>CBSD Jail: массовый менеджмент</h2></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_puppet_ssi.html">Работа с CBSD через Puppet</a> :: CBSD и Puppet</li>
+		</ul>
+	</div>
+	<h2><a name="bhyveflow">Работа с виртуальными машинами Bhyve</a></h2>
+	<div class="block">
+		<p><a href="/ru/workflow_bhyvecbsd.html">Одним файлом</a></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcreate_ssi.html">Создание VM через dialog меню</a> :: bcreate, bconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bconfig_ssi.html">Конфигурации VM</a> :: bconfig</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bstop_bstart_ssi.html">Запуск и останов VM</a> :: bstart, bstop</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jorder_ssi.html">Очередность запуска jail</a> :: border</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bremove_ssi.html">Удаление VM</a> :: bremove</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_brename_ssi.html">Переименовывание VM</a> :: brename</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bls_ssi.html">Список VM</a> :: bls</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bvnc_ssi.html">Использование VNC с bhyve</a> :: bconfig</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_blogin_ssi.html">Подключение к терминалу</a> :: blogin</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bclone_ssi.html">Клонирование VM</a> :: b[r]clone</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bexport_ssi.html">Экспорт VM</a> :: bexport</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bimport_ssi.html">Импорт VM</a> :: bimport</li>
+		</ul>
+	</div>
+	<h2><a name="nodesflow">Работа с нодами</a></h2>
+	<div class="block">
+		<p><a href="/ru/node_cbsd.html">Одним файлом</a></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_overview_ssi.html">Что подразумевается под нодами</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_list_ssi.html">Список нод</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_add_ssi.html">Добавление нод</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_del_ssi.html">Удаление нод</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_rexe_ssi.html">Выполнение команд на удаленных нодах</a> :: rexe</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_nlogin_ssi.html">Логин в ноду пользователем CBSD по ssh</a> :: nlogin</li>
+<!-- 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_nodescp_ssi.html">Копирование файлов с/на удаленные ноды/клетки</a> :: nodescp</li> -->
+		</ul>
+	</div>
+<!--# include file="_end.html" -->

@@ -1,0 +1,25 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<!--# include file="wf_jcreate.html" -->
+
+<!--  Not for text help part -->
+<div class="block">
+		<p><strong>Example</strong> (fill for jname, fqdn, ips fields + GO):</p>
+		<pre class="brush:bash;ruler=true;">
+			% cbsd jconstruct-tui
+		</pre>
+		<p class="text-center"><img src="/img/jcreate1.png" alt="" /></p>
+		<p>When repository configured properly, you can preset to new jail some packages. Use first character of name port for faster searching and hit space for mark it.</p>
+		<p class="text-center"><img src="/img/jcreate2.png" alt="" /></p>
+		<p>Required fields: a short (one word) the name of the jail. This name is used to identify the jail:</p>
+		<p class="text-center"><img src="/img/jcreate3.png" alt="" /></p>
+		<p>Required fields full (the domain) name of the cell. This name will be used as jail hostname:</p>
+		<p class="text-center"><img src="/img/jcreate4.png" alt="" /></p>
+		<p>Required fields: IP address of jail. May have a network prefix with a record like IP/prefix. To assign more than one IP address, use the editing of the file <strong>rc.conf</strong> jails described in <a href="/en/<!--#echo var="version" -->/wf_jconfig_ssi.html">Jail config</a></p>
+		<p class="text-center"><img src="/img/jcreate5.png" alt="" /></p>
+		<p>When you choose item <strong>GO</strong>, you are prompted to create the jail immediately by automatically running <strong>cbsd jcreate jconf=..</strong>. Otherwise, you will be the path to the saved configuration to run <strong>cbsd jcreate</strong> by hand:</p>
+		<p class="text-center"><img src="/img/jcreate6.png" alt="" /></p>
+</div>
+
+<!--# include file="/en/_end.html" -->

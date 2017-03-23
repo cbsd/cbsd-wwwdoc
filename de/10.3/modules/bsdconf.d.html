@@ -1,0 +1,37 @@
+	<h1><span>Working with passwd(1), sysrc(8), service(8) in jail via CBSD</span></h1>
+	
+	<h2><a name="bsdconf_cmd">Commands: passwd, sysrc, service</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd passwd
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd sysrc
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd service
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Commands from <strong>bsdconf.d</strong> module - is a wrapper around the standard FreeBSD <a href="http://man.freebsd.org/sysrc/8" target="_blank">sysrc(8)</a>, <a href="http://man.freebsd.org/service/8" target="_blank">service(8)</a>, <a href="http://man.freebsd.org/passwd/1" target="_blank">passwd(1)</a> for adding <strong>jname</strong> argument for more convenient work with the services and password in jail from the master host.</p>
+		<p>Via <strong>jname=</strong> argument specified jail, all that comes after (except passwd, which has yet possible user= ) - not analyzed and treated appropriately utitites as is.</p>
+		<p><strong>Example1:</strong> Mark sshd service in jail1 as active:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd sysrc jname=jail1 sshd_enable="YES"
+		</pre>
+		<p><strong>Example2:</strong> Get list of services from jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd sysrc jname=jail1 service -l
+		</pre>
+		<p><strong>Example3:</strong> Start sshd service in jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd service jname=jail1 sshd start
+		</pre>
+		<p><strong>Example4:</strong> Change password for root user in jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg passwd
+		</pre>
+		<p><strong>Example5:</strong> Change password for web user in jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg passwd user=web
+		</pre>
+	</div>

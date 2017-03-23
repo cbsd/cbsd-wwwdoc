@@ -1,0 +1,451 @@
+<!--# include file="/ru/_start.html" -->
+<h1><span>Строим свой Jail-based хостинг на FreeBSD</span></h1>
+<h2><a name="intro">Введение</a></h2>
+<div class="block">
+	<p>Данная статья может служить отправной точкой построения хостинга для разработчиков внутри вашей компании, парнеров компании или просто друзей (и подруг, конечно).</p>
+</div>
+<h2><a name="intro">Исходные данные</a></h2>
+<div class="block">
+	<p>Будем рассматривать случай, когда нужен хостинг чуть более сложнее классического shared/vhost-инга, где клиентов также будет обслуживать 1 движек <strong>MySQL</strong>, 1 WEB сервер <strong>nginx</strong> и 1 демон <strong>sshd</strong> на каждой ноде (что не мешает вам масштабировать такие ноды в неограниченном количестве). Однако, даже внутри компании можно ожидать удара с тыла и непосредственно процессы сотрудников (клиентов) будут запущены в jail. Кроме этого, jail позволяет нам наложить квоты на ресурсы и реплицицировать файловую систему индивидуальных клеток через ZFS send на slave-ноду, легко мигрировать в случае чего "неудобный" по нагрузке jail на другую систему и предоставить клиенту возможность использовать файловые снапшоты. Кроме этого, ZFS позволит предоставить файловую квоту для MySQL баз данных на пользователя.</p>
+	<p>В примере будет фигурировать лишь одна нода хостинга, но подразумеваем, что с ростом компании ее ресурсы будут легко исчерпаны, что спровоцирует потребность в установке дополнительных серверов. Поэтому изначально, чтобы не мучиться с заведением, блокированием и изменением эккаунтов и паролей на большом количестве систем, договоримся, что авторизация будет централизована через LDAP сервер (который было бы неплохо продублировать репликой на второй LDAP ввиду особой важности сервиса).</p>
+	<p>Суммируем по пунктам те требования, которые нам необходимо провернуть:</p>
+	<ul>
+		<li>Заведение и удаление базы данных, vhost, эккаунта пользователя, создание/удаление клетки - все должно происходить в автоматическом режиме;</li>
+		<li>Клиенты могут иметь доступ к MySQL через PhpMyAdmin (<strong>PMA</strong>);</li>
+		<li>Клетки будут иметь отдельный профиль, по которому они формируются с заранее прописанным программным обеспечением ( php + модули );</li>
+		<li>Пользовательский процесс php работает в jail, на него могут быть установлены лимиты по числу открытых сокетов/файлов, памяти, процессорному времени и файловой квоты;</li>
+		<li>Движек базы данных Mysql - один, но при этом, на него должны распространяться квоты файловой системы, выданной клиенту;</li>
+		<li>Централизованная авторизация;</li>
+	</ul>
+	<p>Примечание: все действия автор производит на "домашнем" тестовом стенде, состоящим из двух систем: <strong>home.my.domain</strong> - сервер хостинга (на котором, впрочем, запущена kde4 откуда производится работа) и <strong>asus.my.domain</strong> - это Asus EEPC 901, нетбук,
+	который в квартире автора находится где-то чулане. Ввиду низкого электропотребления он всегда включен и не смотря на крайне ограниченные ресурсы, успешно выполняет хостинг сервисов, которые всегда нужны - кеширующий + DDNS DNS сервер, Redmine для
+	записок, RSS агрегатор с выводом в WEB для планшета и тп. Так или иначе, данный нетбук прекрасно подойдет на роль вынесенного сервера авторизации и будет хостить еще и Ldap server.</p>
+	<p>DDNS (dns jail) обслуживает зону <strong>.my.domain</strong> и необходим ввиду того, что автор часто создает клетки взаимодействующие друг с другом и постоянно править <em>/etc/hosts</em> по всем клеткам - тяжело. Поэтому, все jail при запуске и останове автоматически вписывают или выписывают свое имя в зону через <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_ddns_ssi.html">Dynamic DNS</a> и остальные, поскольку используют этот DNS, их видят. Настройки и самого DDNS касаться не будем, поскольку в статье он не фигурирует, но по ходу примеров предполагаем, что они уже внесены в DNS (или /etc/hosts)</p>
+	<p>Кроме этого, предполагаем что на обоих системах уже установлена <strong>CBSD</strong> не ниже 10.0.6 (от этой версии необходим лишь автоматический поиск первого доступного IP для cbsd ip pool)</p>
+</div>
+<h2><a name="arch">Архитектура и алгоритм работы</a></h2>
+<div class="block">
+	<p>В примере используем двухнодувую конфигурацию, где <strong>asus.my.domain</strong> будет хостить лишь LDAP сервер учетных записей пользователей.</p>
+	<p>Вторая система <strong>asus.my.domain</strong> является первой нодой для хостинга клеток, MySQL сервера, WEB-сервера. Кроме того, сделаем из нее простенькую "админку", как пример какого-то единственного интерфейса, с которым (и только с ним) будем работать по окончанию работ по автоматизации всех процессов.</p>
+	<p>Мы не хотим давать vhost-ам (каждой клетке) внешние IP, поэтому, клиенты будут соединяться на IP адрес ноды. В следствии чего, обслуживать их будет лишь один <strong>sshd</strong> сервис.</p>
+	<p>Есть несколько вариантов обеспечить доступ в jail через единственный сервис <strong>sshd</strong>, например можно установить модуль <a href="http://svnweb.freebsd.org/ports/head/security/pam_jail/" target="_blank">pam_jail</a>, который по соответствующей записи в homedir эккаунта будет "прокидывать" авторизованного клиента в его персональный jail. Вы воспользуемся обычным chroot параметров в OpenSSH и обеспечим sftp/scp-only доступ к docroot данным внутри клиентского jail.</p>
+	<p>Такой же выбор есть для WEB сервера. Можно запускать внутри клеток отдельный и персональный для каждого клиента <strong>nginx</strong>, что может быть избыточно, либо воспользоваться одним nginx, установленнным на balancer-сервере или установив в мастер-ноду хостинга как и MySQL. При этом, статику клиента WEB сервер будет брать с файловой системы jail напрямую, а PHP скрипты будет приземлять в апстрим в виде php-fpm через Unix-socket, который открыт внутри jail.</p>
+	<p>Для того, чтобы у нас появилась возможность ставить квоту на объем базы данных MySQL, расположим данные клиентской базы внутри Jail (каждый jail создается на собственном ZFS fileset-е, на который мы поставим квоту). Для того, чтобы клиентская база становилась недоступна когда клетка погашена, пропишем хуки при <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jstop_jstart_ssi.html">jstart</a> и <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jstop_jstart_ssi.html">jstop</a> в <strong>CBSD</strong> на установку и снятие симлинка на базу. И, кроме всего прочего, GRANT-ы на соединение с базой данных клиента будем устанавливать _только_ для IP непосредственно клетки клиента и <strong>PMA</strong> клетки, которой клиент может пользоваться.</p>
+	<p>Схематично, это выглядит следующим образом:</p>
+	<img src="/img/hosting_scheme1.png" alt="" /></li>
+	<p>Для реализации данной схемы (в частности, распределение и постановка задач по созданию jail, ldap, mysqldb и тд) напишем shell-скрипты, которые будут отрабатывать на входе по единственному конфигурационному файлу, полученному от WEB интерфейса.</p>
+	<div class="warning">
+		<p>Данные скрипты опубликованы на GitHub в виде <a href="https://github.com/olevole/cbsd-dummyhosting" target="_blank">cbsd-dummyhosting</a>. В статье не будем выводить их содержимое, ввиду того, что они написаны только как дополнение этой статьи. В реальных же условиях, системным инженерам желательно посмотреть в сторону message queue сервисов, например таких AMQP-реализаций как <a href="http://www.crossroads.io/" target="_blank">CrossroadIO</a>, <a href="http://zeromq.org/" target="_blank">0mq</a>, <a href="https://www.rabbitmq.com/" target="_blank">RabbitMQ</a> и т.п.
+		Один из таких вариантов доступен в виде <a href="/en/modules.html">модуля</a> под именем <strong>jailhosting</strong>. Но для понимания, стоящие задачи и <a href="/ru/articles/build_own_hosing.html#scripts">алгоритм работы</a> функционала, который реализуют эти скрипты -- опишем.</p>
+	</div>
+	<p>Минимальная вводная динамическая информация, которую мы будем получать от админки следующая:</p>
+	<ul>
+		<li><strong>First name</strong>: человеческое имя клиента;</li>
+		<li><strong>Last name</strong>: человеческая фамилия;</li>
+		<li><strong>Mail</strong>: человечья почта;</li>
+		<li><strong>Shell</strong>: стандарный Unix shell эккаунта (в нашем случае роли играть не будет, но для демонстрации запрета шелла, выставим в <strong>/bin/csh</strong>;</li>
+		<li><strong>sftp/scp/ssh login</strong>: системный эккаунт/логин клиента;</li>
+		<li><strong>sftp/scp/ssh password</strong>: пароль для системного эккаунта;</li>
+		<li><strong>primary mysql db</strong>: имя базы данных. В нашем примере, у клиента будет только одна база;</li>
+		<li><strong>primary mysql pw</strong>: пароль для базы данных;</li>
+		<li><strong>jail IPs</strong>: IP клетки. Поскольку наша цель - автоматизировать все что можно, будем использовать служебное значение DHCP - тогда <strong>CBSD</strong> будет новому клиенту сама находить свободный следующий IP из отведенного пула;</li>
+	</ul>
+	<p>Соответственно, если разбить эту большую задачу на маленькие, их можно попробовать сформулировать так:</p>
+	<ul><em>
+		<li>используя параметр login как идентификатор клиента, сформировать LDIF файл (параллельно сформировав из Plain password) по <strong>{SHA}</strong> (password scheme) для Ldap;</li>
+		<li>отправить данный файл в клетку LDAP;</li>
+		<li>в клетке LDAP выполнить <strong>ldapadd</strong> на данный LDIF;</li>
+		<li>создать базу данных в MySQL;</li>
+		<li>создать эккаунт пользователя в MySQL;</li>
+		<li>применить заранее определенные привилегии для клиента на соответствующую базу данных;</li>
+		<li>импортировать (или создать из темплейта) новую клетку для клиента, выдать ей какой-либо IP, сконфигурировать PAM авторизацию на Ldap сервер (в примере не будет востребован);</li>
+		<li>Перенести базу данных MySQL клиента на файловую систему jail;</li>
+		<li>Запустить клетку, при этом слинковав базу данных в "движек";</li>
+	</em></ul>
+	<p>При этом, желательно помнить, что мы живем не в идеальном мире и что какой-то шаг (например, канал связи мигнул и передача LDIF файла в удаленную клетку ldapsrv не прошла) может не отработать, поэтому, задачи будем формировать в неких <strong>spool</strong> каталогах, из которых сценарий удаляется только если он выполнен.</p>
+	<p>Блок-схема создания эккаунтов, реализованная для статьи на sh:</p>
+	<img src="/img/hosting_scheme2.png" alt="" />
+	<p>По это же схеме будет происходить и уничтожение пользователя со всем его хозяйством.</p>
+</div>
+<h2><a name="cbsdprofiles">CBSD профиль</a></h2>
+<div class="block">
+	<p>Наши клетки для хостинга будут отличаться от "обычных" тем, что мы задействуем параметр <strong>exec_master_poststop</strong> и <strong>exec_master_prestart</strong> в своих корыстных целях, дабы при запуске и остановке клетки, база клиента
+	становилась недоступной. Для этого создадим в <em>$workdir/etc/</em> файл jail-freebsd-ownhosting.conf на основе <em>${workdir}/etc/defaults/jail-freebsd-default.conf</em> следующего содержания:</p>
+	<pre>
+	jail_profile="hosting"                                                                                                                                                                                                                                                         
+	exec_master_poststop="rm -f /var/db/mysql/${jname}";                                                                                                                                                                                                                           
+	exec_master_prestart="ln -sf /usr/jails/jails-data/${jname}-data/var/db/mysql/${jname} /var/db/mysql/${jname}";                                                                                                                                                                
+	default_jailname="cl"                                                                                                                                                                                                                                                          
+	default_domain="hosting.com"
+	</pre>
+	<p>Этот профиль нам понадиться, если мы будем создавать клетки в ручном варианте, поскольку при выполнении <strong>cbsd jconstruct-tui</strong> появятся настройки данного профиля. В частности, помимо <strong>exec_master_poststop</strong> и <strong>exec_master_prestart</strong>, профиль предлагает другие имена клеток (<strong>clX</strong> вместо <strong>jailX</strong>) и другой домен (<strong>hosting.com</strong> вместо <strong>my.domain</strong>):</p>
+	<p><img src="/img/hostingwip1.png" alt="" /></p>
+	<p><img src="/img/hostingwip2.png" alt="" /></p>
+	<p><img src="/img/hostingwip3.png" alt="" /></p>
+	<p>Автоматика будет генерировать свой <strong>.jconf</strong>, в котором эти параметры продублируем.</p>
+</div>
+<h2><a name="mysql">Конфигурирование MySQL</a></h2>
+<div class="block">
+	<p>Устанавливаем в мастер-ноде MySQL сервер, назначаем пользователю <strong>root</strong> пароль, удаляем возможность соединятся с базой с пустым паролем:</p>
+	<pre class="brush:bash;ruler:true;">
+	% pkg install mysql55-server
+	% sysrc mysql_enable="YES"
+	% service mysql-server start
+	% mysql
+	mysql> GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'zelepuka';
+	mysql> connect mysql;
+	mysql> DELETE FROM USER WHERE Password='';
+	mysql> FLUSH PRIVILEGES;
+	^D
+	</pre>
+	<p>В данном примере '%' разрешает соединение пользователю <strong>root</strong> с любых хостов используя пароль <strong>zelepuka</strong>. Используйте собственный пароль, более хитрый.</p>
+</div>
+<h2><a name="nginx">Конфигурирование Nginx</a></h2>
+<div class="block">
+	<p>Устанавливаем в мастер-ноде Nginx, который будет обслуживать статику клиентов напрямую, php скрипты приземлять в апстримы php-fpm внутри клеток и кроме этого, обслуживать страничку заведения усеров для нас.</p>
+	<p>В реальном хостинге вы можете предпочесть ставить Nginx в качестве беленсеров (и возможно, не в одном варианте а в режиме отказоусточивости через CARP) в виде отдельного сервера.</p>
+	
+	<pre class="brush:bash;ruler:true;">
+	% pkg install nginx
+	% sysrc nginx_enable="YES"
+	</pre>
+	<p>Минимальное содержимое <em>/usr/local/etc/nginx/nginx.conf</em>:</p>
+	<pre class="cli">
+	user  nobody;
+	worker_processes  4;  &lt;&lt;- используйте свои, более подходящие значения;
+
+	error_log /var/log/httpd/nginx.err;
+	pid /var/run/nginx.pid;
+
+	events {
+		worker_connections   40000; &lt;&lt;- используйте свои, более подходящие значения;
+		kqueue_changes  1024;  &lt;&lt;- используйте свои, более подходящие значения;
+		use kqueue;
+	}
+
+	http {
+		server {
+			listen *:80 default;
+			listen [::]:80 default ipv6only=on;
+		}
+		include vhosts/*.conf;
+	}
+	</pre>
+	<p>Минимальное содержимое <em>/usr/local/etc/nginx/vhosts/admin.conf</em>:</p>
+	<pre class="cli">
+	server {
+		listen [::]:80;
+		listen *:80;
+		server_name  cbsd.localhost;
+		root /usr/jails/modules/dummyhosting/web;
+		set $php_root $document_root;
+
+		location ~ \.php$ {
+			include php-core.conf;
+		}
+
+		location / {
+			index adduser.php;
+		}
+	}
+	</pre>
+	<p>Запускаем WEB:</p>
+	<pre class="brush:bash;ruler:true;">
+	% service nginx start
+	</pre>
+</div>
+<h2><a name="ldapsrv">Конфигурирование OpenLDAP сервера</a></h2>
+<div class="block">
+	<p>Клетка с LDAP сервером и WEB интерфейсом <a href="/en/jdescr/ldapsrv_details.html">присутствует</a> в репозитории <strong>CBSD</strong>, поэтому заходим на наш второй сервер, скачиваем темплейт ldapsrv, даем начальные параметры (Ldap OU, Manager password и IP клетки)</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd repo action=get sources=img name=ldapsrv ver=10.0
+	% cbsd jconfig jname=ldapsrv ldapsrvinstall
+	</pre>
+	<p><img src="/img/hostingwip4.png" alt="" /></p>
+	<p><img src="/img/hostingwip5.png" alt="" /></p>
+	<p>Либо без диалога:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd jconfig jname=ldapsrv ldapsrvinstall cnpw=superpass fqdn=ldapsrv.my.domain ldapsuffix="dc=hosting,dc=com"
+	</pre>
+	<p>В примере административный пароль - <strong>superpass</strong>. Используйте собственный пароль, более мудрый.</p>
+	<p>И запускаем:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd jstart ldapsrv
+	</pre>
+	<p>После этого, по URL http://ldapsrv.my.domain вы сможете заводить пользователей вручную через PhpLdapAdmin (что для данного примера с хостингом нам не понадобится)</p>
+</div>
+<h2><a name="ldapize">Ldapize</a></h2>
+<div class="block">
+	<p>Для того, чтобы сама клетка <strong>ldapsrv</strong> имела представление о LDAP эккаунтах (например, для поиска следующего свободного UID для нового клиена через <strong>pw usernext</strong>), ее также необходимо сконфигурировать на LDAP сервер.</p>
+	<p>Это можно сделать с помощью <a href="/en/modules.html">хелпера</a> <strong>cbsd ldapize</strong>, которая произведет все модификации автоматически, либо выполнить вручную. Здесь опишем пример ручной пример для большего понимания. К тому же, эту же операцию необходимо будет проделать в мастере ноды, которая размещает на себе хостинг - тогда, WEB интерфейс будет находить первое свободное имя для клиента автоматически.</p>
+	<p>Устанавливаем необходимые модули:</p>
+	<pre class="brush:bash;ruler:true;">
+		% pkg install nss_ldap pam_ldap
+	</pre>
+	<p>И модифицируем следующие файлы, заменяя 192.168.1.125 на IP вашего LDAP сервера</p>
+	<ul>
+	<li><strong>/usr/local/etc/ldap.conf:</strong>
+	<pre class="cli">
+ URI ldap://192.168.1.125
+ base dc=hosting,dc=com
+ ldap_version 3
+ scope sub
+ bind_timelimit 3
+ bind_policy soft
+ timelimit 3
+ idle_timelimit 3
+
+ pam_password SSHA
+
+ pam_filter              objectclass=posixAccount
+ pam_check_host_attr     yes
+ pam_login_attribute     uid:caseExactMatch:
+ pam_member_attribute    memberUid
+
+ pam_lookup_policy no
+
+ nss_base_group ou=People,dc=hosting,dc=com
+ nss_base_netgroup ou=People,dc=hosting,dc=com
+ nss_initgroups_ignoreusers root,ldap
+ nss_connect_policy oneshot
+	</pre>
+	</li>
+	<li><strong>/usr/local/etc/nss_ldap.conf</strong>
+	<pre class="cli">
+ URI ldap://192.168.1.125
+ base ou=People,dc=hosting,dc=com
+ ldap_version 3
+
+ timelimit 3
+ bind_timelimit 3
+ bind_policy soft
+ idle_timelimit 3
+	</pre>
+	</li>
+	<li><strong>/etc/nsswitch.conf</strong>
+	<pre class="cli">
+ group: files ldap
+ passwd: files ldap
+	</pre>
+	</li>
+	<li><strong>/usr/local/etc/openldap/ldap.conf</strong>
+	<pre class="cli">
+ nss_reconnect_tried     2
+ pam_login_attributes    uid
+ pam_member_attributes   cn
+ pam_password            SSHA
+ nss_base_passwd         ou=People,dc=hosting,dc=com
+ nss_base_shadow         ou=People,dc=hosting,dc=com
+
+ TIMEOUT 3
+ TIMELIMIT       3
+	</pre>
+	</li>
+	<li><strong>/etc/pam.d/ssh</strong>
+	<pre class="cli">
+ auth            sufficient      /usr/local/lib/pam_ldap.so      no_warn try_first_pass
+ auth            required        pam_unix.so             no_warn try_first_pass
+ account         sufficient      /usr/local/lib/pam_ldap.so      no_warn ignore_authinfo_unavail ignore_unknown_user
+ account         required        pam_unix.so
+ session         required        pam_permit.so
+ password        sufficient      /usr/local/lib/pam_ldap.so      no_warn try_first_pass
+ password        required        pam_unix.so             no_warn try_first_pass
+	</pre>
+	<p>После этих модификаций, ваша система будет интегрирована с LDAP сервером и на такие системные команды как <strong>id</strong>, <strong>finger</strong> и тд. будут подгружаться эккаунты из LDAP</p>
+	<p>Кроме этих действий, непосредственно в клетке <strong>ldapsrv</strong> нам необходимо поместить скрипты для обработки каталога спула, куда будут поступать задачи по заведению или удалению пользователей со стороны админки. Для этого, находясь в клетке LDAP сервера, скачиваем архив скриптов. Предполагаем, что директория со скриптами будет находится по пути <em>/root/dummyhosting</em>:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cd /root
+	% fetch http://www.bsdstore.ru/modules/dummyhosting.tgz
+	% tar xfz dummyhosting.tgz
+	</pre>
+	<p>и прописываем в crontab запуск обработчика каталога dummyhosting/ldap_adduser:</p>
+	<pre class="brush:bash;ruler:true;">
+	% crontab -e
+	</pre>
+	<pre class="cli">
+	* * * * * /usr/bin/lockf -s -t0 /tmp/to_ldapsrv.lock /root/dummyhosting/ldap_adduser/bin/go > /dev/null  2>&1
+	</pre>
+</div>
+<h2><a name="jailskel">Шаблон для создания клеток</a></h2>
+<div class="block">
+<p>При деплое новых окружений, вы можете использовать несколько вариантов в качестве источника данных новой клетки. Самое простое - это создать заранее "образцовый" jail, установить в нем весь необходимый софт и при создании нового клиента, просто делать <strong>jimport</strong>, постфактум поменяв  какие-то уникальные для каждой клетки данные. Второй вариант - каждый раз создавать клетку с нуля. В статье будет описан этот случай, поскольку мы сможем использовать <strong>pkglist</strong> для списка ПО, которое необходимо установить в jail. В этом случае, вы всегда будете ставить свежий софт (если репозиторий обновляем), в то время как преднастроенный имидж вам придется периодически запускать, обновлять и экспортировать вновь.</p>
+<p>Заведением клеток занимается скрипт <strong>go</strong>, расположенный в каталоге <em>to_cbsdjail/bin</em> и при генерации использующий следующий <strong>empty.jconf</strong>, расположенный в каталоге <em>to_cbsdjail/skel</em>:</p>
+<pre class="brush:bash;ruler:true;">
+jname="%%JNAME%%";
+path="/usr/jails/jails/%%JNAME%%";
+host_hostname="%%HOST_HOSTNAME%%";
+ip4_addr="%%IP4_ADDR%%";
+mount_devfs="1";
+allow_mount="1";
+allow_devfs="1";
+allow_nullfs="1";
+mount_fstab="/usr/jails/jails-fstab/fstab.%%JNAME%%";
+arch="native";
+mkhostsfile="1";
+devfs_ruleset="4";
+ver="native";
+basename="";
+baserw="0";
+mount_src="0";
+mount_obj="0";
+mount_kernel="0";
+mount_ports="1";
+astart="1";
+data="/usr/jails/jails-data/%%JNAME%%-data";
+vnet="0";
+applytpl="1";
+mdsize="0";
+rcconf="/usr/jails/jails-rcconf/rc.conf_%%JNAME%%";
+floatresolv="1";
+
+exec_start="/bin/sh /etc/rc"
+exec_stop="/bin/sh /etc/rc.shutdown"
+
+exec_poststart="0";
+exec_poststop="";
+exec_prestart="0";
+exec_prestop="0";
+
+exec_master_poststart="0";
+exec_master_poststop="rm -f /var/db/mysql/%%JNAME%%";
+exec_master_prestart="ln -sf /usr/jails/jails-data/%%JNAME%%-data/var/db/mysql/%%JNAME%% /var/db/mysql/%%JNAME%%";
+exec_master_prestop="0";
+</pre>
+<div class="warning">
+	<p>Обратите внимание на параметры <strong>arch</strong> и <strong>ver</strong>. Значение в них могут быть "i386", "amd64" и "9.2", "10.0", "10.1" "11" и тд , в зависимости от той версии базы, которую вы предпочтете для клеток. Значение <em>native</em> заставляет <strong>CBSD</strong> брать всегда ту версию и архитектуру, на которой запущена нода, что делает версию плавающей, если вы перейдете с FreeBSD 10.2 на 11.0, то будет использоваться база 11.0, если вы хотите зафиксировать конкретную версию - укажите вместо <em>native</em></p>
+</div>
+По даному темплейту отработает <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_secondary_ssi.html">cbsd jcreate</a>, при этом будет применен альтернативный путь <em>skel/empty</em> в этом каталоге в качестве <em>skeldir</em> при создании клетки.
+Вы можете отредактировать темплейт <em>to_cbsdjail/skel/empty.jconf</em>, выставив свои предпочтения и пути. Если же пути вас устраивают, отредактируйте содержимое в каталоге <em>to_cbsdjail/skel/empty</em>, поскольку данные файлы перезапишут оригинальные при создании клетки. В первую очередь это относится к файлам паролей</p>
+</div>
+<h2><a name="jailsoft">Софт в создаваемых клетках</a></h2>
+<div class="block">
+<p>Как упоминалось в параграфе выше, вы можете добавить <strong>pkglist=</strong> аргумент в <strong>.jconf</strong>, в котором будет перечислен требуемой клетки софт. Вы можете использовать стандартный репозиторий FreeBSD для этого. Если вы предпочитаете для своей фермы инсталлировать <a href="/ru/articles/cbsd_cpr.html">свой репозиторий</a>, вам необходимо добавить в skel каталоге клетки в  <em>/usr/loca/etc/pkg/repos/</em> информацию о вашем репозитории.  Также, вы можете просто сделать зеркало пекеджей на локальной машине (или собирать репозиторий на ней), чтобы установка пакетов при разворачивании клетки была максимально быстрой. В этом случае, в pkg.conf для клетки нужно использовать в качестве URL: file:/// и путь к каталогу с packagesite.xml</p>
+</div>
+<h2><a name="crontab">Запуск скриптов по обработке задач</a></h2>
+<div class="block">
+<p>Кроме обработчика задач в клетке <strong>ldapsrv</strong>, который мы <a href="/ru/articles/build_own_hosing.html#ldapsrv">прописали </a> при конфигурировании LDAP сервера, нам нужно прописать в запуск такие же обработчики задач на мастер-ноде.</p>
+<p>Скрипты написаны так, что каждую задачу обслужиает собственный скрипт. Запускаем
+<pre class="brush:bash;ruler:true;">
+	% crontab -e
+</pre>
+<p>и добавляем запуск нужных нам скриптов:</p>
+<pre class="cli">
+* * * * * /usr/bin/lockf -s -t0 /tmp/dispatch.lock /root/dummyhosting/dispatcher/bin/go > /dev/null  2>&1
+* * * * * /usr/bin/lockf -s -t0 /tmp/to_cbsdjail.lock /root/dummyhosting/to_cbsdjail/bin/go > /dev/null  2>&1
+* * * * * /usr/bin/lockf -s -t0 /tmp/to_ldapsrv.lock /root/dummyhosting/to_ldapsrv/bin/go > /dev/null  2>&1
+* * * * * /usr/bin/lockf -s -t0 /tmp/to_mysqlsrv.lock /root/dummyhosting/to_mysqlsrv/bin/go > /dev/null  2>&1
+</pre>
+</div>
+<h2><a name="openssh">Конфигурация OpenSSH</a></h2>
+<div class="block">
+<p>Сконфигурируем OpenSSH таким образом, чтобы все наши клиенты по маске от имени логина имели scp/sftp доступ в клетку, при этом домашний каталог являлся для них корнем и вход по SSH был возможен только для sftp подсистемы OpenSSH:</p>
+<pre class="brush:bash;ruler:true;">
+	% vi /etc/sshd/sshd_config
+</pre>
+<p>Дописываем файл следующими строчками</p>
+<pre class="cli">
+	Match User cl*
+		ChrootDirectory /usr/jails/jails/%u%h
+        	PasswordAuthentication yes
+        	ForceCommand internal-sftp
+        	X11Forwarding no
+        	AllowTCPForwarding no
+</pre>
+<p>Сохраняем, применяем:</p>
+<pre class="brush:bash;ruler:true;">
+	% service sshd restart
+</pre>
+<p>После чего, наш хостинг готов на 99%</p>
+</div>
+<h2><a name="web">WEB форма</a></h2>
+<div class="block">
+	<p>Напишем HTML WEB форму, которая на выходе сгенерирует ascii файл в каталог <em>/root/dummyhosting/dispatch/add</em> с заполненными  <a href="/ru/articles/build_own_hosing.html#arch">перечисленными выше</a> полями:</p>
+	<table class="images">
+	<thead>
+	<tr>
+		<th>результат</th>
+		<th>html</th>
+	</tr>
+	</thead><tbody>
+	<tr>
+		<td><img src="/img/hosting_scheme3.png" alt="" /></td>
+	<td><pre>
+&lt;form action="adduser-fromargs.php" method="post"&gt;
+&lt;label for="firstname"&gt;First name:&lt;/label&gt;
+&lt;input type="text" name="firstname" value="" size="15"/&gt;
+&lt;label for="lastname"&gt;Last name:&lt;/label&gt;
+&lt;input type="text" name="lastname" value="" size="15"/&gt;
+&lt;label for="mail"&gt;Mail:&lt;/label&gt;
+&lt;input type="text" name="mail" value="" size="15"/&gt;
+&lt;label for="shell"&gt;Shell:&lt;/label&gt;
+&lt;input type="text" name="shell" value="/bin/csh" size="15"/&gt;
+&lt;label for="login"&gt;sftp/ssh login:&lt;/label&gt;
+&lt;input type="text" name="login" value="cl1" size="15"/&gt;
+&lt;label for="masterpass"&gt;sftp/ssh password:&lt;/label&gt;
+&lt;input type="text" name="masterpass" value="HxurVQOTvE8qdyX" size="15"/&gt;
+&lt;label for="mysqldb"&gt;primary mysql db:&lt;/label&gt;
+&lt;input type="text" name="mysqldb" value="cl1_db" size="15"/&gt;
+&lt;label for="mysqlpw"&gt;primary mysql pw:&lt;/label&gt;
+&lt;input type="text" name="mysqlpw" value="xZziC7La3cDSAVe" size="15"/&gt;
+&lt;label for="ip4_addr"&gt;jail IP4,IP6 addr:&lt;/label&gt;
+&lt;input type="text" name="ip4_addr" value="DHCP" size="15"/&gt;
+&lt;input type="submit" name="create" value="Create User" &gt;
+&lt;button onclick="goBack()"&gt;Go Back&lt;/button&gt;
+&lt;/form&gt;
+</pre></td>
+</tbody></table>
+<p><em>adduser-fromargs.php</em>:</p>
+
+<pre class="cli">
+&lt;?php
+$savedir="/root/dummyhosting/dispatch/add";
+
+$firstname = $_POST['firstname'];
+$lastname = $_POST['lastname'];
+$mail = $_POST['mail'];
+$shell = $_POST['shell'];
+$login = $_POST['login'];
+$masterpass = $_POST['masterpass'];
+$mysqldb = $_POST['mysqldb'];
+$mysqlpw = $_POST['mysqlpw'];
+$ip4_addr = $_POST['ip4_addr'];
+
+$str = &lt;&lt;&lt;EOF
+firstname="$firstname"
+lastname="$lastname"
+mail="$mail"
+shell="$shell"
+login="$login"
+masterpass="$masterpass"
+mysqldb="$mysqldb"
+mysqlpw="$mysqlpw"
+ip4_addr="$ip4_addr"
+EOF;
+
+$fp = fopen("$savedir/$login.add", "w+");
+if (!$fp) {
+	echo "Error fopen $savedir/$login.add for write";
+	exit(1);
+}
+
+if (!fwrite($fp,$str)) echo "Error write to $savedir/$login.add";
+	fclose($fp);
+echo "Stored in $savedir/$login.add";
+?&gt;
+
+</pre>
+</div>
+<h2><a name="adduser">Проверка</a></h2>
+<div class="block">
+	<p>WIP</p>
+</div>
+<h2><a name="mysql">Эпилог</a></h2>
+<div class="block">
+	<p>WIP</p>
+</div>
+<h2><a name="scripts">Описание работы скриптов</a></h2>
+<div class="block">
+	<p>WIP</p>
+</div>
+
+<!--# include file="/ru/_end.html" -->

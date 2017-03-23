@@ -1,0 +1,41 @@
+<!--# include file="_start.html" -->
+<h1><span>Download</span></h1>
+<div class="block">
+	<p>If you want to install and use CBSD on the FreeBSD host, <a href="/<!--#echo var="lang" -->/installing_cbsd.html">use these instructions</a>.</p>
+</div>
+<h2><a name="block">CBSDWEB VirtualBox Appliance</a></h2>
+	<div class="warning">
+	<p>If you want to see CBSD without having to install a working system (CBSDWEB in the early stages of development, not for production use only!),
+	you may obtain a monthly development-snapshot image for VirtualBox. Keep in mind that VirtualBox does not support
+	Nested Virtualization (Nested VTx/VT-d/IOMMU), For this reason, and XEN and bhyve hypervisors will not work here - only jail container available.
+	For bhyve / XEN please setup FreeBSD on a bare metal server. </p>
+	</div>
+	<div class="block">
+	<p>Credential:<p>
+	<ul>
+	<li>- WEB interface: <strong>https://IPADDR/</strong> (see: *notes1)</li>
+	<li>- root user unix/shell password: <strong>cbsd</strong></li>
+	<li>- cbsd user unix/shell password: <strong>cbsd</strong></li>
+	</p>
+	<p><i>* notes1:</i> If DHCP is not work in your network, edit /etc/rc.conf to static addresses, replacing the line:</p>
+	<pre>
+	ifconfig_vtnet0="DHCP"
+	</pre>
+	<p>to:</p>
+	<pre>
+	ifconfig_vtnet0="IP/PREFIX"
+	defaultrouter="GW"
+	</pre>
+	<p>For example:</p>
+	<pre>
+	ifconfig_vtnet0="192.168.0.2/24"
+	defaultrouter="192.168.0.1"
+	</pre>
+	<p>or:</p>
+	<pre>
+	ifconfig_vtnet0="192.168.0.2 netmask 255.255.255.0"
+	defaultrouter="192.168.0.1"
+	</pre>
+	<p>Get <a href="/<!--#echo var="lang" -->/get_cbsddev.html">CBSD VirtualBox Appliance</a>.</p>
+</div>
+<!--# include file="_end.html" -->

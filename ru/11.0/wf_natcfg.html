@@ -1,0 +1,60 @@
+	<h1><span>Работа с NAT</span></h1>
+	
+	<h2><a name="natcfg_cmd">Команды natcfg, naton, natoff</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd natcfg
+			% cbsd naton
+			% cbsd natoff
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Не всегда клеткам требуются внешние IP, либо, по причинам безопасности, ряд сервисов разворачивают на приватных IP, чтобы они были недоступны со стороны Internet. При этом, самим клетками доступ в Internet может быть необходим. В этом случае используется NAT, транслирующий приватные IP адреса клетки на внешний IP сервера. Функционал <strong>CBSD</strong> имеет шаблон конфигурации NAT правил для трансляции приватных сетей <a href="http://tools.ietf.org/html/rfc1918" target="_blank">RFC1918</a>. Для этого, первым делом необходимо через команду:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd natcfg
+		</pre>
+		<p>выбрать соответствующий фунционал, для которого будут сгенерирована конфигурация NAT: pf, ipfw или ipfilter, по именам соответствующих фреймворков</p>
+	</div>
+	
+	<div class="warning">
+		<p><strong>Внимание:</strong> При конфигурировании, системных /boot/loader.conf ноды будет изменен для загрузки соответствующих модулей. </p>
+	</div>
+	
+	<div class="block">
+		<p>Выбор фреймворка и IP в качестве NAT alias выполняется при первом запуске <strong>cbsd initenv</strong>, в последствии может быть переконфигурирован через <strong>cbsd initenv-tui</strong>. Для того, чтобы измененный <strong>natip</strong> вступил в силу, необходимо запустить <strong>cbsd natcfg</strong> и <strong>cbsd naton</strong> еще раз. В данный момент, средства <strong>CBSD</strong> по конфигурации nat ограничиваются только созданием правил для трансляции приватных сетей и если вам необходимо получить от NAT чего-то большее, вы можете отредактировать созданный файл правил вручную в каталоге <em>$workdir/etc/</em> в файлах:</p>
+		<ul>
+			<li><strong>pfnat.conf</strong>, если используется PF</li>
+			<li><strong>ipfw.conf</strong>, если используется IPFW</li>
+			<li><strong>ipfilter.conf</strong>, если используется IPNAT из пакета IPFilter</li>
+		</ul>
+		<p>Примечание:</p>
+		<p>Если <strong>nodeip</strong> (IP ноды) сам находится в пределах RFC1918 сетей, для этой подсети правило трансляции NAT создано не будет. Для отключения управлением nat средствами <strong>CBSD</strong>, воспользуйтесь запуском команды:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd natoff
+		</pre>
+		<div class="warning">
+			<p><strong>Внимание:</strong> Будьте аккуратны, если активируете NAT через <strong>ipfw</strong>. Это правило подгружает модуль ipfw.ko, в настройках которого по-умолчанию запрещены все пакеты. Если вы проводите эту операцию удаленно, вы можете через <em>/boot/loader.conf</em> включить ipfw с правилом, по-умолчанию разрешающих все пакеты:</p>
+		</div>
+		<pre class="cli">
+ipfw_load="YES"
+net.inet.ip.fw.default_to_accept=1
+		</pre>
+		<p>Пример. Запускаем конфигуратор и активируем NAT через pf, в качестве aliasing-IP используется 192.168.1.2, ранее инициализированный в /etc/rc.conf:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd natcfg
+Configure NAT for RFC1918 Network?
+[yes(1) or no(0)]
+yes
+Set IP address as the aliasing NAT address, e.g: 192.168.1.2
+
+Which NAT framework do you want to use: [pf]
+(type FW name, eg pf,ipfw,ipfilter or "exit" for break)
+
+% cbsd naton
+No ALTQ support in kernel
+ALTQ related functions disabled
+No ALTQ support in kernel
+ALTQ related functions disabled
+pfctl: pf already enabled
+		</pre>
+	</div>
+

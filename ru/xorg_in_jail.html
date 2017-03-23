@@ -1,0 +1,301 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<h1><span>FreeBSD: Xorg in&nbsp;jail</span></h1>
+<h2><a name="intro"><span>Введение</span></a></h2>
+	<div class="block">
+		<p>Традиционно принято считать, что FreeBSD&nbsp;&mdash; неплохой выбор в&nbsp;качестве серверной&nbsp;ОС, но&nbsp;на&nbsp;роль в&nbsp;качестве современной рабочей станции годится слабо. Апологеты и&nbsp;просто горячие головы с&nbsp;обеих сторон этого мнения приводят разные доводы за&nbsp;и&nbsp;против и&nbsp;данная статья не&nbsp;посвящена этому бестолковому спору. Вместо этого, здесь будет произведена попытка связать и&nbsp;пофантазировать вокруг, казалось&nbsp;бы, совершенно разных технологий, таких как Xorg и&nbsp;Jail, а&nbsp;также продемонстрирован один из&nbsp;сценариев работы с&nbsp;FreeBSD в&nbsp;качестве рабочей станции.</p>
+		<p>Не&nbsp;так уж&nbsp;и&nbsp;редко на&nbsp;просторах интернета можно встретить информацию о&nbsp;том, какие дополнительные свойства от&nbsp;*nix системы приобретает пользователь, запускающий Xorg-based приложение в&nbsp;<a href="http://www.freebsd.org/cgi/man.cgi?query=chroot&amp;sektion=8" target="_blank"><strong>chroot(8)</strong></a>.</p>
+		<p>На&nbsp;это может быть множество причин, одна из&nbsp;них&nbsp;&mdash; вы&nbsp;любите эксперементировать с&nbsp;разным количеством окружений и&nbsp;при этом не&nbsp;очень хочется превращать файловую систему в&nbsp;помойку (и&nbsp;возможно, получать конфликты между тем или иным приложением по&nbsp;файловой системе.)</p>
+		<p>Также, не&nbsp;последнюю роль играет безопасность. Никто не&nbsp;даст гарантии, что любой установленный софт, будь&nbsp;то <strong>skype</strong>, <strong>mc</strong>, <strong>screen</strong>, <strong>firefox</strong> и&nbsp;тд, при первом&nbsp;же обновлении, из-за досадной опечатки в&nbsp;коде не&nbsp;просканируют случайным образом ваш домашний каталог на&nbsp;предмет <strong>id_rsa</strong> ключей и&nbsp;<strong>known_hosts</strong>, <strong>.mysql_history, .bash_history</strong> и&nbsp;все ваши настройки эккаунтов из <em>~/.local</em>, <em>~/.config</em> , <em>~/.kde4</em> и&nbsp;не&nbsp;отправит их&nbsp;на&nbsp;сайт разработчика в&nbsp;качестве необходимой для дальнейшего развития обновленного софта статистики. Таким образом, chroot позволяет в&nbsp;этом случае не&nbsp;держать ваши яйца в&nbsp;одной корзине, что само по&nbsp;себе&nbsp;&mdash; прекрасно.</p>
+		<p>Если <strong>chroot</strong> с&nbsp;этим справляется, может возникнуть вопрос&nbsp;&mdash; &laquo;а&nbsp;что может дать jail при запуске в&nbsp;нем Xorg&raquo;. Скорее всего, если знаете о&nbsp;различиях между jail и&nbsp;chroot и&nbsp;поскольку вы&nbsp;уже читаете эту статью, ответ уже найден и&nbsp;можно перейти к&nbsp;следующей главе. Если&nbsp;же нет, то:</p>
+		<p>Основное различие в&nbsp;этом плане jail от&nbsp;chroot&nbsp;&mdash; это группирование процессов по&nbsp;ID (<strong>jid</strong>), который может учавствовать в&nbsp;определенных действиях как: вести аудит только за&nbsp;этими процессами, возможность собирать статистику через RACCT, установка лимитов через <a href="http://www.freebsd.org/cgi/man.cgi?query=rctl&amp;sektion=8" target="_blank"><strong>rctl(8)</strong></a> (полезно для профилирования приложения). И, конечно&nbsp;же, привязка сетевых адресов, возможность изолированного стека и&nbsp;отдельной таблицы маршрутизации на&nbsp;все jailed процессы.</p>
+		<p>Остальные дополнительные плюсы могут уже предоставить конкретные jail management утилиты. Таким образом, то&nbsp;что можно получить от&nbsp;X-jail, зависит только от&nbsp;ваших знаний и&nbsp;фантазии, а&nbsp;<strong>FreeBSD</strong> как обычно, выступает лишь инструментом для решения поставленной задачи.</p>
+		
+		<p>Приведу собственные частные случаи, что получает и&nbsp;использует автор.</p>
+		<p>В&nbsp;случае с&nbsp;<strong>CBSD/jail/FreeBSD</strong>, появляется возможность:</p>
+		<ul>
+			<li>скачивать из&nbsp;репозитория преднастроенные окружения с&nbsp;различными вариантами популярных Windows Manager: <strong>KDE4, Fluxbox, Gnome3, LXDE</strong> и&nbsp;тд;</li>
+			<li>удобная возможность экспорта и&nbsp;импорта в&nbsp;образ;</li>
+			<li>репликация через <strong>zrep</strong> для инкрементальных бекапов;</li>
+			<li>возможность применять файловые снапшоты;</li>
+			<li>можно использовать <a href="http://www.freebsd.org/cgi/man.cgi?query=cpuset&amp;sektion=1" target="_blank"><strong>cpuset(1)</strong></a> для привязки всех&nbsp;X приложений на&nbsp;конкретное ядро или группу ядер;</li>
+			<li>можно использовать различные лимиты на&nbsp;всю клетку, тогда как при chroot, вы&nbsp;можете применять лимиты через <a href="http://www.freebsd.org/cgi/man.cgi?query=limit&amp;sektion=1" target="_blank"><strong>limit(1)</strong></a> лишь на&nbsp;пользователя или PID, что не&nbsp;так удобно.</li>
+			<li>В&nbsp;случае chroot и&nbsp;при наличие нескольких&nbsp;IP alias-ов в&nbsp;системе, в&nbsp;качестве source ip&nbsp;при установке соединения, приложение будет всегда использовать первый IP. В&nbsp;случае с&nbsp;jail и&nbsp;при наличие нескольких&nbsp;IP, вы&nbsp;можете ограничить&nbsp;IP для приложений лишь теми, которые вам нужны. При этом вы&nbsp;можете использовать <strong>PF/IPFW</strong> для подсчета трафика X-приложений, эмулировать &laquo;плохую&raquo; сеть, добавив задержки или потери на&nbsp;сеть этого jail, играясь с&nbsp;traffic bandwith и&nbsp;тд&nbsp;для изучения работы того или иного приложения в&nbsp;разных условиях.</li>
+			<li>Если у&nbsp;вас есть несколько рабочих станций, с&nbsp;помощью jail вы&nbsp;можете устроить &laquo;плавающее&raquo; окружение более простым образом: за&nbsp;какой станцией вы&nbsp;бы не&nbsp;находились, вы&nbsp;всегда находитесь в&nbsp;одном окружении, вся history, вся принятая почта, даже если она была принята при работе на&nbsp;другой станции&nbsp;&mdash; всегда с&nbsp;вами. Вам не&nbsp;нужно обновлять софт сразу в&nbsp;3&nbsp;системах, если вы&nbsp;используете 3&nbsp;рабочих системы и&nbsp;набор&nbsp;ПО не&nbsp;меняется.</li>
+		</ul>
+		
+	</div>
+	<h2><a name="intro"><span>Что необходимо для X-jail</span></a></h2>
+	<div class="block">
+		<p>Для того, чтобы Xorg успешно работал в&nbsp;jail, необходимо снять ограничения jailed процессов на&nbsp;доступ к&nbsp;<em>/dev/io</em> и&nbsp;<em>/dev/kmem</em> устройствам. Уже <a href="http://www.leidinger.net/blog/2007/04/07/a-desktop-environment-in-a-jail/" target="_blank">долгое время</a> существуют патчи от&nbsp;Alexander Leidinger aka <a href="http://www.leidinger.net/" target="_blank">netchild</a>, которые предоставляют опциональность этих настроек. И&nbsp;сейчас, насколько мне известно, Jammie Gritton <a href="http://lists.freebsd.org/pipermail/svn-src-head/2014-January/055578.html" target="_blank">дал толчек к&nbsp;обсуждению</a> о&nbsp;возможном включении патчей в&nbsp;том или ином виде в&nbsp;базу. Вы&nbsp;можете применить патчи самостоятельно и&nbsp;пересобрать ядро, либо можете воспользоваться командой:</p>
+	
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=kernel
+		</pre>
+		<p>И&nbsp;получить ядро с&nbsp;примененными патчами из&nbsp;репозитория <strong>CBSD</strong>.</p>
+		<div class="warning">
+			<p><strong>Внимание:</strong> Ввиду ограничений в&nbsp;ресурсах, данный патч применен только для ядра FreeBSD 11&nbsp;aka HEAD (на&nbsp;момент написания статьи) в&nbsp;репозитории <strong>CBSD</strong></p>
+		</div>
+		<div class="warning">
+			<p><strong>Внимание:</strong> <strong>allow_kmem</strong> нарушает концепцию безопасности и должна использоваться только для XJails. Не включайте эту опцию в клетках, куда имеет доступ потенциальный взломщик</p>
+		</div>
+		<p>При наличие этих патчей, в&nbsp;конфигурации <strong>CBSD</strong> jail появится опция <strong>allow_kmem</strong>, которую можно установить через <strong>cbsd jset</strong> или <strong>cbsd jconfig</strong></p>
+		<p>Кроме того, вам может понадобиться дописать отдельное правило для <a href="http://www.freebsd.org/cgi/man.cgi?query=devfs.ruleset&amp;sektion=5" target="_blank"><strong>devfs.ruleset(5)</strong></a>, чтобы соответствующие устройства стали видимы в&nbsp;<em>/dev</em> каталоге jail. Например такого содержания:</p>
+		<pre class="brush:bash;ruler:true;">
+			[devfsrules_unhide_xorg=8]
+			add include $devfsrules_hide_all
+			add include $devfsrules_unhide_basic
+			add include $devfsrules_unhide_login
+			add path agpgart unhide
+			add path console unhide
+			add path consolectl unhide
+			add path dri unhide
+			add path 'dri/*' unhide
+			add path io unhide
+			add path 'nvidia*' unhide
+			add path sysmouse unhide
+			add path mem unhide
+			add path pci unhide
+			add path tty unhide
+			add path ttyv0 unhide
+			add path ttyv1 unhide
+			add path ttyv8 unhide
+		</pre>
+		<p>и&nbsp;указать соответствующий номер <strong>8</strong>&nbsp;в параметре <strong>devfs_ruleset</strong> из&nbsp;настройки jail.</p>
+		<p>На&nbsp;этом настройка закончена и&nbsp;дальнейшая работа по&nbsp;запуску Xorg в&nbsp;jail ничем не&nbsp;отличается от&nbsp;обычных шагов:</p>
+		<ul>
+			<li>Установка ПО</li>
+			<li>Генерация <em>/etc/X11/xorg.conf</em> (если необходимо) и&nbsp;создание <em>~/.xinitrc</em>
+			<li>Запуск X</li>
+		</ul>
+		
+		<div class="warning">
+			<p><strong>Внимание:</strong> Опция allow_kmem нарушает концепт безопасности jail и должна использоваться для контейнеризации <strong>ТОЛЬКО ВАШИХ</strong> X-клеток. Не включайте данную особенность в клетках, в которые имеют доступ потенциальные злоумышленники.</p>
+		</div>
+		<a href="http://youtu.be/YcfmRnxHRKY" target="_blank">Короткое демо по запуску XJail с нуля</a>.
+	</div>
+	<h2><a name="intro"><span>Практический кейс: desktop everywhere</span></a></h2>
+	<div class="block">
+			<p>Хочется сделать небольшое отстутпление от&nbsp;темы и&nbsp;пофантазировать на&nbsp;тему будущих рабочих окружений и&nbsp;в&nbsp;частности, о&nbsp;моих ожиданиях по&nbsp;услугах хостинг-компаний ;-)</p>
+			<p>Аналитики давно отмечают, что продажи обычных стационарных компьютеров падают, наступила эра мобильности и&nbsp;идея о&nbsp;том, что&nbsp;ПК должен быть на&nbsp;каждом рабочем месте и&nbsp;в&nbsp;каждом доме теперь не&nbsp;кажется такой уж&nbsp;гениальной.</p>
+			<p>При этом, цены на&nbsp;аренду серверных мощностей в&nbsp;быстрых и&nbsp;надежных датацентрах неуклонно снижаются. Недавно автор статьи задумывался об&nbsp;апгрейде своей рабочей станции, от&nbsp;которой нужно лишь&nbsp;то, что делают классические офисные сотрудники:</p>
+				<ul>
+					<li>просмотр фильмов ;)</li>
+					<li>офисные приложения: libreoffice, vim, kmail, gimp, yed, kdevelop, valgrind и&nbsp;прочий стандартный набор обычных домохозяек</li>
+					<li>интернет броузер</li>
+				</ul>
+			<p>При подсчете выяснилось, что цена приобретения нового системного блока удовлетворяющего этим потребностям эквивалентна цене за&nbsp;аренду на&nbsp;3-4 года сервера в&nbsp;датацентре с&nbsp;гораздо более внушительными мощностями, что конечно, породило мысль сделать рабочую систему в&nbsp;Датацентре, а&nbsp;через RDP/VNC подключатся к&nbsp;рабочему столу за&nbsp;приложениями, не&nbsp;требующими большой видеонагрузки, на&nbsp;что дома сгодится любой современный аналог <strong>Raspberry PI</strong>.</p>
+			<p>При этом не&nbsp;учитывались плюсы от&nbsp;отсутствие шума в&nbsp;квартире, экономии на&nbsp;электричестве и&nbsp;то, что сервер в&nbsp;датацентре доступен 24&times;7x365, на&nbsp;котором параллельно можно развернуть пару jail с&nbsp;вспомогательными сервисами.</p>
+			<p>К&nbsp;слову сказать, идее терминалов не&nbsp;один десяток лет и&nbsp;внутри интранет многих компаний она давно и&nbsp;с&nbsp;успехом здравствует. Но&nbsp;с&nbsp;ростом скоростей и&nbsp;качества интернета, уменьшением latency, вопрос подобных услуг от&nbsp;хостинг-компаний&nbsp;&mdash; дело времени. Впрочем непонятно, что мешает этим заниматься компаниям, предоставляющим последнюю милю до&nbsp;клиента. Пока что, автор знает лишь небольшой список компаний, продвигающих услуги <a href="http://en.wikipedia.org/wiki/Desktop_virtualization" target="_blank"><strong>VDI</strong></a>&nbsp;в своих ДатаЦентрах через выделенные каналы.</p>
+			<p>Так или иначе, если идея выноса рабочего окружения в&nbsp;облако еще нежизнеспособна, то&nbsp;сделать какой-то гибрид на&nbsp;пути к&nbsp;этой идее можно попробовать сейчас.</p>
+			<p>К&nbsp;примеру, у&nbsp;автора статьи есть рабочий домашний компьютер с&nbsp;одним монитором и&nbsp;NVidia картой. Также, есть ноутбук с&nbsp;Intel HD&nbsp;3000. И&nbsp;есть рабочий компьютер в&nbsp;офисе, также на&nbsp;NVidia карте, но&nbsp;с&nbsp;двумя мониторами. Кроме того, есть RaspberryPI. Основная ОС&nbsp;на&nbsp;всех системах&nbsp;&mdash; FreeBSD 10/11.</p>
+			<p>Наша задача&nbsp;&mdash; получить плавающее Desktop-окружение.</p>
+			<p>Если при конфигурации всего двух систем (всегда включенных) достаточно лишь при остановке <strong>jail</strong> автоматически инициировать rsync или zrep на&nbsp;партнера, то&nbsp;с&nbsp;множественными системами (которые не&nbsp;всегда online) понадобится какой-то централизованный сервер: например, можно заказать недорогой и&nbsp;всегда доступный VPS. Назовем его <strong>сервер снапшотов</strong>.</p>
+			<p>Далее, создается Xjail с&nbsp;нашим обычным окружением (например <strong>KDE4, libreoffice, audacious, xbmc, chrome, firefox</strong> и&nbsp;тд.) с&nbsp;вашей учетной записью, после чего остается решить 2&nbsp;задачи:</p>
+			<ul>
+				<li>Обеспечить синхронизацию данных между всеми системами;</li>
+				<li>Учесть разницу в&nbsp;периферии между теми системами, на&nbsp;которых вы&nbsp;пранируете запускать jail;</li>
+			</ul>
+			<p>Первый пункт можно решить несколькими способами.
+			Идеально, если все системы имеют файловую систему ZFS, которая позволяет не&nbsp;делая никаких паразитных нагрузок по&nbsp;сканированию модификаций как <strong>csync2</strong> или <strong>rsync</strong> выполнять zfs send и&nbsp;получать некий TimeMachine сервис,
+			когда можно вернуться на&nbsp;любой из&nbsp;снапшотов. Ради интереса, усложним пример и&nbsp;договоримся, что наши клиенты на&nbsp;файловой системе отличной от&nbsp;ZFS, но&nbsp;при этом функции TimeMachine хотелось&nbsp;бы оставить.. В&nbsp;этом случае, ZFS ставим только на&nbsp;сервер снапшотов.
+			Для приема и&nbsp;отправки данных будем использовать rsync, где каждая сессия будет порождать создание ZFS snapshot на&nbsp;сервере снапшотов. Для этого, помещаем в&nbsp;<strong>rsyncd.conf</strong> следующую строчку:</p>
+			<pre class="brush:bash;ruler:true;">
+			...
+			pre-xfer exec = /root/bin/netsnap_rotate zroot/xjail1
+			...
+			</pre>
+			<p>Где&nbsp;&mdash; <strong>zroot</strong>&nbsp;&mdash; общий пул, <strong>xjail1</strong>&nbsp;&mdash; dataset для клетки с&nbsp;имемем <strong>xjail1</strong>, которая и&nbsp;будет нашим окружением. Скрипт <em>/root/bin/netsnap_rotate</em> будет создавать при каждом вызове новый снапшот. Кроме этого, чтобы количество снапшотов не&nbsp;было бесконечным, этот скрипт будет заниматься их&nbsp;ротацией. Тогда, <em>/root/bin/netsnap_rotate</em> может выглядеть так:</p>
+			<pre class="brush:bash;ruler:true;">
+				#!/bin/sh
+				set -e
+				IFS="   "
+				OLDESTDT=`date +%s`
+				OLDESTSNAP="NOP"
+
+				# cmp for oldest timestamp
+				oldest()
+				{
+					if [ $2 -lt $OLDESTDT ]; then
+						OLDESTDT=$2
+						OLDESTSNAP=$1
+					fi
+				}
+				
+				if [ -z "$1" ]; then {
+					echo "Empty FS"
+					exit 1
+				}
+				
+				OLDESTSNAP=$(zfs list -H -r -t snapshot -o name,creation $1 2>/dev/null|while read snap time; do
+							dtstamp=`date -j -f "%a %b %d %H:%M %Y" "${time}" "+%s"`
+							oldest $snap $dtstamp
+							echo "$OLDESTSNAP"
+						done)
+				
+				LAST=`echo $OLDESTSNAP|tail -n1`
+				[ "${LAST}" = "NOP" -o -z "${OLDESTSNAP}" ] && exit
+				# echo "re-created snapshot: $LAST on `date`" |mail -s "Snapshot rotated" operator@my.domain
+				zfs destroy ${LAST}                                                                                                                                                                                                                                                            
+				zfs snapshot ${LAST}
+			</pre>
+			<p>где <strong>OLDESTSNAP</strong> устанавливаем в&nbsp;то&nbsp;количество снапшотов, которое хотим хранить.</p>
+			<li><img src="/img/floatdesktop1.png" alt="" /></li>
+			<p>Вторая задача по&nbsp;учету разницы конфигураций решается еще проще. При первом запуске X -configure на&nbsp;каждой из&nbsp;систем, сохраняем xorg.conf за&nbsp;пределами jail, например в&nbsp;<em>$workdir/jails-system/xjail1/hostname_xorg.conf</em>, а&nbsp;в&nbsp;настройках клетки и&nbsp;параметре <strong>exec_master_prestart</strong>, которая отрабатывает в&nbsp;мастер хосте перед запуском клетки, просто копируем нужную конфигу в&nbsp;<em>/etc/X11/xorg.conf</em> клетки. Таким образом, как&nbsp;бы не&nbsp;отличались хост-машины графическими драйверами, настройками и&nbsp;количеством мониторов, система всегда будет запускаться с&nbsp;правильными и&nbsp;оптимальными настройками для активной физической системы. Некоторые WM&nbsp;могут запоминать геометрию и&nbsp;координаты окон при последнем запуске и&nbsp;стараться восстанавливать на&nbsp;прежнем месте. Если это является проблемой, достаточно найти файлы отвечающие за&nbsp;этот кеш и&nbsp;копировать их&nbsp;таким&nbsp;же образом, но&nbsp;как правило, все&nbsp;WM имеют на&nbsp;этот счет возможность выключить эту особенность или понимают, что геометрия окна изменилась.</p>
+			<p>Кроме этого, на&nbsp;VPS/сервере снапшотов мы&nbsp;можем запустить внутри jail VNC/NX/RDP сервер для соединений, когда большая видеоактивность нам не&nbsp;нужна. Это позволит соединиться в&nbsp;наш рабочий стол с&nbsp;любых отличных от&nbsp;FreeBSD систем, а&nbsp;также пользоваться тонким клиентом с&nbsp;каких-нибудь low power ARM-устройств, которые сейчас можно достать из&nbsp;любого пылесоса и&nbsp;на&nbsp;которых Linux/FreeBSD/Android работают вполне терпимо.</p>
+			<p>Также, нам останется в&nbsp;<strong>exec_master_poststop</strong> вписать команду, которая запустит rsync для отправки данных на&nbsp;сервер, а&nbsp;в&nbsp;<strong>exec_master_prestart</strong>&nbsp;&mdash; rsync для их&nbsp;получения. Другими словами, когда вы&nbsp;завершаете работу с&nbsp;jail, все модификации отправляются на&nbsp;сервер, при запуске&nbsp;&mdash; принимаются с&nbsp;него. В&nbsp;случае с&nbsp;ZFS, крайне удобно ставить zfs send в&nbsp;crontab, чтобы она отправляла модификации постоянно, тогда финальная сихронизация при остановке jail займет пару секунд. В&nbsp;случае с&nbsp;rsync/csync2 это делать не&nbsp;очень желательно, ввиду паразитной I/O нагрузки при сканировании модификаций.</p>
+			<p>Также, если у&nbsp;вас есть какие-то объемные данные, которые должны быть доступны в&nbsp;клетке при работе на&nbsp;одной из&nbsp;WKS, но&nbsp;совершенно не&nbsp;нужны (ввиду объемов) или даже нежелательны при работе на&nbsp;других, удобно использовать <strong>fstab.local</strong>, через который при запуске клетки на&nbsp;хосте&nbsp;N будут примонтированы дополнительные файловые системы из&nbsp;мастер-хоста. К&nbsp;примеру, на&nbsp;домашней машине у&nbsp;вас есть склад media-материалов (видео, музыка, образы виртуальных машин VirtualBox), которые совершенно не&nbsp;хочется реплицировать и&nbsp;они просто не&nbsp;нужны при работе на&nbsp;других станциях. В&nbsp;таком случае, файл <em>$workdir/jails-fstab/xjail1.fstab.local</em> на&nbsp;одной из&nbsp;систем может иметь запись:
+			<pre class="brush:bash;ruler:true;">
+				/usr/media /usr/media nullfs rw 0 0
+			</pre>
+			<p>которая монтирует /usr/media директорию из&nbsp;мастер-ноды в&nbsp;jail, однако в&nbsp;ZFS репликации он&nbsp;учавствовать не&nbsp;будет, поскольку это отдельный dataset (для rsync достаточно добавить --exclude)</p>
+			<p>Подводя итоги: с&nbsp;помощью небольших телодвижений по&nbsp;связке FreeBSD, ZFS, zrep (или rsync), cbsd и&nbsp;Xjail мы&nbsp;получаем плавающее рабочее окружение, не&nbsp;страдающее от&nbsp;разницы в&nbsp;периферии рабочих станций, без потери в производительности как при случае виртуальных машин и&nbsp;не&nbsp;требующая постоянное ручное переконфигурирование, получаем резервное копирование в&nbsp;виде избыточности копий на&nbsp;N системах и&nbsp;защиту от&nbsp;<strong>rm -rf /</strong> в&nbsp;виде TimeMachine-like особенностей ZFS-снапшотов. Окружение может быть доступно по&nbsp;VNC, однако ввиду неготовности сегодняшних каналов обеспечивать качественную связь в&nbsp;современных реалиях, предполагаем что при&nbsp;99% времени всей работы, задействована именно локальная графическая/media подсистема.</p>
+			<div class="warning">
+			<p><strong>Внимание:</strong> Будьте аккуратны с идеями выноса рабочего окружения к NoName оператору и всегда пользуйтесь <a href="/ru/cbsd_geli.html">криптованием</a> файловых систем.</p>
+		</div>
+			
+			<p>АЛСО: в&nbsp;подобной схеме, вместо JAIL может выступать любой образ виртуальной машины на&nbsp;гипервизоре (например, хостинг Linux в&nbsp;bhyve или Windows в&nbsp;VBOX) предоставляя возможность делать снапшоты тех файловых систем внутри гвестов, которые о&nbsp;возможностях снапшотов даже и&nbsp;не&nbsp;мечтают. Однако это тема уже другой, не&nbsp;связанной с&nbsp;Xorg-in-jail статьи.</p>
+	<h2><a name="kdejail"><span>HowTo с нуля по созданию клетки KDE4 с NVIDIA GL</span></a></h2>
+	<div class="block">
+	<p>Для пользователей с Radeon/Intel графикой шаги аналогичны, кроме установки nvidia-settings, nvidia-driver и /usr/src</p>
+        <p>Исходное состояние - установленная с нуля FreeBSD, без портов и дерева исходных кодов системы</p>
+	<p><strong>1)</strong> Устанавливаем <strong>CBSD</strong> и инициализируем рабочий каталог:</p>
+	<pre class="brush:bash;ruler:true;">
+% pkg install cbsd
+% env workdir="/usr/jails" /usr/local/cbsd/sudoexec/initenv
+% service cbsdd start
+	</pre>
+
+	<p>2) Нам понадобиться мышь, включим сервис <strong>moused</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% sysrc moused_enable="YES"
+	</pre>
+	<p>3) Создаем jail с именем <strong>kde4</strong>. В подменю <strong>pkglist</strong> выберем MANUAL и напишем, какой софт нам необходим в клетке: <strong>x11/xorg x11/kde4</strong>:</p>
+	<p>Остальной софт и параметры - на ваше усмотрение.</p>
+	<p>4) Нам понадобиться ядро с патчами. Вы можете собрать свое по инструкции <a href="https://lists.freebsd.org/pipermail/freebsd-current/2013-May/041872.html">FreeBSD maillist</a> либо получить из репозитория <strong>CBSD</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd repo action=get sources=kernel
+	</pre>
+	<p>5) Перезапишем полученное ядро в ваш каталог <em>/boot/kernel</em>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd upgrade target=kernel
+	</pre>
+	<p>6) Перезагружаем систему на новое ядро:</p>
+	<pre class="brush:bash;ruler:true;">
+% shutdown -r now
+	</pre>
+	<p>7) В параметрах jail разрешим <strong>allow_kmem</strong> и изменим <strong>devfs_ruleset</strong> на любой не существующий (например <strong>99</strong>). В этом случае, будет открыт весь <em>/dev</em>. Если вам все открывать ненадо - воспользуйтесь информацией выше как создать свой <strong>ruleset</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd jstop kde4
+% cbsd jset jname=kde4 allow_kmem=1
+% cbsd jset jname=kde4 devfs_ruleset=99
+	</pre>
+	кроме этого (только для NVIDIA пользователей) попросим <strong>CBSD</strong> примонтировать <em>/usr/src</em> в jail. Это необходимо для сборки <strong>nvidia-driver</strong> порта (от которого нужен <strong>libGL.so</strong> в окружении)
+	<pre class="brush:bash;ruler:true;">
+% cbsd jset jname=kde4 mount_src=1
+	</pre>
+	<p>Вместо <strong>jset</strong> можно использовать TUI конфигуратор: cbsd jconfig jname=kde4</p>
+	<p>8) Только для NVIDIA пользователей: нам понадобиться дерево исходных кодов в <em>/usr/src</em> для сборки <em>x11/nvidia-drivers</em></p>
+	<p>Для этого, наполните <em>/usr/src</em> и <em>/usr/ports</em> соответствующим содержимим. Либо, можно попросить это сделать <strong>CBSD</strong></p>
+	<p>Для наполнения <em>/usr/ports</em> из <strong>SVN FreeBSD</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd portsup
+	</pre>
+	<p>Для наполнения <em>$workdir/src/src\*</em> (на который мы создадим симлинк чтобы не держать две копии) из <strong>SVN FreeBSD</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd srcup
+% rmdir /usr/src ( либо на ZFS инсталляциях, удалить псевдо-fs: <strong>zfs destroy zroot/usr/src</strong> )
+% ln -sf ~cbsd/src/src_10.1/src /usr/src
+	</pre>
+	<p>(Если версия FreeBSD не 10.1, путь будет другим)</p>
+	<p>9) Только для NVIDIA пользователей: установим зависимости <strong>nvidia-driver</strong> из репозитория установкой и удалением <strong>nvidia-driver</strong>. Кроме этого, нам понадобится <strong>glproto</strong></p>
+	<pre class="brush:bash;ruler:true;">
+% pkg install x11/glproto x11/nvidia-driver 
+% pkg remove nvidia-driver
+	</pre>
+	<p>10) Только для NVIDIA пользователей: Устанавливаем драйвер NVIDIA из портов</p>
+	<pre class="brush:bash;ruler:true;">
+	env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+	</pre>
+	<p>11) Только для NVIDIA пользователей: Прописываем модуль <strong>nvidia.ko</strong> в автозагрузку, увеличиваем <strong>ipc.shmall</strong> как советует порт:
+	<pre class="brush:bash;ruler:true;">
+% sysrc kld_list="nvidia"
+% echo "kern.ipc.shmall=1310720" >> /etc/sysctl.conf
+	</pre>
+	<p>11) Те же действия, но для пользователей с графикой от <strong>Intel</strong>. Добавить в <em>/boot/loader.conf</em>:</p>
+	<pre class="brush:bash;ruler:true;">
+	hw.vga.textmode=1                                                                                                                                                                                                                                                              
+	drm_load="YES"                                                                                                                                                                                                                                                                 
+	drm2_load="YES"                                                                                                                                                                                                                                                                
+	i915kms_load="YES"
+	</pre>
+	<p>12) Перезагружаем сервер (или подгружаем модули вручную), запускаем и подготавливаем клетку</p>
+	<pre class="brush:bash;ruler:true;">
+% shutdown -r now
+% cbsd jstart kde4
+% cbsd jlogin kde4
+	</pre>
+	<p>13) Последующие шаги выполняются уже в окружении. Внутри jail выставим dbus в автозагрузку</p>
+	<pre class="brush:bash;ruler:true;">
+% sysrc dbus_enable="YES"
+% service dbus start
+	</pre>
+	<p>14) Устанавливаем в jail <strong>nvidia-driver</strong> по аналогии с пунктом <strong>9</strong> и <strong>10</strong></p>
+<pre class="brush:bash;ruler:true;">
+% pkg install x11/glproto x11/nvidia-driver 
+% pkg remove nvidia-driver
+% env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+</pre>
+	<p>15) Если не все еще умеете писать рабочий <strong>xorg.conf</strong> с нуля, лучше сгенерировать его через <strong>nvidia-xconfig</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+% pkg install x11/nvidia-xconfig
+% nvidia-xconfig
+	</pre>
+	<p>Пользователи с Intel могут воспользоваться штатным X:</p>
+	<pre class="brush:bash;ruler:true;">
+% X -configure
+	</pre>
+	<p>И скопировать сгенерированный <em>/root/xorg.conf.new</em> в <em>/etc/X11/xorg.conf</em></p>
+	<p>Допишем в сгенерированный <em>/etc/X11/xorg.conf</em> секцию <strong>ServerFlags</strong>:</p>
+	<pre class="cli;">
+Section "ServerFlags"
+       Option         "AutoAddDevices" "off"
+       Option         "AutoEnableDevices" "off"
+       Option         "AllowEmptyInput" "off"
+EndSection
+</pre>
+	<p>16) Создаем пользователя xuser, если вы этого не сделали при создании jail:</p>
+	<pre class="brush:bash;ruler:true;">
+% pw useradd xuser -m -s /bin/csh
+	</pre>
+	<p>17) Заходим пользователем, пишем стандартный <strong>~/.xinitrc</strong> и запускаем KDE:</p>
+	<pre class="brush:bash;ruler:true;">
+% su - xuser
+% echo startkde >> ~/.xinitrc
+% xinit
+	</pre>
+	<p>Возможно, будет полезно провести дополнительные настройки</p>
+	<p>18) Примонтировать Linux-специфичные FS, для нормальной работы Linux-приложений в клетке. Для этого в мастер ноде создадим локальный fstab для клетки с таким содержимым:</p>
+	<p>файл <em>/usr/jails/jails-fstab/fstab.kde4.local</em></p>
+	<pre class="cli;">
+	linprocfs       /usr/compat/linux/proc  linprocfs       rw      0       0
+	</pre>
+	<p>19) Если вы планируете синхронизировать этот jail с другим сервером и периодически работать на другой ноде, при этом конфигурация второй ноды отличается, лучше всего сохранить xorg.conf в мастер-ноду и создать скрипт, который будет копировать его каждый раз в /etc/X11/ клетки. 
+	Тоже самое необходимо будет сделать на другой ноде</p>
+	<p>Делается в мастер ноде</p>
+	<pre class="brush:bash;ruler:true;">
+% cp /usr/jails/jails-data/kde4-data/etc/X11/xorg.conf /etc/X11
+</pre>
+<p>в каталоге <em>/usr/jails/jails-system/kde4/master_poststart.d</em> создать скрипт <strong>xorg.sh</strong> с содержимым:</p>
+<pre class="cli;">
+#!/bin/sh
+cp -a /etc/X11/xorg.conf ${data}/etc/X11/xorg.conf
+</pre>
+<p>Сделать файл исполняемым:</p>
+<pre class="brush:bash;ruler:true;">
+% chmod +x /usr/jails/jails-system/kde4/master_poststart.d/xorg.sh
+</pre>
+<p>Также можно поступить с /etc/resolv.conf и /etc/hosts при надобности</p>
+	</div>
+	
+<!--# include file="_end.html" -->

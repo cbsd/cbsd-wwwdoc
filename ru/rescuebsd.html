@@ -1,0 +1,39 @@
+<!--# include file="_start.html" -->
+	<h1><span>RescueBSD LiveCD</span></h1>
+	<div class="block">
+		<p><strong>rescuebsd</strong> и&nbsp;<strong>xrescuebsd</strong>&nbsp;&mdash; это клетки для <strong>CBSD</strong> (консольная и&nbsp;с&nbsp;X сервером соответственно), содержащие популярный набор&nbsp;ПО для настройки и&nbsp;восстановления систем, утилиты для анализа сети и&nbsp;тестирования аппаратного обеспечения, которые могут быть полезны в&nbsp;качестве дистрибутивов при восстановительных работах. Работа над разработкой LiveCD дистрибутива в&nbsp;мои планы не&nbsp;входит, нижедоступные образы являются по&nbsp;большей части побочным эффектом от&nbsp;<strong>jail2iso</strong> и&nbsp;демонстрацией ее&nbsp;работы.</p>
+		<p>Данные клетки могут быть получены через <strong>cbsd repo</strong>, кастомизированы, и&nbsp;использованы в&nbsp;качестве PXE -клеток для бездисковой загрузки по&nbsp;сети, либо посредством <strong>cbsd jail2iso</strong> получены USB Memstick и&nbsp;DVD/CD&nbsp;образы.</p>
+		<p>Список&nbsp;ПО, входящего в&nbsp;оригинальные клетки: <a href="/ru/misc/rescuebsd_list.html">rescuebsd</a>, <a href="/ru/misc/xrescuebsd_list.html">xrescuebsd</a></p>
+		<p>Все .img (USB Memstick образы) могут быть записаны на&nbsp;USB носитель через команду:</p>
+		<pre class="brush:bash;ruler:true;">
+			% dd if=_path_to_img.img_ of=/dev/da0 bs="10240" conv="sync"
+		</pre>
+		<p>Будьте внимательны, прописывая корректное имя устройства в&nbsp;<em>of=</em> аргументе</p>
+		<table class="images">
+			<thead>
+			<tr>
+				<th><strong>FreeBSD CURRENT aka 11</strong></th>
+				<th></th>
+				<th></th>
+			</tr>
+			</thead><tbody>
+			<tr>
+				<td>no&nbsp;GUI</td> <td>ISO</td> <td><a href="http://dl.bsdstore.ru/freebsd/amd64/11/live-rescue/rescuebsd-11_amd64.iso">FreeBSD x86-64</a></td>
+			</tr>
+			<tr>
+				<td>no&nbsp;GUI</td> <td>Memstick</td> <td><a href="http://dl.bsdstore.ru/freebsd/amd64/11/live-rescue/rescuebsd-11_amd64.img">FreeBSD x86-64</a></td>
+			</tr>
+			<tr>
+				<td>FreeBSD X11 with Intel graphics</td> <td>ISO</td> <td><a href="http://dl.bsdstore.ru/freebsd/amd64/11/live-xrescue/xrescuebsd-11_amd64.iso">FreeBSD x86-64</a></td>
+			</tr>
+			<tr>
+				<td>FreeBSD X11 with Intel graphics</td> <td>Memstick</td> <td><a href="http://dl.bsdstore.ru/freebsd/amd64/11/live-xrescue/xrescuebsd-11_amd64.img">FreeBSD x86-64</a></td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="block">
+		<p>xrescuebsd livecd screenshot:</p>
+		<p class="text-center"><img src="/img/xrescuebsd1.png" alt="" /></p>
+	</div>
+<!--# include file="_end.html" -->

@@ -1,0 +1,45 @@
+	<h1><span>Wirking with packages and pkg(7) in jail via CBSD </span></h1>
+	
+	<h2><a name="pkd_cmd">Command: pkg</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p><strong>cbsd pkg</strong> - is wrapper around stanart FreeBSD <a href="http://man.freebsd.org/pkg/7" target="_blank">pkg(7)</a> tools for adding <strong>jname</strong> argument for more convenient work with the jail from the master host</p>
+		<p>Via <strong>mode=</strong> argument indicating a needet action. Values can be:</p>
+		<ul>
+			<li>add,install - to install packages</li>
+			<li>remove - to remove packages</li>
+			<li>bootstrap - init pkg (normally done in the jail one times on creating)</li>
+			<li>info, query - execute queries <em>info</em> or <em>query</em> with the same syntax pkg</li>
+			<li>update - execute pkg update</li>
+			<li>upgrade - execute upgrade</li>
+		</ul>
+		<p>Keep in mind that must first be specified parameters <strong>mode</strong> and <strong>jname</strong>. All that comes after - not analyzed and treated <a href="http://man.freebsd.org/pkg/7" target="_blank">pkg(7)</a> as is.</p>
+		<p>In addition, please note that all operations are performed with the argument <strong>-y</strong> to suppress the interactivity that basically, you need to work in automated scripts.</p>
+		<p><strong>Example1:</strong> Get installed packages frin jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=query jname=jail1 %o
+		</pre>
+		<p><strong>Example2:</strong> Install bash, mc, wget in mytest1 jail:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=install jname=mytest1 bash mc wget
+		</pre>
+		<p>or that much better (in order to avoid the same name in different categories) indicate origin package, not the name:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=install jname=mytest1 shells/bash ftp/wget misc/mc
+		</pre>
+		<p><strong>Example3:</strong> Upgrade mc package in jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=upgrade jname=jail1 mc
+		</pre>
+		<p><strong>Example4:</strong> Upgrade all packages in jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=upgrade jname=jail1
+		</pre>
+		<p><strong>Example5:</strong> Remove wget and lsof packages:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=remove jname=jail1 wget lsof
+		</pre>
+	</div>

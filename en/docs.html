@@ -1,0 +1,100 @@
+<!--# include file="_start.html" -->
+<!--# include file="translate.html" -->
+	<h1><span>Documentation</span></h1>
+	<h2><a name="docs">General information</a></h2>
+	<div class="block">
+		<ul>
+			<li><a href="cbsd_additional.html">What you need to know about CBSD</a></li>
+			<li><a href="cbsdweb.html">CBSD WEB interface</a></li>
+			<li><a href="cbsdsh.html">About CBSD shell and SQLite3</a></li>
+			<li><a href="installing_cbsd.html">Installing CBSD</a></li>
+			<li><a href="base_cbsd.html">Building and upgrading bases</a></li>
+			<li><a href="cmdsyntax_cbsd.html">cbsd syntax</a></li>
+			<li><a href="cbsd_rcconf.html">jail settings</a></li>
+			<li><a href="cbsd_vnet.html">cbsd jail and VIMAGE (vnet)</a></li>
+			<li><a href="cbsd_qemu_usermode.html">cbsd and Qemu User mode</a></li>
+			<li><a href="cbsd_geli.html">encrypting images and CBSD</a></li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_repo_ssi.html">Operation with repository</a> :: repo, repo-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">How does a helper for CBSD image</a> :: imghelper</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_history_ssi.html">cbsd command history</a> :: CBSD history</li>
+			<li><a href="custom_freecbsd.html">Modification which are carried out by CBSD scripts in FreeBSD</a></li>
+			<li><a href="cbsd_taskd.html">cbsd taskd</a> :: task, taskls</li>
+			<li><a href="xorg_in_jail.html">FreeBSD: Xorg in jail</a></li>
+			<li><a href="bhyve.html">FreeBSD: CBSD and bhyve</a></li>
+			<li><a href="xen.html">FreeBSD: CBSD and XEN</a></li>
+		</ul>
+	</div>
+	<h2><a name="jailsflow">Operation with jail</a></h2>
+	<div class="block">
+		<p><a href="/en/workflow_cbsd.html">Single file</a></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_ssi.html">jail create via dialog menu</a> :: jcreate, jconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_secondary_ssi.html">other methods of creating jail</a> :: jcreate, jconstruct</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">Profiles for jail creation</a> :: jcreate, jconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html">jail config</a> :: jconfig</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jstop_jstart_ssi.html">starting and stoping jail</a> :: jstart, jstop, jrestart</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jorder_ssi.html">jail starting order</a> :: jorder</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jremove_ssi.html">jail removal</a> :: jremove</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrename_ssi.html">jail renaming</a> :: jrename</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jupgrade_ssi.html">jail upgrade</a> :: jupgrade</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_natcfg_ssi.html">working with NAT</a> :: natcfg, naton, natoff</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jls_ssi.html">jails list</a> :: jls</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jlogin_ssi.html">jail login</a> :: jlogin</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jget_ssi.html">work with jail parameters</a> :: jset,jget</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jclone_ssi.html">jail cloning</a> :: j[r]clone</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jsnapshot_ssi.html">jails snapshot (zfs-only)</a> :: jsnapshot</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jexport_ssi.html">jail export</a> :: jexport</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jimport_ssi.html">jail import</a> :: jimport</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jbackup_ssi.html">backup and file replication for jail</a> :: jbackup</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jdescr_ssi.html">jail description</a> :: jdescr</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcoldmigrate_ssi.html">jail cold migration</a> :: jcoldmigrate</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrctl_ssi.html">jail limits control</a> :: jrctl, jrctl-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_ddns_ssi.html">Dynamic DNS for jail</a> :: ddns</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jail2iso_ssi.html">Generation of bootable ISO and USB Memstick from jail</a> :: jail2iso</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jlocate_ssi.html">Searching for jail in node farm</a> :: jwhereis, jailmapdb</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailscp_ssi.html">Copying files from/to jail filesystem</a> :: jailscp</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html">A few words about jail traffic counting</a> :: fwcounters</li>
+		</ul>
+		<p><h2>Helpers/Modules</h2></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/pkg.d_ssi.html">Working with packages and pkg(7) in jail via CBSD</a> :: pkg.d</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/bsdconf.d_ssi.html">Working with passwd(1), sysrc(8), service(8) in jail via CBSD</a> :: bsdconf.d</li>
+		</ul>
+		<p><h2>CBSD Jail: mass management</h2></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_puppet_ssi.html">Manage CBSD with Puppet</a> :: CBSD and Puppet</li>
+		</ul>
+	</div>
+	<h2><a name="jailsflow">Operation with virtual machine via bhyve</a></h2>
+	<div class="block">
+		<p><a href="/en/workflow_bhyvecbsd.html">Single file</a></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcreate_ssi.html">VM create</a> :: bcreate, bconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bconfig_ssi.html">VM config</a> :: bconfig</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bstop_bstart_ssi.html">starting and stoping VM</a> :: bstart, bstop</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jorder_ssi.html">VM starting order</a> :: border</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bremove_ssi.html">VM removal</a> :: bremove</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_brename_ssi.html">VM renaming</a> :: brename</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bls_ssi.html">VMs list</a> :: bls</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bvnc_ssi.html">Using VNC with bhyve</a> :: bconfig</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_blogin_ssi.html">Attach to console</a> :: blogin</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bclone_ssi.html">VM cloning</a> :: b[r]clone</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bexport_ssi.html">VM export</a> :: bexport</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bimport_ssi.html">VM import</a> :: bimport</li>
+
+		</ul>
+	</div>
+	<h2><a name="nodesflow">Operation with nodes</a></h2>
+	<div class="block">
+		<p><a href="/en/node_cbsd.html">Single file</a></p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_overview_ssi.html">What nodes is meant</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_list_ssi.html">list of nodes</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_add_ssi.html">adding nodes</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_del_ssi.html">removal nodes</a> :: node</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_rexe_ssi.html">execute commands on remote nodes</a> :: rexe</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_nlogin_ssi.html">Login into node by CBSD user via ssh</a> :: nlogin</li>
+<!--			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_nodescp_ssi.html">Copying files from/to remote nodes/jails</a> :: nodescp</li> -->
+		</ul>
+</div>
+<!--# include file="_end.html" -->

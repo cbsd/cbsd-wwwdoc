@@ -1,0 +1,129 @@
+	<h1><span>Profiles for jail creation</span></h1>
+	
+	<h2><a name="jail_profiles">Command: jcreate</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jcreate
+		</pre>
+		<p><strong>Description</strong></p>
+		<p>Suppose you need to create a series of alike jails which all require a certain set of software and configuration,for example an environment with running an nginx http server with a custom index.html. One way to achieve this is to create a jail (eg jail1), perform all necessary adjustments and do a <strong>jexport</strong>. Afterwards whenever you need a new instance, run the command:</p>
+		<pre class="brush:bash;ruler:true;">
+   % cbsd jimport jname=jail1 newjname=jail2
+		</pre>
+		<p>This creates an image on the basis of jail1 called jail2. Another way to get similar results is making use of <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jclone_ssi.html">jclone</a>. However, it is not always convenient (especially in terms of keeping software up to date in the original jail). Another way is to to apply profiles and alternative <strong>skel</strong>-directories for applications we need to change on the fly when creating fresh jails.</p>
+		<p><strong>Example</strong>:</p>
+		<h2>1) Write <strong>jconf</strong>:</h2>
+		<p>If you want to create a non-interactive scripts, create a template from which to create new a jail. To do this, run <strong>cbsd jconstruct-tui</strong> and when asked if you want to create the jail immediately select not to. In this case, the command to be withdrawn for <strong>jcreate</strong> and the path to jconf - this is the configuration for which you are creating the jail. Alternatively, it is possible to write manually, for example:</p>
+		<pre class="brush:bash;ruler:true;">
+% mkdir /root/share
+% cat > /root/share/nginx.jconf << EOF
+jname="jail1";
+path="/usr/jails/jails/jail1";
+host_hostname="jail1.my.domain";
+ip4_addr="DHCP";
+mount_devfs="1";
+allow_mount="1";
+allow_devfs="1";
+allow_nullfs="1";
+mount_fstab="/usr/jails/jails-fstab/fstab.jail1";
+arch="amd64";
+mkhostsfile="1";
+devfs_ruleset="4";
+ver="10.1";
+basename="";
+baserw="0";
+mount_src="0";
+mount_obj="0";
+mount_kernel="0";
+mount_ports="1";
+astart="1";
+data="/usr/jails/jails-data/jail1-data";
+vnet="0";
+applytpl="1";
+mdsize="0";
+rcconf="/usr/jails/jails-rcconf/rc.conf_jail1";
+floatresolv="1";
+
+exec_poststart="0";
+exec_poststop="";
+exec_prestart="0";
+exec_prestop="0";
+
+exec_master_poststart="0";
+exec_master_poststop="0";
+exec_master_prestart="0";
+exec_master_prestop="0";
+pkg_bootstrap="1";
+user_pw_root='rootpw'
+interface="auto"
+jailskeldir="/root/share/nginx-jail"
+pkglist="/root/share/pkglist.txt";
+exec_start="/bin/sh /etc/rc"
+exec_stop="/bin/sh /etc/rc.shutdown"
+EOF
+		</pre>
+		<p>Where the most important for us:</p>
+		<ul>
+			<li><strong>jail1</strong> - jail name</li>
+			<li><strong>user_pw_root</strong> - parameter sets the appropriate root password (you can generate password file instead in skel-dir)</li>
+			<li><strong>ip4_addr="DHCP"</strong> - causes <strong>CBSD</strong> take the first free IP range of nodepool</li>
+			<li><strong>jailskeldir="/root/share/nginx-jail"</strong> - alternative path to <strong>skel</strong>-dir, applied after the jail creation</li>
+			<li><strong>pkglist="/root/share/pkglist.txt"</strong> - path to a file that defines a set of software in the cell when it is created</li>
+		</ul>
+
+		<h2>2) Write pkglist.txt</h2>
+		<p>Just listed origin or packagename of software that want to get in the jail:</p>
+		<pre class="cli">
+% cat > /root/share/pkglist.txt << EOF
+www/nginx
+shells/bash
+EOF
+		</pre>
+
+		<h2>3) skel-directories</h2>
+		<p>Custimize directories of additional files that are copied to the jail. Namely - prescribe nginx in rc.conf inside the jail and push into <em>/usr/local/www/nginx/index.html</em> some text to output:</p>
+		<pre class="brush:bash;ruler:true;">
+% cp -a /usr/local/cbsd/share/jail-skel /root/share/nginx-jail
+% mkdir -p /root/share/nginx-jail/usr/local/www/nginx
+% cat > /root/share/nginx-jail/usr/local/www/nginx/index.html << EOF
+&lt;html&gt;
+   &lt;body&gt;
+      &lt;pre&gt;
+      It's been a hard day's night
+      And I've been working like a dog
+      It's been a hard day's night
+      I should be sleeping like a log
+      &lt;/pre&gt;
+   &lt;/body&gt;
+&lt;/html&gt;
+EOF
+% sysrc -f /root/share/nginx-jail/etc/rc.conf nginx_enable="YES"
+		</pre>
+
+		<h2>4) the creation and launch</h2>
+		<p>Create a environment, run and check:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd jcreate jconf=/root/share/nginx.jconf
+% cbsd jstart jail1
+% curl http://X.Y.N.M
+      It's been a hard day's night
+      And I've been working like a dog
+      It's been a hard day's night
+      I should be sleeping like a log
+		</pre>
+
+		<h2>Profiles for jconstruct-tui</h2>
+		<p>If you want to manually create these jails, choosing when it should be necessary skel-directories or the default settings, create the directory $workdir/etc file named jail-freebsd-<strong>XXXX</strong>.conf with minimum content:
+		<pre class="cli">
+jail_profile="XXX"
+		</pre>
+		<p>where XXX - name of the profile. Profile <strong>vnet</strong> in CBSD is created as an example, you see it in <em>$workdir/etc/defaults/jail-freebsd-vnet.conf</em></p>
+		<p>In turn, it overwrites the default values from the profile defaults: <em>jail-freebsd-default.conf</em></p>
+		<p>If you rarely use the default profile and want to CBSD default offered at your profile, change the value default_profile putting it in the name of your profile:</p>
+		<pre class="brush:bash;ruler:true;">
+echo 'default_profile="XXX"' > ~cbsd/etc/jail-freebsd-default.conf
+		</pre>
+		</div>
+		<div class="warning">
+		<p>Please note that the files in the $workdir/etc/defaults can not be edited - as well as in the /etc/defaults. If you want to override the default values, copy the directory $workdir/etc/defaults file with the same name in the directory $workdir/etc and change</p>
+		</div>

@@ -1,0 +1,914 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>FreeBSD Jail и Bacula</span></h1>
+	<!-- Тэги: <strong>howto</strong> -->
+	
+	<h2><a name="intro">Введение</a></h2>
+	<div class="block">
+		//draft, unformatted
+
+		<p>Ниже представлен <strong>howto</strong> по организации резервного копирования на базе FreeBSD в качестве ОС и свободного продукта <strong>Bacula</strong> (<a href="http://www.bacula.org/" target="_blank">http://www.bacula.org/</a>). Результатом статьи является клетка <strong>bacula</strong> в репозитории имиджей <strong>CBSD</strong>, которую вы всегда можете получить через:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 cbsd repo action=get sources=img name=bacula
+		</pre>
+		<p>и использовать в свое удовольствие.</p>
+		<p>Статья разбита на 2 части&nbsp;— непосредственно настройка <strong>Bacula</strong> и написанию скрипта, призванного снять рутину с системных инженеров путем автоматизации типовых конфигураций по шаблонным файлам. На детальном конфигурированиии самой <strong>Bacula</strong> особого внимания заострять не будем, поскольку ей посвящено немало статей и проект имеет исчерпывающую документацию, которая, как предполагается&nbsp;— изучена.</p>
+	</div>
+	
+	<h2><a name="dt">Принятые условности</a></h2>
+	<div class="block">
+		<ul>
+			<li>Скрипт будем создавать на примере фермы серверов под управлением <strong>FreeBSD/jail</strong>, однако ничего не мешает адаптировать эту схему под вашу <strong>FavoriteOS</strong>&nbsp;— <strong>bacula</strong> имеет фаловые агенты для большинства современных ОС: <strong>MacOSX</strong>, <strong>Linux</strong> и <strong>Windows</strong>.</li>
+			<li>Для бОльшей солидности, представим себе, что обслуживаемая ферма имеет несколько десятков физических нод, размещающих на себе несколько сотен клеток, с которыми ежедневно могут происходить различные телодвижения&nbsp;— миграция с одной ноды на другую, переименовывание, удаление и создание новых.</li>
+			<li> <strong>Bacula-server</strong> будет запущен в клетке с именем <strong>bacula</strong> и <strong>FQDN</strong>: <strong>bacula.my.domain</strong>, который ресолвится по данному имени на всех учавствующих в резервном копировании серверах, а также, доступен для них по портам <strong>tcp/9xxx</strong></li>
+			<li>Сам сервер, на котором запущена клетка <strong>Bacula</strong>, имеет достаточный объем жесткого диска для резервных копий, доступный клетке <strong>Bacula</strong>&nbsp;— это может быть выполнено запуском самой клетки на этом партишене, либо посредством <strong>bacula.fstab</strong> или <strong>zfs mount</strong>, примонтировано в директорию <strong>/var/bacula</strong> внутри клетки.</li>
+			<li> В <strong>Bacula</strong>, мы будем использовать один общий пул (<strong>Default</strong>) на все данные, тип пула&nbsp;— <strong>File</strong>. Те, если вы используете ленточные накопители, конфигурация будет немного иной.</li>
+			<li> В качестве пароля файловых демонов, договоримся использовать запись вида <strong>${node}srvpassword</strong>, где <strong>${node}</strong>&nbsp;— имя ноды.</li>
+		</ul>
+	</div>
+
+	<h2><a name="pt1">Часть 1/2: Настройка сервера.</a></h2>
+	<div class="block">
+		<p><strong>создание клетки и инсталляция ПО</strong></p>
+		<p>На сервере, выбранном в качестве Backup сервера, создаем стандартную клетку (например через <strong>cbsd jconstruct-tui</strong>) с именем <strong>bacula</strong> и полным именем <strong>bacula.my.domain</strong>. (разумеется, здесь может быть любое ваше имя) и устанавливаем необходимый софт через порты или <strong>pkg</strong>:
+		<p><em>На момент написания статьи, порт <strong>bacula-server</strong> по-умолчанию сконфигурирован на использование <strong>PgSQL</strong>. Если вы пользуетесь <strong>pkg</strong> и желаете использовать <strong>SQLite3</strong> как подразумевается статьей,  можно использовать соответствующий репозиторий <strong>nox</strong> от <strong>CBSD</strong> (<a href="/<!--#echo var="lang" -->/downloads.html">http://www.bsdstore.ru/ru/downloads.html</a>) либо собрать из портов. Узнать, с какими опциями собран софт на репозитории можно через <strong>pkg rquery</strong>. Вариант настройки <strong>Bacula+PgSQL</strong> можно посмотреть в конце статьи, однако, даже для нескольких десятков физических нод и нескольких сотен клеток, автор посчитал подъем СУБД <strong>PgSQL</strong>&nbsp;— избыточным решением.</em></p>
+		<pre class="brush:bash;ruler:rule;">
+			 pkg install bacula-server
+		</pre>
+	</div>
+	
+	<h2><a name="bacula">Настройка Bacula</a></h2>
+	<div class="block">
+		<p><strong>Файловая иерархия Bacula</strong></p>
+		<p>Теперь определимся с файловой иерархией конфигурационных файлов и выполним настройку <strong>Bacula</strong>. Стандартное местоположение конфигурационных файлов <strong>bacula-server</strong> в инсталляции по-умолчанию в <strong>FreeBSD</strong>: <em>/usr/local/etc/bacula/</em></p>
+		<pre class="brush:bash;ruler:rule;">
+				 /usr/local/etc/bacula/bacula-dir.conf   — конфигурационный файл директора
+				 /usr/local/etc/bacula/bacula-fd.conf    — конфигурационный файл агента (файловый демон/клиент)
+				 /usr/local/etc/bacula/bacula-sd.conf    — конфигурационный файл стореджа
+				 /usr/local/etc/bacula/bconsole.conf     — конфигурационный файл для консоли
+		</pre>
+		<p>Скопируем стандартные конфигурационные файл в рабочие:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 cd /usr/local/etc/bacula
+			 cp bacula-dir.conf.sample bacula-dir.conf
+			 cp bacula-sd.conf.sample bacula-sd.conf
+			 cp bacula-fd.conf.sample bacula-fd.conf
+			 cp bconsole.conf.sample bconsole.conf
+			 touch includes.conf
+		</pre>
+		<p><strong>Подготовка Bacula server</strong></p>
+		<p>Для того, чтобы не проводить огромное количество правок в одном конфигурационном файле <strong>bacula-dir.conf</strong>, вынесем через <em>@include</em> макрос те файлы, которые будем корректировать и/или будут генерироваться автоматически. Для большего удобства, будем подразумевать следующую иерархию конфигурационных файлов:</p>
+		<ul>
+			<li><em>/usr/local/etc/bacula/</em>&nbsp;— корень конфигурации Bacula</li>
+			<li><em>/usr/local/etc/bacula/address/</em>&nbsp;— каталог, содержащий параметр Address и пароль авторизации файлового демона для физических нод. Также, на эти файлы будут указывать символические ссылки для адреса клеток (ссылка будет указывать на адрес той физической ноды, на которой хостится клетка.</li>
+			<li><em>/usr/local/etc/bacula/fileset/</em>&nbsp;— выделенные в отдельную локацию списки путей на физических серверах (включая пути относящиеся к клеткам), которые следует включить или исключить из бекапа.</li>
+			<li><em>/usr/local/etc/bacula/hosts/</em>&nbsp;— конфигурация для бекапа физических машин</li>
+			<li><em>/usr/local/etc/bacula/jails/</em>&nbsp;— конфигурация для бекапа клеток</li>
+		</ul>
+		<p><strong>Настройка bacula-dir</strong></p>
+		<p><strong>bacula-dir.conf</strong></p>
+		<p>Произведем в <strong>bacula-dir.conf</strong> минимальные правки для запуска сервера:</p>
+		<p>В секции <strong>Director</strong> задаем имя директора:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Name = bacula-dir
+		</pre>
+		<p>Если дисковая подсистема достаточно быстрая (уровень raid>5+) и пропускная способность сети выше 50-100 Mbit/s, имеет смысл увеличить максимальное количество параллельных задач с 1 до, к примеру, 10:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Maximum Concurrent Jobs = 10
+		</pre>
+		<p>Зададим пароль, используемыемый консолью для доступа в директор:</p>
+		<div class="warning">
+			<p><strong>Внимание</strong>: устанавливайте свои сгенерированные случайным образом пароли. Эти пароли могут быть любой последовательностью и не передаются по сети.</p>
+		</div>
+		<em>Password = "consolepassword"</em>
+		<p>В секции JobDefs изменим имя:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Client = bacula-fd
+		</pre>
+		<p>в секции Job, описывающий задание по-умолчанию, поменяем имя BackupClient1 на более говорящее свое имя:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Name = "bacula.my.domain"
+		</pre>
+		<p>В секции Job, описыващий тип Restore, поменяем имя клиента на соответствующего локальному демону:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Client = backup1-fd
+		</pre>
+		<p>В секции FileSet опишем пути, которые будем сохранять у локального клиента:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 Include {
+				Options {
+					signature = MD5
+				}
+				File = /etc
+				File = /root
+				File = /usr/local/etc
+			}
+
+			Exclude {
+			}
+		</pre>
+		<p>В секции Client установим имя, адрес и пароль клиента bacula</p>
+		<pre class="brush:bash;ruler:rule;">
+				Name=bacula-fd
+				Address=bacula.my.domain
+				Password="filedaemonpassword" 
+		</pre>
+		<p>В секции Storage установим адрес и пароль storage-демона:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Address=bacula.my.domain
+				Password="storagepassword" 
+		</pre>
+		<p>В секции Catalog укажем, что в качестве бакенда будем использовать SQLite3 базу, как наименее требовательный движек:</p>
+		<pre class="brush:bash;ruler:rule;">
+				dbdriver = "dbi:sqlite3";
+		</pre>
+		<p>В секциях Messages переназначим лог-файл в более подходящее место и исправим email на тот, который мы проверяем (в примере: root@localhost):</p>
+		<pre class="brush:bash;ruler:rule;">
+				append = "/var/log/bacula/bacula.log" = all, !skipped
+		</pre>
+		<p>Откорректируем пул Default (если вы используете ленточный накопитель, настройка будет иной), добавив метку, нужное количество возможных файлов-библиотек, их максимальные объемы и срок ротации. В нашем примере будем импользовать префикс Vol в именах библиотек, максимальный объем каждого ограничим 100Gb, максимальное число которых&nbsp;— 100 (те, объем хранилища под резервные копии отводится 10 Tb). Повторное использование&nbsp;— через 65 дней.</p>
+		<pre class="brush:bash;ruler:rule;">
+				LabelFormat = "Vol" 
+				Maximum Volume Bytes = 50G
+				Maximum Volumes = 50
+				Maximum Volume Files = 0
+		</pre>
+		<p>Остальные параметры закомментируем (либо они будут вынесены в подключаемых файлах), добавив путь к остальной конфигурации через файл <em>/usr/local/etc/bacula/includes.conf</em>:</p>
+		<pre class="brush:bash;ruler:rule;">
+				@/usr/local/etc/bacula/includes.conf
+		</pre>
+		<p>Финальный вид <strong>bacula-dir.conf</strong> будет таким:</p>
+		<pre class="brush:bash;ruler:rule;">
+		Director {
+			Name = bacula-dir
+			DIRport = 9101
+			QueryFile = "/usr/local/share/bacula/query.sql" 
+			WorkingDirectory = "/var/db/bacula" 
+			PidDirectory = "/var/run" 
+			Maximum Concurrent Jobs = 10
+			Password = "consolepassword" 
+			Messages = Daemon
+		}
+
+		JobDefs {
+			Name = "DefaultJob" 
+			Type = Backup
+			Level = Incremental
+			Client = bacula-fd
+			FileSet = "Full Set" 
+			Schedule = "WeeklyCycle" 
+			Storage = File
+			Messages = Standard
+			Pool = File
+			Priority = 10
+			Write Bootstrap = "/var/db/bacula/%c.bsr" 
+		}
+
+		Job {
+			Name = "bacula.my.domain" 
+			JobDefs = "DefaultJob" 
+		}
+
+		Job {
+			Name = "BackupCatalog" 
+			JobDefs = "DefaultJob" 
+			Level = Full
+			FileSet="Catalog" 
+			Schedule = "WeeklyCycleAfterBackup" 
+			RunBeforeJob = "/usr/local/share/bacula/make_catalog_backup.pl MyCatalog" 
+			RunAfterJob  = "/usr/local/share/bacula/delete_catalog_backup" 
+			Write Bootstrap = "/var/db/bacula/%n.bsr" 
+			Priority = 11
+		}
+
+		Job {
+			Name = "RestoreFiles" 
+			Type = Restore
+			Client = bacula-fd
+			FileSet="Full Set"                  
+			Storage = File                      
+			Pool = Default
+			Messages = Standard
+			Where = /tmp/bacula-restores
+		}
+
+		FileSet {
+			Name = "Full Set" 
+			Include {
+				Options {
+					signature = MD5
+				}
+				File = /etc
+				File = /root
+				File = /usr/local/etc 
+		}
+
+			Exclude {
+			}
+		}
+
+		Schedule {
+			Name = "WeeklyCycle" 
+			Run = Full 1st sun at 23:05
+			Run = Differential 2nd-5th sun at 23:05
+			Run = Incremental mon-sat at 23:05
+		}
+
+		Schedule {
+			Name = "WeeklyCycleAfterBackup" 
+			Run = Full sun-sat at 23:10
+		}
+
+		FileSet {
+			Name = "Catalog" 
+			Include {
+				Options {
+					signature = MD5
+				}
+				File = "/var/db/bacula/bacula.sql" 
+			}
+		}
+
+		Client {
+			Name = bacula-fd
+			Address = localhost
+			FDPort = 9102
+			Catalog = MyCatalog
+			Password = "backup1.my.domainsrvpassword" 
+			File Retention = 30 days
+			Job Retention = 6 months
+			AutoPrune = yes
+		}
+
+		Storage {
+			Name = File
+			Address = bacula.my.domain
+			SDPort = 9103
+			Password = "storagepassword" 
+			Device = FileStorage
+			Media Type = File
+		}
+
+		# Generic catalog service
+		Catalog {
+			Name = MyCatalog
+			dbdriver = "dbi:sqlite3";
+			dbname = "bacula"; dbuser = "bacula"; dbpassword = "" 
+		}
+
+		Messages {
+			Name = Standard
+			mailcommand = "/usr/local/sbin/bsmtp -h localhost -f \"\(Bacula\) \&lt;%r\&gt;\" -s \"Bacula: %t %e of %c %l\" %r" 
+			operatorcommand = "/usr/local/sbin/bsmtp -h localhost -f \"\(Bacula\) \&lt;%r\&gt;\" -s \"Bacula: Intervention needed for %j\" %r" 
+			mail = root@localhost = all, !skipped            
+			operator = root@localhost = mount
+			console = all, !skipped, !saved
+			append = "/var/log/bacula/bacula.log" = all, !skipped
+			catalog = all
+		}
+
+		Messages {
+			Name = Daemon
+			mailcommand = "/usr/local/sbin/bsmtp -h localhost -f \"\(Bacula\) \&lt;%r\&gt;\" -s \"Bacula daemon message\" %r" 
+			mail = root@localhost = all, !skipped            
+			console = all, !skipped, !saved
+			append = "/var/log/bacula/bacula.log" = all, !skipped
+		}
+
+		Pool {
+			Name = Default
+			Pool Type = Backup
+			Recycle = yes
+			AutoPrune = yes
+			Volume Retention = 65 days
+			LabelFormat = "Vol" 
+			Maximum Volume Bytes = 100G
+			Maximum Volumes = 100
+		}
+
+		@/usr/local/etc/bacula/includes.conf
+		</pre>
+
+		<p><strong>Запуск bacula-dir</strong></p>
+
+		<p>Создадим каталоги для логов и архивов, дав им соответствующего владельца:</p>
+		<pre class="brush:bash;ruler:rule;">
+				mkdir -m 740 /var/log/bacula /var/bacula
+				chown bacula:bacula /var/log/bacula /var/bacula
+		</pre>
+		<p>Создадим SQLite3 базу и необходимую иерархию таблиц в <em>/var/db/bacula/bacula.db</em>:</p>
+		<pre class="brush:bash;ruler:rule;">
+				sh /usr/local/share/bacula/create_sqlite3_database 
+				sh /usr/local/share/bacula/make_sqlite3_tables 
+		</pre>
+		<p>Выставим флаг старта сервиса bacula-dir и запустим его:</p>
+		<pre class="brush:bash;ruler:rule;">
+				sysrc bacula_dir_enable=YES
+				service bacula-dir start
+		</pre>
+		<p>Половина работы выполнена ;)</p>
+
+		<p><strong>Bacula Storage daemon</strong></p>
+		<p>Нижеописанная конфигурация подразумевает использование в качестве стореджа для бекапа непосредственно дисковое пространство, на котором запущена клетка <strong>Bacula</strong>.</p>
+		<p>Сконфигурируем <em>/usr/local/etc/bacula/bacula-sd.conf</em></p>
+		<p>В секции Storage укажем соответствующее серверу имя:</p>
+		<pre class="brush:bash;ruler:rule;">
+		Name = bacula-sd
+		</pre>
+		<p>В секции Director укажем корректное имя и соответствующий пароль для авторизации SD с директором:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Name = bacula-dir
+				Password = "storagepassword" 
+		</pre>
+		<p>В секции Device укажем путь, где будут находится непосредственно резервные копии. Это может быть любой путь в пределах доступности клетки, который в свою очередь может быть подмонтирован отдельно через fstab клетки, либо подразумеваем, что клетка сама по себе запущена на достаточно объемном накопителе.  В нашем случае, путь к корню копий является <em>/var/bacula</em>:</p>
+		<pre class="brush:bash;ruler:rule;">
+				Archive Device = /var/bacula
+		</pre>
+		<p>Финальный вид <em>/usr/local/etc/bacula/bacula-sd.conf</em> в нашем случе будет следующим:</p>
+		<pre class="brush:bash;ruler:rule;">
+		Storage {
+			Name = bacula-sd
+			SDPort = 9103
+			WorkingDirectory = "/var/db/bacula" 
+			Pid Directory = "/var/run" 
+			Maximum Concurrent Jobs = 20
+		}
+
+		Director {
+			Name = bacula-dir
+			Password = "storagepassword" 
+		}
+
+		Director {
+			Name = bacula-mon
+			Password = "storagepassword" 
+			Monitor = yes
+		}
+
+		Device {
+			Name = FileStorage
+			Media Type = File
+			Archive Device = /var/bacula
+			LabelMedia = yes;
+			Random Access = Yes;
+			AutomaticMount = yes;
+			RemovableMedia = no;
+			AlwaysOpen = no;
+		}
+
+		Messages {
+			Name = Standard
+			director = bacula-dir = all
+		}
+		</pre>
+		<p>Добавим SD в rc.conf и запустим:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 sysrc bacula_sd_enable=YES
+			 service bacula-sd start
+		</pre>
+
+		<p><strong>bacula fd</strong></p>
+		<p>Клиент на сервере <strong>Bacula</strong> нам может понадобится по двум причинам&nbsp;— мы хотим делать резервную копию самой клетки и ее конфигурацию (разумеется, делать резервное копирование настроек Bacula, необходимо куда-то еще на независимый сервер) и для того, чтобы иметь возможность быстро раскатать информацию любой другой машины из бекапа.</p>
+		<p>В <em>/usr/local/etc/bacula-fd.conf</em> дадим имя и пароль нашему файловому демону. Финальный вид, файл будет иметь следующий вид:</p>
+		<pre class="brush:bash;ruler:rule;">
+		Director {
+			Name = bacula-dir
+			Password = "bacula.my.domainsrvpassword" 
+		}
+
+		FileDaemon{
+			Name = backup.my.domain
+			FDport = 9102
+			WorkingDirectory = /var/db/bacula
+			Pid Directory = /var/run
+			Maximum Concurrent Jobs = 20
+		}
+
+		# Send all messages except skipped files back to Director
+		Messages {
+			Name = Standard
+			director = bacula-dir = all, !skipped, !restored
+		}
+		</pre>
+		<p>Добавим FD в rc.conf и запустим:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 sysrc bacula_fd_enable=YES
+			 service bacula-fd start
+		</pre>
+		<p><strong>bacula console</strong></p>
+		<p>Для доступа в <strong>Bacula</strong> с помощью агентов (<strong>bat</strong>, <strong>bacula-web</strong>), в том числе для доступа bconsole непосредственно на самом сервере, изменим имя и пароль в соответствующем файле <em>/usr/local/etc/bacula/bconsole.conf</em>. Пароль должен соответствовать тому, который вы установили в <strong>bacula-dir</strong> в секции <strong>Directory</strong>. В нашем примере, <em>/usr/local/etc/bacula/bconsole.conf</em> будет иметь следующий вид:</p>
+
+		<pre class="brush:bash;ruler:rule;">
+		Director {
+				 Name = bacula-dir
+				 DIRport = 9101
+				 address = localhost
+				 Password = "consolepassword" 
+			}
+		</pre>
+
+		<p><strong>Обновление пула</strong></p>
+		<p>Для обновления данных пула Default из конфигурационного файла, необходимо выполнить update pool from resource в CLI:</p>
+		<pre class="brush:bash;ruler:rule;">
+		# bconsole
+
+		*update
+		Automatically selected Catalog: MyCatalog
+		Using Catalog "MyCatalog" 
+		Update choice:
+				 1: Volume parameters
+				 2: Pool from resource
+				 3: Slots from autochanger
+				 4: Long term statistics
+		Choose catalog item to update (1-4): 2
+		Automatically selected Pool: Default
+		..
+
+		*exit
+		</pre>
+	</div>
+	
+	<h2><a name="part2">Часть 2/2: скрипт для создания конфигураций FreeBSD нод и клеток.</a></h2>
+	<div class="block">
+		<p><em>Данная часть предназначена для ленивых сисадминов, предназначение которой&nbsp;— снятия рутины по минимальному обслуживанию типовых конфигураций</em></p>
+		<p><strong>Установка <strong>CBSD</strong> в клетку</strong></p>
+		<p><em>Примечание: установка порта <strong>CBSD</strong> необходима только для получения файла <strong>jmap.txt</strong> через вызов <strong>cbsd jailmapdb</strong>. Если вы уже имеете в ферме актуальный <strong>jmap.txt</strong>, вы можете просто синхронизировать этот файл в клетку с <strong>bacula</strong>. В данном примере, предполагаем, что клетка будет самодостаточной и будет иметь всю информацию по нодам внутри себя.</em></p>
+		<p>Если вы будете синхронизировать <strong>jmap.txt</strong> в клетку из другого источника, этот шаг можно пропустить.</p>
+		<p>Скачаем через <strong>pkg</strong>: </p>
+		<pre class="brush:bash;ruler:rule;">
+				pkg install cbsd
+		</pre>
+		<p>Или установим из портов:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 % make -C /usr/ports/sysutils/cbsd install
+		</pre>
+		<p>Проинициализируем <strong>CBSD</strong>, указав <strong>workdir</strong> например, в <em>/root/jails</em>, поскольку базу клетки мы обычно монтируем в <em>read-only</em> и привычное для <strong>CBSD</strong> место <em>/usr/jails</em> будет недоступно для записи.</p>
+		<pre class="brush:bash;ruler:rule;">
+		env workdir="/root/jails" /usr/local/cbsd/sudoexec/initenv
+		// задаем любой пароль пользователю cbsd, он использоваться не будет
+
+		Do you want to activate every 5 minutes activity reporter into log (cbsdsar)?
+		//отвечаем no, внутри клетки этот функционал не нужен
+
+		nodeip: persistent (when possible) managment IP address for node interconnection. e.g: 10.0.0.10
+		//вводим любой IP, внутри клетки этот функционал не нужен
+
+		jnameserver: default DNS nameserver (comma separated for multiple) for jails resolv.conf, e.g.: 10.0.0.10,8.8.8.8
+		//вводим любой IP, внутри клетки этот функционал не нужен
+
+		nodeippool: pool of IP addresses from which jail can work
+		//вводим любой IP, внутри клетки этот функционал не нужен
+
+		nat_enable: configure NAT for RFC1918 Network?
+		//отвечаем no, внутри клетки этот функционал не нужен
+
+		fbsdrepo: shall i use the official FreeBSD repository for fetching base via repo?
+		//отвечаем no, внутри клетки этот функционал не нужен
+
+		mdtmp: do you want to use memory disk (8 mb default) for temporary operation? 0&nbsp;— for disable or N (in mb) for disk size e.g: 8
+		//отвечаем 0, внутри клетки этот функционал не нужен
+
+		parallel: do you want to stop/start jail in parallel mode? (0&nbsp;— no parallel or positive value (in seconds) as timeout for next parallel sequence) e.g: 5
+		//любое значение, внутри клетки этот функционал не нужен
+
+		stable: if you want to use STABLE_X branch instead of RELEASE_X_Y for base and kernel, choose '1', e.g: 0 (use release)
+		//отвечаем 0, внутри клетки этот функционал не нужен
+
+		Configure RSYNC services for jail migration?
+		//отвечаем no, внутри клетки этот функционал не нужен
+
+		Configure NAMED service for resolving?
+		//отвечаем no, внутри клетки этот функционал не нужен
+		</pre>
+		<p>Теперь <strong>CBSD</strong> внутри клетки, готова для команд <strong>cbsd node node=add</strong> и <strong>jailmapdb</strong>.</p>
+		<p><strong>Темплейты</strong></p>
+		<p>Конфигурационный файл <strong>Bacula</strong> для каждой клетки будет содержать всю нужную информацию о параметрах копирования (частота, время, список локаций для копирования и исключений, приоритет и т.д.); единственное, что у этих данных будет обновляться автоматически&nbsp;— это физическое расположение клетки. В связи с этим, адрес сервера для клетки мы вынесем в отдельное место и предоставим управление его содержимим скрипту <strong>bacula-helper</strong>.  Кроме того, напишем пару шаблонов, которые будут использованы при создании новых конфигураций в автоматическом режиме. Создадим общий набор путей для исключений не нужных в копировании путей на физических серверах, которые подойдут для всех. Персональные настройки можно будет дописывать уже после создания конфигурации&nbsp;— скрипт их перезаписывать не будет. Будем предполагать, что все клетки на серверах инициированы (<em>workdir</em>) в каталоге <em>/usr/jails</em>.  Если это не так, или имеете другие предпочтения, вы можете откорректировать пути как пожелаете. Все темплейты будем хранить в каталоге <em>/root/etc/bacula</em>, они в последствии будут использованы <strong>bacula-helper</strong>.</p>
+		<p>К примеру, стандартный набор для исключений из бекапа путей под FreeBSD может иметь такой вид:</p>
+		<p><em>/root/etc/bacula/freebsd-default-exclude</em></p>
+		<pre class="brush:bash;ruler:rule;">
+			 File = /dev
+			 File = /proc
+			 File = /tmp
+			 File = /usr/compat/linux/sys
+			 File = /usr/compat/linux/proc
+			 File = /usr/obj
+			 File = /usr/ports
+			 File = /usr/src
+			 File = /var/tmp
+			 File = /var/crash
+			 File = /var/db/freebsd-update
+			 File = /var/db/portsnap
+			 File = /var/db/pkg
+			 File = /var/cache
+			 File = /usr/jails/basejail
+			 File = /usr/jails/src
+			 File = /usr/jails/tmp
+			 File = /usr/jails/export
+			 File = /usr/jails/import
+			 File = /usr/jails/var/db/sar
+			 File = /usr/jails/jails
+			 File = /usr/jails/jails-data
+			 File = /usr/jails/jails-system
+		</pre>
+		<p>Создадим общий набор путей для включения в резервное копирование при бекапе физических, которые подойдут для всех серверов. К примеру, для клиентов на FreeBSD такой вариант:</p>
+		<p><em>/root/etc/bacula/freebsd-default-fileset</em></p>
+		<pre class="brush:bash;ruler:rule;">
+			 File = /boot
+			 File = /root
+			 File = /etc
+			 File = /var/db/pkg
+			 File = /var/db/ports
+			 File = /usr/local/etc
+			 File = /var/backups
+			 File = /var/run/dmesg.boot
+			 File = /var/named
+			 File = /var/cache
+			 File = /usr/jails
+		</pre>
+		<p>Таким же образом, создадим общий набор путей для исключений при бекапе FreeBSD клеток, подходящие всем системам:</p>
+		<p><em>/root/etc/bacula/jails-exclude.tpl</em></p>
+		<pre class="brush:bash;ruler:rule;">
+			 File = /usr/jails/jails-data/${jname}-data/dev
+			 File = /usr/jails/jails-data/${jname}-data/proc
+			 File = /usr/jails/jails-data/${jname}-data/tmp
+			 File = /usr/jails/jails-data/${jname}-data/usr/compat/linux/sys
+			 File = /usr/jails/jails-data/${jname}-data/usr/compat/linux/proc
+			 File = /usr/jails/jails-data/${jname}-data/usr/obj
+			 File = /usr/jails/jails-data/${jname}-data/usr/ports
+			 File = /usr/jails/jails-data/${jname}-data/usr/src
+			 File = /usr/jails/jails-data/${jname}-data/var/tmp
+			 File = /usr/jails/jails-data/${jname}-data/var/crash
+			 File = /usr/jails/jails-data/${jname}-data/var/db/freebsd-update
+			 File = /usr/jails/jails-data/${jname}-data/var/db/portsnap
+			 File = /usr/jails/jails-data/${jname}-data/var/db/pkg
+			 File = /usr/jails/jails-data/${jname}-data/var/cache
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/basejail
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/src
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/tmp
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/export
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/import
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/var/db/sar
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/jails
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/jails-data
+			 File = /usr/jails/jails-data/${jname}-data/usr/jails/jails-system
+		</pre>
+		<p>Общий набор путей для включения в резервное копирование FreeBSD клеток, подходящие всем:</p>
+		<p><em>/root/etc/bacula/jails-fileset.tpl</em></p>
+		<pre class="brush:bash;ruler:rule;">
+			 File = /usr/jails/jails-rcconf/rc.conf_${jname}
+			 File = /usr/jails/jails-fstab/fstab.${jname}
+			 File = /usr/jails/jails-system/${jname}
+			 File = /usr/jails/jails-data/${jname}-data
+		</pre>
+		<p>Шаблон для создания конфигурации ноды</p>
+		<p><em>/root/etc/bacula/hosts.tpl</em></p>
+		<pre class="brush:bash;ruler:rule;">
+		Client {
+		@/usr/local/etc/bacula/address/${node}-address
+
+		Name = ${node}-fd
+		FDPort = 9102
+		Catalog = MyCatalog
+		File Retention = 65 days
+		Job Retention = 65 days
+		AutoPrune = yes
+		Maximum Concurrent Jobs = 5
+		}
+
+		JobDefs{
+		Name = "${node}-jobdef" 
+		Type = Backup
+		Level = Incremental
+		Client = ${node}-fd
+		FileSet = "${node}-full" 
+		Schedule = "${node}-cycle" 
+		Storage = File
+		Messages = Standard
+		Pool = Default
+		Priority = 10
+		}
+
+		Job {
+		Name = "${node}-job" 
+		JobDefs = "${node}-jobdef" 
+		Write Bootstrap = "/var/db/bacula/${node}.bsr" 
+		Maximum Concurrent Jobs = 5
+		}
+
+		FileSet {
+		 Name = "${node}-full" 
+		 Include {
+			Options {
+			signature = MD5
+			compression = GZIP
+		}
+
+		@/usr/local/etc/bacula/fileset/freebsd-default-fileset
+		}
+
+		Exclude {
+				@/usr/local/etc/bacula/fileset/freebsd-default-exclude
+		}
+
+		}
+
+		Schedule {
+			Name = "${node}-cycle" 
+			Run = Full 1st fri at 01:00
+			Run = Differential 2nd-5th fri at 01:00
+			Run = Incremental mon-sun at 01:00
+		}
+		</pre>
+		<p>Шаблон для создания конфигурации клетки.</p>
+		<p><em>/root/etc/bacula/jails.tpl</em></p>
+		<pre class="brush:bash;ruler:rule;">
+		Client {
+		@/usr/local/etc/bacula/address/${node}-address
+		Name = ${node}-fd
+		FDPort = 9102
+		Catalog = MyCatalog
+		File Retention = 65 days
+		Job Retention = 65 days
+		AutoPrune = yes
+		Maximum Concurrent Jobs = 5
+		}                                                                                      
+
+		JobDefs {
+		Name = "${node}-jobdef" 
+		Type = Backup
+		Level = Incremental
+		Client = ${node}-fd
+		FileSet = "${node}-full" 
+		Schedule = "${node}-cycle" 
+		Storage = File
+		Messages = Standard
+		Pool = Default
+		Priority = 10                                                                       
+		}
+
+		Job {
+		Name = "${node}-job" 
+		JobDefs = "${node}-jobdef" 
+		Write Bootstrap = "/var/db/bacula/${node}.bsr" 
+		Maximum Concurrent Jobs = 5
+		}
+
+		FileSet {
+			Name = "${node}-full" 
+			Include {
+				Options {
+				 signature = MD5
+				 compression = GZIP
+		}
+
+		@/usr/local/etc/bacula/fileset/freebsd-default-fileset
+		}
+
+		Exclude {
+				@/usr/local/etc/bacula/fileset/freebsd-default-exclude
+		}
+
+		}
+
+		Schedule {
+			Name = "${node}-cycle" 
+			Run = Full 1st fri at 01:00
+			Run = Differential 2nd-5th fri at 01:00
+			Run = Incremental mon-sun at 01:00
+		}
+		</pre>
+		<p>И наконец, шаблон куска адреса и составной пароля физической ноды, который будет подключается из файла конфигурации ноды.</p>
+		<em>/root/etc/bacula/nodeaddr.tpl</em>
+		<pre class="brush:bash;ruler:rule;">
+			 Address = ${node}
+			 Password = "${node}srvpassword" 
+		</pre>
+		<p><strong>CBSD</strong></p>
+		<p>В данном случае <strong>CBSD</strong> (а конкретнее&nbsp;— <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jlocate_ssi.html">jmap</a>) будет служить в качестве указателя на ноду, где какая клетка размещена. Для обработки этой информации, осуществлением мониторинга за создаваемыми или удаляемыми клетками в ферме, напишем <strong>sh</strong>-скриптик <strong>bacula-helper</strong>, который будет связующим звеном между Bacula и cbsd. Кроме этого, скрипт будет автоматически создавать конфигурации к отсутствующем в <strong>Bacula</strong> конфигурациям. Данный функционал не вставляет новые конфигурации серверов или клеток в общий список задач&nbsp;— это специально вынесено на усмотрение инженера, но в случае уже имеющейся конфигурации, при изменения адреса физической ноды или при миграции клетки с одной ноды в ферме на другую, изменения вступят в силу.  О любых изменениях в конфигураци, скрипт будет высылать отчет на электронную почту (переменная <strong>RCPTTO</strong>). Включать или не включать новые ноды и клетк оставляем на усмотрение системного администратора.</p>
+		<pre class="brush:bash;ruler:rule;">
+		#!/bin/sh
+		BACULADIR="/usr/local/etc/bacula" 
+		ADDRDIR="${BACULADIR}/address" 
+		JAILDIR="${BACULADIR}/jails" 
+		FILESETDIR="${BACULADIR}/fileset" 
+		HOSTSDIR="${BACULADIR}/hosts" 
+		CFGDIR="/root/etc/bacula" 
+		RCPTTO="root@localhost" 
+		MYNAME="${0##*/}" 
+		FLAG="clean" 
+		CBSD=/usr/local/bin/cbsd
+
+		# fatal error. Print message end quit with exitval
+		err()
+		{
+				local _retval=$1
+				shift
+				echo "$*" 1>&amp;2
+
+				mail -s "${MYNAME}: critical error" ${RCPTTO} << EOF
+		host: `hostname`
+		Problem: $*
+		EOF
+
+				[ "${_retval}" = "0" ] || exit ${_retval}
+		}
+
+		#init cfg and send notify
+		initcfg()
+		{
+				local _size _i _modify=0
+
+				for _i in ${linklog} ${conflog}; do
+						_size=`stat -f %z ${_i}`
+						[ ${_size} -gt 0 ] &amp;&amp; _modify=$(( _modify + 1 ))
+				done
+
+				if [ ${_modify} -gt 0 ]; then
+						mail -s "${MYNAME}: config modify" ${RCPTTO} << EOF
+		`cat ${linklog}`
+		`cat ${conflog}`
+		EOF
+
+						echo "reload" |/usr/local/sbin/bconsole > /dev/null 2>&amp;1
+						#let bacula-dir time for reloading
+						sleep 2
+						/usr/sbin/service bacula-dir status >/dev/null 2>&amp;1|| err 1 "bacula is not running!" 
+				fi
+
+		}
+
+		make_jail()
+		{
+
+				while read line; do
+						eval echo "${line}" 
+				done < "${CFGDIR}/jails.tpl" > ${JAILDIR}/${jname} &amp;&amp; chown root:bacula ${JAILDIR}/${jname}
+
+				cat >> ${conflog} << EOF
+		jail config created: ${jname}
+		Please add by hands into ${BACULADIR}/includes.conf if you want to backup this:
+		@${JAILDIR}/${jname}
+
+		EOF
+		}
+
+		make_hosts()
+		{
+
+				while read line; do
+						eval echo "${line}" 
+				done < "${CFGDIR}/hosts.tpl" > ${HOSTSDIR}/${node} &amp;&amp; chown root:bacula ${HOSTSDIR}/${node}
+
+				if [ ! -f "${ADDRDIR}/${node}-address" -o ${FORCE} -eq 1 ]; then
+						while read line; do
+								eval echo "${line}" 
+						done < ${CFGDIR}/nodeaddr.tpl > ${ADDRDIR}/${node}-address &amp;&amp; chown root:bacula ${ADDRDIR}/${node}-address
+				fi
+
+				cat >> ${conflog} <<EOF
+		node config created: ${node}
+		Please add by hands into ${BACULADIR}/includes.conf if you want to backup this:
+		@${HOSTSDIR}/${node}
+
+		EOF
+		}
+
+		make_jail_fileset()
+		{
+
+				while read line; do
+						eval echo "${line}" 
+				done < "${CFGDIR}/jails-fileset.tpl" > ${FILESETDIR}/jails-${jname}-fileset &amp;&amp; chown root:bacula ${FILESETDIR}/jails-${jname}-fileset
+
+				echo "default jail fileset created: ${jname}" >> ${conflog}
+		}
+
+		make_jail_exclude()
+		{
+
+				while read line; do
+						eval echo "${line}" 
+				done < "${CFGDIR}/jails-exclude.tpl" > ${FILESETDIR}/jails-${jname}-exclude &amp;&amp; chown root:bacula ${FILESETDIR}/jails-${jname}-exclude
+
+				echo "default jail exclude created: ${jname}" >> ${conflog}
+		}
+
+		# (re-)create for symlinks
+		symlink()
+		{
+				ln -sf ${ADDRDIR}/${node}-address ${ADDRDIR}/${jname}-jail-address &amp;&amp; echo "link changed: ${jname}-jail-address -> ${node}-address" >> ${linklog}
+		}
+
+		## MAIN ##
+		FORCE=0
+		[ "$1" = "force" ] &amp;&amp; FORCE="1" 
+
+		for i in $BACULADIR $ADDRDIR $JAILDIR $FILESETDIR $HOSTSDIR;  do
+				[ ! -d "${i}" ] &amp;&amp; mkdir ${i}
+		done
+
+		for i in freebsd-default-exclude freebsd-default-fileset; do
+				[ ! -f "${FILESETDIR}/${i}" -o $FORCE -eq 1 ] &amp;&amp; cp ${CFGDIR}/${i} ${FILESETDIR}/${i}
+		done
+
+		. /etc/rc.conf
+
+		[ ! -f "${cbsd_workdir}/var/db/jmap.txt" ] &amp;&amp; err 1 "No such jmap.txt. Please run: cbsd jailmapdb update=1" 
+
+		jailmaptmp=`mktemp -t ${MYNAME} -t ${MYNAME}`
+		jaildeltmp=`mktemp -t ${MYNAME}`
+		jailremovetmp=`mktemp -t ${MYNAME}`
+		jailexisttmp=`mktemp -t ${MYNAME}`
+		conflog=`mktemp -t ${MYNAME}`
+		linklog=`mktemp -t ${MYNAME}`
+
+		trap "rm -f ${jailmaptmp} ${jaildeltmp} ${jailremovetmp} ${jailexisttmp} ${conflog} ${linklog}" HUP INT ABRT BUS TERM  EXIT
+		jailexst=$(ls /usr/local/etc/bacula/jails/ > ${jailexisttmp})
+
+		while read line; do
+				line=${line%%=*}
+				echo ${line}
+		done < "${cbsd_workdir}/var/db/jmap.txt" > ${jailmaptmp}
+
+		grep -v -f ${jailmaptmp} ${jailexisttmp} > ${jaildeltmp}
+
+		while read LINE;do
+				echo "Remove jail: $jaildel$LINE" 
+		done < ${jaildeltmp} > ${jailremovetmp}
+
+		mail -E -s "Bacula jail config remove" "${RCPTTO}" < ${jailremovetmp}
+
+		for node in $(${CBSD} node mode=list);do
+				[ ! -f "${HOSTSDIR}/${node}" -o ${FORCE} -eq 1 ] &amp;&amp; make_hosts
+		done
+
+		for jname in $(${CBSD} jailmapdb all=1 quiet=1);do
+				node=$(${CBSD} jailmapdb ${jname} quiet=1 | awk {'print$1'})
+				[ ! -f "${JAILDIR}/${jname}" -o ${FORCE} -eq 1 ] &amp;&amp; make_jail
+				[ ! -f "${FILESETDIR}/jails-${jname}-fileset" -o ${FORCE} -eq 1 ] &amp;&amp; make_jail_fileset
+				[ ! -f "${FILESETDIR}/jails-${jname}-exclude" -o ${FORCE} -eq 1 ] &amp;&amp; make_jail_exclude
+				echo `readlink ${ADDRDIR}/${jname}-jail-address` | grep ${node} > /dev/null 2>&amp;1
+				SYMTEST=$?
+				[ ${SYMTEST} -ne 0 -o ${FORCE} -eq 1 ] &amp;&amp; symlink
+		done
+
+		initcfg
+		</pre>
+		<p><strong>Crontab и активация конфигураций.</strong></p>
+		<p>На данном этапе, осталось надобавлять через <strong>cbsd node mode=add</strong> все ноды, которые мы хотим бекапить (либо копировать <strong>jmap.txt</strong> в соответствующий каталог с любого сервера, где список нод поддерживается в актуальном состоянии.</p>
+		<p>Поставим скрипт на выполнение, к примеру, один раз в сутки, например в 23:00 в пользовательском cron пользователя root:</p>
+		<p><strong>crontab -e</strong>:</p>
+		<pre class="brush:bash;ruler:rule;">
+		..
+		0 22 * * * /usr/bin/lockf -s -t0 /tmp/jailmapdb /usr/local/bin/cbsd jailmapdb update=1 > /dev/null 2>&amp;1
+		0 23 * * * /usr/bin/lockf -s -t0 /tmp/backupmap /root/bin/bacula-helper > /dev/null 2>&amp;1
+		..
+		</pre>
+		<p>(если список нод копируется откуда-то, а не генерируется внутри клетки bacula, первая строчка с jailmapdb&nbsp;— не нужна)</p>
+		<p>Последний шаг&nbsp;— добавление новых конфигураций в Bacula. Для этого мы выбрали файл /usr/local/etc/bacula/includes.conf, в который добавим то, что должно копироваться. Например, файл может быть таким:</p>
+		<pre class="brush:bash;ruler:rule;">
+		# Client includes
+		@/usr/local/etc/bacula/hosts/s1.my.domain
+		@/usr/local/etc/bacula/hosts/s2.my.domain
+
+		# FreeBSD Jails
+		@/usr/local/etc/bacula/jails/jail1
+		@/usr/local/etc/bacula/jails/jail2
+		@/usr/local/etc/bacula/jails/jail3
+		@/usr/local/etc/bacula/jails/jail4
+		@/usr/local/etc/bacula/jails/jail5
+		@/usr/local/etc/bacula/jails/jail6
+		</pre>
+		<p>выполним перечитывание конфигурации, чтобы изменения вступили в силу:</p>
+		<pre class="brush:bash;ruler:rule;">
+			 echo "reload" | bconsole
+		</pre>
+
+	</div>
+
+	<h2><a name="epil">Заключение</a></h2>
+	<div class="block">
+		<p>Суммируем полученные плюсы, полученные в результате проделанной работы:</p>
+			<ul>
+				<li>Слежение за появляемыми, удаляемыми и мигрирующимими окружениями передано автоматике. Рост общего числа серверов и клеток никак не сказывается на занятости системного администратора;  исключаются случаи, когда мысли «сейчас сделаем окружение, а бекап&nbsp;— чуть попозже»&nbsp;— забываются, а каждая миграция клетки не требует постоянных правок конфигураций.</li>
+				<li>Созданы типовые шаблоны для конфигураций, в которых перечислены исключения и выборки локаций для резервного копирования;</li>
+				<li>Общий шаблон позволяет копировать всю клетку. В случае, если физический сервер погибает, системный инженер запускает <strong>restore</strong> на любую подходящую систему, после чего выполняет старт клетки. Подобный подход позволяет ввести в эксплуатацию сервер через несколько минут после установки чистой ОС (которая занимает 5-10 минут)</li>
+				<li>В случае, когда скрипт замечает миграцию клетки, на Email оператора шлется письмо <em>«bacula-helper: config modify»</em> информационного характера:
+				<pre class="brush:bash;ruler:rule;">
+				link changed: gitlab-jail-address -> s1.bsdstore.ru-address
+				ln -sf s1.bsdstore.ru-address gitlab-jail-address
+				</pre>
+				</li>
+				<li>В случае, когда скрипт замечает новую клетку в ферме, создается ее конфигурация, а на Email оператора шлется соответствующее письмо с предложением включить новые конфиги в пул:
+				<pre class="brush:bash;ruler:rule;">
+				link changed: syslogd-jail-address -> devsrv.bsdstore.ru-address
+				jail config created: syslogd
+				
+				Please add by hands into /usr/local/etc/bacula/includes.conf if you want to backup this:
+				@/usr/local/etc/bacula/jails/syslogd
+				default jail fileset created: syslogd
+				default jail exclude created: syslogd
+				</pre>
+				</li>
+			</ul>
+	</div>
+<!--# include file="/ru/_end.html" -->

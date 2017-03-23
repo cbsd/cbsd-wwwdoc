@@ -1,0 +1,444 @@
+<!--# include file="/ru/_start.html" -->
+<h1><span>Пример использования <strong>CBSD</strong>/jail и Consul</span></h1>
+<div class="block">
+<p>В <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">предыдущей статье</a> мы говорили о функционале pre/post/stop/start хуков в <strong>CBSD</strong> и о том, 
+как они могут помочь в вопросах интеграции <strong>CBSD</strong> со сторонними сервисами. 
+На примере связки с DHCPD мы видели, каким образом можно экспортировать и использовать внутренние переменные <strong>CBSD</strong>, 
+конфигурируя DHCPD на-лету таким образом, чтобы сервис выдавал виртуальным окружениям указанные нами адреса,что обеспечивает контроль над сетевыми настройками в виртуальных окружениях
+<a href="http://man.freebsd.org/bhyve/1" target="_blank">bhyve(8)</a>
+</p>
+<p>
+Давайте теперь придумаем решение, демонстрирующее еще одно эффективное использование функционала хуков, но также, применимое к контейнерам. 
+Одна из частых задач современного Devops инженера заключается в разделении задач на отдельные изолированные окружения и оркестрация ими. 
+При этом, все операции по делегированию, изменению и удалению записей должны проходить желательно в автоматическом режиме, без участия инженера.
+Для этих задач существует большое количество так называемых 'service discovery', некие службы каталогов которые динамическим образом 
+наполняются информацией об инфраструктуре, например 
+<a href="https://zookeeper.apache.org/" target="_blank">ZooKeeper</a>, <a href="https://coreos.com/etcd/docs/latest/" target="_blank">etcd</a>, <a href="https://www.consul.io/" target="_blank">Consul</a> и тому подобные. 
+В этом примере мы рассмотрим интеграцию с <strong>Consul</strong> для регистрации сервисов и опроса их черех HTTP API или DNS. 
+Помимо этого, Consul может выступать распределенным хранилищем ключей/значений, использование которых мы рассмотрим в следующей статье.
+</p>
+<h1><span>Введение</span></h1>
+<p>
+Мы умеем создавать виртуальные окружения - как вручную, запуская j/bconstruct-tui и вводя начальные параметры, 
+так и через клонирование уже ранее настроенных окружений, либо используя .jconf сценарий, либо используя системы оркестрации, такие как Puppet, Ansible, Chef, Saltstack и тд.
+</p>
+<p>
+Мы можем управлять назначением фиксированных адресов, либо можем даже не задумываться об этом и использовать DHCP. 
+Наша основная задача - это заставить сервисы взаимодействовать друг с другом и при этом воздержаться от задач по прописыванию и выписыванию IP адресов сервисов. 
+С одной стороны, это избавляет от прослойки в виде service discovery и сопутствующих им процессов. 
+С другой - с таким подходом вы отказываетесь от одного из основных преимущество использования контейнеров - их мобильности и переносимости.Кроме этого,
+контейнеры и виртуальные окружения должны делать только одну вещь (и делать ее хорошо), что выливается в очень и очень большую ферму, сложную в управлении. 
+Кроме этого, всегда должны быть дублирующие контейнера, и вы должны подразумевать худший вариант с отказом в обслуживании, 
+когда ваш сервер может внезапно выйти из строя и таким образом, трафик должен распределится на оставшиеся живые сервера.
+</p>
+
+<h1><span>Подготовка</span></h1>
+
+<p>Для того, чтобы достаточно близко смоделировать производственную среду, состоящую из нескольких хостов, 
+мы создадим две виртуальных машины bhyve с FreeBSD/<strong>CBSD</strong> на которых будут запускаться jail, 
+а Consul запустим в контейнере на нашем физическом сервере. В моем примере, все это будет происходить на одном сервере в <a href="https://hetzner.de/">Hetzner</a> с одним внешним IP адресом. 
+Для нас, это ограничение не будет играть роль, поскольку контейнера будем запускать в приватной подсети.
+</p>
+
+<p>
+Запускаем <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcreate_ssi.html">cbsd bconstruct-tui</a> и создаем первую виртуальную машину с характеристиками:
+</p>
+<ul>
+	<li>- имя: clu1</li>
+	<li>- 10GB диск</li>
+	<li>- 4GB RAM</li>
+	<li>- IP адрес пускай получим по DHCP (при соблюдении <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">CBSD/bhyve и DHCPD</a></li>
+</ul>
+<p class="text-center"><img src="/img/cbsd_consul1.png" alt="" /></p>
+
+<p>
+После штатной установки ОС, зайдем в нее, установим <strong>CBSD</strong> и проведем настройку.
+</p>
+
+<p>В примере автора, IP виртуалке выдался: 192.168.0.5. Заходим на нее через VNC или ssh:</p>
+
+<pre class="brush:bash;ruler:rule;">
+  root@clu1:~ # pkg update
+  root@clu1:~ # pkg install cbsd 
+  root@clu1:~ # env workdir=/usr/jails /usr/local/cbsd/sudoexec/initenv
+</pre>
+
+<p>Проходим стадию инициализации CBSD:</p>
+<hr>
+<pre class="brush:bash;ruler:rule;">
+-------[<strong>CBSD</strong> v.11.0.11]-------
+..
+Do you want prepare or upgrade hier environment for <strong>CBSD</strong> now?
+[yes(1) or no(0)]
+y
+..
+Shall i add cbsd user into /usr/local/etc/sudoers.d/cbsd_sudoers sudo file to obtain root privileges for the most cbsd commands?
+[yes(1) or no(0)]
+y
+..
+Shall i modify the /etc/rc.conf to sets cbsd_workdir="/usr/jails"?: 
+[yes(1) or no(0)]
+y
+..
+nodename: Short form nodename for this host e.g. like hostname. Warning: this operation will recreate the ssh keys in /usr/jails/.ssh dir: clu1.my.domain
+..
+nodeip: Node management IPv4 or IPv6 address (used for node interconnection), e.g: 192.168.0.5
+..
+jnameserver: Jails default DNS name-server (for jails resolv.conf), e.g.: 8.8.8.8,8.8.4.4
+..
+Hint: use space as delimiter for multiple networks, e.g.: 10.0.0.0/16 192.168.0.5/24
+..
+nat_enable: Enable NAT for RFC1918 networks?
+[yes(1) or no(0)]
+y
+..
+Set IP address or NIC as the aliasing NAT address or interface, e.g: 192.168.0.5
+..
+Which NAT framework do you want to use: [pf]
+..
+Do you want to modify /boot/loader.conf to set pf_load=YES ?
+[yes(1) or no(0)]
+y
+..
+fbsdrepo: Use official FreeBSD repository? When no (0) repository of <strong>CBSD</strong> is preferred (usefull for stable=1) for fetching base/kernel?
+[yes(1) or no(0)]
+y
+..
+(0 - no parallel or positive value (in seconds) as timeout for next parallel sequence) e.g: 5
+..
+stable: Use STABLE branch (RELENG_10 (ver = 10) instead of RELEASE_10.x (ver = 10.x) ). Only <strong>CBSD</strong> repository have binary base for STABLE branch ?
+(STABLE_X instead of RELEASE_X_Y branch for base/kernel will be used), e.g.: 0 (use release)
+..
+sqlreplica: Enable sqlite3 replication to remote nodes ?
+(0 - no replica, 1 - try to replicate all local events to remote nodes) e.g: 1
+..
+Configure RSYNC services for jail migration?
+[yes(1) or no(0)]
+n
+..
+Shall i modify the /etc/rc.conf to sets cbsdd_enable=YES ?
+[yes(1) or no(0)]
+y
+..
+Shall i modify the /etc/rc.conf to sets rcshutdown_timeout="900"?
+[yes(1) or no(0)]
+y
+..
+Shall i modify default SSH daemon port from 22 to 22222 on this host via /etc/rc.conf and sshd_flags="-oPort=22222" which is default for cbsd?
+[yes(1) or no(0)]
+y
+..
+</pre>
+<hr>
+<p>Пока мы здесь, также получим базовые файлы через команду: cbsd repo</p>
+<pre class="brush:bash;ruler:rule;">
+  cbsd repo action=get sources=base
+</pre>
+<p>Также, нам понадобится утилита <a href="http://curl.haxx.se/">curl</a>, с помощью которой будем взаимодействовать с <strong>Consul</strong>, поэтому поставим ее:</p>
+</p>
+<pre class="brush:bash;ruler:rule;">
+clu1% pkg install ftp/curl
+</pre>
+<p>
+Пошлем виртуалку на выключение, чтобы с перезагружкой все параметры применились:
+</p>
+<pre class="brush:bash;ruler:rule;">
+  shutdown -p now
+</pre>
+<p>
+Теперь, дабы не проходить дважды процедуру установки, склонируем через cbsd bclone виртуальную машину. 
+При этом, если вы используете <strong>CBSD</strong> на ZFS, нам во благо отработает ZFS и copy-on-write, 
+за счет чего мы получаем клонированный экземпляр моментально и он при этом не съедает 6 GB пространства 
+его объем будет увеличиваться только при операции записи.
+</p>
+<pre class="brush:bash;ruler:rule;">
+  cbsd bclone old=clu1 new=clu2
+</pre>
+<p>
+Поставим вручную IP, чтобы не заходить по VNC и определять, какой IP выдался серверу (при условии, что у вас работает DHCPD)
+</p>
+<pre class="brush:bash;ruler:rule;">
+  cbsd bset jname=clu2 ip4_addr=192.168.0.6
+</pre>
+<p>Поскольку клонирование копирует настройки, в том числе и MAC адрес, нам необходимо сбросить его, чтобы <strong>CBSD</strong> выдала любой другой адрес.</p>
+<p>Это можно сделать через:</p>
+<p>
+  cbsd bconfig -> Network config -> nic1 -> nic_hwaddr 
+</p>
+<p>и установить в значение '0'</p>
+<p>Либо через напрямую в БД:</p>
+<pre class="brush:bash;ruler:rule;">
+  % sqlite3 ~cbsd/jails-system/clu2/local.sqlite "UPDATE bhyvenic SET nic_hwaddr='0';"
+</pre>
+
+<p>Запустим обе виртуалки:</p>
+
+<pre class="brush:bash;ruler:rule;">
+  cbsd bstart clu1 clu2
+</pre>
+
+<p>и зайдем в clu2, чтобы изменить имя и параметры <strong>CBSD</strong>:</p>
+<pre class="brush:bash;ruler:rule;">
+  % sysrc hostname="clu2.my.domain"
+  % cbsd initenv-tui
+</pre>
+<p>поменяем <strong>nodename</strong> на <strong>clu2.my.domain</strong> и изменим <strong>natip</strong> на <strong>192.168.0.6</strong>,
+после чего пошлем сервер на перезагрузку для полноты проверки.</p>
+<p>Теперь настала очередь <strong>Consul</strong>
+<p>создадим jail на нашем хостере через <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_ssi.html">cbsd jconstruct-tui</a> и установим в него consul:</p>
+<pre class="brush:bash;ruler:rule;">
+  cbsd jconstruct-tui
+</pre>
+<p>Для установки софта на этапе создания jail, выбираем меню pkglist</p>
+<p class="text-center"><img src="/img/cbsd_consul2.png" alt="" /></p>
+<p>и в MANUAL вводим имя пакета вручную:</p>
+<p class="text-center"><img src="/img/cbsd_consul3.png" alt="" /></p>
+
+<p>Возвращаемся в основное меню и выбираем jname. Пускай имя контейнера будет consul:</p>
+Остальные параметры нас устраивают, поэтому выбираем "создать jail" и ожидаем конца инициализации
+
+<p>Запускаем контейнер:</p>
+<pre class="brush:bash;ruler:rule;">
+  cbsd jstart consul
+</pre>
+<p>Заходим в него:</p>
+<pre class="brush:bash;ruler:rule;">
+  cbsd jlogin consul
+</pre>
+<p>Ставим consul в автозагрузку:</p>
+<pre class="brush:bash;ruler:rule;">
+  sysrc consul_enable=YES
+</pre>
+<p>Создадим каталог с конфигурацией Consul:</p>
+<pre class="brush:bash;ruler:rule;">
+  mkdir /usr/local/etc/consul.d
+</pre>
+<p>и непосредственно конфигурационный файл <i>/usr/local/etc/consul.d/config.json</i>:</p>
+<pre class="cli">
+  {"acl_datacenter":"dc1","acl_default_policy":"deny","acl_down_policy":"deny","acl_master_token":"secret",
+  "bootstrap_expect":1,"client_addr":"0.0.0.0","data_dir":"/var/tmp/consul","datacenter":"dc1","
+  log_level":"INFO","node_name":"consul.my.domain","server":true,"ui_dir":"/var/tmp/consul/ui"}
+</pre>
+<p>
+И запускаем:
+</p>
+<pre class="brush:bash;ruler:rule;">
+service consul start
+</pre>
+<p>На этом, настройка Consul почти готова.
+В нормальной инсталляции, кластер консула нужно запускать минимум из трех нод. Хороший вариант, когда каждый хостер также запускает на себе Consul агента, 
+но для этой демонстрации мы ограничимся опасной инсталляцией с одним единственным экземпляром consul.
+</p>
+
+<p>Мы можем назначить контейнеру Consul IP адрес из той же подсети что и виртуальные машины. 
+Однако, мы можем пробросить порты с нашего единственного внешнего IP внутрь контейнера и работать с Consul по внешнему адресу, 
+тем более что я планирую опрашивать его со своей домашней машины через интернет.
+</p>
+<p>
+Для этого, воспользуемся функционалом проброса портов через <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_expose_ssi.html">cbsd expose</a>,
+которая генерирует правила для <strong>ipfw</strong> или <strong>pf</strong> (в зависимости от выбранного вами фреймворка NAT)
+Нам необходимо пробросить несколько портов разных протоколов. Нас устроят порты сервисов по умолчанию кроме одного - мы хотим использовать <strong>Consul</strong> также в качестве <strong>DNS</strong> сервера.
+По умолчанию, <strong>Consul</strong> обслуживает DNS запросы на <i>8600</i> порту, тогда как стандартный порт - <i>53</i>.
+Поэтому, делая expose для всех портов мы можем указывать только <strong>in=</strong> порта - тогда <strong>out=</strong> будет автоматически присваиваться то же значение. 
+При пробросе <i>8600</i> порта, <strong>in=</strong> у нас будет <i>53</i>, поскольку из интернета запросы на nameserver приходят на него, 
+а <strong>out=</strong> соотв, будет уходить на <i>8600</i> порт контейнера. 
+По умолчанию, expose подразумевает работу с <strong>proto=tcp</strong>,  поэтому для <i>udp</i> нам нужно указать протокол явно. Итак, наши команды:
+</p>
+<pre class="cli">
+cbsd expose jname=consul in=8300 mode=add
+cbsd expose jname=consul in=8301 mode=add
+cbsd expose jname=consul in=8301 proto=udp mode=add
+cbsd expose jname=consul in=8302 mode=add
+cbsd expose jname=consul in=8302 proto=udp mode=add
+cbsd expose jname=consul in=8400 mode=add
+cbsd expose jname=consul in=8500 mode=add
+cbsd expose jname=consul in=53 out=8600 mode=add
+</pre>
+
+<p><strong>CBSD</strong> сохраняет правила и применяет их или удаляет при запуске или останове контейнера. Мы можем в этом убедится -  в моем случае, фреймворк для NAT выбран <strong>pf</strong>, поэтому запускаем pf и смотрим:</p>
+
+<pre class="cli">
+% pfctl -s nat
+nat on em0 inet from 10.0.0.0/8 to ! 10.0.0.0/8 -> 138.201.18.134
+nat on em0 inet from 172.16.0.0/12 to ! 172.16.0.0/12 -> 138.201.18.134
+nat on em0 inet from 192.168.0.0/16 to ! 192.168.0.0/16 -> 138.201.18.134
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8140 -> 10.0.0.29 port 8140
+rdr pass inet proto tcp from any to 138.201.18.134 port = telnet -> 10.0.0.9 port 23
+rdr pass inet proto tcp from any to 138.201.18.134 port = ldap -> 10.0.0.2 port 389
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8300 -> 10.0.0.11 port 8300
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8301 -> 10.0.0.11 port 8301
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8301 -> 10.0.0.11 port 8301
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8302 -> 10.0.0.11 port 8302
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8302 -> 10.0.0.11 port 8302
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8400 -> 10.0.0.11 port 8400
+rdr pass inet proto tcp from any to 138.201.18.134 port = 8500 -> 10.0.0.11 port 8500
+rdr pass inet proto tcp from any to 138.201.18.134 port = domain -> 10.0.0.11 port 8600
+</pre>
+
+<p>В случае с <strong>ipfw</strong>, похожие правила присутствовали бы в вывооде команды ipfw list
+Теперь, мы можем обратится на наш внеший IP адрес на порт <strong>:8500</strong> где живет стандартный UI
+для <strong>Consul</strong> и убедится, что сервис готов к работе:
+</p>
+<p class="text-center"><img src="/img/cbsd_consul5.png" width="800" height="600" alt="" /></p>
+<p>
+Итак давайте просуммируем, что мы сделали до этого этапа. У нас есть два разных сервера bhyve, на которых установлена <strong>CBSD</strong> и готовая к созданию и запуску jail. У нас есть отдельный контейнер Consul, доступный для взаимодействия по сети Internet. 
+Теперь мы вплотную подошли непосредственно к интеграции <strong>CBSD</strong> и <strong>Consul</strong>.
+</p>
+
+<h1><span>Настройка CBSD post/pre/hooks и Consul</span></h1>
+<p>
+Согласно документации на <a href="https://www.consul.io/docs/agent/http/catalog.html">https://www.consul.io/docs/agent/http/catalog.html</a>, 
+мы можем использовать различные <i>Endpoint</i> для работы с Consul через HTTP API. Сейчас нас интересует регистрация и разрегистрация сервисов. 
+Для того, чтобы ограничить видимость данных в Consul, мы будем использовать секретны токен secret, заданный нами при процедуре настройки <strong>Consul</strong>. 
+Для этого, все запросы должны содержать <strong>?&token=secret</strong>
+</p>
+<p>Со стороны <strong>CBSD</strong>, нам будет полезно знать <strong>ip4_addr</strong> адрес контейнера и непосредственно
+имя контейнера - его <strong>$jname</strong> или <strong>$host_name</strong>
+<p>
+Теперь создадим два тестовых контейнера, один на <strong>clu1</strong> с именем <strong>redis1</strong>, другой - <strong>clu2</strong> с именем <strong>www1</strong>:
+<p>
+<strong>clu1 #</strong> <i>cbsd jconstruct-tui</i> -> jname: (set to redis1) -> Proceed
+</p>
+<p>
+<strong>clu2 #</strong> <i>cbsd jconstruct-tui</i> -> jname: (set to www1) -> Proceed
+</p>
+<p>и напишем скрипт для регистрации и выписки из <strong>Consul</strong>:</p>
+
+<pre class="brush:bash;ruler:rule;">
+#!/bin/sh
+hostname=$( hostname )
+
+/usr/local/bin/curl -X PUT "http://samson.bsdstore.ru:8500/v1/catalog/deregister?token=secret" \
+-d "{\"Datacenter\": \"dc1\", \"Node\": \"$host_hostname\", \"Address\": \"$ip4_addr\", \"Service\": {\"Service\": \"jail\", \"Tags\":[ \"$hostname\", \"jail\" ] }}"
+
+err=$?
+
+if [ ${err} -ne 0 ]; then
+        echo "reg_consul failed"
+fi
+
+exit 0
+</pre>
+<p>
+для регистрации и такой же, и измененным endpoint для разрегистрации:
+</p>
+<pre class="brush:bash;ruler:rule;">
+#!/bin/sh
+hostname=$( hostname )
+
+/usr/local/bin/curl -X PUT "http://samson.bsdstore.ru:8500/v1/catalog/deregister?token=secret" \
+-d "{\"Datacenter\": \"dc1\", \"Node\": \"$host_hostname\", \"Address\": \"$ip4_addr\", \"Service\": {\"Service\": \"jail\", \"Tags\":[ \"$hostname\", \"jail\" ] }}"
+
+err=$?
+
+if [ ${err} -ne 0 ]; then
+        echo "reg_consul failed"
+fi
+
+exit 0
+</pre>
+
+<p>дадим им executable флаг и положим в каталоги соответственно:</p>
+<ul>
+	<li>/usr/jails/jails-system/redis1/master_poststart.d</li>
+	<li>/usr/jails/jails-system/redis1/master_prestop.d</li>
+</ul>
+<p>Тоже самое сделаем на clu2 для контейнера www1 и убедимся, что поведение аналогичное:</p>
+
+<p class="text-center"><img src="/img/cbsd_consul7.png" width="800" height="600" alt="" /></p>
+<p>
+Также, вы можете опрашивать состояние через HTTP запросы:
+</p>
+<pre class="brush:bash;ruler:rule;">
+% curl "http://samson.bsdstore.ru:8500/v1/catalog/services?token=secret"
+{"consul":[],"jail":["clu1.my.domain","jail","clu2.my.domain"]}
+</pre>
+
+<p>curl "http://samson.bsdstore.ru:8500/v1/catalog/nodes?token=secret&pretty"</p>
+<pre class="cli">
+ [
+    {
+        "ID": "00000000-0000-0000-0000-000000000000",
+        "Node": "consul.my.domain",
+        "Address": "10.0.0.11",
+        "TaggedAddresses": {
+            "lan": "10.0.0.11",
+            "wan": "10.0.0.11"
+        },
+        "Meta": {},
+        "CreateIndex": 6,
+        "ModifyIndex": 89
+    },
+    {
+        "ID": "",
+        "Node": "redis1.my.domain",
+        "Address": "10.0.0.1/16",
+        "TaggedAddresses": null,
+        "Meta": null,
+        "CreateIndex": 347,
+        "ModifyIndex": 347
+    },
+    {
+        "ID": "",
+        "Node": "www1.my.domain",
+        "Address": "10.0.0.2/16",
+        "TaggedAddresses": null,
+        "Meta": null,
+        "CreateIndex": 378,
+        "ModifyIndex": 378
+    }
+ ]
+</pre>
+<p>Теперь, попробуем воспользоваться <strong>Consul</strong> в качестве DNS и опросить наши сервисы.
+Для удобства, в контейнерах, которые работают с <strong>Consul</strong> ресурсами, вы можете прописывать домен по-умолчанию <i>.consul</i>:
+</p>
+<p>/etc/resolv.conf</p>
+<pre class="cli">
+search consul
+</pre>
+<p>
+Таким образом, вы можете обращаться с discovered-записям напрямую:
+</p>
+<pre class="brush:bash;ruler:rule;">
+ consul: # ping -c2 redis1
+ PING redis1 (10.0.0.1): 56 data bytes
+ 64 bytes from 10.0.0.1: icmp_seq=0 ttl=64 time=0.032 ms
+</pre>
+
+<p>Также, можете опрашивать сервис с разделением на датацентры:</p>
+<pre class="brush:bash;ruler:rule;">
+% dig @samson.bsdstore.ru redis1.my.domain.node.consul. ANY |grep ^redis
+redis1.my.domain.node.consul. 0 IN      CNAME   10.0.0.1/16.
+
+% dig @samson.bsdstore.ru redis1.my.domain.node.dc1.consul. ANY
+</pre>
+
+<p>Как видите, настройка не самая сложная, а возможности интеграции ограничены только вашей фантазией.</p>
+
+<h1><span>Выводы</span></h1>
+
+<p>
+В этой статье мы рассмотрели подход, позволяющий нашим контейнерам регистрироваться в реестре service discovery приложений
+автоматически, без необходимости их прописывать и связывать друг с другом через конфигурационные файлы.
+За рамками этого обзора, остались вопросы health-check, а также service discovery непосредственно сервисов внутри контейнера - 
+здесь мы ограничились лишь регистрацией jail в Consul.
+</p>
+<p>
+Поскольку в среде DevOPS преобладает подход <i>Infrastucture-as-code</i> и авторы <strong>CBSD</strong> его приветствуют, 
+пример service discovery для сервисов будет рассмотрен в отдельной статье о работе <strong>CBSD</strong> + <strong>Puppet</strong>.
+<p>
+Что касается health check, то на данный момент, <strong>jail</strong> в <strong>FreeBSD</strong> не являются каким-то отдельным процессом,
+который можно  было бы мониторить или обращаясь на определенный порт. Однако, каждый контейнер имеет IP, и вы всегда можете при регистрации
+объявить healh-check вида:
+</p>
+<pre class="cli">
+"checks": [ { "script": "ping -c2 $ip4_addr", "interval": "10s" } ]
+</pre>
+<p>при объявлении сервиса. Таким образом, для мониторинга непосредственно работы контейнера, этого вполне может быть достаточно.</p>
+<p>
+Также, вы можете запускать сразу несколько контейнеров одной и той же службы, при этом в Consul они будут регистрироваться под одним именем, 
+но иметь массив IP адресов, что позволяет автоматически балансировать нагрузку между ними. 
+Доступность опроса через DNS позволяет вам разворачивать и запускать действительно сложные конфигурации сервисов совершенно 
+прозрачным способом, не требуя со стороны клиентов поддержки интеграции с <strong>Consul</strong>.
+</p>
+<!--# include file="/ru/_end.html" -->

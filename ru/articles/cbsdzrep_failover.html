@@ -1,0 +1,41 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>CBSD, ZFS-репликация и Failover для клеток</span></h1>
+	<div class="block">
+		<p>Статья, описывающая вариант настройки двух физических нод под управлением FreeBSD и запуском клеток в режиме Failover</p>
+		
+		<p>Требования, которые необходимо соблюсти:</p>
+		
+		<ul>
+			<li>— <strong>CBSD</strong> не ниже 10.0.0 версии.</li>
+			<li>— Два физических сервера.</li>
+			<li>— Включенная <strong>zfs feat</strong> ( рабочий каталог <strong>$workdir</strong> должен размещаться на ZFS файловой системе ).</li>
+			<li>— <em>(желательно)</em> Для ускорения пересылки снапшотов ZFS, рекомендуется использовать мультиплексирование SSH, чтобы исключить на каждом снапшоте "тяжелый" этап хендшейка ssh соединения.</li>
+		</ul>
+		
+		<p>Это можно сделать двумя способами:</p>
+		
+		<p>a) Включить удаленную ноду в <strong>cbsd nodepinger</strong>, которая автоматически устанавливает ssh-сессию (не туннель).</p>
+		<p>b) Включить туннель вручную, например:</p>
+		<pre class="brush:bash;ruler:rule;">
+		% ssh -f -w 0:1 remotenode true
+		</pre>
+		
+		<p>что создаст <strong><a href="http://www.freebsd.org/cgi/man.cgi?query=tun&amp;apropos=0&amp;sektion=0&amp;manpath=FreeBSD+9.2-RELEASE&amp;arch=default&amp;format=html" target="_blank">tun(4)</a></strong> интерфейс:
+		<pre class="cli">
+	tun0: flags=8051&lt;UP,POINTOPOINT,RUNNING,MULTICAST&gt; metric 0 mtu 1500
+		options=80000&lt;LINKSTATE&gt;
+		inet6 fe80::5ed9:98ff:fef5:a90f%tun1 prefixlen 64 scopeid 0x6 
+		nd6 options=21&lt;PERFORMNUD,AUTO_LINKLOCAL&gt;
+		Opened by PID XXX
+		</pre>
+		
+		<p>PS: во втором случае, опции</p>
+		<pre class="cli">
+	ControlMaster
+	ControlPath
+		</pre>
+		
+		<p>в <em>~/.ssh/config</em> должны присутствовать (по-умолчанию, системный пользователь <strong>CBSD</strong> их имеет)</p>
+		<p>//WIP</p>
+	</div>
+<!--# include file="/ru/_end.html" -->

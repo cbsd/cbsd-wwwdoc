@@ -1,0 +1,64 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="bhyvealert.html" -->
+<h2><a name="intro"><span>работа с bhyve</span></a></h2>
+<div class="block">
+		<p>Здесь описаны отличия в работе bhyve-related скриптов по отношению к jail-related. Именование команд для действий над bhyve в большинстве случаев совпадает с командами для jail, но начинаются с буквы <strong>b</strong> вместо <strong>j</strong>.</p>
+</div>
+<h2><a name="intro"><span>Создание виртуальной машины</span></a></h2>
+<div class="block">
+	<pre class="brush:bash;ruler:true;">
+		% cbsd bconstruct-tui
+	</pre>
+	<p class="text-center"><img src="/img/bcreate1.png" alt="" /></p>
+	<ul>
+		<li><strong>vm_os_type</strong> - Freebsd или Linux (адекватная работа остальных пока под подозрением)</li>
+		<li><strong>vm_os_profile</strong> - если Linux, выбрать через пробел профиль линукса.</li>
+		<li><strong>freesize</strong> - объем виртуального жесткого диска. Если гвест - Linux, это будет общий размер на весь диск. Если это FreeBSD, это будет количество доступного свободного места после создания (создается из jail). Например: <strong>10g</strong> для Linux или <strong>1g</strong> для FreeBSD</li>
+		<li><strong>jname</strong> - имя виртуалки. например: freebsd, ubuntu, centos, debian</li>
+		<li><strong>fqdn</strong> - полное имя с доменом, например blabla_foo.my.domain</li>
+	</ul>
+	<p class="text-center"><img src="/img/bcreate2.png" alt="" /></p>
+	<p>Остальные параметры необязательны. Для виртуалок FreeBSD можно сразу заполнить <strong>ip4_addr</strong>  (например: 192.168.0.5/24) и <strong>gw4</strong> (например: 192.168.0.1) - по задумке, это применится в создаваемую VM. Если Linux, <strong>ip4_addr</strong> оставить в значении 0, <strong>gw4</strong> - пустое.</p>
+	<p>Дальнейшее изменение конфигурации VM производится через скрипты <strong>cbsd bconfig</strong> и <strong>cbsd bhyvedsk-tui</strong>.
+</div>
+<h2><a name="intro"><span>Запуск виртуальной машины</span></a></h2>
+<div class="block">
+	<p>После отработки bconstruct-tui можно попробовать запустить виртуалку через <strong>cbsd bstart $jname</strong>. По-умолчанию, запускается с образа жесткого диска. Очередность загрузочного устройства может быть изменена через <strong>cbsd bconfig</strong>. В случае, если первое устройство - жесткий диск и он не содержит данных, сприпты предложат запуститься с CD/ISO.</p>
+	<p>Запуск, как и положено сейчас в bhyve, проходит в два этапа - загрузка ядра через <strong>bhyveload</strong> (для инородных, не FreeBSD-гвестах, эта операция проходит через <strong>grub2-bhyve</strong>) и непосредственно запуск виртуальности через <strong>bhyve</strong>. Обе операции в случае с <strong>CBSD</strong> проходят с созданием и выводом консоли в <strong>tmux</strong> сессию. Если после отработки <strong>cbsd bstart</strong> вас вернуло в терминал и по команде <strong>cbsd bls</strong> статус гвеста - в On, скорее всего, ядро загрузилось успешно и можно подключится в ее консоль через <strong>cbsd blogin $jname</strong>.</p>
+	<p class="text-center"><img src="/img/bcreate3.png" alt="" /></p>
+</div>
+<h2><a name="intro"><span>Останов виртуальной машины</span></a></h2>
+<div class="block">
+	<p>Останов виртуалки (а также, завершение bhyveload, когда если оно зависло на выполнении <strong>cbsd bstart</strong> и вас не выпустило обратно в терминал ) выполняется через команду <strong>cbsd bstop $jname</strong></p>
+</div>
+<h2><a name="intro"><span>Подключение к терминалу виртуальной машины</span></a></h2>
+<div class="block">
+	<p>Для подключения к сессии, используется команда <strong>cbsd blogin</strong>. Поскольку сессия запускается в tmux, при подключении наследуется его навигация. Если вы не знакомы с tmux - основное, что вам нужно в случае с <strong>CBSD</strong> знать о tmux, что операция отключения от терминала происходит через комбинацию <strong>Ctrl + B</strong> и <strong>D</strong> (удерживая Ctrl, нажимаете B. Отпускаете их и давите D). </p>
+</div>
+<h2><a name="intro"><span>Операция с жесткими дисками VM</span></a></h2>
+<div class="block">
+	<p>При создании, по пути <em>${workdir}/jails-data/$jname-data/</em> создается образ первого жесткого диска с именем <strong>dsk1.vhd</strong>. При этом, тип контроллера используется тот, который указан в профиле виртуальной машины (файлы <em>$workdir/etc/defaults/bhyve-*.conf</em>.<p>
+	<p>Через команду <strong>cbsd bhyvedsk-tui</strong> вы можете изменить тип контроллера и добавить или удалить новые образы</p>
+	<p class="text-center"><img src="/img/bcreate4.png" alt="" /></p>
+	<p>В настоящий момент, возможен выбор эмуляции через <strong>virtio-blk</strong> драйвер и <strong>ahci-hd</strong>. У одной виртуальной машины могут быть до 16 устройств с разными контроллерами. Через команду <strong>cbsd bhyvedsk</strong> вы можете вывести список всех жестких дисков виртуальных машин, или диски лишь конкретной VM.</p>
+	<p class="text-center"><img src="/img/bcreate5.png" alt="" /></p>
+</div>
+<h2><a name="intro"><span>Конфигурации VM</span></a></h2>
+<div class="block">
+	<p>Изменить некоторые параметры виртуальной машины вы можете через команду <strong>cbsd bconfig</strong>.
+	<p class="text-center"><img src="/img/bcreate6.png" alt="" /></p>
+</div>
+<h2><a name="intro"><span>Пара других комментариев</span></a></h2>
+<div class="block">
+	<ul>
+		<li>Если вы не меняли <em>${workdir}/share/jail-skel/etc/</em> файлы паролей и applytpl=1, пароль пользователя <strong>root</strong> у виртуалок freebsd созданных через cbsd bconstruct/jail2iso: <strong>cbsd</strong></li>
+		<li>bhyve-виртуальны машины убраны из вывода <a href="/ru/<!--#echo var="version" -->/wf_jls_ssi.html">jls</a>, как и по команде <strong>cbsd bls</strong> вы не увидете jail-based окружения.</li>
+		<li>Поскольку все жесткие диски создаются в каталоге $workdir/jails-data/$jname-data, виртуальные машины <strong>bhyve</strong> могут быть экспортированы, перенесены со всеми дисками и импортированы на других хостах через команды <strong>cbsd jexport</strong> и <strong>cbsd jimport</strong>.</li>
+		<li>По аналогии с <a href="/ru/<!--#echo var="version" -->/wf_jrename_ssi.html">jrename</a> и <a href="/ru/<!--#echo var="version" -->/wf_jclone_ssi.html">jclone</a> работают скрипты <strong>brename</strong> и <strong>bclone</strong> за тем лишь исключением, что при работе фигурируют лишь параметры <strong>old=</strong> и <strong>new=</strong>.</p>
+		<li>FreeBSD гвест создается через скрипт jail2iso из jail, поэтому он не предлагает запустится с ISO</li>
+		<li>Сеть для вирутальных машин создается через tap интерфейсы, которые прописываются в bridge на ваш аплинковый интерфейс</li>
+		<li>В старых версиях grub-bhyve, при "резиновых" данных на экране на широкоформатном мониторе, если количество знакомест больше 255, grub уходит в ступор и уводит туда же bhyveload. Соответственно, если при cbsd bstart XXX процесс залочился, выполните cbsd bstop XXX и уменьшив геометрию окна, попробуйте запустить вновь. Патч: <a href="https://github.com/grehan-freebsd/grub2-bhyve/commit/70ace4fd43f5017d4aacc920017b5641c9d45431" target="_blank">https://github.com/grehan-freebsd/grub2-bhyve/commit/70ace4fd43f5017d4aacc920017b5641c9d45431</a></li>
+	</ul>
+<div>
+<!--# include file="_end.html" -->

@@ -1,0 +1,19 @@
+	<h1><span>Экспорт jail</span></h1>
+	
+	<h2><a name="jexport_cmd">Команда jexport</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jexport
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<div class="warning">
+			<p><strong>Внимание:</strong> выполнение команды допускает клетку в статусе On. Однако следует помнить (особенно если используются базы данных), что при импортировании такой клетки, с большой вероятностью можно получить проблемы в виде  неконсистентных файлов, остаточных .pid файлов и тп, что может нарушить работу импортированной клетки.</p>
+		</div>
+		<p>Экспортировать jail в файл (*.img). В качестве аргумента <strong>jname</strong> указывается имя клетки. img-файл сохраняется в каталоге <em>$workdir/export</em>. Оригинальная клетка после экспорта остается без изменений.</p>
+		<p><strong>Пример</strong> (экспортировать клетку mysqljail в $workdir/export/mysqljail.img):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jexport jname=mysqljail
+		</pre>
+		<p class="text-center"><img src="/img/jexport1.png" alt="" /></p>
+	</div>
+

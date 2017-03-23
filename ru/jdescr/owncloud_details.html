@@ -1,0 +1,25 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>OwnCloud jail</span></h1>
+	<div class="block">
+		<p>For installing ownCloud cbsd jail just follow this steps (for FreeBSD 10 and above):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=owncloud
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=owncloud ver=10.0
+		</pre>
+		<p>If you hosted on another ( non 10.0 ) FreeBSD version. After image downloading please set correct name and ip address of the jail and run a <strong>install script</strong> that asks you for FQDN of WEB server and ownCloud:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=owncloud owncloudinstall
+		</pre>
+		<p>After entering FQDN of instance, <strong>Install</strong> procedure and starting jail the clean ownCloud installation will be available via <strong>http://FQDN/owncloud</strong> with</p>
+		<p>default login: <strong>admin</strong></p>
+		<p>and</p>
+		<p>default password: <strong>admin</strong></p>
+		<p class="text-center"><img src="/img/owncloud1.png" alt="" />
+		<!--# include file="/en/changeroot.html" -->
+	</div>
+<!--# include file="/en/_end.html" -->

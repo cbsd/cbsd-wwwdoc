@@ -1,0 +1,32 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>LDAP jail</span></h1>
+	<div class="block">
+		<p>For installing LDAP cbsd jail just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=ldapsrv
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd repo action=get sources=img name=ldapsrv ver=10.0
+		</pre>
+		<p>If you hosted on another ( non 10.0 ) FreeBSD version. After image downloading please set correct name and ip address of the jail and run a <strong>install script</strong> that asks you for LDAP Common name, FQDN, Suffix and Manager password:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=ldapsrv ldapsrvinstall
+		</pre>
+		<p class="text-center"><img src="/img/ldapsrv1.png" alt="" /></p>
+		<p>Now LDAP server ready to use. Do not forget to set <em>astart=1</em> in <strong>cbsd jconfig jname=ldapsrv</strong> if you want for starting jail automatically. By the starting jail via</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart ldapsrv
+		</pre>
+		<p>PHPLdapAdmin will be available for accessing via <strong>http://FQDN</strong>:</p>
+		<img src="/img/ldapsrv2.png" alt="" />
+		<!--# include file="/en/changeroot.html" -->
+		<p>For non-interactive and automatic deploying (for example you create hosting with lots of RM installation for customer) you can use: </p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=ldapsrv ldapsrvinstall cn= cnpw= fqdn= ldapsuffix=
+		</pre>
+	</div>
+<!--# include file="/en/_end.html" -->
+

@@ -1,0 +1,54 @@
+<!--# include file="/ru/_start.html" -->
+	<h1><span>Не бойтесь mergemaster</span></h1>
+	<!-- Тэги: <strong>FreeBSD best practices</strong> -->
+	
+	<div class="block">
+		<p>Среди начинающих и не только системных администраторов FreeBSD, часто наблюдается боязнь и непонимание относительно действий, когда в процессе <strong>freebsd-update</strong> (или при обновление через компиляцию исходных кодов) наступает черед отработки <strong>mergemaster</strong> (для FreeBSD 10.x: <strong>etcupdate</strong>), утилиты, призванной провести слияние тех кусков в ascii-конфигурационных файлов, которые появились в новой версии программ с уже имеющимися.</p>
+		
+		<p>При больших изменениях сделанных администратором, это действительно может быть утомительно.</p>
+		
+		<p>Между тем избежать головной боли, вызванной ручным разруливанием конфликтов (если автоматика бессильна или осторожничает) и/или возвратом своих конфиг-файлов обратно довольно просто — достаточно воспользовавшись функционалом <strong>rc.subr</strong> подсистемы, позволяющей через <i>name_flags</i> выносить в <strong>rc.conf</strong> все, что заблагорассудится при запуске той или иной программы.</p>
+		
+		<p>Например, вас не устраивает настройка стандартного <strong>/etc/ssh/sshd_config</strong> – вам не требуется проверка rDNS, не хотите на 22 порту и вообще, 
+		политика авторизации вам не подходит.</p>
+		
+		<p>Просто не трогайте стандартный файл <strong>/etc/ssh/sshd_config</strong>, а опишите нужные параметры в rc.conf. Например так:</p>
+		<pre class="brush:bash;ruler=true;">
+		sshd_flags="-oPort=1234 -oPermitRootLogin=without-password -oPasswordAuthentication=yes -oUseDNS=no"
+		</pre>
+		
+		<p>и отработка <strong>mergemaster</strong> перестанет вам сбивать соответствующие настройки при каждом обновлении.</p>
+		
+		<p>Таким же образом, выносите все ваши конфиги за пределы отработки <strong>mergemaster</strong> в те файлы (любые пути-файлы кроме стандартных имен),<br>
+		в которые <strong>mergemaster</strong> заглядывать не будет.</p>
+		
+		<p>Например, создадим свой каталог для хранения модифицированных конфигураций:</p>
+		<pre class="brush:bash;ruler=true;">
+		% mkdir /root/etc
+		</pre>
+		
+		<p>Если используется <strong>ipfw</strong> и <strong>/etc/rc.firewalll</strong> вы модифицируйте, скопируйте файл /etc/rc.firewall в /root/etc/rc.firewall, а через флаги в /etc/rc.conf скормите альтернативный путь к боевой конфиге:</p>
+		<pre class="brush:bash;ruler=true;">
+		firewall_script="/root/etc/rc.firewall"
+		</pre>
+		
+		<p>Другие примеры выноса конфигураций за пределы <strong>mergemaster</strong>:</p>
+		<pre class="brush:bash;ruler=true;">
+		syslogd_flags="-ss -c -f /root/etc/syslog.conf"
+		inetd_flags="-wW -C 60 /root/etc/inetd.conf"
+		named_conf="/etc/namedb/myconf.conf"
+		newsyslog_flags="-CN -f /root/etc/newsyslog.conf"
+		..
+		</pre>
+		
+		<p>и т.д. — все базовые утилиты, имеющие конфиг файлы, можно переопределить на альтернативный путь.</p>
+		
+		<p>Необходимость редактирования системного файла <strong>/etc/crontab</strong> заменяем на пользовательский <strong>cron</strong> ( <strong>crontab -e</strong>), который хранит все записи в <strong>/var/cron</strong>.</p>
+		
+		<p>Соответственно, вы правите лишь те файлы, которые скопировали в <strong>/root/etc</strong> (в случае с <strong>named</strong> выше, копируете <strong>/etc/namedb/named.conf</strong> в <strong>/etc/namedb/myconf.conf</strong>).</p>
+		
+		<p>После таких незначительных изменений, как правило, <strong>mergemaster</strong> отрабатывает совершенно без капризов — ему остается провести слияние с ручными модификациями в <strong>/etc/group</strong> и <strong>/etc/master.passwd</strong> файлах, что не вызывает затруднений, и обновления систем проходят быстро, надежно и без поломок настроек сервисов.</p>
+		
+		<p><strong>Примечание</strong>: Разумеется, необходимость изучения Release Notes и отслеживание модификации в новых конфигурациях этот подход не отменяет.</p>
+	</div>
+<!--# include file="/ru/_end.html" -->

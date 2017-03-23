@@ -1,0 +1,17 @@
+	<h1><span>Клонирование виртуальной машины</span></h1>
+	
+	<h2><a name="bclone_cmd">Команда bclone</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bclone
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd brclone
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Выполняет клонирование виртуальной машины в новую. В качестве обязательных аргументов, указывается источник/оригинал VM через <strong>old</strong> и новое имя через аргумент <strong>new</strong></p>
+		<p><strong>Пример:</strong> клонирование виртуальной машины debian1 в debian2:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bclone old=debian1 new=debian2
+		</pre>
+	</div>

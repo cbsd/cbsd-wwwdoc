@@ -1,0 +1,23 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>Bacula jail</span></h1>
+	<div class="block">
+		<p>To install bacula cbsd jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=bacula
+		</pre>
+		<p>After downloading images and set correct ip address of jail, run install script who will ask you for a password for root user in MySQL, password of bacula user in MySQL and the name of the resource will be available via http://FQDN:</p>
+		<p>Execute <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">imghelper</a> that asks you for some questions required for the installation of the jail:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper jname=bacula bootstrap=/usr/jails/jails-system/bacula/bin/bootstrap.sh
+		</pre>
+		<p>where: <em>/usr/jails/</em> is workdir for <strong>CBSD</strong>.
+		<p>If all goes well, when you start the jail:<p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart bacula
+		</pre>
+		<!--# include file="/en/changeroot.html" -->
+	</div>
+<!--# include file="/en/_end.html" -->
+

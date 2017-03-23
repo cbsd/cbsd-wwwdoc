@@ -1,0 +1,85 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h2><a name="cmdsyntax">CBSD syntax</a></h2>
+<div class="block">
+	<p>All commands begin with <em>cbsd</em> prefix (if you not in <a href="/en/cbsdsh.html#cbsdsh">CBSD CLI</a>):</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jls
+		% cbsd jstop jname
+		% cbsd jstart jname
+		% cbsd node mode=list
+		...
+	</pre>
+	<p>Commands of <strong>CBSD</strong> can accept arguments that are written in the form "param=value". <strong>CBSD</strong> commands can have as required arguments, and the arguments are optional. Order of the arguments does not matter.</p>
+</div>
+<h2><a name="cmdhelp">Command arguments and description</a></h2>
+<div class="block">
+	<p>In order to get brief information about a particular script, and get a list of required and optional arguments use the --help argument for the corresponding command</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd &lt;cmd&gt; --help
+	</pre>
+	<p>For example, to get help on jls:</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jls --help
+	</pre>
+	<p>Result:</p>
+	<pre class="cli">
+	[jail] List jail and status
+	require: 
+	opt: alljails shownode display node header
+	alljails=1 - get jaillist from remote node
+	shownode=1 - show nodename for jails
+	node= only for current node
+	header=0 don't print header
+	display= list by comma for column. Default: jid,jname,ip4_addr,host_hostname,path,status
+	External help: http://www.bsdstore.ru/10.0.2/html/wf_jls_en.html
+	</pre>
+	<p>The first line in square brackets the name of the module to which the command (jail in this case), as well as a summary of the functions.</p>
+	<p>In line with <strong>require:</strong> lists the required arguments, without specifying which command work impossible.</p>
+	<p>In line with <strong>opt: </strong> lists the optional arguments (though, depending on the mode of the utility, in various cases, they may be required)</p>
+	<p>In the following lines is a brief description of the arguments, if it exist</p>
+	<p>Also, it may be a reference to the documentation (External help). It can point to a site and a local file, if installed documentation.</p>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax1.png" alt="" />
+	</p>
+	<p>Some of the commands waiting in as a parameter the name of the jails, can be interactive, with a list of jails (including from remote nodes) to choose from. To do this, just run the command with no argument. Examples of these commands:</p>
+	<p><strong>cbsd jlogin, cbsd blogin, cbsd jconfig, cbsd bconfig, cbsd jstop, cbsd bstop, cbsd jstart, cbsd bstart</strong>, etc...</p>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax2.png" alt="" />
+	</p>
+	<p>In addition, <strong>CBSD</strong> installed as a module for base tools <strong>bsdconfig</strong> (adds itself to the end of the list), which grouped some </strong>-tui</strong> utility, so some controls CBSD you can perform through the interactive interface, running <strong>bsdconfig cbsd</strong>.
+	<p class="text-center">
+		<img src="/img/cbsd_syntax3.png" alt="" />
+	</p>
+</div>
+<h2><a name="cmdinter">Interactivity, the color in the output result</a></h2>
+<div class="block">
+	<p>By default, the console output is produced in color. If the color is prevents to you (for example, you use some of his script to work with <strong>CBSD</strong> command), you can use the environment variable parameter NOCOLOR=1</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jls
+		% env NOCOLOR=1 cbsd jls
+	</pre>
+	<p>Some commands may be interactive - during a predetermined correction question. For example, if you run the jail, demanding base FreeBSD 10.1 and this base you do not, <strong>CBSD</strong> will ask to download database</p>
+	<p>This behavior may not be suitable if you write your scripts around <strong>CBSD</strong>. In this case, you can append the parameter <strong>inter=0</strong> in each command. this causes <strong>CBSD</strong> decide by default when there is an interrogative situation</p>
+	<pre class="brush:bash;ruler:true;">
+		% cbsd jstart inter=0 jname=XXX
+		% cbsd jcreate inter=0 jconf=/path/to/jconf
+	</pre>
+</div>
+<h2><a name="cmddebug">CBSD command debuging</a></h2>
+<div class="block">
+	<p>For enable debugging via <strong>sh xtrace</strong> and trace all operation, use <em>--debug</em> arguments after CBSD command, for example:</p>
+	<pre class="brush:bash;ruler:true;">
+		% env NOCOLOR=1 cbsd node --debug mode=add node=192.168.1.222 pw=very_strong_plain_password port=22
+		% env NOCOLOR=1 cbsd jls --debug
+	</pre>
+</div>
+<h2><a name="cmdoutput">Output in XML, JSON, HTML and human-readable format</a></h2>
+<div class="block">
+	<p>Since 10.1.5, <strong>CBSD</strong> can display information not only to understand the human form, but also in HTML, XML and JSON for easy machine parsing and simply for the cyborgs joy</p>
+	<p class="text-center">
+		<img src="/img/cbsd_syntax4.png" alt="" />
+	</p>
+</div>
+<!--# include file="_end.html" -->

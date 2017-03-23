@@ -1,0 +1,10 @@
+<!--# include file="_start.html" -->
+<!--# include file="translate.html" -->
+<h1><span>Modules</span></h1>
+<div class="block">
+	<p>Modules are enhanced functionality for <strong>CBSD</strong>. In fact - it's just a separate script (or program) that an easier way to access the CBSD data (eg use its procedures for easier access to data)</p>
+	<p>The reason that they are separate - the unwillingness to inflate the size of the base distribution of <strong>CBSD</strong>. Moreover, many modules can have their dependencies (require the installation of the programs), to be written in different languages ​​and to do things that you may never be useful</p>
+	<p>Modules must deployed to <em>$workdir/modules</em> directory. To enable or disable, put or removed the module name in <em>$workdir/etc/modules.conf</em> file. After completing <strong>cbsd initenv</strong> command module will be available (or disappear) to call through <strong>cbsd</strong></p>
+	<!--# include file="/modules.html" -->
+</div>
+<!--# include file="_end.html" -->

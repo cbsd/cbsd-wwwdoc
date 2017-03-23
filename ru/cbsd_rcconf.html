@@ -1,0 +1,153 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+		<h1><span>Параметры клеток cbsd</span></h1>
+		<div class="block">
+			<p>Каждая клетка cbsd имеет свой набор настроек, который используется при старте, останове и&nbsp;работе клеток. Часть из&nbsp;них указывается на&nbsp;этапе создания клетки, остальные вы&nbsp;сможете поменять через команду</p>
+			<pre class="brush:bash;ruler:true;">% cbsd jconfig jname=jname</pre>
+			<p>Очень немногие параметры в&nbsp;данный момент можно изменить на-лету. Здесь дана краткая информация стандартных параметров.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">jname="jail1";</pre>
+			<p>Непосредственно, уникальное имя клетки. Это то&nbsp;имя, которое видно по&nbsp;команде <strong>cbsd jls</strong> или в&nbsp;списке инвентаризации нод. Данное поле нельзя менять вручную. Если вы&nbsp;хотите поменять имя клетки, воспользуйтесь командой <strong>cbsd jrename</strong>, поскольку имя клетки используется во&nbsp;многих настройках и&nbsp;путях на&nbsp;файловой системе.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">path="/usr/jails/jails/jail1";</pre>
+			<p>Указывает на&nbsp;путь, который будет использован в&nbsp;качестве корня при старте клетки. Вышеописанная конфигурация характерна для клеток, которые имеют настройку baserw равную&nbsp;0, тоесть, база которых смонтирована в&nbsp;только-чтение. В&nbsp;этом случае, алгоритм работы jstart будет следующим:</p>
+			<ul>
+				<li>1) смонтировать через nullfs базу определенной версии (см. ниже) в&nbsp;каталог <em>/usr/jails/jails/$jname</em></li>
+				<li>2) на&nbsp;уже смонтированную базу <em>$workdir/jails/jails/$jname</em> подмонтировать каталоги, относящиеся непосредственно к&nbsp;клетке (из&nbsp;каталога <em>$workdir/jails-data/$jname</em>), обычно уже в&nbsp;режиме записи.</li>
+				<li>3) стартовать клетку с&nbsp;корнем <em>$workdir/jails/jails/$jname</em></li>
+			</ul>
+			<p>Если&nbsp;же baserw=1, то&nbsp;nullfs не&nbsp;исползуется, и&nbsp;клетка сразу стартует с&nbsp;каталогом $workdir/jails-data/$jname в&nbsp;качестве корня. В&nbsp;этих случаях, параметр path обычно выглядит как</p>
+			<pre class="brush:bash;ruler:true;">path=/usr/jails/jails-data/jail1-data</pre>
+			<hr />
+			<pre class="brush:bash;ruler:true;">host_hostname="jail1.my.domain";</pre>
+			<p>FQDN, полное имя клетки. Данное поле нельзя менять вручную. Если вы&nbsp;хотите поменять имя клетки, воспользуйтесь командой <strong>cbsd jrename</strong></p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">ip4_addr="10.0.0.5/24";</pre>
+			<p>IP&nbsp;адрес клетки. Если планируется использовать несколько&nbsp;IP адресов, они записываются через запятую:</p>
+			<p>ip4_addr=&quot;10.0.0.5/24,192.168.0.2/30,54:04:a6:b2:11:c4/64&Prime;;</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mount_devfs="1";</pre>
+			<p>Смонтировать&nbsp;ли в&nbsp;клетку файловую систему devfs (каталог /dev). Как правило, большинство сервисов без этого просто не&nbsp;смогут работать.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">allow_mount="1";</pre>
+			<p>Можно&nbsp;ли пользователям или сервисам, находящимся внутри клетки монтировать другие файловые системы.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">allow_devfs="0";</pre>
+			<p>Можно&nbsp;ли пользователям или сервисам, находящимся внутри клетки монтировать devfs</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">allow_nullfs="0";</pre>
+			<p>Можно&nbsp;ли пользователям или сервисам, находящимся внутри клетки монтировать nullfs</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mount_fstab="/usr/jails/jails-fstab/fstab.jail1";</pre>
+			<p>Путь к&nbsp;файлу, содержащему список каталогов или файловых систем, которые будут примонтированы в&nbsp;клетку при ее&nbsp;запуске</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">arch="amd64";</pre>
+			<p>Архитектура клетки (и&nbsp;соответственно, базы из&nbsp;$workdir/basejail)</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mkhostsfile="1";</pre>
+			<p>Поправить&nbsp;ли в&nbsp;/etc/hosts клетки запись вида</p>
+			<p>$ip4_add $jname $jname.my.domain</p>
+			<p>в&nbsp;соответствии с&nbsp;IP адресом и&nbsp;именем (FQDN) клетки</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">devfs_ruleset="4";</pre>
+			<p>набор правил devfs, которые будут применены на&nbsp;файловую систему devfs в&nbsp;каталоге /dev клетки (список правил в&nbsp;файле /etc/devfs.rules мастер-ноды)</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">interface="auto";</pre>
+			<p>Запись управляет поведением по&nbsp;автоматическому созданию и&nbsp;удалению&nbsp;IP адресов на&nbsp;интерфейсе либо использованию ранее установленных.</p>
+			<p>Значение <strong>auto</strong> означает, что cbsd сама выберет интерфейс, на&nbsp;котором создать&nbsp;IP адрес клетки.</p>
+			<p>Например: имеется нода с&nbsp;двумя интерфейсами. На&nbsp;интерфейсе igb0 установлен&nbsp;IP и&nbsp;подсеть 10.0.0.2/24 и&nbsp;при этом шлюз по-умолчанию для сервера является 10.0.0.1, в&nbsp;следствии чего igb0 является сетевой картой, через который идет трафик по-умолчанию.  На&nbsp;интерфейсе  igb1 прописан IP/подсеть 192.168.0.1/24. В&nbsp;случае, если в&nbsp;rc.conf клетки ip4_addr принимает значение 192.168.0.{1-255}, то&nbsp;cbsd автоматически выберет интерфейс igb1 для прописывания&nbsp;IP клетки. </p>
+			<p>Если ни&nbsp;на&nbsp;одном из&nbsp;интерфейсов нет подсети, в&nbsp;которую входит&nbsp;IP клетки, будет выбран интерфейс по-умолчанию.</p>
+			<p>Также, значение может быть выставлено в&nbsp;имя интерфейса, если вы&nbsp;не&nbsp;хотите использовать поиск наиболее подходящего интерфейса. Например запись</p>
+			<pre class="brush:bash;ruler:true;">interface="igb0";</pre>
+			<p>пропишет&nbsp;IP адрес клетки на&nbsp;интерфейсе igb0.</p>
+			<p>Также как и&nbsp;при запуске, когда cbsd пропишет на&nbsp;интерфейсе нужные клетке&nbsp;IP, при остановке их&nbsp;снимет с&nbsp;интерфейса. Поэтому, будьте предельно аккуратны&nbsp;&mdash; если вы&nbsp;пропишите по&nbsp;ошибке в&nbsp;качестве&nbsp;IP клетки адрес непосредственно ноды, то&nbsp;при остановке клетки cbsd выполнит</p>
+			<pre class="brush:bash;ruler:true;">ifconfig &lt;iface&gt; &lt;ip&gt; -alias</pre>
+			<p>и&nbsp;нода будет потеряна по&nbsp;сети.</p>
+			<p>Для того, чтобы пресечь управление&nbsp;IP адресами, параметр interface можно закомментировать или удалить, либо значение оставить пустым:</p>
+			<pre class="brush:bash;ruler:true;">interface="";</pre>
+			<p>В&nbsp;этом случае, cbsd сразу будет запускать jail с&nbsp;соответствующим&nbsp;IP, подразумевая, что он&nbsp;уже инициализирован. Такая ситуация может быть необходима, когда сервер имеет лишь 1&nbsp;IP адрес, а&nbsp;вы&nbsp;планируете запустить jail (или несколько клеток) на&nbsp;одном имеющимся&nbsp;IP, но&nbsp;с&nbsp;сервисами внутри, которые не&nbsp;конфликтуют по&nbsp;портам. Например, имея 1&nbsp;IP адрес, вы&nbsp;можете запустить одну клетку с&nbsp;WEB сервером на&nbsp;80&nbsp;порту, другую клетку с&nbsp;почтовым сервером на&nbsp;25&nbsp;порту и&nbsp;тд.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">ver="10.0";</pre>
+			<p>Версия базы для клетки. Имеет прямое отношение к&nbsp;версии FreeBSD. Так, если в&nbsp;rc.conf клетки установлены параметры</p>
+			<pre class="brush:bash;ruler:true;">
+				arch="amd64"
+				ver="10.0"
+				baserw=0
+			</pre>
+			<p>то&nbsp;при старте клетки в&nbsp;качестве базы будет выбрана ${workdir}/basejail/base_amd64_10.0.</p>
+			<p>Если стоит</p>
+			<pre class="brush:bash;ruler:true;">
+				arch="i386"
+				ver="9.1"
+				baserw=0
+			</pre>
+			<p>то, соответственно, будет использован ${workdir}/basejail/base_i386_9.1.</p>
+			<p>Таким образом вы&nbsp;можете переключать версию базы с&nbsp;одной версии на&nbsp;другую</p>
+			<p>&nbsp;случае, когда baserw=1, подразумевается что вся база уже была проинициализирована и&nbsp;наполнила собой ${workdir}/jails-data/$jname-data, поэтому эти параметры роли не&nbsp;играют</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">basename="";</pre>
+			<p>Имя базы. Вы&nbsp;можете собирать кастомизированные base, например собрать минимальное окружение и&nbsp;разместить его в <em>$workdir/base_lite_amd64_9.2</em>. Для того, чтобы указать cbsd что нужно смонтировать данный каталог, basename должен содержать префикс lite:</p>
+			<pre class="brush:bash;ruler:true;">basename="lite"</pre>
+			<hr />
+			<pre class="brush:bash;ruler:true;">baserw="0";</pre>
+			<p>Если&nbsp;1, подразумевается что клетка имеет свою собственную базовую файловую систему и&nbsp;имеет в&nbsp;нее запись. Как правило, этот параметр задается на&nbsp;этапе создания клетки. Если&nbsp;же вы&nbsp;создали изначально клетку baserw=0 (readonly), но&nbsp;хотите перевести ее&nbsp;в&nbsp;режим baserw=1, вам предварительно необходимо скопировать все базовые файлы в&nbsp;каталог $workdir/jails-data/$jname-data. Например:</p>
+			<pre class="brush:bash;ruler:true;">
+				cd /usr/jails/basejail/base_amd64_10/
+				pax -p eme -X -rw . /usr/jails/jails-data/jail1-data
+			</pre>
+			<p>либо, если вы&nbsp;собрали в&nbsp;мастер-ноде объектные файлы:</p>
+			<pre class="brush:bash;ruler:true;">make -C /usr/src installworld DESTDIR="/usr/jails/jails-data/jail1-data"</pre>
+			<p>Таким&nbsp;же образом на&nbsp;данном этапе, предполагается обновлять клетки, работающие в&nbsp;режиме baserw=1, тк&nbsp;каждая клетка имеет персональную копию базы. Напротив, при использовании baserw=0, вы&nbsp;можете использовать лишь одну копию базы, которая монтируется через nullfs в&nbsp;read-only всем клеткам.  Вы&nbsp;можете иметь одну базу (например минимального объема с&nbsp;именем lite) на&nbsp;несколько десятков клеток, размещенную на&nbsp;md-ramfs для ускорения работы базовых утилит в&nbsp;клетках. Помимо этого, с&nbsp;baserw=0&nbsp;вы имеете возможность обновлять версию баз меньшими затратами. Кроме этого, смонтированная база в&nbsp;режиме read-only дает вам дополнительную безопасность, если вашу клетку взломали и&nbsp;попробуют модифицировать файлы системы&nbsp;&mdash; это у&nbsp;взломщиков просто не&nbsp;получится.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mount_src="0";</pre>
+			<p>Смонтировать&nbsp;ли в&nbsp;/usr/src каталог клетки исходные коды FreeBSD в&nbsp;read-only, если они есть</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mount_obj="";</pre>
+			<p>Смонтировать&nbsp;ли в&nbsp;/usr/obj каталог клетки объектные файлы FreeBSD в&nbsp;read-only, если они есть</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mount_kernel="0";</pre>
+			<p>Смонтировать&nbsp;ли в&nbsp;/boot/kernel ядро FreeBSD. Это может быть полезно, к&nbsp;примеру, для работы CTF-информации, необходимую для работы DTRACE.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mount_ports="1";</pre>
+			<p>Смонтировать&nbsp;ли в&nbsp;/usr/ports порты из&nbsp;мастер-ноды в&nbsp;readonly. Вы&nbsp;можете иметь одно дерево портов на&nbsp;всю ноду, которое развернуть в&nbsp;/usr/ports каталоге мастер-ноды и&nbsp;которое подмонтировано во&nbsp;все клетки. Для того, чтобы одновременная копмиляция одного и&nbsp;того&nbsp;же порта не&nbsp;конфликтовала в&nbsp;двух и&nbsp;более клетках, в&nbsp;/etc/make.conf параметр WRKDIRPREFIX ставится в&nbsp;альтернативное место, например /tmp (если клетка  имеет applytpl=1, это происходит автоматически)</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">astart="1";</pre>
+			<p>Следует&nbsp;ли запускать клетку автоматически при старте ноды. Если astart=0, клетка не&nbsp;запустится сама с&nbsp;перезагрузки мастер-хоста.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">vnet="0";</pre>
+			<hr />
+			<pre class="brush:bash;ruler:true;">applytpl="1";</pre>
+			<p>Применить&nbsp;ли некоторые модификации в&nbsp;конфигурации клетки: выставить pkg.conf, внести записи в&nbsp;/etc/hosts и&nbsp;тд.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">mdsize="0";</pre>
+			<hr />
+			<pre class="brush:bash;ruler:true;">floatresolv="1";</pre>
+			<p>Автоматически поправить /etc/resolv.conf , назначив автоматически в&nbsp;качестве первичного nameserver кеширующий named в&nbsp;мастер-ноде, остальные nameserver&nbsp;&mdash; из&nbsp;инвентаризации ноды.</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">exec_start="/bin/sh /etc/rc";</pre>
+			<pre class="brush:bash;ruler:true;">exec_stop="/bin/sh /etc/rc.shutdown";</pre>
+			<p>Системные команды для запуска и останова клетки. Если вы хотите писать дополнительные скрипты, отрабатывающих при запуске и останове клеток, прочитайте: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">Конфигурации клетки</a></p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">cpuset="0";</pre>
+			<p>Привязать jail и&nbsp;его процессы к&nbsp;конкретным ядрам CPU. Значение&nbsp;0 (по-умолчанию) означает, что привязок к&nbsp;ядрам нет и&nbsp;процессы будут занимать все доступные ядра. Значение отличное от&nbsp;нуля идентифицирует ядро или список ядер, на&nbsp;которых дозволено работать клетке. Запись должна соответствовать форме записи параметра -l cpu-list у&nbsp;команды <a href="http://www.freebsd.org/cgi/man.cgi?query=cpuset&amp;sektion=1" target="_blank"><strong>cpuset(1)</strong></a>, например:</p>
+			<pre class="brush:bash;ruler:true;">cpuset="1";</pre>
+			<p>означает, что процессы будут работать только на&nbsp;ядре 1.</p>
+			<pre class="brush:bash;ruler:true;">cpuset="0-3"</pre>
+			<p>означает, что процессы будут работать на&nbsp;ядрах 0,1,2,3</p>
+			<pre class="brush:bash;ruler:true;">cpuset="0,3"</pre>
+			<p>означает, что процессы будут работать на&nbsp;ядрах 0&nbsp;и&nbsp;3</p>
+			<p>Данный функционал полезен, например, для профилирования&nbsp;ПО, или если вы&nbsp;хотите ограничить клетку определенными ядрами (или давать каждой клетке по&nbsp;своему ядру).</p>
+			<hr />
+			<pre class="brush:bash;ruler:true;">setfib="0";</pre>
+			<p>Привязать jail и&nbsp;его процессы к&nbsp;отдельной таблице маршрутизации. Значение&nbsp;0 (по-умолчанию) означает, что привязок нет и&nbsp;будет использоваться стандартная таблица маршрутизации. Для того, чтобы использовать <strong>setfib</strong>, в&nbsp;файле <em>/boot/loader.conf</em> вам необходимо установить лимиты таблиц через параметр <strong>net.fibs</strong>. Например, если вы&nbsp;хотите использовать пять отдельных таблиц маршрутизации, в&nbsp;<em>/boot/loader.conf</em> вы&nbsp;должны иметь следующую запись:</p>
+			<pre class="brush:bash;ruler:true;">net.fibs="5"</pre>
+			<hr />
+			<pre class="brush:bash;ruler:true;">exec.consolelog="0";</pre>
+			<p>Регулирует протоколирование вывода jail(8) при старте и&nbsp;останове клетки. По-умолчанию, используется значение <strong>0</strong>.Возможные значения:</p>
+			<ul>
+				<li><strong>0</strong>&nbsp;&mdash; выключить exec.consolelog. В&nbsp;этом случае, при jstart/jstop будет показываться весь вывод процедуры запуска и&nbsp;останова.</li>
+				<li><strong>1</strong>&nbsp;&mdash; Включить протоколирование в&nbsp;файл <em>${workdir}/var/log/${jname}.log</em>, где $jname&nbsp;&mdash; соответствующее имя клетки. При этом, на&nbsp;терминале этих сообщений не&nbsp;будет.</li>
+			</ul>
+			<p><strong><em>/path/to/file</em></strong>&nbsp;&mdash; Произвольное имя файла. Например при значении <strong>/dev/null</strong>, клетка не&nbsp;будет выводить записи и&nbsp;куда-либо протоколировать процесс.</p>
+		</div>
+<!--# include file="_end.html" -->

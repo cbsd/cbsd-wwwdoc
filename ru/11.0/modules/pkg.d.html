@@ -1,0 +1,45 @@
+	<h1><span>Работа с ПО и pkg(7) в jail через CBSD </span></h1>
+	
+	<h2><a name="pkd_cmd">Команда pkg</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p><strong>cbsd pkg</strong> - это обертка вокруг стандартного FreeBSD <a href="http://man.freebsd.org/pkg/7" target="_blank">pkg(7)</a> для добавления аргумента <strong>jname</strong> для более удобной работы с ПО клетки из мастер-хоста.</p>
+		<p>Через аргумент <strong>mode=</strong> указывается необходимое действие. Значения могут быть:</p>
+		<ul>
+			<li>add,install - установить ПО</li>
+			<li>remove - удалить ПО</li>
+			<li>bootstrap - проинициализировать pkg (обычно делается при создании клетки 1 раз)</li>
+			<li>info, query - выполнить соответствующие запросы <em>info</em> или <em>query</em> с аналогичным pkg синтаксисом</li>
+			<li>update - выполнить pkg update</li>
+			<li>upgrade - выполнить upgrade</li>
+		</ul>
+		<p>Имейте ввиду, что вначале должны указываться параметры <strong>mode</strong> и <strong>jname</strong>. Все что идет после - не анализируется и относиться к <a href="http://man.freebsd.org/pkg/7" target="_blank">pkg(7)</a> как есть.</p>
+		<p>Кроме этого, учтите, что все операции выполняются с аргументом <strong>-y</strong> для подавления интерактивности, что в основном, необходимо для работы в автоматизированных сценариях.</p>
+		<p><strong>Пример1:</strong> Получить список установленного ПО в клетке jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=query jname=jail1 %o
+		</pre>
+		<p><strong>Пример2:</strong> Установить bash, mc, wget в клетку mytest1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=install jname=mytest1 bash mc wget
+		</pre>
+		<p>или, что гораздо лучше (во избежание одинаковых имен в разных категориях), указывать origin пакета, а не имя:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=install jname=mytest1 shells/bash ftp/wget misc/mc
+		</pre>
+		<p><strong>Пример3:</strong> Обновить пакет mc в клетке jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=upgrade jname=jail1 mc
+		</pre>
+		<p><strong>Пример4:</strong> Обновить все пакеты jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=upgrade jname=jail1
+		</pre>
+		<p><strong>Пример5:</strong> Удалить пакеты wget и lsof:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=remove jname=jail1 wget lsof
+		</pre>
+	</div>

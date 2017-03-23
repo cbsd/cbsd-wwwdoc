@@ -1,0 +1,232 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+		<h1><span>Jail settings</span></h1>
+		<div class="block">
+		<p>Each jail managed by &nbsp;cbsd has its own settings which are&nbsp;used when starting and stopping the jail. Some of&nbsp;them are specified during the creation of the&nbsp;jail, can be set with the command</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=jname
+		</pre>
+		<p>Currently only few options be changed on-the-fly.</p>
+		<p>This page contains a&nbsp;summary of&nbsp;the default settings and description.</p>
+		<hr />
+		<pre class="brush:bash;ruler:true;">
+			jname="jail1";
+		</pre>
+		<p>First, the unique name of&nbsp;the jail. This is needs to be identical with the name shown by <strong>cbsd jls</strong> or in the inventory list. This field can not be&nbsp;changed manually. If&nbsp;you want to&nbsp;change the name of&nbsp;the jail please use <strong>cbsd jrename</strong>, because the name of&nbsp;the jail is used in&nbsp;many other configs and directory names</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			path="/usr/jails/jails/jail1";
+		</pre>
+		<p>Indicates the path that will be&nbsp;used as&nbsp; root at&nbsp; when the jail is run. The above configuration is&nbsp;characteristic of&nbsp;jails who are setting baserw to&nbsp;0 (no&nbsp;write access in&nbsp;base), ie, the base of&nbsp;which is&nbsp;mounted in&nbsp;read-only. In&nbsp;this case, the algorithm will work jstart follows:</p>
+		<ul>
+			<li>1) mount a&nbsp;base via nullfs specific version (see below) to&nbsp;/usr/jails/jails/$jname directory</li>
+			<li>2) on&nbsp;the mounted base at&nbsp;$workdir/jails/jails/$jname mount directories related directly to&nbsp;the jail data (in&nbsp;the directory $workdir/jails-data/$jname), usually in&nbsp;write access</li>
+			<li>3) start jail with the root $workdir/jails/jails/$jname</li>
+		</ul>
+		<p>If&nbsp;baserw=1, then nullfs not use and the jail immediately starts with the directory $workdir/jails-data/$jname as&nbsp;root. In&nbsp;these cases, the path is&nbsp;usually seen as&nbsp;a <em>path=&quot;/usr/jails/jails-data/jail1-data&quot;;</em>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			host_hostname="jail1.my.domain";
+		</pre>
+		<p>FQDN, the full name of&nbsp;the jail. This field can not be&nbsp;changed manually. If&nbsp;you want to&nbsp;change the name of&nbsp;the jail please use <strong>cbsd jrename</strong> command</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			ip4_addr="10.0.0.5/24";
+		</pre>
+		<p>IP&nbsp;address of&nbsp;the jail. If&nbsp;you plan to&nbsp;use multiple&nbsp;IP addresses, they are separated by&nbsp;commas:</p>
+		<p>ip4_addr=&quot;10.0.0.5/24,192.168.0.2/30,54:04:a6:b2:11:c4/64&laquo;;</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mount_devfs="1";
+		</pre>
+		<p>Mount a&nbsp;devfs file system into the jail (directory /dev). Most services without this simply can not work.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			allow_mount="1";
+		</pre>
+		<p>Allow users or&nbsp;services mount other file system inside the jail</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			allow_devfs="0";
+		</pre>
+		<p>Allow users or&nbsp;services mount devfs file system inside the jail</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			allow_nullfs="0";
+		</pre>
+		<p>Allow users or&nbsp;services mount nullfs file system inside the jail</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mount_fstab="/usr/jails/jails-fstab/fstab.jail1";
+		</pre>
+		<p>The path to&nbsp;a&nbsp;file containing a&nbsp;list of&nbsp;directories or&nbsp;file systems to&nbsp;be&nbsp;mounted with the jail when it&nbsp;is&nbsp;run</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			arch="amd64";
+		</pre>
+		<p>Jail architecture (and respectively base from the <em>$workdir/basejail</em>)</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mkhostsfile="1";
+		</pre>
+		<p>Whether correct in&nbsp;jail /etc/hosts entry</p>
+		<p>$ip4_add $jname $jname.my.domain</p>
+		<p>in&nbsp;accordance with the&nbsp;IP address and the name (FQDN) of&nbsp;jail</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			devfs_ruleset="4";
+		</pre>
+		<p>a&nbsp;set of&nbsp;rules devfs, which will be&nbsp;applied to&nbsp;the devfs file system in&nbsp;the /dev of&nbsp;jail (list of&nbsp;rules in&nbsp;the file /etc/devfs.rules of&nbsp;master node)</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			interface="auto";
+		</pre>
+		<p>This recording controls the behavior of&nbsp;the automatic creation and deletion of&nbsp;IP addresses on&nbsp;the interface or&nbsp;use the previously established.</p>
+		<p>The value <strong>auto</strong> means that cbsd will select the interface on&nbsp;which to&nbsp;create an&nbsp;IP address jail.</p>
+		<p>For example : there is&nbsp;a&nbsp;node with two interfaces . </p>
+		<p>At&nbsp;the interface igb0 set&nbsp;IP subnet 10.0.0.2/24 and while the default gateway for the server is&nbsp;10.0.0.1, in&nbsp;consequence of&nbsp;which igb0&nbsp;a network card, through which the traffic by&nbsp;default. at&nbsp;the interface igb1 registered IP/subnet 192.168.0.1/24. </p>
+		<p>If&nbsp;the jail in&nbsp;rc.conf ip4_addr takes value 192.168.0.{1-255}, then <strong>CBSD</strong> automatically selects  igb1 interface for&nbsp;IP jail.</p> 
+		<p>If&nbsp;none of&nbsp;the interface is&nbsp;not the subnet that contains the&nbsp;IP jail will be&nbsp;selected by&nbsp;default interface.</p>
+		<p>Also, the value can be&nbsp;set to&nbsp;the name of&nbsp;the interface, if&nbsp;you do&nbsp;not want to&nbsp;search for a&nbsp;suitable interface. For example record</p>
+		<p>interface = &laquo;igb0&raquo;</p>
+		<p>sets the&nbsp;IP address of&nbsp;the jail at&nbsp;the interface igb0.</p>
+		<p>As&nbsp;well as&nbsp;during start-up, when <strong>CBSD</strong> will sets the necessary&nbsp;IP for jail on&nbsp;interface, when you stop them <strong>CBSD</strong> unset IPs from the interface automatically. Therefore, be&nbsp;extremely careful — If&nbsp;you set by&nbsp;mistake&nbsp;IP address of&nbsp;the node for jail , then, during the cbsd jstop sequence, <strong>CBSD</strong> execute</p>
+		<p>ifconfig &lt;iface&gt; &lt;ip&gt; -alias</p>
+		<p>and a&nbsp;node will be&nbsp;lost in&nbsp;the network.</p>
+		<p>To&nbsp;the stop of&nbsp;management&nbsp;IP address, the interface= param can be&nbsp;commented out or&nbsp;removed, or&nbsp;the value is&nbsp;left blank:</p>
+		<p>interface=&quot;&quot;</p>
+		<p>In&nbsp;this case, <strong>CBSD</strong> will immediately start the jail with the appropriate&nbsp;IP, meaning that he&nbsp;has already been initialized . Such a&nbsp;situation may be&nbsp;necessary when server has only one&nbsp;IP address, and you plan to&nbsp;run jail ( or&nbsp;a&nbsp;few jails ) in&nbsp;one existing&nbsp;IP, but with the services within that do&nbsp;not conflict the ports.</p>
+		<p>For example, having one&nbsp;IP address , you can start jail with WEB server on&nbsp;port 80 , another jail with the mail server on&nbsp;port 25&nbsp;and so&nbsp;on.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			ver="10.0";
+		</pre>
+		<p>Version of&nbsp;the base for jail. Is&nbsp;directly related to&nbsp;the version of&nbsp;FreeBSD. Thus, if&nbsp;the jail are have in&nbsp;rc.conf options</p>
+		<pre class="brush:bash;ruler:true;">
+			arch="amd64"
+			ver="10.0"
+			baserw=0
+		</pre>
+		<p>then at&nbsp;the start of&nbsp;the jail ${workdir}/basejail/base_amd64_10.0 will be&nbsp;selected. When</p>
+		<pre class="brush:bash;ruler:true;">
+			arch="i386"
+			ver="9.1"
+			baserw=0
+		</pre>
+		<p>it&nbsp;will accordingly be&nbsp;used ${workdir}/basejail/base_i386_9.1.</p>
+		<p>This way you can switch the version of&nbsp;base from one version to&nbsp;another</p>
+		<p>When baserw=1 means that the entire base has been initialized and is&nbsp;filled from ${workdir}/jails-data/$jname-data, so&nbsp;that these parameters do&nbsp;not matter</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			basename="";
+		</pre>
+		<p>The base name. You can create a&nbsp;customized base, for example to&nbsp;build a&nbsp;minimal environment and place it&nbsp;to <em>$workdir/base_lite_amd64_9.2</em></p>
+		<p>To&nbsp;specify <strong>CBSD</strong> that you need to&nbsp;mount this directory, basename must have &laquo;lite&raquo; prefix:</p>
+		<p>basename=&quot;lite&quot;;</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			baserw="0";
+		</pre>
+		<p>When&nbsp;1, it&nbsp;is&nbsp;understood that a&nbsp;jail has its own base file system and has an&nbsp;entry. Typically, this parameter is&nbsp;set during the creation of&nbsp;the jail. If&nbsp;you originally created the jail with baserw=0 (readonly), but want to switch it&nbsp;into a&nbsp;baserw=1&nbsp;mode, you first need to&nbsp;copy all the files from the base directory to&nbsp;$workdir/jails-data/$jname-data. For example:</p>
+		<p>cd&nbsp;/usr/jails/basejail/base_amd64_10/</p>
+		<p>pax -p eme -X -rw . /usr/jails/jails-data/jail1-data</p>
+		<p>or, if&nbsp;you have in&nbsp;the master node object files:</p>
+		<p>make -C /usr/src installworld DESTDIR=&quot;/usr/jails/jails-data/jail1-data&quot;</p>
+		<p>In&nbsp;the same way, at&nbsp;this stage, it&nbsp;is&nbsp;supposed to&nbsp;update the jail that operate in&nbsp;baserw=1, since each cell has a&nbsp;personal copy of&nbsp;the base.</p>
+		<p>In&nbsp;contrast, when using baserw=0, you can only use one copy of&nbsp;the base, which is&nbsp;mounted through nullfs in&nbsp;read-only to&nbsp;all jails.</p>
+		<p>You can have one base (eg&nbsp;the minimum amount called lite) for a&nbsp;few tens of&nbsp;jails which is&nbsp;placed on&nbsp;md-ramfs to&nbsp;accelerate the operation of&nbsp;the basic tools in&nbsp;the jails.</p>
+		<p>In&nbsp;addition, with baserw=0 you have the opportunity to&nbsp;update the version of&nbsp;the base less.</p>
+		<p>In&nbsp;addition, the base is&nbsp;mounted in&nbsp;read-only mode gives you extra security if&nbsp;your jail hacked and somebody try to&nbsp;modify the file system&nbsp;&mdash; this is&nbsp;simply will not work.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mount_src="0";
+		</pre>
+		<p>Does the mount /usr/src directory of&nbsp;jail FreeBSD source code in&nbsp;read-only, if&nbsp;they have</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mount_obj="";
+		</pre>
+		<p>Does the mount /usr/obj directory of&nbsp;jail FreeBSD source code in&nbsp;read-only, if&nbsp;they have</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mount_kernel="0";
+		</pre>
+		<p>Does the mount /boot/kernel kernel FreeBSD. This can be&nbsp;useful, for example, for CTF-information required to&nbsp;operate DTRACE.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mount_ports="1";
+		</pre>
+		<p>Does the mount /usr/ports of&nbsp;the master node in&nbsp;readonly to&nbsp;/usr/ports in&nbsp;jail. You can have one copy of&nbsp;ports tree on&nbsp;the master node that is&nbsp;deployed in&nbsp;/usr/ports, and which mount to&nbsp;all jails. In&nbsp;order to&nbsp;simultaneously compilation of&nbsp;the same port are not conflicted in&nbsp;two or&nbsp;more jails, in&nbsp;the /etc/make.conf option WRKDIRPREFIX must be&nbsp;sets to&nbsp;for alternate location, such as&nbsp;/tmp (if&nbsp;the jail has applytpl=1&nbsp;settings, this is&nbsp;done automatically)</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			astart="1";
+		</pre>
+		<p>Whether to&nbsp;start jail automatically when nodes is&nbsp;started. If&nbsp;astart=0, the jail does not run itself on&nbsp;booted node.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			vnet="0";
+		</pre>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			applytpl="1";
+		</pre>
+		<p>Whether to&nbsp;apply some modification in&nbsp;the jail configuration: sets pkg.conf, make entries in&nbsp;the /etc/hosts, and so&nbsp;on.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			mdsize="0";
+		</pre>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			rcconf="/usr/jails/jails-rcconf/rc.conf_jail1";
+		</pre>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			floatresolv="1";
+		</pre>
+		<p>Automatically correct the /etc/resolv.conf, automatically assigning as&nbsp;the primary nameserver caching named in&nbsp;the master node, the other nameserver&nbsp;&mdash; from inventory of&nbsp;nodes.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			exec_start="/bin/sh /etc/rc";
+			exec_stop="/bin/sh /etc/rc.shutdown";
+		</pre>
+		<p>System commands for starts and stops jail. If you want to write additional scripts executed by starting and stopping jails see: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">Jail config</a></p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			cpuset="0";
+		</pre>
+		<p>Assign jail and its processes to&nbsp;specific cores CPU. A&nbsp;value of&nbsp;0 (default) means that there is&nbsp;no&nbsp;binding to&nbsp;CPUs and processes will take up&nbsp;all the available cores. Nonzero value identifies the kernel or&nbsp;a&nbsp;list of&nbsp;the CPUs allowed to&nbsp;work jail.  Entry must match an&nbsp;entry form for <em>-l cpu-list</em> from <a href="http://www.freebsd.org/cgi/man.cgi?query=cpuset&amp;sektion=1" target="_blank"><strong>cpuset(1)</strong></a> command, for example:</p>
+		<pre class="brush:bash;ruler:true;">
+			cpuset="1";
+		</pre>
+		<p>means that the processes will only run on&nbsp;first core</p>
+		<pre class="brush:bash;ruler:true;">
+			cpuset="0-3"
+		</pre>
+		<p>means that the processes will only run on&nbsp;0,1,2,3&nbsp;CPUs</p>
+		<pre class="brush:bash;ruler:true;">
+			cpuset="0,3"
+		</pre>
+		<p>means that the process will only run on&nbsp;0&nbsp;and 3&nbsp;CPUs</p>
+		<p>This functionality is&nbsp;useful, for example, for profiling software, or&nbsp;if&nbsp;you want to&nbsp;restrict jails by&nbsp;CPUs.</p>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			setfib="0";
+		</pre>
+		<p>Assign jail and its processes to&nbsp;separate routing table. A&nbsp;value of&nbsp;0 (default) means that there is&nbsp;no&nbsp;binding and will be&nbsp;use default routing table. To&nbsp;use <strong>setfib</strong>, in&nbsp;the file /boot/loader.conf you need to&nbsp;set limits number of&nbsp;tables by&nbsp;parameter <strong>net.fibs</strong>.  For example, if&nbsp;you want use five separate routing tables, in&nbsp;/boot/loader.conf you must have the following entry:</p>
+		<pre class="brush:bash;ruler:true;">
+			net.fibs="5"
+		</pre>
+		<hr>
+		<pre class="brush:bash;ruler:true;">
+			exec.consolelog="0";
+		</pre>
+		<p>Regulates logging output of&nbsp;jail(8) at&nbsp;the start and stop of&nbsp;the jail. By&nbsp;default, the value is&nbsp;<strong>0</strong>.</p>
+		<p>Possible values are:</p>
+		<ul>
+			<li><strong>0</strong>&nbsp;&mdash; disable exec.consolelog. In&nbsp;this case, on&nbsp;jstart/jstop will show all output for jail start and jail stop procedures.</li>
+			<li><strong>1</strong>&nbsp;&mdash; Enable logging to&nbsp;file <em>${workdir}/var/log/${jname}.log</em>, where $jname&nbsp;&mdash; an&nbsp;appropriate name if&nbsp;jail. Thus, the terminal these messages will not.</li>
+		</ul>
+		<p><strong><em>/path/to/file</em></strong>&nbsp;&mdash; Path to&nbsp;alternate file. For example, with <strong>/dev/null</strong>, the jail will not show anything and it&nbsp;will not record.</p>
+	</div>
+<!--# include file="_end.html" -->

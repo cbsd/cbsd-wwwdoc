@@ -1,0 +1,100 @@
+<!--# include file="_start.html" -->
+	<h1><span>Über das Projekt</span></h1>
+	<div class="block">
+		<p><strong>CBSD</strong> ist als Managementlayer für das <a href="http://www.freebsd.org" target="_blank">FreeBSD</a> <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a> subsytem geschrieben worden. Es hat zum Ziel racct(8), vnet, zfs(8), carp(4) und hastd(8) mit einem Werkzeug zu vereinen. Es ist eine umfassende Lösung für das schnelle Erstellen und Bereitstellen von Applikationen und vordefinierten Software-Sets und das alles mit minimaler Konfiguration.</p>
+		<p>Es wurde bis jetzt keine Funktionalität des Betriebssystems beeinflusst und alles was <strong>CBSD</strong> kann, ist auch mit zehn oder hunderten von Shell-Kommandos und den unterliegenden Werkzeugen möglich. (Auch wenn man das wohl kaum selbst machen möchte!)
+</p>
+		<p>Funktionen:</p>
+		<ul>
+			<li>Schnelles Bereitstellen von Jails aus dem Nichts</li>
+			<li>Import und Export in und aus Images</li>
+			<li>Klonen und migrieren(auch auf enternte Rechner)</li>
+			<li>Snapshots mit ZFS</li>
+			<li>Traffic-Erfassung und Informationen über den Ressourcenverbrauch pro Jail</li>
+			<li>Ressoucenverwaltung: Prioritäten, RACCT/RCTL, Datei Quotas</li>
+			<li>Replikation auf entfernte Rechner</li>
+			<li>Jail Distributionen (Jails mit verschiedenen Software-Sets und Services)</li>
+			<li>Webinterface und zentrales Management</li>
+			<li><a href="/en/xorg_in_jail.html">XJails</a> (Xorg im jail)</li>
+			<li><a href="/en/bhyve.html">Bhyve</a> (BSD Hypervisor support)</li>
+			<li>&hellip;</li>
+		</ul>
+	</div>
+	
+	<h2><a name="why">Warum&hellip;</a></h2>
+	<div class="block">
+		<p>&laquo;Warum FreeBSD? Warum Jails? Warum sh?&raquo;:</p>
+		<p>FreeBSD Jails haben wir aus verschiedenen Gründen gewählt:</p>
+		<ul>
+			<li><a href="/de/cbsdsh.html">Details</a> über shell</li>
+			<li><a href="/de/articles/bhyve_vs_jails.html">Zero Virtualization Overhead</a>: Abgesehen von VIMAGE hat der Jail Code ein sehr einfaches Design.</li>
+			<li>Sicherheit: Es ist für jeden Dienst oder eine Gruppe von Diensten erstrebenswert von allem Anderen isoliert zu sein</li>
+			<li>Effiziente Replikation von Umgebungen: Systemadministratoren haben oft viele gleiche Umgebungen z. B. AMP, MTA, KDE4. An einem gewissen Punkt möchte man solche Umgebungen auf andere Weise verwalten. Jails erlauben es einem neue Umgebungen ohne Verzögerungen bereitzustellen. Sie erlauben es auch, dass sich Umgebungen nur durch die einzelnen Konfigurationen unterscheiden, als auch in der installierten Software</li>
+			<li>Geschwindigkeit der Bereitstellung und praktische Backups.</li>
+			<li>Baue deine eigene Jail-Bibliothek mit angepassten Optionen über <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/ports.html" target="_blank">FreeBSD ports</a></li>
+			<li>Es ist nicht wirklich befriedigend nur in einer Linuxwelt zu leben</li>
+			<li>Viele mehr</li>
+		</ul>
+		<p>Der Großteil des <strong>CBSD</strong> Code ist in <strong>sh</strong> geschrieben. Da keine komplexe Logik im Code selbst nötig ist, wird <strong>sh</strong> hauptsächlich dafür verwendet, externe Tools wie <strong>zfs, zpool, sudo, pkg oder rsync</strong> aufzurufen. Andere Bereiche die Verbesserungen benötigen oder spezielle Komponenten wie logtail, replication oder der Nodeüberwachungsdienst sind aus Performancegründen in C geschrieben. </p>
+		<p>CBSD hat folgende Abhängigkeiten: <strong>rsync</strong>,<strong>sudo</strong>,<strong>libssh2</strong>,<strong>sqlite3</strong>
+	</div>
+	
+	<h2><a name="features">Funktionen</a></h2>
+	<div class="block">
+		<ul>
+			<li>Ein fertiges Repository für Kernels und World das kein <strong>buildworld/installworld</strong> benötigt;</li>
+			<li>Support für src.conf und <strong>buildworld/installworld</strong> Anpassungen;</li>
+			<li>Der Katalog kann auf Memorysticks, im RAM auf tmpfs oder mit RO mounted Base verwendet werden;</li>
+			<li>ZFS: Filesystem, Quotas und Snapshots;</li>
+			<li>Konfigurations-GUI für Jails (Dialog or&nbsp;Web UI);</li>
+			<li>VIMAGE support;</li>
+			<li>Per-Jail Traffic Accounting;</li>
+			<li>Jail Import/Export;</li>
+			<li>Jail Beschreibungen;</li>
+			<li>Cold migration zwischen Knoten;</li>
+			<li>Eigene Jail Startreihenfolgen und Prioritäten;</li>
+			<li>RACCT/RCTL support;</li>
+			<li>Ein Repository mit fertigen Jail-Templates;</li>
+			<li>Jail Replikation;</li>
+			<li>Umwandlung eines Jails zu PXE/ISO/Memstick-image;</li>
+			<li>Unterstützung für nicht native Architekturen mit Hilfe von Qemu User mode (z. B. arm oder mips64 für einen Jail  auf einem x86-64 Hostsystem);</li>
+			<li>&hellip;</li>
+		</ul>
+	</div>
+	
+	<h2><a name="goals">Ziele</a></h2>
+	<div class="block">
+		<ul>
+			<li>Die Funktionen und Vorteile von FreeBSD als Hostingplattform zu zeigen. Nicht nur Jails sondern auch Linux-Umgebungen mit Hilfe von Bhyve zu hosten;</li>
+			<li>Ein WEB-Interface bereitstellen um das Erstellen von eigenen Hostingfarmen auf eigenen Systemen zu ermöglichen;</li>
+			<li>Automatisiertes Bereitstellen von Systemen;</li>
+			<li>Praktisches und einfaches Verwalten, Überwachen und Konfigurieren von FreeBSD Jails und Bhyve;</li>
+			<li>&hellip;</li>
+		</ul>
+	</div>
+
+	<h2><a name="contactus"><span>CBSD-related support, talks and usergroup channel</span></a></h2>
+	<div class="block">
+		<p>We are started <a href="https://web.telegram.org/" target="_blank">Telegram</a> channel for discussion about using and CBSD development.</p>
+		<p>Please join us in <a href="https://web.telegram.org/#/im?p=%40cbsdofficial" target="_blank">@cbsdofficial</a>
+	</div>
+
+	<h2><a name="thanks"><span>Unterstützen Sie das Projekt</span></a></h2>
+	<div class="block">
+	<p>
+	<p>Die Arbeiten an der <strong>CBSD Projekt </strong> hängt weitgehend von folgenden Faktoren ab:</p>
+	<ul>
+		<li>Die Verfügbarkeit der freien Zeit die Entwickler ist die wichtigste Job (nicht um ein kommerzielles Projekt);</li>
+		<li>Auf Wunsch des Projekts;</li>
+		<li>Von den Vorschlägen im Zusammenhang mit der Anwendung von CBSD Entwicklungen oder der Entwicklung und Anpassung der Komponenten unter realen / kommerziellen Projekten;</li>
+	</ul>
+	<p>Falls Sie Hilfe oder Spenden an das Projekt möchten, verwenden Sie den Button:</p>
+	<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+		<input type="hidden" name="cmd" value="_s-xclick">
+		<input type="hidden" name="hosted_button_id" value="KDK9R7AAYAT5E">
+		<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+		<img alt="" border="0" src="https://www.paypalobjects.com/ru_RU/i/scr/pixel.gif" width="1" height="1">
+	</form>
+	<p>Darüber hinaus können Sie einen Entwurf auf der Seite markieren <a href="https://github.com/cbsd/cbsd">Github CBSD</a>, Drücken der <strong>Star</strong>.  Kleinigkeit, aber schön ;-)</p>
+	
+<!--# include file="_end.html" -->

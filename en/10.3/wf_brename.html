@@ -1,0 +1,19 @@
+	<h1><span>Virtual Machine Renaming</span></h1>
+	
+	<h2><a name="brename_cmd">command: brename</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd brename
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Performs renaming the virtual machine and the corresponding directory data in the new name. Can be executed only on the inactive virtual machine. As required parameters:</p>
+		<ul>
+			<li><strong>old</strong>&nbsp;— old VM name</li>
+			<li><strong>new</strong>&nbsp;— new VM name</li>
+		</ul>
+		<p><strong>Example</strong> (renaming debian1 VM into debian50:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd brename old=debian1 new=debian50
+		</pre>
+	</div>
+

@@ -1,0 +1,80 @@
+<!--# include file="_start.html" -->
+<h1><a name="buildworld"><span>Сборка и обновление базы</span></a></h1>
+<div class="block">
+	<p>Команды</p>
+	<pre class="brush:bash;rule:true">
+		% cbsd srcup
+		% cbsd buildworld
+		% cbsd installworld
+		% cbsd world
+	</pre>
+</div>
+<div class="block">
+	<p><em>Примечание</em>: под словом "база" будет подразумеваться каталог, содержащий полную копию/иерархию файлов ОС FreeBSD.</p>
+	<p>Для создания новой клетки (или запуска клетки, база которой монтируется в RO), необходима готовая база, из которой будет собран новый <strong>jail</strong> (или которая будет подмонтирована при запуске клетки).</p>
+	<p>Ниже описаны шаги для получения исходных кодов FreeBSD из SVN репозитория проекта (<a href="http://svn.freebsd.org/" target="_blank">http://svn.freebsd.org</a>), его компиляция и инсталляция в отдельный каталог, который будет выступать базой. Данные действия могут быть востребованы, если вы не хотите пользоваться уже собранной версией, доступной на ресурсах <a href="ftp://ftp.freebsd.org" target="_blank">ftp://ftp.freebsd.org</a> и <a href="http://www.bsdstore.ru" target="_blank">http://bsdstore.ru</a> (например по причинам безопасности), которые можно получить через <strong>cbsd repo</strong>. Также, сборкой можно получить не только релизы, но и промежуточные варианты веток.</p>
+</div>
+<div class="block">
+	<p>Сборка или обновление состоит из трех шагов:</p>
+	<ul>
+		<li> Получение или обновление исходного кода FreeBSD через cbsd srcup:
+			Получение или обновление исходного кода для той версии FreeBSD, на котором в данные момент работает текущая нода:
+			<pre class="brush:bash;rule:true">
+				% cbsd srcup
+			</pre>
+			Получение или обновление исходного кода для конкретной версии FreeBSD, например, для 10.0:
+			<pre class="brush:bash;rule:true">
+				% cbsd srcup ver=10.0
+			</pre>
+			Получение или обновление исходного кода для STABLE ( например, для RELENG_10 ):
+			<pre class="brush:bash;rule:true">
+				% cbsd srcup ver=10 stable=1
+			</pre>
+			( Если вы хотите работать с STABLE по-умолчанию, рекомендуется выставить эту опцию глобально в cbsd initenv-tui, после чего добавлять stable=1 к командам будет необязательно ).
+			Эти команды, при наличие исходных кодов в SVN, наполнят каталоги <strong>$workdir/src/src_$ver</strong>
+		</li>
+		<li> Компиляция исходного кода через cbsd buildworld:
+			Результат, полученный с шага 1, может быть использован для компиляции базы. Сборка базы, при наличие <strong>$workdir/src/src_$ver</strong> каталога для текущей версии ядра:
+			<pre class="brush:bash;rule:true">
+				% cbsd buildworld
+			</pre>
+			При этом, объектные файлы, при наличие прошлых сборок, предварительно удалены не будут (make clean). Если в процессе повторной сборки возникла ошибка, имеет смысл заставить систему провести чистку <strong>.o</strong>-файлов:
+			<pre class="brush:bash;rule:true">
+				% cbsd buildworld clean=1
+			</pre>
+			По-умолчанию, осуществляется многопоточная сборка, где количество <strong>job</strong>-ов равняется количество ядер (sysctl hw.ncpu). Количество параллельных потоков регулируется через параметр maxjobs, например, для сборки в одном потоке:
+			<pre class="brush:bash;rule:true">
+				% cbsd buildworld maxjobs=1
+			</pre>
+			При компиляции, может учитываться персональный <a href="http://www.freebsd.org/cgi/man.cgi?query=src.conf&amp;sektion=5" target="_blank">src.conf(5)</a>, в котором можно указывать стандартные KNOBS-ы. Файл src.conf должен лежать в каталоге $workdir/etc/ с именем <strong>src-</strong><em>basename</em><strong>.conf</strong>, где basename&nbsp;— любое имя-название конфигурации. Например, в стандартной <strong>CBSD</strong> имеется файл /usr/jails/etc/src-lite.conf. Для сборки мира с определенным src.conf, необходимо указать параметр basename:
+			<pre class="brush:bash;rule:true">
+				% cbsd buildworld basename=lite
+			</pre>
+			Последующие операции над результатом этой сборки, также должны содержать параметр basename=, поскольку результат сборки будет сформирован в катало <strong>$workdir/basejail/base_$basename_$arch_$ver</strong>, где $basename&nbsp;— название конфигурации.
+			Другие параметры buildworld:
+			<ul>
+				<li><em>ver</em>&nbsp;— указать конкретную версию</li>
+				<li><em>arch</em>&nbsp;— сборка для конкретной архитектуры</li>
+				<li><em>stable</em>&nbsp;— сборка RELENG_X ветки</li>
+			</ul>
+		</li>
+		<li>Инсталляция мира через cbsd installworld:
+			Результат, полученный с шага 2, можно использовать для инсталляции нового мира в <strong>${workdir}/basejail/base_*</strong> каталог, откуда уже будет монтироватся в режиме RO, или формироваться новая клетка. Инсталляция файлов для текущей версии системы:
+			<pre class="brush:bash;rule:true">
+				% cbsd installworld
+			</pre>
+			Инсталляция файлов для версии 10.1, собранной с использованием src.conf под именем lite:
+			<pre class="brush:bash;rule:true">
+				% cbsd installworld basename=lite ver=10.1
+			</pre>
+			Другие параметры installworld:
+			<ul>
+				<li><em>arch</em>&nbsp;— инсталляция для конкретной архитектуры</li>
+				<li><em>stable</em>&nbsp;— инсталляция RELENG_X ветки</li>
+			</ul>
+		</li>
+	</ul>
+	<p>Команда <strong>cbsd world</strong> это последовательность <strong>cbsd buildworld && cbsd installworld</strong></p>
+	<p>Имея готовую базу в <strong>${workdir}/basejail</strong>, можно приступать к <a href="/ru/<!--#echo var="version" -->/wf_jcreate_ssi.html">созданию клеток</a>.</p>
+</div>
+<!--# include file="_end.html" -->

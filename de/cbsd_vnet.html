@@ -1,0 +1,33 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>CBSD FreeBSD jail with VIMAGE (vnet)</span></h1>
+	<div class="block">
+		<p>In view of some of the subtleties with FreeBSD vnet-jail, information about it deduced this separate article. First of all, the <strong>VIMAGE</strong> functionality requires a customized kernel with</p>
+		<pre class="brush:bash;ruler:true;">
+			options VIMAGE
+		</pre>
+		<p>If you get a kernel from the repository through a command <strong>cbsd</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=kernel
+		</pre>
+		<p>that your kernel is supports for VIMAGE.</p>
+		<p>In the case when kernel has no options, parameter <strong>vnet</strong> in the file <em>${workdir}/nc.inventory</em> will always be set to <strong>0</strong>. If this option is present in the kernel, in the configurator of creation jail will be present parameter <strong>vnet</strong>.</p>
+		<p>Second, keep in mind that although <strong>VIMAGE</strong> (available from FreeBSD 8.0) and held the status of an experimental feature for the 4 years of its existence in the base operating system, it can still be found a variety of problems, the correction of which is extremely tightened: in GNATS (current ticket system FreeBSD)  quite <a href="http://www.freebsd.org/cgi/query-pr-summary.cgi?category=&amp;severity=&amp;priority=&amp;class=&amp;state=&amp;sort=none&amp;text=vimage&amp;responsible=&amp;multitext=&amp;originator=&amp;release=" target="_blank">a few</a> panics messages using VIMAGE in conjunction with the various components;</p>
+		<p>Besides <a href="http://www.freebsd.org/cgi/query-pr.cgi?pr=164763" target="_blank">seen</a> cases of memory leaking.</p>
+		<p>Well, now the something good;)</p>
+		<p><strong>vnet</strong>-featured jail has at its disposal a fully virtualized and isolated network stack, which in turn allows the use of a private jail (albeit virtual) interface, "right" <strong>loopback</strong>, use within the jail a packet filters (<strong>pf, ipfw, pfilter</strong>), raise the tunnels and reconfigure the routing table.</p>
+		<p>When you create a vnet-jails the <strong>ip4_addr</strong> should indicate <strong>0</strong>, which prohibit <strong>CBSD</strong> set itself an IP address for vnet jail.</p>
+		<p><em>Note: The installation of IP addresses in the vnet jail is not implemented yet</em>
+		<p>Also, if you want to get a jail itself an IP address automatically (via DHCP), you would write a separate section devfs.rules, in which you need to open  <a href="http://www.freebsd.org/cgi/man.cgi?query=bpf&amp;sektion=4" target="_blank"><strong>bpf(4)</strong></a>-device ( unhide bpf*), and set  this devfs rule number to <strong>vnet</strong>-jail (via <strong>cbsd jconfig jname=XXXX</strong>)</p>
+		<p>cbsd creates virtual interfaces using a pair of <a href="http://www.freebsd.org/cgi/man.cgi?query=epair&amp;sektion=4" target="_blank"><strong>epair(4)</strong></a>, but the "other end" virtual cable that connects to the jail, <strong>CBSD</strong> renamed to <strong>eth0</strong> interface.</p>
+		<p><em>Note: </em>: Rename this is relevant only for FreeBSD jails. If a jail is run as Linux-based, renaming will not happen.</p>
+		<p>Renaming to <strong>eth0</strong> by the fact that each new <strong>epair</strong> increments the number of the interface, those of the first <strong>vnet</strong>-jail in original, interface will be called as epair<strong>0</strong>a. When you running the fifth of jails, in last jail interface will be called as epair<strong>5</strong>a. It's not very convenient whith jail migrating (on another server, it may be a different number), and definitely not convenient that every time you have to correct the contents of the rc.conf with the network setup.</p>
+		<p class="text-center"><em>Sets 0 (empty) in ip4_addr field when create vnet-jail</em></p>
+		<p class="text-center"><img src="/img/vnet1.png" alt="" /></p>
+		<p><em>If the kernel has VIMAGE option, it is possible to set the vnet 1</em></p>
+		<p class="text-center"><img src="/img/vnet2.png" alt="" /></p>
+		<p><em>Inside the jail. We do what we want, we get your IP, set up ipfw</em></p>
+		<p class="text-center"><img src="/img/vnet3.png" alt="" /></p>
+	</div>
+<!--# include file="_end.html" -->

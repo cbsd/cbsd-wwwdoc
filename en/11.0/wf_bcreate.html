@@ -1,0 +1,43 @@
+	<h1><span>bhyve virtual machine create via dialog menu</span></h1>
+	
+	<h2><a name="jcreate_cmd">Commands: bcreate, bconstruct-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler=true;">
+		% cbsd bconstruct-tui
+		% cbsd bcreate jconf=/path/to/conf.jconf
+		</pre>
+	</div>
+	<div class="block">
+		<strong>Description:</strong>
+		<p>The virtual machine is created on a pre-formed configuration file through <strong>cbsd bcreate jconf=path_to_cfg</strong>.</p>
+		<p>For the configuration process, you can use the script <strong>cbsd bconstruct-tui</strong>, or use WEB interface.</p>
+		<p>To create a via DIALOG:</p>
+		<pre class="brush:bash;ruler=true;">
+		% cbsd bconstruct-tui
+		</pre>
+		<p>The same menu is available to create a jail when configuring <strong>CBSD</strong> via bsdconfig</p>
+		<p class="text-center"><img src="/img/cbsd_syntax3.png" alt="" /></p>
+		<p>If <strong>bconstruct-tui</strong> worked correctly, at the end you will be asked to create a virtual machine. In the case of  positive response, <strong>bcreate</strong> will be made to the new configuration automatically. Otherwise,  script displays the path to the configuration file (in <em>$workdir/tmp</em>), on which you can create a VM.</p>
+	</div>
+	<div class="block">
+	<p>Options and their brief description, which appear in the dialogue form. Depending on the type and profile of the OS, some of them may not be available:</p>
+	<ul>
+		<li>vm_os_type - type of OS. Depending on the type of the guest OS will be offered a particular profile set distributions</li>
+		<li>vm_os_profile - select the profile distribution. A profile can contain as proposed default parameters described below, as well as specific distro settings (URL for the image, kernel boot options, etc.)</li>
+		<li>imgsize - Size for the first virtual image. If the guest OS - FreeBSD profile and FreeBSD-from-jail (image generation through jail2iso), this parameter indicates the amount of free space after copying distribution</li>
+		<li>jname - the name of the virtual machine, in a one word.</li>
+		<li>host_hostname - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: set the hostname in /etc/rc.conf guest OS to the appropriate value</li>
+		<li>vm_ram - allocated RAM</li>
+		<li>vm_cpus - the number of virtual cores</li>
+		<li>vm_hostbridge - guest OS host bridge. Maybe hostbridge or amd_hostbridge (affects the PCI vendor ID)</li>
+		<li>astart - sign automatically start the virtual machine with the boot node</li>
+		<li>interface - uplink interface for tap-interface, the first network card of the virtual machine</li>
+		<li>pkglist - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: select the appropriate pekedzhi to be pre-installed in the created VM</li>
+		<li>ip4_addr - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: set the ifconfig_NIC /etc/rc.conf in the guest OS to the appropriate value - can be an IP address or a 'DHCP'</li>
+		<li>gw4 - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: install defaultrouter parameter /etc/rc.conf guest OS to the appropriate value</li>
+		<li>ver - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: use the base and kernel of the specified version (for example 10.1, 11.0, 12)</li>
+		<li>applytpl - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: whether to apply additional settings (/etc/hosts, /etc/make.conf)</li>
+		<li>floatresolv - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: set /etc/resolv.conf servers listed in the parameter jnameserver</li>
+		<li>arch - relevant only to the guest OS FreeBSD and Profile FreeBSD-from-jail: use the base and kernel of this architecture (eg i386, amd64)</li>
+	</ul>
+	

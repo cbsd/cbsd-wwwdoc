@@ -1,0 +1,164 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h2><a name="why">LDAP jail</a></h2>
+	<div class="block">
+		<p>For installing LDAP <strong>CBSD</strong> jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=ldapsrv
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd repo action=get sources=img name=ldapsrv ver=10.1
+		</pre>
+		<p>If you hosted on another ( non 10.1 ) FreeBSD version.</p>
+		<p>Execute <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">imghelper</a> that asks you for some questions required for the installation of the jail:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper jname=ldapsrv bootstrap=/usr/jails/jails-system/ldapsrv/bin/bootstrap.sh
+		</pre>
+		<p>where: <em>/usr/jails/</em> is workdir for <strong>CBSD</strong>.
+		<p class="text-center"><img src="/img/ldapsrv1.png" alt="" /></p>
+		<p>Now LDAP server ready to use. Do not forget to set <em>astart=1</em> in <strong>cbsd jconfig jname=ldapsrv</strong> if you want for starting jail automatically. By the starting jail via</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart ldapsrv
+		</pre>
+		<p>PHPLdapAdmin will be available for accessing via <strong>http://FQDN</strong>:</p>
+		<p class="text-center"><img src="/img/ldapsrv2.png" alt="" /></p>
+		<!--# include file="/en/changeroot.html" -->
+		<p>For non-interactive and automatic deploying (for example you create hosting with lots of RM installation for customer) you can use: </p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=ldapsrv ldapsrvinstall cn= cnpw= fqdn= ldapsuffix=
+		</pre>
+		<p>After starting the LDAP jail, you can use <em>/root/example_user.ldif</em> as an example LDIF template to add your user. For this purpose, after the command received password</p>
+		<pre class="brush:bash;ruler:true;">
+			% slappasswd -h "{SSHA}" -s yourpassword
+		</pre>
+		<p>fill in the userPassword and run:</p>
+		<pre class="brush:bash;ruler:true;">
+			ldapadd -Z -D "cn=Manager,dc=example,dc=com" -W -f /root/example_user.ldif
+		</pre>
+	</div>
+	<h2><a name="why">LDAP PAM authentication</a></h2>
+	<div class="block">
+		<p>You can use the LDAP server not only for authorization applications like Asterisk, GitLab, Redmine, OwnCloud, but also to provide centralized management of Unix account on all servers and jails. To add authentication via PAM, you need to install inside the jail follow packages: <strong>nss_ldap</strong> and <strong>pam_ldap</strong>. To the home directory is automatically created when you first enter, also  need <strong>pam_mkhomedir</strong>. The following files need to change inside the jails:</p>
+		<ul>
+			<li><strong>/usr/local/etc/ldap.conf:</strong>
+			<pre class="cli">
+ URI ldap://%%URI%%
+ base %%DC%%
+ ldap_version 3
+ scope sub
+ bind_timelimit 3
+ bind_policy soft
+ timelimit 3
+ idle_timelimit 3
+
+ pam_password SSHA
+
+ pam_filter              objectclass=posixAccount
+ pam_check_host_attr     yes
+ pam_login_attribute     uid:caseExactMatch:
+ pam_member_attribute    memberUid
+
+ pam_lookup_policy no
+
+ nss_base_group %%OU%%,%%DC%%
+ nss_base_netgroup %%OU%%,%%DC%%
+ nss_initgroups_ignoreusers root,ldap
+ nss_connect_policy oneshot
+			</pre>
+			</li>
+			<li><strong>/usr/local/etc/nss_ldap.conf</strong>
+			<pre class="cli">
+ uri ldap://%%URI%%
+ base %%OU%%,%%DC%%
+ ldap_version 3
+
+ timelimit 3
+ bind_timelimit 3
+ bind_policy soft
+ idle_timelimit 3
+			</pre>
+			</li>
+			<li><strong>/etc/nsswitch.conf</strong>
+			<pre class="cli">
+ group: files ldap
+ passwd: files ldap
+			</pre>
+			</li>
+			<li><strong>/usr/local/etc/openldap/ldap.conf</strong>
+			<pre class="cli">
+ nss_reconnect_tried     2
+ pam_login_attributes    uid
+ pam_member_attributes   cn
+ pam_password            SSHA
+ nss_base_passwd         %%OU%%,%%DC%%
+ nss_base_shadow         %%OU%%,%%DC%%
+
+ TIMEOUT 3
+ TIMELIMIT       3
+			</pre>
+			</li>
+			<li><strong>/etc/pam.d/ssh</strong>
+			<pre class="cli">
+ auth            sufficient      /usr/local/lib/pam_ldap.so      no_warn try_first_pass
+ auth            required        pam_unix.so             no_warn try_first_pass
+ account         sufficient      /usr/local/lib/pam_ldap.so      no_warn ignore_authinfo_unavail ignore_unknown_user
+ account         required        pam_unix.so
+ session         required        /usr/local/lib/pam_mkhomedir.so
+ session         required        pam_permit.so
+ password        sufficient      /usr/local/lib/pam_ldap.so      no_warn try_first_pass
+ password        required        pam_unix.so             no_warn try_first_pass
+			</pre>
+			</li>
+			<p>All of these changes, you can turn on or off via the command:</p>
+			<pre class="brush:bash;ruler:true;">
+			% cbsd ldapize jname=XXX
+			</pre>
+			<p>Thus, the previous configuration stored in <strong>$systemdir/$jname</strong> of ldapize helper directory to he could get back to the previous state</p>
+			<p>Example activations and deactivation LDAP authorization.</p>
+			<pre class="brush:bash;ruler:true;">
+			root@home:~ # cbsd ldapize --help
+			[helpers] Modify /etc/pam.d/sshd, ldap.conf and nss_ldap.conf in jail for your LDAP service
+			require: mode jname
+			opt: uri ou dc
+			mode= install,deinstall,modify
+			</pre>
+			<p>User oleg doesn not exist in master.passwd of jldap jail: </p>
+			<pre class="brush:bash;ruler:true;">
+			cbsd jexec jname=jldap grep oleg /etc/master.passwd
+			</pre>
+			<p>Activations for jldap jail. (<strong>ou=</strong>, <strong>dc=</strong> and <strong>uri=</strong> value stored in environment):</p>
+			<pre class="brush:bash;ruler:true;">
+root@home:~ # cbsd jls | grep jldap
+jldap	4	192.168.1.168/24	jldap.my.domain	/usr/jails/jails/jldap	On
+			
+root@home:~ # cbsd ldapize jname=jldap mode=install
+Original /etc/pam.d/sshd from jail stored into: /usr/jails/jails-system/jldap/module-ldapize/etc/pam.d
+Original /etc/nsswitch.conf from jail stored into: /usr/jails/jails-system/jldap/module-ldapize/etc
+Original /usr/local/etc/openldap/ldap.conf from jail stored into: /usr/jails/jails-system/jldap/module-ldapize/usr/local/etc/openldap
+Original /usr/local/etc/ldap.conf from jail stored into: /usr/jails/jails-system/jldap/module-ldapize/usr/local/etc
+Original /usr/local/etc/nss_ldap.conf from jail stored into: /usr/jails/jails-system/jldap/module-ldapize/usr/local/etc
+Make sure that you have pam_mkhomedir nss_ldap pam_ldap installed in your jail
+
+% cbsd jexec jname=jldap finger oleg
+Login: oleg                             Name: oleg ginzburg
+Directory: /home/oleg                   Shell: /bin/csh
+Last login Thu Apr 17 17:46 (MSK) on pts/20 from 192.168.1.199
+No Mail.
+No Plan.
+			</pre>
+			<p>Deactivation and test:</p>
+			<pre class="brush:bash;ruler:true;">
+root@home:~ # cbsd ldapize jname=jldap mode=deinstall
+Original /etc/pam.d/sshd from /usr/jails/jails-system/jldap/module-ldapize/etc/pam.d restored
+Original /etc/nsswitch.conf from /usr/jails/jails-system/jldap/module-ldapize/etc restored
+Original /usr/local/etc/openldap/ldap.conf from /usr/jails/jails-system/jldap/module-ldapize/usr/local/etc/openldap restored
+Original /usr/local/etc/ldap.conf from /usr/jails/jails-system/jldap/module-ldapize/usr/local/etc restored
+Original /usr/local/etc/nss_ldap.conf from /usr/jails/jails-system/jldap/module-ldapize/usr/local/etc restored
+
+% cbsd jexec jname=jldap finger oleg
+finger: oleg: no such user
+			</pre>
+	</div>
+<!--# include file="/en/_end.html" -->

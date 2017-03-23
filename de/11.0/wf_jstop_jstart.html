@@ -1,0 +1,58 @@
+<h1><span>Starting and stoping jail</span></h1>
+	
+	<h2><a name="jstart_cmd">jstart, jrestart, jorder commands</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart jname=jail1 jail2
+			% cbsd jstart jail1 jail2 ... jailX
+
+			% cbsd jstop jname=jail1 jail2
+			% cbsd jstop jail1 jail2 ... jailX
+
+			% cbsd jrestart
+			% cbsd jorder
+		</pre>
+		<strong>Description</strong>:
+		<p>Running jails occurs at startup <strong>CBSD</strong>/server automatically if parameter <strong>astart</strong> (auto-start) corresponding jail set to 1. You can change this setting through <strong>cbsd jconfig</strong> or <strong>cbsd jset</strong>. When you stop the server or service <strong>cbsdd</strong>, all running jails will be stopped automatically.</p>
+		<p>Starting the jail manually by the command:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart jname=jail1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart jail1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart jail1 jail2 jail3 ..
+		</pre>
+		<p>(to launch multiple jails by one command)</p>
+		<p>When ( You can change this behavior in cbsd initenv-tui ) <strong>parallel=0</strong> and you try to launch/stoping a few jails, start/stop will be held consecutively. It is not always good, as any error triggered inside jails in the rc-scripts, which leads to a pause, can block start/stop next jails. In the case when <strong>parallel</strong> have a non-zero value, each next jails will be launched/stopped in N seconds after the previous one, where N — <strong>parallel</strong> value. After this timeout, no matter whether the previous jail o start fully and next jail will be started.</p>
+		<p>To stoping jail <strong>jstop</strong> must be used, with the same syntax and behavior:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstop jname=jail1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstop jail1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstop jail1 jail2 jail3 ..
+		</pre>
+		<p>(to stopping multiple jails by one command)</p>
+		<p>If the argument of the jstart/jstop/jrestart command is missing, will displays the corresponding list of all running or stopped jail for interactive selection</p>
+		<p>When the jail is started, it creates a lock file, a sign that the jail working via file <em>${jailsysdir}/${jname}/locked</em> which records the name of the node. This feature is used when this jail presented several nodes, these jail are in the DFS (NFS, glusterfs, etc.) and any node is able to run it. This lock ensures that the presence of the same jail at the second node, it will not be launched.</p>
+		<p>With a large number of jails (particularly databases, with services such as MySQL, redis, cassandra, etc.), it should be borne in mind that the low value <strong>parallel</strong> (for example, less than 5 seconds) can generate a very intensive storage I/O load that can increase the amount of start-up time of all jails, than if they were run sequentially or higher timeout.</p>
+		<p>Additionally, when a shutdown command is running on the server with lots of jails/services that should be taken into consideration low timeout that defaults to perform rc.shutdown sequence. In this regard, the process <strong>init(8)</strong> can interrupt the rc-scripts on this timeout, resulting in abnormal shutdown jails. In this case, the database can lead to nonconservation or damage data. To avoid this, <strong>/etc/rc.conf</strong> master system should be adjusted parameter <strong>rcshutdown_timeout</strong> to a more reasonable value (default: 90 seconds)</p>
+		<p>In the absence of <strong>rcshutdown_timeout</strong> in the system <strong>/etc/rc.conf</strong>, <strong>cbsd initenv</strong> will put this option in its sole discretion automatically.</p>
+		<p>Also, keep in mind that when using the zfs features (<em>$workdir/nc.inventory</em>, the parameter <strong>zfsfeat=1</strong>), and the file system ZFS, at jstop, file system of jails will be unmounted and those catalog <em><strong>$workdir/</strong>jails-data/jail1-data</em> will be empty. If in such a case when jail data is requires without running it,  by the command <strong>zfs list</strong> You can see the name appropriate file system and run zfs mount <strong>fs</strong>.</p>
+	</div>
+	<h2><a name="jstart_cmd">Writing scripts executed on starting and stopping jail</a></h2>
+	<div class="block">
+		<p>Please read details on the <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">Jail config</a>
+	<div>
+	<h2><a name="jorder">Priority launch of jails</a></h2>
+	<div class="block">
+		<p>In <strong>CBSD</strong> you can specify the sequence in which the jails will be started. Please read details on the <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jorder_ssi.html">jail starting order</a>
+	</div>

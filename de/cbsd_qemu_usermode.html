@@ -1,0 +1,21 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+	<h1><span>CBSD and Qemu User mode</span></h1>
+	<div class="block">
+		<p>Having installed QEMU in the master node, builded with additional targets <strong>user mode</strong>  (\*-user) ( <a href="https://wiki.freebsd.org/QemuUserModeHowTo" target="_blank">https://wiki.freebsd.org/QemuUserModeHowTo</a> ), you can create jails with alternative architectures other than the master host. At the same time, will be achieved through emulation emulator Qemu, it is completely transparent — if the binary has a non-native architecture, it can perform in this system without having to install a complete Qemu virtual machine.</p>
+		<p>To <strong>CBSD</strong> could create such jail, binary of Qemu, providing this architecture in <strong>usermode </strong>, must be built statically, because the file will be placed inside the jail.</p>
+		<p>Why it can be useful at all?</p>
+		<p>First of all, it's a fairly simple way to test the binary FreeBSD specific software architecture in the native environment, while you do not need to search for bootable distribution and install FreeBSD desired architecture on a separate drive from scratch.</p>
+		<p>Secondly, many owners of ARM-based devices suffer from a lack repository <strong>pkg</strong> for ARM architectures, and building of the packages directly on very limited resources for capacity themselves Embedded ARM-based devices — to put it mildly, quite sad operation.</p>
+		<p>ARM-based jail, running on a powerful x86-64 system will allow you to build the necessary packages, you'll have to install Embedded device via a standard <strong>pkg</strong> in binary form.</p>
+		<p>According to test results, the loss of speed in the work under QEMU emulator varies from 3% to 25%, for example, in comparison with the power of such devices as <strong>RPi-B</strong>, modern x86-desktop in any case much faster.</p>
+		<p>Currently tested jail work on <strong>armv6</strong> and <strong>mips64</strong> architectures.</p>
+		<p><em>Note</em>: because the program will run under qemu, they are have default limit of RAM 128MB, that can lead to crashes some fat processes. I have not found in haste as through user mode tools (qemu-arm, qemu-mips64) indicate <strong>-m XX </strong>, so you can simply adjust the desired volume in the file vl.c QEMU, specifying such</p>
+		<pre class="brush:bash;ruler:true;">
+			#define DEFAULT_RAM_SIZE 512
+		</pre>
+		<p>instead of 128.</p>
+		<p class="text-center"><img src="/img/cbsd_with_qemu.png" alt="" /></p>
+	</div>
+<!--# include file="_end.html" -->

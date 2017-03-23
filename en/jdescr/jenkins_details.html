@@ -1,0 +1,25 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>Jenkins FreeBSD jail image</span></h1>
+	<div class="block">
+	<p><a href="https://wordpress.org/" target="_blank">Jenkins</a> is a free extendable open source continuous integration server</p>
+	<p>For installing Jenkins <strong>CBSD</strong> jail use <strong>bsdconfig cbsd</strong> and Repository submenu, or just follow this steps:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=jenkins
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=img name=jenkins ver=10.1
+		</pre>
+		<p>If you hosted on another ( non 10.1 ) FreeBSD version.</p>
+		<p>Execute <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_imghelper_ssi.html">imghelper</a> that asks you for some questions required for the installation of the jail:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper jname=jenkins bootstrap=/usr/jails/jails-system/jenkins/bin/bootstrap.sh
+		</pre>
+		<p>where: <em>/usr/jails/</em> is workdir for <strong>CBSD</strong>.
+		<p>A clean Jenkins instance in the jail will be available for access via <strong>http://IP:8180/jenkins/</strong></p>
+		<!--# include file="/en/changeroot.html" -->
+		<p class="text-center"><img src="/img/jenkins1.png" alt="" /></p>
+	</div>
+<!--# include file="/en/_end.html" -->

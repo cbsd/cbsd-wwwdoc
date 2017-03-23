@@ -1,0 +1,24 @@
+	<h1><span>Использование VNC для подключения к bhyve виртуальной машине</span></h1>
+	
+	<h2><a name="bconfig_cmd">Команда bconfig, bconstruct-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bconfig
+			% cbsd bconstruct-tui
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>На данный момент, VNC возможно только при запуске виртуальных машин через UEFI режим</p>
+		<p>Для этого, при создании новой виртуальной машины (или при ее редактировании через bconfig), убедитесь, что:</p>
+		<p>значение <strong>vm_efi</strong> установлено в <strong>uefi</strong>:</p>
+		<p class="text-center"><img src="/img/bcreate11.png" alt="" /></p>
+		<p>Если вы хотите зафиксировать VNC порт, используете пункт меню <strong>vm_vnc_port</strong></p>
+		<p>Если <strong>vm_vnc_port</strong> принимает значение <strong>0</strong> - CBSD автоматически найдет первый свободный порт для VNC соединения</p>
+		<p>Если <strong>vm_vnc_port</strong> принимает значение <strong>1</strong> - CBSD не будет открывать порт для VNC</p>
+		<p>Если <strong>vm_vnc_port</strong> любое другое числовое значение, например <strong>5905</strong> - CBSD будет использовать данный порт VNC для виртуальной машины всегда</p>
+		<br>
+		<p>Обратите внимание, что по-умолчанию, порт VNC открывается на loopback адресе 127.0.0.1</p>
+		<p>Это сделано из соображений безопасности, иначе любой пользователь сможет подсоединиться на VNC вывод вашей виртуальной машины</p>
+		<p>Для соединения с VNC на удаленном сервере, используйте SSH туннели, либо прокси, которые защищены сертификатом или паролем</p>
+		<p>Если же вы хотите работать с VNC напрямую, изменить параметр <strong>bhyve_vnc_tcp_bind</strong> с 127.0.0.1 на 0.0.0.0 в меню <strong>vnc_options</strong>. В этом случае, порт для соединения будет открыт всем</p>
+		<p class="text-center"><img src="/img/bcreate12.png" alt="" /></p>
+	</div>

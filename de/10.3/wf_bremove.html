@@ -1,0 +1,21 @@
+	<h1><span>Removal Virtual Machine</span></h1>
+	
+	<h2><a name="bremove_cmd">command: bremove</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bremove jail1 jail2 ..
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Removing a virtual machine affects all files in one way or another connected with the VM:</p>
+		<ul>
+			<li>a) directory or ZFS fileset with images of virtual machine</li>
+			<li>b) statistics and the description of the virtual machine</li>
+			<li>c) snapshots, if it was</li>
+		</ul>
+		<p>In case when <strong>bremove</strong> runs on a running virtual machine, the work of the guest OS is automatically interrupted.</p>
+		<p>&nbsp;</p>
+		<p><strong>Example</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bremove redhat1
+		</pre>
+	</div>

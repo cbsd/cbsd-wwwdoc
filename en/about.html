@@ -81,17 +81,29 @@
 
 		<p><strong>Q:</strong> <strong>CBSD</strong> production ready?</p>
 		<ul>
+			<li>
 			<p>It depends only on you and your requirements. CBSD exists since 2013 and at the moment is one of the oldest systems for managing virtual environments on FreeBSD, 
 			while it is in the current state and continues to improve. A number of users successfully use CBSD in large production installations.</p>
 			<p>We are also interested in learning more about the using of CBSD and ClonOS, so we created a <a href="/en/press.html">separate page</a> where we collect articles and reviews from different users</p>
+			</li>
 		</ul>
 
 		<p><strong>Q:</strong> ezjail, qjail, zjail, warden, iocage, bsdploy, jailctl, and other: What the hell is so many projects, what is the difference between all of them?</p>
 		<ul>
+			<li>
 			<p>Short answer: each project has a very special developmental vector and goals in comparison with other tools; You have a choice between several different implementation options.
 			The main difference between CBSD and others is that CBSD is positioned as a complete solution with as simple (where is possible) management interface.
 			CBSD for this reason is much larger and bigger and not all of this is suitable. But we have different goals in comparison with others and focused on complex cluster solutions.
 			</p>
+			</li>
+		</ul>
+
+		<p><strong>Q:</strong> jail, bhyve, xen... What about <strong>Docker</strong>, any plan to support Docker in CBSD?</p>
+		<ul>
+			<li><p>No. We focus on large production-ready <strong><u>and</u></strong> <strong>FreeBSD-based</strong> installations.
+			Docker is great, but it does not have official FreeBSD support, so it makes no sense to use inappropriate tools in the serious work.</p>
+			<p>You can use the Docker as it is in MacOS or FreeNAS - through an intermediate layer with [x/b]hyve hypervisor. But it suits more for fun and games than for serious
+			application in the production infrastructure. But if you really want, all this <a href="/<!--#echo var="lang" -->/articles/docker_on_freebsd.html">easy to make by yourself</a> without CBSD.</li>
 		</ul>
 
 		<p><strong>Q:</strong> &laquo;Why CBSD written on <strong>sh</strong>:</p>

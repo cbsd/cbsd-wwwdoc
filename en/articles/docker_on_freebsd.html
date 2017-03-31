@@ -1,0 +1,225 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>Using Docker on FreeBSD</span></h1>
+<div class="block">
+<h1><span>Introduction</span></h1>
+<p>
+<a href="https://www.docker.com/" target="_blank">Docker</a> solutions pretty much embedded in the lives of many IT companies.
+Moreover, the trends towards Docker-lock-in situations began to be traced, when companies completely build the infrastructure using Docker.
+This technology, like any other, has pros and cons, but the fact remains - in today's world Docker is very popular -
+even in spite of the fact that the number of forces for his support and service began to exceed the forces that are necessary
+spend engineers on the solution of those tasks that Docker originally had to solve, but without Docker.
+Engineers no longer spend their energy and time on implementing content delivery methods - now Docker does it, however
+all the forces and time of engineers are now spent on tracking Docker and Dockerization. Demand for this grows and
+some FreeBSD users who are tired of the simplicity/<a href="https://en.wikipedia.org/wiki/KISS_principle" target="_blank">KISS</a> of solutions, 
+and often in the BSD-world the same question sounds: "When we finally can start all your time to solve problems caused by the use of Docker, because it's so exciting! ";-)
+</p>
+
+<p>
+As a result of these needs, even such serious FreeBSD-based solutions as <a href="http://www.freenas.org/" target="_blank">FreeNAS</a> awkwardly trying to give their
+users Docker, completely replacing them with the native implementation of jail containers.
+For example in the following <a href="https://forums.freenas.org/index.php?threads/jails-plugins-and-containers-vms-in-10.43830/" target="_blank">message</a>,
+the FreeNAS developers explain the reasons for the termination of the development of jail-based environments and argue the transition to the Docker.
+First of all, because there is a huge amount of Docker-based services that you can just grab and use.
+However, one must understand that such a step is more a commercial move from the side <a href="https://www.ixsystems.com/">IXSystem companies</a>,
+which sells the NAS appliance and which goes on a leash  on potential consumers, making an attempt to attract their attention.
+However, in fact, the technical effectiveness of such a solution is extremely low and the possibility of application is very limited. Why?
+</p>
+
+<p>
+It should be noted that Docker is concentrated and implemented using Linux-only specific technologies - it is based on many
+Linux kernel functionals, such as cgroups and iptables, and it launches a container with a Linux environment.
+</p>
+<p>In other words, if you want to run production on a Docker, nothing else will work for you except for Linux,
+since officially the project is developed and designed for Linux ecosystem.
+Yes, you can run Docker through an interlayer, as it does on Windows or MacOSX platforms,
+but be prepared to lose some of the functionality, flexibility and speed in such solution.
+The current implementation of the launch of Docker on MacOSX is based on the hypervisor xhyve (which in turn is based on developments
+bhyve), but no one will never run a large production infrastructure in dockers that run on MacOSX or Windows, or FreeNAS
+- in these cases, hypervisors (although they are fast) is an unnecessary layer that does not help the infrastructure, but on the contrary,
+only complicates it. Therefore, these options should be considered only as an opportunity for developers and testers to check
+service or code bypassing the resources of only their local working machine, where the code is written.</p>
+
+<p>Of the main limitations, of course, this is overhead for the hypervisor. You need to preconfigure the bhyve environment,
+giving out a certain amount of resources (cores, memory), within which you will run the Docker.
+Sooner or later, you will encounter the problem of exhausting the Docker resources inside bhyve (or notice that this is poorly masquerading on virtual cores)
+and you will need to run another bhyve-based hypervisor for the Docker. In this case, it will not be easy to manage environments in different hypervisors.
+In other words, such implementations as in MacOSX and FreeNAS are suitable only for games and for local development, when you run 1-2 dockers,
+to test something, but not more - and this is not suitable for use in combat conditions and large installations.
+And when MacOS and Windows - it's an excellent choice as a working desktop machine, where you can develop and run on it
+Docker, few people prefer to install on their workstation and use as a desktop-system NAS system.
+</p>
+
+<p>
+For these reasons, we do not plan to implement Docker support in CBSD/ClonOS in the near future: if you do something and build
+production installation on the basis of FreeBSD, to minimize risks, loss in speed and flexibility, we recommend that you use your native FreeBSD stack/stuff: jail, bhyve and xen.
+If you need a Docker in a large environment - use Linux as a Docker hoster.
+If you use FreeBSD as a Desktop-OS and you need to test the service or you develop code - you can easily
+configure a similar MacOS docker scheme - using bhyve as a docker-server and a docker-client on FreeBSD.
+Current articles oriented only for this 'local' use cases.
+</p>
+
+<p>Must say that there is an unofficial port <a href="https://www.freshports.org/sysutils/docker-freebsd/">docker-freebsd</a>, 
+but from the articles authors point of view, this is the worst option, because there is no official support from Docker developers; Docker never planet to run
+through a jail, which loses much in the overall functionality. In addition, the port is oriented to Linuxator - an interlayer in FreeBSD,
+permanently at any time in the "partially working" state, because it tries to emulate the most <strong><u>minimal</u></strong> set of Linux kernel system calls,
+but to catch up with the modern development of the Linux kernel for FreeBSD linuxator is very difficult, it's a constant game of catch-up.
+Therefore, you can spend a very long time meeting unexpected application behavior inside docker-freebsd,
+which is caused by nobody testing, nowhere used and not oriented to such a method of launching Docker environments in a half-realized Linux emulation.
+</p>
+
+<p>Therefore, we create an implementation similar to MacOS/xhyve, but with FreeBSD/bhyve.</p>
+
+<h1><span>Using Docker with FreeBSD (via bhyve)</span></h1>
+
+<p>
+Next on the steps is written an instruction for those who want to run Docker, working in FreeBSD.
+The general file system problem for /var/lib/docker is not considered here, since for local experiments,
+file system bhyve guest is enough. If you want to use several bhyve for Docker on one host and run a large number of 3D Docker images,
+we recommend to look at the Docker <a href="https://github.com/ContainX/docker-volume-netshare" target="_blank">docker-volume-netshare</a> plugin,
+with which you can create volume on CIFS/NFS, or on project 9p and virtio-9p in bhyve.
+</p>
+
+
+<ul>
+<li><p>1) Any Linux where Docker is work is suits for us.  Create a virtual machine with enough resources to run Docker environments in it.
+For minimization fans, take a look on the <a href="http://boot2docker.io/">Boot2Docker</a> project, which is a minimal installation of the Linux environment for running Docker.
+Unfortunately, at the time of this writing, this image does not support UEFI boot mode, so we preferred to install Linux Ubuntu 16.04 and further instructions are targeted at it.
+</p></li>
+<li><p>2) Let's move Linux network to the bridge mode, because through it we will configure the network of containers being launched.
+We need this mode of operation if we want to work with containers directly from the FreeBSD host system, not only
+inside bhyve. For this, we will install a bridge-utils package for working with the bridge inside the Linux guest:</p>
+<pre class="brush:bash;ruler:rule;">
+apt-get install bridge-utils
+</pre>
+
+<p>Rewrite <i>/etc/network/interfaces</i> configuration for the physical interface, placing it in bridge.</p>
+
+<p>In our case:</p>
+<ul>
+<li>* physical bhyve NIC name: <strong>enp0s4</strong></li>
+<li>* IP address of bhyve with Docker: <strong>192.168.0.233</strong></li>
+<li>* The network in which we will run the Docker and which is available on the FreeBSD hoster: <strong>192.168.0.0/24</strong></li>
+<li>* Network gateway: <strong>192.168.0.1</strong></li>
+
+<p>So, full content of <i>/etc/network/interfaces</i> can look like this:</p>
+
+<pre class="cli">
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+
+iface enp0s4 inet manual
+
+allow-hotplug enp0s4
+
+auto br0
+iface br0 inet static
+        address 192.168.0.233
+        netmask 255.255.255.0
+        gateway 192.168.0.1
+        dns-nameservers 8.8.8.8
+        dns-search example.com
+        bridge_ports enp0s4
+        bridge_fd 9
+        bridge_hello 2
+        bridge_maxage 12
+        bridge_stp off</pre>
+</pre>
+
+</p></li>
+
+<li><p>3) Reboot bhyve to apply new network settings and install docker:</p>
+
+<pre class="brush:bash;ruler:rule;">
+apt-get install docker.io
+</pre>
+</li></p>
+
+<li><p>4) Through arguments, configure Docker on the network with the default bridge, with the appropriate network parameters. 
+And also, we'll add the TCP port through the -H switch, through which the external client (FreeBSD in our case) will interact with the Docker daemon.
+To do this, open the file <i>/etc/defaults/docker</i> and add this line:
+</p>
+
+<pre class="cli">
+DOCKER_OPTS="-H tcp://0.0.0.0:2375 --bridge=br0 --fixed-cidr=192.168.0.0/24 --default-gateway=192.168.0.1 -H unix:///var/run/docker.sock"
+</pre>
+</p></li>
+
+<li><p>5) On FreeBSD, install the Docker-client:</p>
+
+<pre class="brush:bash;ruler:rule;">
+pkg install sysutils/docker
+</pre>
+
+<p>For the current session, we export the correct value <strong>DOCKER_HOST</strong>:</p>
+
+<pre class="brush:bash;ruler:rule;">
+setenv DOCKER_HOST tcp://192.168.0.233:2375
+</pre>
+
+<p>Or write it globally in files <i>~/.cshrc</i> or <i>/etc/profile</i> or <i>/etc/csh.cshrc</i></p>
+</p></li>
+</ul>
+
+<p>On this stage, the hypervisor configuration with bhyve is finished. Let's test it:</p>
+
+<p>On FreeBSD:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% uname -a
+FreeBSD gizmo.my.domain 12.0-CURRENT FreeBSD 12.0-CURRENT #5 r315987: Sun Mar 26 20:00:24 MSK 2017 root@gizmo.my.domain:/usr/obj/usr/jails/src/src_12/src/sys/CBSD  amd64
+</pre>
+
+<p>Get ubuntu image:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% docker pull ubuntu
+Using default tag: latest
+latest: Pulling from library/ubuntu
+d54efb8db41d: Pull complete 
+f8b845f45a87: Pull complete 
+e8db7bf7c39f: Pull complete 
+9654c40e9079: Pull complete 
+6d9ef359eaaa: Pull complete 
+Digest: sha256:dd7808d8792c9841d0b460122f1acf0a2dd1f56404f8d1e56298048885e45535
+Status: Downloaded newer image for ubuntu:latest
+</pre>
+
+<p>Launch new ubuntu-based containers:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% docker run -it ubuntu
+root@de8c2a012278:/# uname -a
+Linux de8c2a012278 4.4.0-71-generic #92-Ubuntu SMP Fri Mar 24 12:59:01 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+root@de8c2a012278:/#
+</pre>
+
+<p>Find out container IP:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% docker inspect de8c2a012278 | grep IPAddress
+            "SecondaryIPAddresses": null,
+            "IPAddress": "192.168.0.2",
+                    "IPAddress": "192.168.0.2",
+</pre>
+
+<p>ping it:</p>
+
+<pre class="brush:bash;ruler:rule;">
+%# ping -c2 192.168.0.2
+PING 192.168.0.2 (192.168.0.2): 56 data bytes
+64 bytes from 192.168.0.2: icmp_seq=0 ttl=64 time=0.055 ms
+64 bytes from 192.168.0.2: icmp_seq=1 ttl=64 time=0.059 ms
+
+--- 192.168.0.2 ping statistics ---
+2 packets transmitted, 2 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 0.055/0.057/0.059/0.002 ms
+</pre>
+
+<p>As we see, everything is quite simple and for local development it should be enough. Good luck!</p>
+</div>
+<!--# include file="/en/_end.html" -->

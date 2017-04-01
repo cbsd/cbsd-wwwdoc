@@ -38,13 +38,13 @@ The current implementation of the launch of Docker on MacOSX is based on the hyp
 bhyve), but no one will never run a large production infrastructure in dockers that run on MacOSX or Windows, or FreeNAS
 - in these cases, hypervisors (although they are fast) is an unnecessary layer that does not help the infrastructure, but on the contrary,
 only complicates it. Therefore, these options should be considered only as an opportunity for developers and testers to check
-service or code bypassing the resources of only their local working machine, where the code is written.</p>
+service or code bypassing the resources of only their local working machine</p>
 
 <p>Of the main limitations, of course, this is overhead for the hypervisor. You need to preconfigure the bhyve environment,
 giving out a certain amount of resources (cores, memory), within which you will run the Docker.
 Sooner or later, you will encounter the problem of exhausting the Docker resources inside bhyve (or notice that this is poorly masquerading on virtual cores)
 and you will need to run another bhyve-based hypervisor for the Docker. In this case, it will not be easy to manage environments in different hypervisors.
-In other words, such implementations as in MacOSX and FreeNAS are suitable only for games and for local development, when you run 1-2 dockers,
+In other words, such implementations as in MacOSX and FreeNAS are suitable only for games and for local development, when you run 2-5 dockers,
 to test something, but not more - and this is not suitable for use in combat conditions and large installations.
 And when MacOS and Windows - it's an excellent choice as a working desktop machine, where you can develop and run on it
 Docker, few people prefer to install on their workstation and use as a desktop-system NAS system.

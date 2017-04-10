@@ -1,0 +1,97 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/translate.html" -->
+
+<h1><span>CBSD jail on GlusterFS HOWTO</span></h1>
+<div class="block">
+	<p>This howto demonstrates CBSD jail setup on cluster filesystem <a href="https://www.gluster.org/">GluserFS</a></p>
+	<p>Please note that replication causes additional overhead for system resources. You will need about +1Gb RAM for glusterfs processes. Also, it is desirable to have fast hard drives (SSD and 1Gbit/s give you aprox. 250 Gbit/s on gluster(?)) In addition, avoid such installations for containers with a high write load</p>
+	<hr>
+	<h2>Prepare:</h2>
+	<p>1) Install sysutils/cbsd</p>
+	<p>2) Init CBSD workdir: env workdir=/usr/jails /usr/local/cbsd/sudoexec/initenv</p>
+	<h2>Glusterfs setup:</h2>
+	<p>1) kldload fuse</p>
+	<p>2) sysrc -qf /boot/loader.conf fuse_load="YES"</p>
+	<p>3) zfs create -o mountpoint=/glusterfs zroot/glusterfs</p>
+	<p>4) pkg install -y net/glusterfs</p>
+	<p>5) sysrc glusterd_enable="YES"</p>
+	<p>6) service glusterd start</p>
+
+	<p>7) vi /etc/hosts: - add IP/name for each node, e.g:</p>
+	<pre class="cli">
+192.168.0.30 glu1
+192.168.0.31 glu2
+	</pre>
+
+	<p>8) mkdir /glusterfs/brick1 /glusterfs/brick2 /glusterfs/brick3</p>
+
+	<p><strong>glu1%</strong> gluster peer probe glu2</p>
+	<p><strong>glu2%</strong> gluster peer status</p>
+	<p><strong>glu1%</strong> (optional): gluster peer probe glu1</p>
+
+	<p><strong>glu1%</strong> gluster pool list</p>
+
+	<p><strong>glu1%</strong> gluster volume create jails-data replica 2 glu1:/glusterfs/brick1 glu2:/glusterfs/brick1</p>
+	<p><strong>glu1%</strong> gluster volume create jails-system replica 2 glu1:/glusterfs/brick2 glu2:/glusterfs/brick2</p>
+	<p><strong>glu1%</strong> gluster volume create jails-fstab replica 2 glu1:/glusterfs/brick3 glu2:/glusterfs/brick3</p>
+
+	<p><strong>glu1%</strong> gluster volume start jails-data</p>
+	<p><strong>glu1%</strong> gluster volume start jails-system</p>
+	<p><strong>glu1%</strong> gluster volume start jails-fstab</p>
+
+	<p><strong>glu1%</strong> gluster volume bitrot jails-data enable</p>
+	<p><strong>glu1%</strong> gluster volume heal jails-data enable</p>
+
+	<p><strong>glu1%</strong> gluster volume bitrot jails-system enable</p>
+	<p><strong>glu1%</strong> gluster volume heal jails-system enable</p>
+
+	<p><strong>glu1%</strong> gluster volume bitrot jails-fstab enable</p>
+	<p><strong>glu1%</strong> gluster volume heal jails-fstab enable</p>
+
+	<h2>Check state:</h2>
+	<p>gluster volume info jails-data</p>
+	<p>gluster volume info jails-fstab</p>
+	<p>gluster volume info jails-system</p>
+
+	<h2>Automount for flusterfs volumes:</h2>
+	<p>Create script in /usr/local/etc/rc.d/gluster_mount:</p>
+<pre class="cli">
+#!/bin/sh
+# PROVIDE: gluster_mount
+# REQUIRE: LOGIN glusterd
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="gluster_mount" 
+rcvar="glusterd_enable" 
+start_cmd="gluster_mount" 
+stop_cmd="gluster_umount" 
+
+gluster_mount()
+{
+        [ ! -d ${cbsd_workdir}/jails-data/.trashcan ] && /usr/local/sbin/mount_glusterfs localhost:/jails-data ${cbsd_workdir}/jails-data
+        [ ! -d ${cbsd_workdir}/jails-system/.trashcan ] && /usr/local/sbin/mount_glusterfs localhost:/jails-system ${cbsd_workdir}/jails-system
+        [ ! -d ${cbsd_workdir}/jails-fstab/.trashcan ] && /usr/local/sbin/mount_glusterfs localhost:/jails-system ${cbsd_workdir}/jails-fstab
+}
+
+gluster_umount()
+{
+        [ -d ${cbsd_workdir}/jails-data/.trashcan ] && /sbin/umount ${cbsd_workdir}/jails-data
+        [ -d ${cbsd_workdir}/jails-system/.trashcan ] && /sbin/umount ${cbsd_workdir}/jails-system
+        [ -d ${cbsd_workdir}/jails-fstab/.trashcan ] && /sbin/umount ${cbsd_workdir}/jails-fstab
+}
+
+load_rc_config $name
+run_rc_command "$1" 
+</pre>
+
+	<p>chmod +x /usr/local/etc/rc.d/gluster_mount</p>
+	<p>service gluster_mount start</p>
+	<p>Re-run CBSD initenv to invert <strong>zfsfeat</strong> (automatically):</p>
+	<p>cbsd initenv</p>
+
+	<h2>Profit:</h2>
+	<p>Create jail and start it as usual</p>
+</div>
+<!--# include file="/en/_end.html" -->

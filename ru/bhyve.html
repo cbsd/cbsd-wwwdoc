@@ -1,21 +1,19 @@
 <!--# include file="_start.html" -->
 <!--# include file="currentver.html" -->
-<h1><span>FreeBSD: Bhyve ( виртуализация xBSD и Linux )</span></h1>
+<h1><span>FreeBSD: Bhyve</span></h1>
 <h2><a name="intro"><span>Введение</span></a></h2>
 	<div class="block">
-			<p> <a href="http://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank"><strong>Bhyve</strong></a> - это гипервизор, любезно открытый компанией <a href="http://www.netapp.com/us/" target="_blank">NetAPP</a> (имеющий свои наработки на базе FreeBSD ОС) под лицензей BSD и в данный момент входящий в коробочную/базовую версию ОС FreeBSD, в отличие от ряда аналогичных проектов, которые не являются частью ОС и их (или модифицированые для них ядра) необходимо предварительно скачать и установить. Другими словами, все релизы FreeBSD начиная с 10.0, в состоянии запустить OpenBSD, NetBSD и Linux-виртуальные системы прямо из коробки.</p>
-			<p>Эксперементируя с громадным количеством ключей bhyve, у меня довольно быстро возникло непреодолимое желание иметь <a href="http://petitecloud.org/" target="_blank"><strike>PetiteCloud</strike> CLI</a> <strong>CBSD</strong>, но для bhyve вместо jail, поскольку это  очень высоко конфигурируемый гипервизор и плавать в его настройках можно достаточно долго до первого запуска окружения. </p>
-			<div class="warning">
-				<p><strong>Обратите внимание:</strong> ( кроме уже упомянутого проекта <a href="http://petitecloud.org/" target="_blank">PetiteCloud</a> ) на <a href="http://bhyve.org/vmrc/" target="_blank">vmrc</a>, развиваемое <a href="http://callfortesting.org/" target="_blank">Michael Dexter</a> + <a href="https://github.com/michaeldexter" target="_blank">его GITHUB</a>
-			</div>
-			<p>Вторая мысль - что в коде <strong>CBSD</strong> очень много примитивов для действий, свойственных и для работы с виртуальными окружениями.  К тому же, при работе с гвестами FreeBSD, часть потенциально полезных функций пересекаются с тем, что хотелось бы видеть в cbsd4bhyve. В связи с этим, появилась мысль в <strong>CBSD</strong> 10.0.4 если не добавить поддержку bhyve прямо в коде, то сделать это в виде модуля к <strong>CBSD</strong>.</p>
-			<p>Какие плюсы (кроме самого факта, что FreeBSD в состоянии быть быстрой хост-системой) можно получить, имея FreeBSD в качестве хоста, а Linux/OpenBSD/NetBSD в качестве гостя?
-			Вариантов много и этот вопрос вряд ли будет когда-либо закрыт. На вскидку, это возможность использовать HASTD или iscsi для использования NAS, это возможность лимитировать <strong>cputime</strong> или <strong>pcpu</strong> на виртуальную машину, это возможность использовать Link Aggregation,
-			агрегировав несколько физических сетевых карт в один транк и скормив его в виртуальную систему. Это возможность внедриться NetGraph хуками в трафик, идущий от систем, не владеющих NetGraph. Это возможность использовать <strong>GELI</strong>-криптованные разделы, <strong>FIB</strong>, <strong>nice</strong>. Возможность с 
-			помощью ZFS получить клонирование и снапшоты для файловых систем внутри виртуальных систем, которые о снапшотах даже не догадываются. Что позволяет например делать TimeMachine для Linux/ext3/ext4/xfs/btrfs, при этом
-			откат на предыдущие версии состояния не зависят от убитости файловой системы и работоспособности ОС гостя - достаточно за пределами виртуальной системы вынести API для управления снапшотами. Что очень выгодно 
-			можно использовать в хостинге Linux/BSD систем. Также, можно производить массовые действия - например, имея 1 образ виртуальной системы, сделать 100 клонирований средствами ZFS, параллельно монтируя образ и модифицируя конфигурацию на свой лад.<p>
-			<p>В данный момент, обертка к bhyve в <strong>CBSD</strong> доступна в версии на github и реализована в виде команд управления клетками, но начинающиеся с буквы <strong>b</strong>:</p>
+			<p><a href="http://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank"><strong>Bhyve</strong></a> - это гипервизор, любезно открытый компанией <a href="http://www.netapp.com/us/" target="_blank">NetAPP</a> (имеющий свои наработки на базе FreeBSD ОС) под лицензей BSD и в данный момент входящий в коробочную/базовую версию ОС FreeBSD, в отличие от ряда аналогичных проектов, которые не являются частью ОС и их (или модифицированые для них ядра) необходимо предварительно скачать и установить. Другими словами, все релизы FreeBSD начиная с 10.0, в состоянии запустить *BSD, Linux и различные другие ОС прямо из коробки.</p>
+			<p>На данный момент, существует достаточно большое количество оберток для управления bhyve, наравне с базовым скриптом <i>/usr/share/examples/bhyve/vmrun.sh</i> и отличающиеся между собой поставленными целями</p>
+			<p>Основные цели, которые ставит CBSD:</p>
+			<ul>
+				<li>Требовать от пользователя минимум действий, чтобы полноценно начать использовать bhyve;</li>
+				<li>Требовать от пользователя минимум по заучиванию команд и аргументов, а также пресечь постоянные обращения к документации: все должно быть доступно для управления через WEB или text user-interface;</li>
+				<li>Интеграция bhyve с другими компонентами FreeBSD (NFS, glusterfs, iscsi,  HAST, carp) из коробки</li>
+				<li>Интеграция bhyve с внешними службами (DHCPD, Consul)</li>
+				<li>Ориентированность на большие инсталляции, за рамками применения на localhost-only</li>
+			</ul>
+			<p>Для удобства, команды управления bhyve в CBSD аналогичны командам управления jail, но начинаются с буквы <strong>b</strong>:</p>
 			<ul>
 				<li><strong>jstart</strong> (jail start) -> <strong>bstart</strong> (bhyve start)</li>
 				<li><strong>jstop</strong> (jail stop) -> <strong>bstop</strong> (bhyve stop)</li>
@@ -23,47 +21,40 @@
 				<li><strong>jconstruct-tui</strong> (jail constructor) -> <strong>bconstruct-tui</strong> (bhyve constructor)</li>
 				<li>и тд.</li>
 			</ul>
-			<p>Sample demo:</p>
-			<ul>
-				<li><a href="http://youtu.be/SOgxQEyu2kI" target="_blank">bhyve demo: FreeBSD as host and Linux CentOS x86 as guest</a></li>
-				<li><a href="http://youtu.be/EJLBiYj5C_M" target="_blank">bhyve demo: FreeBSD as host and FreeBSD as guest, created by cbsd jail2iso script</a></li>
-			</ul>
-			<p><a href="/ru/articles/bhyve_vs_jails.html">Jails против Bhyve</a></p>
+			<p>Пользуясь <strong>CBSD</strong>, вы можете совмещать в одном инструменте управление как для контейнеров jail, так и виртуальных машин на гипервизоре bhyve, используя тот или иной подход в разных задачах</p>
+			<p>Дополнительно, можете ознакомится со статьей: <a href="/ru/articles/bhyve_vs_jails.html">Jails против Bhyve</a></p>
 	<div>
-<h2><a name="intro"><span>Обратите внимание</span></a></h2>
-<div class="block">
-<p>1.</p>
-<p>В данный момент, разработка функционала <strong>CBSD</strong> для управления bhyve носит крайне эксперементальный и не приоритетный характер. Использовать это в в боевых условиях не рекомендуется.</p>
-<p>Если у вас возникли проблемы с запуском bhyve vm и хотите продебажить проблему, можете воспользоваться скриптом и конфигурационным файлом, который генерирует <strong>CBSD</strong> для запуска bhyve в системном каталоге виртуальной машины.
-Скрипт для запуска bhyve - <em>$workdir/share/bhyverun.sh</em>, который в качестве аргумента ожидает путь к конфиг файлу. Например, для виртуальной машины с именем <strong>debian1</strong> и рабочим каталогом /usr/jails, это файл - <em>/usr/jails/jails-system/debian1/bhyve.conf</em>.
-Данный скрипт позволит вам пробовать запускать виртуальную машину без привязки к проблемам <strong>CBSD</strong> (которая занимается лишь созданием образов, сетевых карт и генерацией bhyve.conf). Если изучение работы скрипта без <strong>CBSD</strong>
-не принесет ясности, имеет смысл написать в соответствующий список рассылки <a href="http://lists.freebsd.org/mailman/listinfo/freebsd-virtualization" target="_blank">FreeBSD virtualization</a>.</p>
-
-<p>2.</p>
-<p>Некоторые Linux guest, которые загружаются через grub-bhyve (по утверждениям авторов bhyve это неудобство - дело времени) загружаются через указываемый путь к vmlinuz и initramfs. Например: <em>/vmlinuz-3.10.0-123.el7.x86_64</em>.</p>
-<p>Поскольку соответствующая настройка прописана в профиле виртуальной машины, при обновлении версии ядра Linux в guest, профиль будет указывать на старый или уже не существующий файл. К сожалению, в таких дистрибутивах (RHEL, CentOS, Oracle)
-при обновлениях необходимо отслеживать этот момент и править профили (например, создав копию профиля из etc/defaults и поместим под новым именем в /etc).
-В ряде дистрибутивов Linux, имена файлов ядра являются константой (но могут быть символическими ссылками и указывать на нужное ядро). В таких дистрибутивах обновление ядер не должно вызывать смену имени и соответственно, такой проблеме они не подвержены. Примеры таких "правильных" Linux
-дистрибутовов: <strong>Debian, Ubuntu</strong>. Дополнительно следует сказать, что в качестве решения данной проблемы также может быть загрузка виртуальной машины через EFI (и порт grub2-efi)</p>
-
-<p>3.</p>
-<p>Для работы с bhyve через <strong>CBSD</strong>, в базовой системе также должны быть проинсталлированы следующие пекеджи:</p>
-<ul>
-	<li>grub-bhyve  ( pkg install grub-bhyve <strong>или</strong> make -C /usr/ports/sysutils/grub-bhyve install )</li>
-	<li>tmux ( pkg install tmux <strong>или</strong> make -C /usr/ports/sysutils/tmux install )</li>
-</ul>
-<p>Кроме этого, ядро вашей ноды должно иметь модули <strong>if_bridge, if_tap, vmm</strong>. Если в конфигурации ядра они отсутствуют, вы можете загружать их через:</p>
-	<ul>
-		<li><strong>/boot/loader.conf</strong>:
-			<pre class="cli;">
-if_bridge_load="YES"
-if_tap_load="YES"
-vmm_load="YES"
-			</pre></li>
-		<li><strong>/etc/rc.conf</strong>:
-			<pre class="cli;">
-kld_list="if_bridge if_tap vmm"
-			</pre></li>
-	</ul>
-</div>
+	<h2><a name="intro"><span>Начало работы с bhyve</span></a></h2>
+	<div class="block">
+			<p>Для начала работы с bhyve через <strong>CBSD</strong>, введите в командной строке:</p>
+			<pre class="brush:bash;ruler=true;">
+			% cbsd bconstruct-tui
+			</pre>
+			<p>Если в вашей системе не хватает каких-либо компонент или настроек, вы увидете соответствующие подсказки, которые необходимо выполнить.</p>
+			<p>По готовности, вы увидете dialog-based меню для создания виртуальной машины:</p>
+			<p class="text-center"><img src="/img/bconstruct-tui1.png" alt="" /></p>
+			<p>Параметры <strong>vm_os_profile</strong>,<strong>jname</strong> и <strong>imgsize</strong> - являются обязательными для ручного ввода</p>
+			<p>Начните создание виртуальной машины с выбора типа ОС и выбора профиля ОС</p>
+			<p>Если вы запускаете виртуальную машину первый раз, при старте автоматически будет скачиватся соответствующий образ с официальных сайтов</p>
+			<p>Ряд параметров (ключи запуска bhyve) доступны в подменю <strong>bhyve_options</strong>:</p>
+			<p class="text-center"><img src="/img/bconstruct-tui2.png" alt="" /></p>
+			<p>и vnc_options:</p>
+			<p class="text-center"><img src="/img/bconstruct-tui3.png" alt="" /></p>
+			<p>Имейте ввиду, что при вводе параметра <strong>imgsize</strong>, вы задаете объем первого (загрузочного) виртуального жесткого диска.</p>
+			<p>Для добавления дополнительных дисков или сетевых карт, используйте команду <strong>cbsd bconfig</strong> уже после создания VM.</p>
+	</div>
+	<h2><a name="intro"><span>О сети bhyve</span></a></h2>
+		<p>По-умолчанию, виртуальные машины используют <strong>tap</strong> интерфейс, который <strong>CBSD</strong> автоматически коммутирует в <strong>bridge</strong> на ваш uplink интерфейс (вы можете изменить интерфейс через меню nic_parent в 'cbsd bconfig' - bhyvenic - nic1</p>
+		<p>Вы можете предпочесть два других варианта коммутации, доступных в <strong>CBSD</strong></p>
+		<ul>
+			<li>Использовать виртуальный свич на базе <a href="http://man.freebsd.org/vale/4" target="_blank">vale(4)</a>. Для этого, воспользуйтесь диалогом создания свича через: <strong>cbsd valecfg-tui</strong></li>
+			<li>Вы можете исключить bridge и использовать point-to-point соединение. Для этого, через 'cbsd bconfig' - bhyvenic - nic1, вам необходимо изменить параметр nic_parent в значение <strong>disable</strong>. В этом режиме, вы должны 
+			назначить какой-либо Ip адрес в качестве шлюза вашей виртуальной машины на tap интерфейсе</li>
+		</ul>
+		<div class="warning">
+		<p>Внимание! Обратите внимание на присутствие меню для выбора IP адреса bhyve в меню bconstruct-tui. Имейте ввиду, что без вспомогательных скриптов внутри дистрибутива или виртуальной машины, вы не можете управлять настройками в самой виртуальной машины извне.
+		Данный пункт меню сохраняет IP адрес в базе данных CBSD для того, чтобы вы могли сторонними методами (например через DHCP) сконфигурировать автоматическую настройку ОС без необходимости помещать внутри собственный скрипты. В качестве примера,
+		посмотрите на статью: <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">CBSD/bhyve и DHCPD</a></li></p>
+		</div>
+	</div>
 <!--# include file="_end.html" -->

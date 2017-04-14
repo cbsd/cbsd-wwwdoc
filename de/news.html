@@ -5,12 +5,49 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li>bhyve: support for e1000 NIC</li>
+		<li></li>
 	</ul>
 	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
+	
 </div>
-
 <h2><a name="release">Releases</a></h2>
+<div class="block">
+	<hr>
+	<p><strong>11.0.15</strong>&nbsp;&mdash; 2017-04-14</p>
+	<ul>
+		<li>bhyve: add Ubuntu 17.04 profile</li>
+		<li>srcup: add HardenedBSD source repository support</li>
+		<li>jail: ability to change mac address for vnet-based jail. <a href="https://github.com/cbsd/cbsd/issues/159" target="_blank">Issue #159</a> (Reported by: <strong>Greg Fitzgerald</strong>)</li>
+		<li>initenv: add RACCT enable question in first initenv wizard, <a href="https://github.com/cbsd/cbsd/issues/138" target="_blank">Issue #138</a> (Reported by: <strong>Egor Vershinin</strong>)</li>
+	</ul>
+</div>
+<div class="block">
+	<hr>
+	<p><strong>11.0.12</strong>&nbsp;&mdash; 2017-03-23</p>
+	<ul>
+		<li>bhyve: UEFI pxeboot. See <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">Using CBSD/bhyve and ISC-DHCPD</a> article for example</li>
+	</ul>
+</div>
+<div class="block">
+	<hr>
+	<p><strong>11.0.11</strong>&nbsp;&mdash; 2017-03-13</p>
+	<ul>
+		<li>bugfix release: fix profile apply on jconstruct-tui introduced in 11.0.10</li>
+	</ul>
+</div>
+<div class="block">
+	<hr>
+	<p><strong>11.0.10</strong>&nbsp;&mdash; 2017-03-12</p>
+	<ul>
+		<li>bhyve: support for e1000 NIC on FreeBSD 11.1+</li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jclone_ssi.html">jclone,bclone</a>: ZFS clone in <strong>jclone,bclone</strong> operation on ZFS based hoster. <a href="https://github.com/cbsd/cbsd/issues/111" target="_blank">Issue #111</a> (Suggested by: <strong>Pavol Cupka</strong>)
+			<p>Warning! this changes the old behavior! Read the documentation carefully. The old behavior is regulated through arguments or a configuration file!</p>
+		<li>add cbsd_queue execution to send status of task - this need for backend's progress bar and control of job execution</li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> has been improved: add remove.d directory; possibility to specify an alternative path via <strong>systemskeldir</strong> variables; add additional bhyve variables in hook environment</li>
+		<li>sshkey script has been added to operate node keys through via script. Also partially belongs to <a href="https://github.com/cbsd/cbsd/issues/59" target="_blank">Issue #59</a> (Suggested by: <strong>mzs114</strong>)</li>
+		<li><em>(bugfix)</em> jrctl-tui has been rewrited to forms functional. Also this fix <a href="https://github.com/cbsd/cbsd/issues/139" target="_blank">Issue #139</a> (Reported by: <strong>Egor Vershinin</strong>)</li>
+	</ul>
+</div>
 <div class="block">
 	<hr>
 	<p><strong>11.0.9</strong>&nbsp;&mdash; 2017-02-19</p>

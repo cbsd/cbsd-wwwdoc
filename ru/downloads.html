@@ -2,40 +2,6 @@
 <h1><span>Скачать</span></h1>
 <div class="block">
 	<p>Если вы хотите установить и использовать CBSD на FreeBSD хосте, <a href="/<!--#echo var="lang" -->/installing_cbsd.html">воспользуйтесь этой инструкцией</a>.</p>
-</div>
-<h2><a name="block">CBSDWEB VirtualBox Appliance</a></h2>
-	<div class="warning">
-	<p>Если вы хотите посмотреть CBSD без установки на рабочую систему (CBSDWEB находится на ранней стадии разработки, не для production применения!), 
-	вы можете получить ежемесячный development-snapshot образа в VirtualBox. Имейте ввиду, что VirtualBox не поддерживает 
-	Nested Virtualization (Nested VTx/VT-d/IOMMU), по этой причине, гипервизоры bhyve и XEN здесь работать не будут - доступны только jail контейнера.
-	Для работы bhyve/XEN устанавливайте CBSD на обычный сервер. </p>
-	</div>
-	<div class="block">
-	<p>Параметры доступа:<p>
-	<ul>
-	<li>- WEB interface: <strong>https://IPADDR/</strong> (см. *notes1)</li>
-	<li>- root user unix/shell password: <strong>cbsd</strong></li>
-	<li>- cbsd user unix/shell password: <strong>cbsd</strong></li>
-	</p>
-	<p><i>* notes1:</i> Если DHCP в вашей сети нет, отредактируйте файл /etc/rc.conf для статических адресов, заменив строчку:</p>
-	<pre>
-	ifconfig_vtnet0="DHCP"
-	</pre>
-	<p>на:</p>
-	<pre>
-	ifconfig_vtnet0="IP/PREFIX"
-	defaultrouter="GW"
-	</pre>
-	<p>например:</p>
-	<pre>
-	ifconfig_vtnet0="192.168.0.2/24"
-	defaultrouter="192.168.0.1"
-	</pre>
-	<p>или:</p>
-	<pre>
-	ifconfig_vtnet0="192.168.0.2 netmask 255.255.255.0"
-	defaultrouter="192.168.0.1"
-	</pre>
-	<p>Скачать <a href="/<!--#echo var="lang" -->/get_cbsddev.html">CBSD VirtualBox Appliance</a>.</p>
+	<p>Если вы хотите установить CBSDWEB ( ClonOS дистрибуция ), воспользуйтесь страницей на официальном сайте проекта: <a href="https://clonos.tekroutine.com/download.html" target="_blank">ClonOS Downloads</a></p>
 </div>
 <!--# include file="_end.html" -->

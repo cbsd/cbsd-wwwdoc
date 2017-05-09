@@ -1,0 +1,195 @@
+<!--# include file="/ru/_start.html" -->
+<h1><span>Создание <strong>CBSD</strong> образов с настроенными сервисами с помощью Puppet</span></h1>
+<div class="block">
+<p>Данный HowTo рассчитан на тех, кто уже знаком с системой управления виртуальными окружениями CBSD и менеджером конфигурации <a href="http://puppet.com/">Puppet</a></p>
+<p>В какой-то момент времени вы можете захотеть создать свои собственные 'jail registry' (по аналогии с <a href="https://docs.docker.com/registry/">Docker registry</a>) для возможности создавать и закачивать свои собственные образы в репозиторий образов</p>
+<p>С помощью этих скриптов вы можете создавать CBSD образы из Puppet кода. Это может быть полезно, например, в  таких случаях:</p>
+<ul>
+	<li>- Вы имеете существующую кодовую базу Puppet и желаете перенести часть ваших сервисов в контейнера. Совместное
+		использование кода между контейнерами и не контейниризированным окружением позволит вам минимизировать дубляж кода и 
+		сэкономит время по обслуживанию инфраструктуры;
+	</li>
+	<li>- Вы создаете большое количество образов с настроенными внутри сервисами и определенными параметрами. 
+		В этом случае, Puppet позволяет вам использовать декларативный язык по описанию ваших образов и с помощью
+		скрипта вы можете создавать и обновлять ваши образы достаточно просто и быстро.
+	</p>
+</ul>
+<h1><span>Настройка</span></h1>
+<p>Наша реализация будет состоять из двух частей. Первое - это файловая структура, содержащая обычные Puppet ресурсы - стандартный <a href="https://docs.puppet.com/puppet/latest/lang_summary.html">Puppet-манифест</a>, 
+описывающий ваше окружение и <a href="https://docs.puppet.com/pe/latest/cmgmt_puppetfile.html">Puppetfile</a>. В Puppetfile вы должны описать модули, которые вам требуются для созданного манифеста. </p>
+<p>Вторая часть - скрипт, который создает контейнер, запускает <a href="http://www.freshports.org/sysutils/rubygem-r10k/">r10k</a> на Puppetfile и выполняет puppet apply.</p>
+<p>В данном HowTo рассматривается server-less архитектура. Тем не менее, вы можете легко использовать ваш Puppet сервер вместо локальных манифестов.</p>
+
+<p>Итак, создадим рабочий каталог <em>/root/buid-jail</em>. В нем мы будем хранить per-instance каталоги со всеми необходимыми файлами. Например, для сервиса 'redis' будем использовать каталог <em>/root/build-jail/redis</em>:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir -p /root/build-jail/redis
+</pre>
+
+<p>Внутри этого каталога создадим директорию 'manifest' в котором создадим Puppet манифест. В нем вы должны описать все то, что пишете в обычных манифестах Puppet сервера:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir /root/build-jail/redis/manifest
+</pre>
+
+<p>Поскольку наш пример ориентирован на демонстрацию запуска redis, подключим класс 'redis':</p>
+
+<pre class="brush:bash;ruler:rule;">
+echo "class { 'redis': }" > /root/build-jail/redis/manifest/init.pp
+</pre>
+
+<p>Чтобы расширить пример, и продемонстрируем возможность использования <a href="https://docs.puppet.com/hiera/">Hiera</a>, напишем часть параметров в yaml бакенде. Для этого, создадим соответствующий каталог:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir /root/build-jail/redis/hieradata
+</pre>
+
+<p>И напишем в yaml формате часть параметров так, как вы это делаете в обычных yaml файлах Puppet сервера:</p>
+
+<pre class="brush:bash;ruler:rule;">
+cat &gt; /root/build-jail/redis/hieradata/common.yaml << EOF
+redis::manage_repo: false
+redis::bind: 0.0.0.0
+redis::port: 6379
+redis::log_level: warning
+EOF
+</pre>
+
+<p>Далее, нам осталось написать Puppetfile. Нам потребуется сам модуль redis, а также его зависимости:</p>
+
+<pre class="brush:bash;ruler:rule;">
+cat &gt; /root/jenkins-jredis/jredis/Cbsdfile &lt;&lt;EOF
+forge 'https://forgeapi.puppetlabs.com'
+
+mod 'arioch-redis', '1.2.4'
+
+mod 'puppetlabs/apt'
+mod 'puppetlabs/stdlib'
+mod 'stahnma/epel'
+EOF
+</pre>
+
+<p>Теперь, нам осталось написать скрипт, который будет создавать jail из темплейта и применять Puppet внутри.</p>
+<p>Сам template, где мы заменили наш рабочий каталог на конструкцию #workdir# и jname - на #jname#, будет выглядеть следующим образом:</p>
+
+<pre class="brush:bash;ruler:rule;">
+relative_path="1";
+jname="#jname#";
+path="#workdir#/jails/#jname#";
+host_hostname="#jname#.my.domain";
+ip4_addr="DHCP";
+mount_devfs="1";
+allow_mount="1";
+allow_devfs="1";
+allow_nullfs="1";
+mount_fstab="#workdir#/jails-fstab/fstab.#jname#";
+arch="native";
+mkhostsfile="1";
+devfs_ruleset="4";
+ver="native";
+basename="";
+baserw="0";
+mount_src="0";
+mount_obj="0";
+mount_kernel="0";
+mount_ports="1";
+astart="1";
+data="#workdir#/jails-data/#jname#-data";
+vnet="0";
+nic_hwaddr="0";
+applytpl="1";
+mdsize="0";
+rcconf="#workdir#/jails-rcconf/rc.conf_#jname#";
+floatresolv="1";
+zfs_snapsrc="";
+
+exec_poststart="0";
+exec_poststop="";
+exec_prestart="0";
+exec_prestop="0";
+
+exec_master_poststart="0";
+exec_master_poststop="0";
+exec_master_prestart="0";
+exec_master_prestop="0";
+pkg_bootstrap="1";
+with_img_helpers="";
+runasap="0";
+interface="auto";
+jailskeldir="#workdir#/share/FreeBSD-jail-skel";
+jail_profile="default";
+# root password
+user_pw_root='cbsd';
+exec_start="/bin/sh /etc/rc"
+exec_stop="/bin/sh /etc/rc.shutdown"
+emulator="jail"
+</pre>
+
+<p>Вы можете получить этот темплейт самостоятельно, запустив 'cbsd jconstruct-tui', введя необходимые параметры и ответив 'no' на вопрос 'Do you want to create jail immediately?'.</p>
+<p>На выходе вы получите тот самый темплейт, в котором необходимо заменить ваш рабочий каталог на #workdir# и имя клетки на #jname#.</p>
+
+<p>Сам скрипт может иметь примерно следующий вид (назовем его Cbsdfile):</p>
+
+<pre class="brush:bash;ruler:rule;">
+#!/bin/sh
+JAILNAME="jredis"
+
+##
+MYDIR="$( /usr/bin/dirname $0 )"
+MYPATH="$( /bin/realpath ${MYDIR} )"
+
+. /etc/rc.conf
+
+cbsd jstatus jname=${JAILNAME} > /dev/null 2>&1
+
+ret=$?
+
+if [ ${ret} -ne 0 ]; then
+        echo "Warning, jail exist. Please remove them first"
+        # cbsd jremove ${JAILNAME}
+        exit 0
+fi
+
+tmpjconf=$( mktemp )
+
+#trap "/bin/rm -f ${tmpjconf}" HUP INT QUIT ABRT KILL ALRM TERM BUS EXIT
+
+sed -e "s:#jname#:${JAILNAME}:g" \
+-e "s:#workdir#:${cbsd_workdir}:g" ${MYPATH}/tpl.jconf > ${tmpjconf}
+
+cbsd jcreate jconf=${tmpjconf}
+cbsd jstart inter=0 ${JAILNAME}
+
+cbsd jexec jname=${JAILNAME} pkg update
+cbsd jexec jname=${JAILNAME} pkg install -y sysutils/puppet4 ca_root_nss rubygem-r10k
+
+cbsd jailscp ${MYPATH}/Puppetfile ${JAILNAME}:/tmp/Puppetfile
+
+cbsd jexec jname=${JAILNAME} "cd /tmp && r10k puppetfile install --moduledir /tmp/module"
+
+[ -f ${MYPATH}/hiera.yaml ] && cbsd jailscp ${MYPATH}/hiera.yaml ${JAILNAME}:/tmp/hiera.yaml
+[ -d ${MYPATH}/hieradata ] && cbsd jailscp ${MYPATH}/hieradata/ ${JAILNAME}:/tmp/hieradata
+cbsd jailscp ${MYPATH}/manifests/ ${JAILNAME}:/tmp/manifests
+
+cbsd jexec jname=${JAILNAME} env FACTER_hostname=${JAILNAME} puppet apply /tmp/manifests/init.pp --detailed-exitcodes --verbose --show_diff --summarize --hiera_config=/tmp/hiera.yaml --app_management --modulepath=/tmp/module
+
+cbsd jexec jname=${JAILNAME} pkg clean -y
+
+exit 0
+ 
+</pre>
+
+<p>Обратите внимание, что имя создаваемого контейнера указано в этом скрипте в параметре <strong>JAILNAME</strong>.</p>
+<p>Вы можете вынести этот параметр за пределы скрипта в конфигурационный файл, или принимать его в качестве аргумента.</p>
+<p>Также, возможно, вы захотите не делать проверку на существование контейнера и удалять его автоматически при запуске каждый раз. Для этого, раскомментируйте строку 'cbsd jremove ${JAILNAME}'</p>
+<p>На выходе работы данного скрипта мы получим рабочий jail с именем jredis с конфигурированным и запущенным сервисом redis внутри. </p>
+<p>Далее с этим можно делать все что угодно, например клонировать или экспортировать и загрузить свой репозиторий образов.</p>
+<br>
+<p>Вы можете превратить подобный скрипт в сервис по созданию контейнеров внутри компании, где ваши сотрудники (например, разработчики) самостоятельно конфигурируют параметры контейнера и 'заказывают' сборку необходимого образа</p>
+<p>Например, вы можете создать Jenkins Job для вышеописанного случая, создав параметизированный Job, в котором пользователь может менять определенные вами параметры (таким образом поступил автор статьи для сборки Docker образов)</p>
+<p>Посмотрите на пример, как это может выглядеть: <a href="https://youtu.be/AQ7FbCHhIBk">https://youtu.be/AQ7FbCHhIBk</a></p>
+<div class="warning">Обратите внимание, что большая часть модулей Puppet не имеет поддержки FreeBSD (как и любая другая система управления конфигурациями).
+В связи с этим, автор коллекционирует (и добавляет поддержку FreeBSD в силу своих возможностей) модули, которые работают с FreeBSD. Для этого, на ресурсе GitHub создана группа <a href="https://github.com/PuppetBSD">PuppetBSD</a>, где хочется
+собрать такие модули в одном месте. Если вы испольуете Puppet и FreeBSD, пожалуйста, добавляйте такие модули в эту группу. Этим вы поможете многим пользователям FreeBSD и сможете извлечь выгоду сами.
+</div>
+<!--# include file="/ru/_end.html" -->

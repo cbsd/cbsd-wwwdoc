@@ -1,0 +1,197 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>Creating <strong>CBSD</strong> images with Puppet</span></h1>
+<div class="block">
+<p>Current HowTo is designed for those who are already familiar with the CBSD virtual environment management system and  <a href="http://puppet.com/">Puppet</a> configuration manager.</p>
+<p>At some point in time, you might want to create your own 'jail registry' (by analogy with <a href="https://docs.docker.com/registry/">Docker registry</a>) to create and upload your own images to the image repository</p>
+<p>With these scripts you can create CBSD images from Puppet code. This can be useful, for example, in such cases:</p>
+<ul>
+	<li>- You have an existing Puppet code base and want to split some of your services into container. A joint
+		using code between containers and a non-containerized environment will allow you to minimize code dublication and
+		save time on infrastructure maintenance;
+	</li>
+	<li>- You create a large number of images with customized services and certain parameters.
+		In this case, Puppet allows you to use a declarative language by describing your images and using
+		script you can create and update your images quite simply and quickly.
+	</p>
+</ul>
+<h1><span>Setup</span></h1>
+<p>Our implementation will consist of two parts. The first is a file structure that contains regular Puppet resources - the standard <a href="https://docs.puppet.com/puppet/latest/lang_summary.html">Puppet-manifest</a>, 
+which describes your environment and <a href="https://docs.puppet.com/pe/latest/cmgmt_puppetfile.html">Puppetfile</a>. In the Puppetfile you must describe the modules that you need for the created manifest.</p>
+<p>The second part is the script that creates the container, launches <a href="http://www.freshports.org/sysutils/rubygem-r10k/">r10k</a> on Puppetfile and execute puppet apply.</p>
+<p>This HowTo addresses to server-less architecture. However, you can easily use your Puppet server instead of local manifests.</p>
+
+<p>So, create a working directory <em>/root/buid-jail</em>. In it, we will store per-instance directories with all the necessary files. For example, for the service 'redis' we will use the directory <em>/root/build-jail/redis</em>:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir -p /root/build-jail/redis
+</pre>
+
+<p>Inside this directory, create a directory 'manifest' in which we create the Puppet manifest. In it, you should describe everything that you write in the usual manifest Puppet server:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir /root/build-jail/redis/manifest
+</pre>
+
+<p>Since our example is aimed at demonstrating the launch of redis, we attach the 'redis' class:</p>
+
+<pre class="brush:bash;ruler:rule;">
+echo "class { 'redis': }" > /root/build-jail/redis/manifest/init.pp
+</pre>
+
+<p>To expand the example, and demonstrate the possibility of using <a href="https://docs.puppet.com/hiera/">Hiera</a>, write some parameters in the yaml backend. To do this, create the appropriate directory:</p>
+
+<pre class="brush:bash;ruler:rule;">
+% mkdir /root/build-jail/redis/hieradata
+</pre>
+
+<p>And we'll write some parameters in yaml format as you do in regular yaml Puppet server files:</p>
+
+<pre class="brush:bash;ruler:rule;">
+cat &gt; /root/build-jail/redis/hieradata/common.yaml << EOF
+redis::manage_repo: false
+redis::bind: 0.0.0.0
+redis::port: 6379
+redis::log_level: warning
+EOF
+</pre>
+
+<p>Next, we need to write Puppetfile. We will need the redis module itself, as well as its dependencies:</p>
+
+<pre class="brush:bash;ruler:rule;">
+cat &gt; /root/jenkins-jredis/jredis/Cbsdfile &lt;&lt;EOF
+forge 'https://forgeapi.puppetlabs.com'
+
+mod 'arioch-redis', '1.2.4'
+
+mod 'puppetlabs/apt'
+mod 'puppetlabs/stdlib'
+mod 'stahnma/epel'
+EOF
+</pre>
+
+<p>Now, we need to write a script that will create a jail from the template and apply Puppet inside.</p>
+<p>The template itself, where we replaced our working directory with the construction #workdir# and jname - with #jname#, would look like this:</p>
+
+<pre class="brush:bash;ruler:rule;">
+relative_path="1";
+jname="#jname#";
+path="#workdir#/jails/#jname#";
+host_hostname="#jname#.my.domain";
+ip4_addr="DHCP";
+mount_devfs="1";
+allow_mount="1";
+allow_devfs="1";
+allow_nullfs="1";
+mount_fstab="#workdir#/jails-fstab/fstab.#jname#";
+arch="native";
+mkhostsfile="1";
+devfs_ruleset="4";
+ver="native";
+basename="";
+baserw="0";
+mount_src="0";
+mount_obj="0";
+mount_kernel="0";
+mount_ports="1";
+astart="1";
+data="#workdir#/jails-data/#jname#-data";
+vnet="0";
+nic_hwaddr="0";
+applytpl="1";
+mdsize="0";
+rcconf="#workdir#/jails-rcconf/rc.conf_#jname#";
+floatresolv="1";
+zfs_snapsrc="";
+
+exec_poststart="0";
+exec_poststop="";
+exec_prestart="0";
+exec_prestop="0";
+
+exec_master_poststart="0";
+exec_master_poststop="0";
+exec_master_prestart="0";
+exec_master_prestop="0";
+pkg_bootstrap="1";
+with_img_helpers="";
+runasap="0";
+interface="auto";
+jailskeldir="#workdir#/share/FreeBSD-jail-skel";
+jail_profile="default";
+# root password
+user_pw_root='cbsd';
+exec_start="/bin/sh /etc/rc"
+exec_stop="/bin/sh /etc/rc.shutdown"
+emulator="jail"
+</pre>
+
+<p>You can get this template yourself by running 'cbsd jconstruct-tui', entering the required parameters and answering 'no' to the question 'Do you want to create jail immediately?'.</p>
+<p>At the output, you get the same template in which you need to replace your working directory with #workdir# and the name of the jail on the #jname#.</p>
+
+<p>The script itself can have something like the following (call it Cbsdfile):</p>
+
+<pre class="brush:bash;ruler:rule;">
+#!/bin/sh
+JAILNAME="jredis"
+
+##
+MYDIR="$( /usr/bin/dirname $0 )"
+MYPATH="$( /bin/realpath ${MYDIR} )"
+
+. /etc/rc.conf
+
+cbsd jstatus jname=${JAILNAME} > /dev/null 2>&1
+
+ret=$?
+
+if [ ${ret} -ne 0 ]; then
+        echo "Warning, jail exist. Please remove them first"
+        # cbsd jremove ${JAILNAME}
+        exit 0
+fi
+
+tmpjconf=$( mktemp )
+
+#trap "/bin/rm -f ${tmpjconf}" HUP INT QUIT ABRT KILL ALRM TERM BUS EXIT
+
+sed -e "s:#jname#:${JAILNAME}:g" \
+-e "s:#workdir#:${cbsd_workdir}:g" ${MYPATH}/tpl.jconf > ${tmpjconf}
+
+cbsd jcreate jconf=${tmpjconf}
+cbsd jstart inter=0 ${JAILNAME}
+
+cbsd jexec jname=${JAILNAME} pkg update
+cbsd jexec jname=${JAILNAME} pkg install -y sysutils/puppet4 ca_root_nss rubygem-r10k
+
+cbsd jailscp ${MYPATH}/Puppetfile ${JAILNAME}:/tmp/Puppetfile
+
+cbsd jexec jname=${JAILNAME} "cd /tmp && r10k puppetfile install --moduledir /tmp/module"
+
+[ -f ${MYPATH}/hiera.yaml ] && cbsd jailscp ${MYPATH}/hiera.yaml ${JAILNAME}:/tmp/hiera.yaml
+[ -d ${MYPATH}/hieradata ] && cbsd jailscp ${MYPATH}/hieradata/ ${JAILNAME}:/tmp/hieradata
+cbsd jailscp ${MYPATH}/manifests/ ${JAILNAME}:/tmp/manifests
+
+cbsd jexec jname=${JAILNAME} env FACTER_hostname=${JAILNAME} puppet apply /tmp/manifests/init.pp --detailed-exitcodes --verbose --show_diff --summarize --hiera_config=/tmp/hiera.yaml --app_management --modulepath=/tmp/module
+
+cbsd jexec jname=${JAILNAME} pkg clean -y
+
+exit 0
+ 
+</pre>
+
+<p>Note that the name of the created container is specified in this script in the <strong>JAILNAME</strong> parameter.</p>
+<p>You can put this parameter outside the script in the configuration file, or take it as an argument. </p>
+<p>Also, you might want to not check for the existence of the container and delete it automatically at startup every time. To do this, uncomment the line with 'cbsd jremove ${JAILNAME}' </p>
+<p>At the output of this script, we get a working jail named jredis with a configured and started redis service inside. </p>
+<p>Then you can do anything with this, for example, clone or export and push  your image to repository. </p>
+<p>You can turn a similar script into a container creation service within a company where your employees (for example, developers) configure the container settings themselves and give them 'order' to build images with custom settings</p>
+<p>For example, you can create a Jenkins Job for the above case by creating a Job that has been parametized, in which the user can change the parameters you specify (this is how the author of the article used to build the Docker images came in)</p>
+
+<p>See an example of how it might look like: <a href="https://youtu.be/AQ7FbCHhIBk">https://youtu.be/AQ7FbCHhIBk</a></p>
+
+<div class="warning">Note that most of the Puppet modules do not have FreeBSD support (like any other configuration management system).
+In this regard, the author collects (and adds support for FreeBSD by virtue of its capabilities) modules that work with FreeBSD. For this purpose, a group <a href="https://github.com/PuppetBSD">PuppetBSD</a> was created on the GitHub resource, 
+where you want collect such modules in one place. If you use Puppet and FreeBSD, please add such modules to this group. This will help many FreeBSD users and can benefit from it.
+</div>
+<!--# include file="/en/_end.html" -->

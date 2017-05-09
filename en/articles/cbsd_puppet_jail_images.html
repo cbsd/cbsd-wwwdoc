@@ -153,7 +153,7 @@ fi
 
 tmpjconf=$( mktemp )
 
-#trap "/bin/rm -f ${tmpjconf}" HUP INT QUIT ABRT KILL ALRM TERM BUS EXIT
+trap "/bin/rm -f ${tmpjconf}" HUP INT QUIT ABRT KILL ALRM TERM BUS EXIT
 
 sed -e "s:#jname#:${JAILNAME}:g" \
 -e "s:#workdir#:${cbsd_workdir}:g" ${MYPATH}/tpl.jconf > ${tmpjconf}

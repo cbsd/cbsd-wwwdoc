@@ -175,6 +175,12 @@ cbsd jexec jname=${JAILNAME} env FACTER_hostname=${JAILNAME} puppet apply /tmp/m
 
 cbsd jexec jname=${JAILNAME} pkg clean -y
 
+# And push to registry:
+#   cbsd jstop jname=${JAILNAME}
+#   cbsd jexport jname=${JAILNAME}
+#   scp ~cbsd/exports/${JAILNAME} builder@repo.my.domain:/path/.../
+#   ..
+
 exit 0
  
 </pre>

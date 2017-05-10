@@ -35,7 +35,7 @@
 <p>Поскольку наш пример ориентирован на демонстрацию запуска redis, подключим класс 'redis':</p>
 
 <pre class="brush:bash;ruler:rule;">
-echo "class { 'redis': }" > /root/build-jail/redis/manifest/init.pp
+% echo "class { 'redis': }" > /root/build-jail/redis/manifest/init.pp
 </pre>
 
 <p>Чтобы расширить пример, и продемонстрируем возможность использования <a href="https://docs.puppet.com/hiera/">Hiera</a>, напишем часть параметров в yaml бакенде. Для этого, создадим соответствующий каталог:</p>
@@ -58,7 +58,7 @@ EOF
 <p>Далее, нам осталось написать Puppetfile. Нам потребуется сам модуль redis, а также его зависимости:</p>
 
 <pre class="brush:bash;ruler:rule;">
-cat &gt; /root/jenkins-jredis/jredis/Cbsdfile &lt;&lt;EOF
+cat &gt; /root/build-jail/redis/Cbsdfile &lt;&lt;EOF
 forge 'https://forgeapi.puppetlabs.com'
 
 mod 'arioch-redis', '1.2.4'
@@ -125,6 +125,7 @@ exec_stop="/bin/sh /etc/rc.shutdown"
 emulator="jail"
 </pre>
 
+<p>Сохраним этот темплейт как <i>/root/build-jail/tpl.jconf</i></p>
 <p>Вы можете получить этот темплейт самостоятельно, запустив 'cbsd jconstruct-tui', введя необходимые параметры и ответив 'no' на вопрос 'Do you want to create jail immediately?'.</p>
 <p>На выходе вы получите тот самый темплейт, в котором необходимо заменить ваш рабочий каталог на #workdir# и имя клетки на #jname#.</p>
 

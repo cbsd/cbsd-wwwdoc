@@ -82,26 +82,29 @@ with which you can create volume on CIFS/NFS, or on project 9p and virtio-9p in 
 
 
 <ul>
-<li><p>1) Any Linux where Docker is work is suits for us.  Create a virtual machine with enough resources to run Docker environments in it.
-For minimization fans, take a look on the <a href="http://boot2docker.io/">Boot2Docker</a> project, which is a minimal installation of the Linux environment for running Docker.
+	<li>1) Any Linux where Docker is work is suits for us.  Create a virtual machine with enough resources to run Docker environments in it.</li>
+</ul>
+<p>For minimization fans, take a look on the <a href="http://boot2docker.io/">Boot2Docker</a> project, which is a minimal installation of the Linux environment for running Docker.
 Unfortunately, at the time of this writing, this image does not support UEFI boot mode, so we preferred to install Linux Ubuntu 16.04 and further instructions are targeted at it.
-</p></li>
-<li><p>2) Let's move Linux network to the bridge mode, because through it we will configure the network of containers being launched.
-We need this mode of operation if we want to work with containers directly from the FreeBSD host system, not only
+</p>
+<ul>
+	<li>2) Let's move Linux network to the bridge mode, because through it we will configure the network of containers being launched.</li>
+</ul>
+<p>We need this mode of operation if we want to work with containers directly from the FreeBSD host system, not only
 inside bhyve. For this, we will install a bridge-utils package for working with the bridge inside the Linux guest:</p>
 <pre class="brush:bash;ruler:rule;">
-apt-get install bridge-utils
+% apt-get install bridge-utils
 </pre>
 
 <p>Rewrite <i>/etc/network/interfaces</i> configuration for the physical interface, placing it in bridge.</p>
 
 <p>In our case:</p>
 <ul>
-<li>* physical bhyve NIC name: <strong>enp0s4</strong></li>
-<li>* IP address of bhyve with Docker: <strong>192.168.0.233</strong></li>
-<li>* The network in which we will run the Docker and which is available on the FreeBSD hoster: <strong>192.168.0.0/24</strong></li>
-<li>* Network gateway: <strong>192.168.0.1</strong></li>
-
+    <li>* physical bhyve NIC name: <strong>enp0s4</strong></li>
+    <li>* IP address of bhyve with Docker: <strong>192.168.0.233</strong></li>
+    <li>* The network in which we will run the Docker and which is available on the FreeBSD hoster: <strong>192.168.0.0/24</strong></li>
+    <li>* Network gateway: <strong>192.168.0.1</strong></li>
+</ul>
 <p>So, full content of <i>/etc/network/interfaces</i> can look like this:</p>
 
 <pre class="cli">
@@ -127,19 +130,20 @@ iface br0 inet static
         bridge_fd 9
         bridge_hello 2
         bridge_maxage 12
-        bridge_stp off</pre>
+        bridge_stp off
 </pre>
-
-</p></li>
-
-<li><p>3) Reboot bhyve to apply new network settings and install docker:</p>
+<ul>
+<li>3) Reboot bhyve to apply new network settings and install docker:
+</ul>
 
 <pre class="brush:bash;ruler:rule;">
-apt-get install docker.io
+% apt-get install docker.io
 </pre>
-</li></p>
 
-<li><p>4) Through arguments, configure Docker on the network with the default bridge, with the appropriate network parameters. 
+<ul>
+	<li>4) Through arguments, configure Docker on the network with the default bridge, with the appropriate network parameters. </li>
+</ul>
+<p>
 And also, we'll add the TCP port through the -H switch, through which the external client (FreeBSD in our case) will interact with the Docker daemon.
 To do this, open the file <i>/etc/defaults/docker</i> and add this line:
 </p>
@@ -147,12 +151,13 @@ To do this, open the file <i>/etc/defaults/docker</i> and add this line:
 <pre class="cli">
 DOCKER_OPTS="-H tcp://0.0.0.0:2375 --bridge=br0 --fixed-cidr=192.168.0.0/24 --default-gateway=192.168.0.1 -H unix:///var/run/docker.sock"
 </pre>
-</p></li>
 
-<li><p>5) On FreeBSD, install the Docker-client:</p>
+<ul>
+	<li>5) On FreeBSD, install the Docker-client:</li>
+</ul>
 
 <pre class="brush:bash;ruler:rule;">
-pkg install sysutils/docker
+% pkg install sysutils/docker
 </pre>
 
 <p>For the current session, we export the correct value <strong>DOCKER_HOST</strong>:</p>
@@ -161,9 +166,9 @@ pkg install sysutils/docker
 setenv DOCKER_HOST tcp://192.168.0.233:2375
 </pre>
 
-<p>Or write it globally in files <i>~/.cshrc</i> or <i>/etc/profile</i> or <i>/etc/csh.cshrc</i></p>
-</p></li>
-</ul>
+<p>
+Or write it globally in files <i>~/.cshrc</i> or <i>/etc/profile</i> or <i>/etc/csh.cshrc</i>
+</p>
 
 <p>On this stage, the hypervisor configuration with bhyve is finished. Let's test it:</p>
 

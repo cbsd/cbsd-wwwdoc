@@ -1,15 +1,19 @@
 <h1><span>Управление несколькими клетками с помощью Shell скриптов</span></h1>
 
+
 <p>Между ручным управлением каждой клеткой с помощью <strong>cbsd jlogin</strong> и настройкой систем централизованной оркестровки 
 вроде <strong>Puppet</strong> или <strong>Ansible</strong> находится способ, основанный на базе скриптов на языке Shell.</p>
 <p>Использование фреймворка <strong>cbsd</strong> и команд вида <strong>jset/jget/jconfig/jexec</strong> позволяет с помощью простых
 скриптов реализовать достаточно сложные сценарии конфигурирования и управления множеством клеток.</p>
 <p>Ниже приводится примеры написания таких скриптов для решения всевозможных групповых задач внутри клеток.</p>
 
+
 <h1><span>Тестируем наличие в клетках уязвимого ПО</span></h1>
 
-<p>Простейший скрипт, запускающий в каждой клетке команду pkg audit -F - проверка наличия установленного ПО 
+
+<p>Простейший скрипт, запускающий в каждой клетке команду <strong>pkg audit -F</strong> - проверка наличия установленного ПО 
   с известными проекту FreeBSD уязвимостями.</p>
+
 
 <pre class="brush:bash;ruler:true;">
 #!/bin/sh
@@ -30,7 +34,9 @@ echo «Checking SAMBA JAIL»
 /usr/local/bin/cbsd jexec jname=samba pkg audit –F
 </pre>
 
+
 <p>Пример вывода скрипта после отработки:</p>
+
 
 <pre class="brush:bash;ruler:true;">
 Checking local SYSTEM
@@ -54,10 +60,13 @@ vulnxml file up-to-date
 0 problem(s) in the installed packages found.
 </pre>
 
+
 <h1><span>Обновление базы известных пакетов и вывод информации об наличие обновлений</span></h1>
+
 
 <p>Аналогичная предыдущей идеи - выполняем <strong>pkg upgrade</strong> с ключом <strong>-n</strong> внутри каждой клетки. Итог - обновляем список доступных для клетки
 пакетов <strong>pkg</strong> из репозиториев и выводим на экран доступные обновления.</p>
+
 
 <pre class="brush:bash;ruler:true;">
 #!/bin/sh
@@ -77,3 +86,155 @@ echo ""
 echo «Checking SAMBA JAIL»
 /usr/local/bin/cbsd jexec jname=samba pkg upgrade –n
 </pre>
+
+
+<h1><span>Получение мгновенных значений потребления оперативной памяти клеток</span></h1>
+
+
+<p>Задача простая - хотим знать, сколько запущенные клетки используют оперативной памяти</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+cbsd jrctl mode=show | egrep -i "\-\-\-|memoryuse" | grep -v "\=0"
+</pre>
+
+
+<p>Полученный результат выполнения скрипта</p>
+
+
+<pre class="brush:bash;ruler:true;">
+--- dokuwiki ---
+memoryuse=31M
+vmemoryuse=645M
+--- owncloud ---
+memoryuse=46M
+vmemoryuse=1948M
+--- samba ---
+memoryuse=16M
+vmemoryuse=1680M
+--- ftpbackup ---
+memoryuse=1172K
+vmemoryuse=42M
+--- asterisk ---
+memoryuse=25M
+vmemoryuse=889M
+</pre>
+
+
+<h1><span>Запуск нескольких скриптов и отправка по почте</span></h1>
+
+
+<p>Итак - у нас есть несколько полезных скриптов, которые получают нужную нам информацию о клетках.
+  Нужно решить задачу их периодического запуска и получения вывода на электронную почту</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+sleep 1
+echo "To: vershinin.e@gmail.com" > /root/Scripts/audit-pkg.mail
+echo "Subject: Audit PKG on MAIN and JAILed systems!!!" >> /root/Scripts/audit-pkg.mail
+echo "" >> /root/Scripts/audit-pkg.mail
+echo "" >> /root/Scripts/audit-pkg.mail
+sleep 1
+`/root/Scripts/pkg-audit-all-sys.sh >> /root/Scripts/audit-pkg.mail`
+sleep 1
+`/root/Scripts/pkg-upgrade-all-sys.sh >> /root/Scripts/audit-pkg.mail`
+sleep 1
+`/root/Scripts/memory-use-jails.sh >> /root/Scripts/audit-pkg.mail`
+sleep 1
+`cat /root/Scripts/audit-pkg.mail | /usr/local/bin/msmtp vershinin.e@gmail.com`
+sleep 1
+</pre>
+
+
+<p>Настройки почтового клиента msmtp в файле /root/.msmtprc</p>
+
+
+<pre class="brush:bash;ruler:true;">
+account default
+host smtp.gmail.com
+maildomain gmail.com
+auto_from on
+port 587
+from vershinin.asterisk@gmail.com
+tls on
+tls_certcheck off
+
+auth on
+user vershinin.asterisk
+password XXXXXXXXXXXX
+logfile /var/log/msmtp.log
+
+# Syslog logging with facility LOG_MAIL instead of the default LOG_USER.
+syslog LOG_MAIL
+</pre>
+
+
+<h1><span>Регулярное резервное копирование клеток</span></h1>
+
+
+<p>Скрипт для регулярной выгрузки клеток и их сохранение в определенном месте с определенным именем.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+jailname=$1
+
+CBSDPATH=/CBSD
+
+JAILBACKUPTARGET=/data/JAILS
+
+backupdate=`/bin/date "+%Y-%m-%d"`
+
+jstatus=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus -ne "0" ]; then
+        /usr/local/bin/cbsd jstop $jailname
+        sleep 15
+fi
+
+jstatus2=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus2 -eq "0" ]; then
+        /usr/local/bin/cbsd jexport jname=$jailname compress=9
+        sleep 15
+fi
+
+if [ -f $CBSDPATH/export/$jailname.img ]; then
+        cp $CBSDPATH/export/$jailname.img $JAILBACKUPTARGET/$jailname-$backupdate.img
+        sleep 5
+fi
+
+jstatus3=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus3 -eq "0" ]; then
+        /usr/local/bin/cbsd jstart $jailname
+        sleep 5
+fi
+
+jstatus4=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus4 -ne "0" ]; then
+        echo "Backup JAIL Finish Successfull! Jail restarted!"
+fi
+</pre>
+
+
+<p>Данный скрипт запускается через <strong>/etc/crontab</strong> для каждой клетки индивидуально по расписанию.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+# Backup JAILS monthly
+1       4       1       *       *       root    /root/Scripts/backup-jail.sh dokuwiki
+1       4       2       *       *       root    /root/Scripts/backup-jail.sh owncloud
+1       4       3       *       *       root    /root/Scripts/backup-jail.sh samba && /usr/local/bin/cbsd jexec jname=samba /usr/local/etc/rc.d/transmission stop
+1       4       4       *       *       root    /root/Scripts/backup-jail.sh ftpbackup
+</pre>
+
+
+<p>Итог работы скрипта - в каталоге /data/JAILS/ каждый месяц в первых числах будут создаваться сжатые экспорты всех клеток со всеми настройками.</p>
+

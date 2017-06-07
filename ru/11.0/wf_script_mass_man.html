@@ -1,6 +1,79 @@
 <h1><span>Управление несколькими клетками с помощью Shell скриптов</span></h1>
 
 <p>Между ручным управлением каждой клеткой с помощью <strong>cbsd jlogin</strong> и настройкой систем централизованной оркестровки 
-вроде <strong>Puppet</strong> или <strong>Ansible</strong> находится способ, основанный на базе скриптов на языке Shell</p>
+вроде <strong>Puppet</strong> или <strong>Ansible</strong> находится способ, основанный на базе скриптов на языке Shell.</p>
 <p>Использование фреймворка <strong>cbsd</strong> и команд вида <strong>jset/jget/jconfig/jexec</strong> позволяет с помощью простых
-скриптов реализовать достаточно сложные сценарии конфигурирования и управления множеством клеток</p>
+скриптов реализовать достаточно сложные сценарии конфигурирования и управления множеством клеток.</p>
+<p>Ниже приводится примеры написания таких скриптов для решения всевозможных групповых задач внутри клеток.</p>
+
+<h1><span>Тестируем наличие в клетках уязвимого ПО</span></h1>
+
+<p>Простейший скрипт, запускающий в каждой клетке команду pkg audit -F - проверка наличия установленного ПО 
+  с известными проекту FreeBSD уязвимостями.</p>
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+echo «Checking local SYSTEM»
+pkg audit -F
+echo ""
+echo «Checking DokuWiki JAIL»
+/usr/local/bin/cbsd jexec jname=dokuwiki pkg audit -F
+echo ""
+echo «Checking OwnCloud JAIL»
+/usr/local/bin/cbsd jexec jname=owncloud pkg audit -F
+echo ""
+echo «Checking FTP Backup JAIL»
+/usr/local/bin/cbsd jexec jname=ftpbackup pkg audit -F
+echo ""
+echo «Checking SAMBA JAIL»
+/usr/local/bin/cbsd jexec jname=samba pkg audit –F
+</pre>
+
+<p>Пример вывода скрипта после отработки:</p>
+
+<pre class="brush:bash;ruler:true;">
+Checking local SYSTEM
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking DokuWiki JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking OwnCloud JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking FTP Backup JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking SAMBA JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+</pre>
+
+<h1><span>Обновление базы известных пакетов и вывод информации об наличие обновлений</span></h1>
+
+<p>Аналогичная предыдущей идеи - выполняем <strong>pkg upgrade</strong> с ключом <strong>-n</strong> внутри каждой клетки. Итог - обновляем список доступных для клетки
+пакетов <strong>pkg</strong> из репозиториев и выводим на экран доступные обновления.</p>
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+echo «Checking local SYSTEM»
+pkg upgrade -n
+echo ""
+echo «Checking DokuWiki JAIL»
+/usr/local/bin/cbsd jexec jname=dokuwiki pkg upgrade -n
+echo ""
+echo «Checking OwnCloud JAIL»
+/usr/local/bin/cbsd jexec jname=owncloud pkg upgrade -n
+echo ""
+echo «Checking FTP Backup JAIL»
+/usr/local/bin/cbsd jexec jname=ftpbackup pkg upgrade -n
+echo ""
+echo «Checking SAMBA JAIL»
+/usr/local/bin/cbsd jexec jname=samba pkg upgrade –n
+</pre>

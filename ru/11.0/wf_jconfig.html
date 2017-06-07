@@ -98,7 +98,29 @@
 			<li><strong>stop.d</strong> - скрипты для отработки внутри клетки при ее останове. Аналог параметра <strong>exec.stop</strong> оригинального <em>jail.conf</em></li>
 			<li><strong>remove.d</strong> - (с версии CBSD 11.0.10) скрипты отработают при удалении окружения</li>
 		</ul>
-		<p>Писать скрипты для <em>master_\*</em> каталогов может быть полезно, если при старте-останове клеток вам необходимо выполнить какой-то действие не связанное с самим окружением в клетке - например, создать ZFS снапшот, поставить счетчики в IPFW и тп</p>
+		<p>Писать скрипты для <em>master_\*</em> каталогов может быть полезно, если при старте-останове клеток вам необходимо выполнить какой-то действие не связанное с самим окружением в клетке - например, создать ZFS снапшот, поставить счетчики в IPFW и т.п.</p>
+		<p>Пример скрипта, который перед запуском клетки с именем <strong>asterisk></strong> проверяет не изменился ли один из IP-адресов, выдаваемый по DHCP от провайдера.</p>
+		
+		
+		<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+ufanetip_from_dhcp=`ifconfig vlan200 | grep "inet" | cut -d" " -f2`
+sleep 1
+
+current_asterisk_jail_ip=`/usr/local/bin/cbsd jget jname=asterisk ip4_addr | cut -d "," -f2`
+sleep 1
+
+if [ "$ufanetip_from_dhcp" != "$current_asterisk_jail_ip" ]; then
+        echo "Setting NEW Ufanet IP from DHCP!!!!"
+        echo "Current ip4_addr setting in Asterisk JAIL is: 192.168.1.250,$ufanetip_from_dhcp"
+        sleep 1
+        /usr/local/bin/cbsd jset mode=quiet jname=asterisk ip4_addr="192.168.1.250,$ufanetip_from_dhcp"
+        sleep 1
+fi
+		</pre>
+		
+		
 		<p>В скриптах вы можете использовать переменные CBSD, такие как <strong>$jname, $path, $data, $ip4_addr</strong>, например, поместив такой скрипт (с правами на выполнение) в <em>/usr/jails/jails-system/jail1/master_poststart.d/notify.sh</em>:</p>
 		<pre class="brush:bash;ruler:true;">
 		#!/bin/sh

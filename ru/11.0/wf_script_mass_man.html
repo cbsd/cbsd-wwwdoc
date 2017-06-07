@@ -238,3 +238,50 @@ fi
 
 <p>Итог работы скрипта - в каталоге /data/JAILS/ каждый месяц в первых числах будут создаваться сжатые экспорты всех клеток со всеми настройками.</p>
 
+
+<h1><span>Полезные alias-ы для интерпретатора CSH</span></h1>
+
+
+<p>При частой работе с клетками некоторые большие команды удобно сократить с помощью создания alias в настройках интерпретатора - например .cshrc</p>
+
+
+<p>Просмотр файловых систем - вариант первый.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias df        'df -m | grep -v "\/dev"'
+</pre>
+
+
+<p>Просмотр файловых систем - вариант второй.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias df2       'df | grep -v "\/jails\/"'
+</pre>
+
+
+<p>Список всех клеток со всех узлов.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias jall      cbsd jls alljails=1 shownode=1
+</pre>
+
+
+<p>Список всех узлов и их статусов.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias cnodes    cbsd node mode=list
+</pre>
+
+
+<p>Команды запуска и остановки torrent клиента Transmission внутри клетки.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias tstop     '/usr/local/bin/cbsd jexec jname=samba /usr/local/etc/rc.d/transmission stop'
+alias tstart    '/usr/local/bin/cbsd jexec jname=samba /usr/local/etc/rc.d/transmission start'
+</pre>
+

@@ -1,0 +1,286 @@
+<h1><span>Managing multiple Jails using Shell Scripts</span></h1>
+
+
+<p>Between manual control of each Jail using <strong>cbsd jlogin</strong> and the setting up of centralized orchestration systems
+like <strong>Puppet</strong> or <strong>Ansible</strong> stay a method based on scripts in the language Shell.</p>
+<p>Using framework <strong>cbsd</strong> and command like <strong>jset/jget/jconfig/jexec</strong> you can implement quite complex 
+scenarios for the configuration and management of multiple cells.</p>
+<p>Below are examples of writing such scripts to solve all sorts of group tasks inside Jails.</p>
+
+
+<h1><span>We test the presence of vulnerable software in the Jails.</span></h1>
+
+
+<p>The simplest script that runs in each jail is a command <strong>pkg audit -F</strong> - checking for installed software
+   with known vulnerabilities in the FreeBSD project.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+echo «Checking local SYSTEM»
+pkg audit -F
+echo ""
+echo «Checking DokuWiki JAIL»
+/usr/local/bin/cbsd jexec jname=dokuwiki pkg audit -F
+echo ""
+echo «Checking OwnCloud JAIL»
+/usr/local/bin/cbsd jexec jname=owncloud pkg audit -F
+echo ""
+echo «Checking FTP Backup JAIL»
+/usr/local/bin/cbsd jexec jname=ftpbackup pkg audit -F
+echo ""
+echo «Checking SAMBA JAIL»
+/usr/local/bin/cbsd jexec jname=samba pkg audit –F
+</pre>
+
+
+<p>Example of script output after working off:</p>
+
+
+<pre class="brush:bash;ruler:true;">
+Checking local SYSTEM
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking DokuWiki JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking OwnCloud JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking FTP Backup JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+
+Checking SAMBA JAIL
+vulnxml file up-to-date
+0 problem(s) in the installed packages found.
+</pre>
+
+
+<h1><span>Updating the database of known packages and displaying information about updates</span></h1>
+
+
+<p>Similar to the previous idea - we perform <strong>pkg upgrade</strong> with key <strong>-n</strong> inside of each jail. Result - update the list of available jails
+packages in <strong>pkg</strong> from the repositories and display available updates.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+echo «Checking local SYSTEM»
+pkg upgrade -n
+echo ""
+echo «Checking DokuWiki JAIL»
+/usr/local/bin/cbsd jexec jname=dokuwiki pkg upgrade -n
+echo ""
+echo «Checking OwnCloud JAIL»
+/usr/local/bin/cbsd jexec jname=owncloud pkg upgrade -n
+echo ""
+echo «Checking FTP Backup JAIL»
+/usr/local/bin/cbsd jexec jname=ftpbackup pkg upgrade -n
+echo ""
+echo «Checking SAMBA JAIL»
+/usr/local/bin/cbsd jexec jname=samba pkg upgrade –n
+</pre>
+
+
+<h1><span>Obtaining instantaneous values of jail memory consumption</span></h1>
+
+
+<p>The task is simple - we want to know how many running jails use RAM.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+cbsd jrctl mode=show | egrep -i "\-\-\-|memoryuse" | grep -v "\=0"
+</pre>
+
+
+<p>The result of the script execution</p>
+
+
+<pre class="brush:bash;ruler:true;">
+--- dokuwiki ---
+memoryuse=31M
+vmemoryuse=645M
+--- owncloud ---
+memoryuse=46M
+vmemoryuse=1948M
+--- samba ---
+memoryuse=16M
+vmemoryuse=1680M
+--- ftpbackup ---
+memoryuse=1172K
+vmemoryuse=42M
+--- asterisk ---
+memoryuse=25M
+vmemoryuse=889M
+</pre>
+
+
+<h1><span>Run several scripts and send them by mail</span></h1>
+
+
+<p>So - we have several useful scripts that get the information we need about the cells.
+   It is necessary to solve the task of periodically starting them and getting output to e-mail.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+sleep 1
+echo "To: vershinin.e@gmail.com" > /root/Scripts/audit-pkg.mail
+echo "Subject: Audit PKG on MAIN and JAILed systems!!!" >> /root/Scripts/audit-pkg.mail
+echo "" >> /root/Scripts/audit-pkg.mail
+echo "" >> /root/Scripts/audit-pkg.mail
+sleep 1
+`/root/Scripts/pkg-audit-all-sys.sh >> /root/Scripts/audit-pkg.mail`
+sleep 1
+`/root/Scripts/pkg-upgrade-all-sys.sh >> /root/Scripts/audit-pkg.mail`
+sleep 1
+`/root/Scripts/memory-use-jails.sh >> /root/Scripts/audit-pkg.mail`
+sleep 1
+`cat /root/Scripts/audit-pkg.mail | /usr/local/bin/msmtp vershinin.e@gmail.com`
+sleep 1
+</pre>
+
+
+<p>Mail client settings msmtp in file /root/.msmtprc</p>
+
+
+<pre class="brush:bash;ruler:true;">
+account default
+host smtp.gmail.com
+maildomain gmail.com
+auto_from on
+port 587
+from vershinin.asterisk@gmail.com
+tls on
+tls_certcheck off
+
+auth on
+user vershinin.asterisk
+password XXXXXXXXXXXX
+logfile /var/log/msmtp.log
+
+# Syslog logging with facility LOG_MAIL instead of the default LOG_USER.
+syslog LOG_MAIL
+</pre>
+
+
+<h1><span>Regular cell backup</span></h1>
+
+
+<p>A script for the regular unloading of jails and their saving in a certain place with a specific name.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+jailname=$1
+
+CBSDPATH=/CBSD
+
+JAILBACKUPTARGET=/data/JAILS
+
+backupdate=`/bin/date "+%Y-%m-%d"`
+
+jstatus=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus -ne "0" ]; then
+        /usr/local/bin/cbsd jstop $jailname
+        sleep 15
+fi
+
+jstatus2=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus2 -eq "0" ]; then
+        /usr/local/bin/cbsd jexport jname=$jailname compress=9
+        sleep 15
+fi
+
+if [ -f $CBSDPATH/export/$jailname.img ]; then
+        cp $CBSDPATH/export/$jailname.img $JAILBACKUPTARGET/$jailname-$backupdate.img
+        sleep 5
+fi
+
+jstatus3=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus3 -eq "0" ]; then
+        /usr/local/bin/cbsd jstart $jailname
+        sleep 5
+fi
+
+jstatus4=`/usr/local/bin/cbsd jstatus $jailname`
+
+if [ $jstatus4 -ne "0" ]; then
+        echo "Backup JAIL Finish Successfull! Jail restarted!"
+fi
+</pre>
+
+
+<p>This script is launched through <strong>/etc/crontab</strong> For each jail individually according to the schedule.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+# Backup JAILS monthly
+1       4       1       *       *       root    /root/Scripts/backup-jail.sh dokuwiki
+1       4       2       *       *       root    /root/Scripts/backup-jail.sh owncloud
+1       4       3       *       *       root    /root/Scripts/backup-jail.sh samba && /usr/local/bin/cbsd jexec jname=samba /usr/local/etc/rc.d/transmission stop
+1       4       4       *       *       root    /root/Scripts/backup-jail.sh ftpbackup
+</pre>
+
+
+<p>The result of the script is in the directory /data/JAILS/ every month in the first days will be created compressed exports of all cells with all the settingsи.</p>
+
+
+<h1><span>Useful alias for the interpreter CSH</span></h1>
+
+
+<p>When working with cells frequently, it is convenient to shorten some large commands by creating alias in the interpreter settings - for example .cshrc</p>
+
+
+<p>Viewing Filesystems - Option One.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias df        'df -m | grep -v "\/dev"'
+</pre>
+
+
+<p>Viewing Filesystems - Option Two.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias df2       'df | grep -v "\/jails\/"'
+</pre>
+
+
+<p>List of all jails from all nodes.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias jall      cbsd jls alljails=1 shownode=1
+</pre>
+
+
+<p>List of all nodes and their statuses.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias cnodes    cbsd node mode=list
+</pre>
+
+
+<p>Commands of start and stop torrent of the client of Transmission inside of a jail.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+alias tstop     '/usr/local/bin/cbsd jexec jname=samba /usr/local/etc/rc.d/transmission stop'
+alias tstart    '/usr/local/bin/cbsd jexec jname=samba /usr/local/etc/rc.d/transmission start'
+</pre>

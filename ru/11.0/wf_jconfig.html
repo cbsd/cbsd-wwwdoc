@@ -104,15 +104,16 @@
 		
 		<pre class="brush:bash;ruler:true;">
 #!/bin/sh
+iface="vlan200"
 
-ufanetip_from_dhcp=`ifconfig vlan200 | awk '/inet /{print $2}'`
+ufanetip_from_dhcp=$( ifconfig ${iface} | awk '/inet /{print $2}' )
 
-current_asterisk_jail_ip=`/usr/local/bin/cbsd jget mode=quiet jname=asterisk ip4_addr`
+current_asterisk_jail_ip=$( /usr/local/bin/cbsd jget mode=quiet jname=${jname} ip4_addr )
 
 if [ "$ufanetip_from_dhcp" != "$current_asterisk_jail_ip" ]; then
-        echo "Setting NEW Ufanet IP from DHCP!!!!"
-        echo "Current ip4_addr setting in Asterisk JAIL is: 192.168.1.250,$ufanetip_from_dhcp"
-        /usr/local/bin/cbsd jset jname=asterisk ip4_addr="192.168.1.250,$ufanetip_from_dhcp"
+	echo "Setting NEW Ufanet IP from DHCP!!!!"
+	echo "Current ip4_addr setting in ${jname} jail is: 192.168.1.250,$ufanetip_from_dhcp"
+	/usr/local/bin/cbsd jset jname=${jname} ip4_addr="192.168.1.250,$ufanetip_from_dhcp"
 fi
 		</pre>
 		

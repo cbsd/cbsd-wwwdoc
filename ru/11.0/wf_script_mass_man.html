@@ -61,6 +61,24 @@ vulnxml file up-to-date
 </pre>
 
 
+<p>Более компактный вариант скрипта, который использует цикл и проверку статуса Jail.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+for jail in $(/usr/local/bin/cbsd jorder); do
+
+        jstatus1=`/usr/local/bin/cbsd jstatus ${jail}`
+
+        if [ $jstatus1 -ne "0" ]; then
+                /usr/local/bin/cbsd jexec jname=${jail} pkg audit -F
+        fi
+
+done
+</pre>
+
+
 <h1><span>Обновление базы известных пакетов и вывод информации об наличие обновлений</span></h1>
 
 
@@ -86,6 +104,9 @@ echo ""
 echo «Checking SAMBA JAIL»
 /usr/local/bin/cbsd jexec jname=samba pkg upgrade –n
 </pre>
+
+
+<p>Вариант с циклом работает аналогично.</p>
 
 
 <h1><span>Получение мгновенных значений потребления оперативной памяти клеток</span></h1>

@@ -61,6 +61,24 @@ vulnxml file up-to-date
 </pre>
 
 
+<p>A more compact version of the script that uses the loop and status check Jail.</p>
+
+
+<pre class="brush:bash;ruler:true;">
+#!/bin/sh
+
+for jail in $(/usr/local/bin/cbsd jorder); do
+
+        jstatus1=`/usr/local/bin/cbsd jstatus ${jail}`
+
+        if [ $jstatus1 -ne "0" ]; then
+                /usr/local/bin/cbsd jexec jname=${jail} pkg audit -F
+        fi
+
+done
+</pre>
+
+
 <h1><span>Updating the database of known packages and displaying information about updates</span></h1>
 
 

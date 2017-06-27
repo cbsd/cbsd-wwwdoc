@@ -1,0 +1,340 @@
+<!--# include file="/ru/_start.html" -->
+<h1><span>Экспорт и отображение jail и bhyve метрик с <strong>CBSD</strong>, Grafana и Prometheus</span></h1>
+<div class="block">
+<p>Часто возникает потребность знать, насколько сильно и по каким компонентам ваши контейнера и виртуальные среды (в рамках этой статьи речь идет о 
+FreeBSD <a href="http://man.freebsd.org/jail/8" target="_blank">jail(8)</a> и <a href="http://man.freebsd.org/bhyve/8" target="_blank">bhyve(8)</a> виртуальных машинах) 
+потребляют ресурсы в различные моменты времени и иметь визуализацию этого в виде графиков. Основные метрики которые интересны в первую очередь это, как правило, базовые системные:
+</p>
+<ul>
+	<li> CPU usage;</li>
+	<li> Memory usage;</li>
+	<li> Storage I/O bandwitch;</li>
+	<li> Storage IOPS;</li>
+	<li> Traffic bandwitch;</li>
+</ul>
+<p>Источники информации по этим метрикам в FreeBSD ОС избыточны в том плане, что вы можете получать их из разных мест - потребление CPU можно считывать из bhyve, 
+из фреймворка <a href="http://man.freebsd.org/rctl/8" target="_blank">rctl(4)</a>, из утилиты <a href="http://man.freebsd.org/top/1" target="_blank">top(1)</a> и
+<a href="http://man.freebsd.org/ps/1" target="_blank">ps(1)</a> (<a href="http://man.freebsd.org/kvm_getprocs/3" target="_blank">kvm_getprocs(3)</a> в частности); 
+информацию по I/O - через <strong>GEOM</strong> или <em>'zfs iostat'</em>,
+<a href="http://man.freebsd.org/vmstat/8" target="_blank">vmstat(8)</a>/<a href="http://man.freebsd.org/iostat/8" target="_blank">iostat(8)</a>; 
+трафик - с утилиты <a href="http://man.freebsd.org/netstat/1" target="_blank">netstat(1)</a> или 
+счетчиков <a href="http://man.freebsd.org/ipfw/8" target="_blank">ipfw(8)</a> и <a href="http://man.freebsd.org/pf/4" target="_blank">pf(4)</a> и т.д.
+</p>
+<p>
+Скрипты <strong>CBSD</strong> могут собирать и накапливать данную статистику и предоставлять к ним интерфейс для дальнейшей обработки.
+В качестве примера, вы можете посмотреть информацию о получении трафика в CBSD для определенного контейнера:  <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html"</a>trafstat</a>
+В этой статье рассказывается, каким образом цифры можно экспортировать в графическое представление для более наглядной формы. Начиная с версии 11.1.0, <strong>CBSD</strong> позволяет 
+экспортировать метрики с <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrctl_ssi.html"</a>jrctl</a> и <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html"</a>trafstat</a> 
+утилит в унифицированном формате как для jail так и для bhyve в формате prometheus.
+</p>
+
+<h1><span>Настройка Prometheus</span></h1>
+<p>Итак, наши компоненты:</p>
+<ul>
+	<li> <a href="https://www.freebsd.org/" target="_blank">FreeBSD</a> как ОС общего пользования, на которой все и происходит;</li>
+	<li> <strong>bhyve</strong> и <strong>jail</strong> как гипервизор и контейнера, в которых запускаются некие сервисы и метрику с которых мы будем снимать;</li>
+	<li> <strong>CBSD</strong> - фреймворк управления bhyve и jail, позволяющий также выгрузить статистику по тому или иному гипервизору или контейнеру в формате prometheus;</li>
+	<li> <a href="https://prometheus.io/" target="_blank">Prometheus</a> - система сбора метрик в формате key-value pairs с возможностью делать выборку запросами, с эффективным движком хранения данных (<strong>leveldb</strong>), имеющую встроенную интеграцию с <strong>Grafana</strong>, а также, имеющая клиентские библиотеки для популярных языков программирования;</li>
+	<li> <a href="https://grafana.com/Grafana" target="_blank">Grafana</a> - популярная и гибкая система Dashboard-ов с аналитикой и графиками по любым метрикам;</li>
+</ul>
+<p>
+Получить информацию о загрузке виртуальной машины или контейнера по их имени в CBSD вы можете по команде 'cbsd jrctl'. Этот скрипт использует метрики, предоставляемые RACCT фреймворком, поэтому убедитесь, что ваш <em>/boot/loader.conf</em> имеет соответствующую настройку:
+</p>
+<pre>
+kern.racct.enable=1
+</pre>
+<p>По-умолчанию, 'cbsd jrctl' выводит информацию в формате <strong>ключ-значение</strong>:</p>
+<pre class="brush:bash;ruler:rule;">
+% cbsd jrctl mode=show jname=f11
+datasize=2080K
+stacksize=264K
+coredumpsize=0
+memoryuse=63M
+memorylocked=0
+maxproc=1
+openfiles=40
+vmemoryuse=1099M
+nthr=29
+nsemop=0
+wallclock=6206
+pcpu=0
+readbps=0
+writebps=0
+readiops=0
+writeiops=0
+</pre>
+<p>Если аргумент <em>jname=</em> опустить, вы увидете информацию по всем имеющимся окружениям. Если данная команда вызвана с ключем <em>prometheus=1</em>, вывод будет осуществляться в том формате, который ожидают <a href="https://prometheus.io/docs/introduction/getting_started/#starting-up-some-sample-targets" target="_blank">prometheus targets</a>.<p>
+<p>Экспортировать метрики в prometheus можно по-разному. Один из способов - отправлять метрику напрямую в prometheus используя любой комфортный для вас язык программирования, где имеется библиотека <a href="https://prometheus.io/docs/instrumenting/clientlibs/" target="_blank">клиента  prometheus</a>.
+<p>Мы реализуем второй вариант, когда сервер prometheus будет сам обходить точки и собирать необходимую статистику.
+Для этого можно написать простенький демон, проксирующий вывод команды <em>'cbsd jrctl mode=show prometheus=1'</em> на определенном tcp порту. 
+Либо, чтобы избежать потенциальных проблем с безопасностью (вам нужно обезопасить этот демон от действий возможных злоумышленников, поскольку работа с командой 'cbsd' требует привелигированного пользователя) 
+и перенаправить вывод <em>'cbsd jrctl'</em> в промежуточный файл, который будет доступен на отдачу через любой WEB сервер, например <a href="https://www.nginx.com/" target="_blank">NGINX</a>.
+</p>
+<p>Схематично, это может выглядеть следующим образом:</p>
+<!--<p class="text-center"><img src="/img/grafana/cbsd_grafana_schema.png" width="800" height="600" alt="" /></p>-->
+<p class="text-center"><img src="/img/grafana/cbsd_grafana_schema.png" alt="" /></p>
+<p>В качестве сборщика и генератора index.html файла может выступать написанный самостоятельно демон, либо скрипт вызываемый из <a href="http://man.freebsd.org/cron/8">cron</a>, либо демонизированный <strong>sh</strong>-скрипт, который и описывается здесь.</p>
+<p>Каждая нода будет экспортировать свои метрики по http://&lt;<strong>FQDN</strong>&gt;/rctl/ , задача prometheus - собрать статистику и показать grafana-е.</p>
+<p>Prometheus и Grafana мы установим также в jail, для чего запустим диалог создания контейнера:</p>
+<p>В качестве jname, введем произвольное имя, например: grafana</p>
+<pre class="brush:bash;ruler:rule;">
+% cbsd jconstruct-tui
+</pre>
+<p class="text-center"><img src="/img/grafana/grafana_art_1.png" alt="" /></p>
+<p>Остальные параметры меняем по своему усмотрению (если это необходимо) и нажимаем 'Go PROCEED!'</p>
+<p>Зайдем в jail и установим пакеты prometheus и grafana:</p>
+<pre class="brush:bash;ruler:rule;">
+% cbsd jstart grafana
+% cbsd jlogin grafana
+% pkg install -y net-mgmt/prometheus www/grafana4
+</pre>
+<p>
+Установим сервисы в автозагрузку:
+</p>
+<pre class="brush:bash;ruler:rule;">
+% sysrc grafana_enable="YES" 
+% sysrc prometheus_enable="YES" 
+</pre>
+<p>
+Отредактируем конфигурационный файл <em>/usr/local/etc/prometheus.yml:</em>
+</p>
+<pre class="cli">
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+  external_labels:
+      monitor: 'codelab-monitor'
+
+rule_files:
+
+scrape_configs:
+  - job_name: rctl
+    metrics_path: /rctl/
+    static_configs:
+      - targets: ['rctl.olevole.ru:80']
+</pre>
+<p>где:<p>
+<ul>
+	<li><em>rctl.olevole.ru:80</em> - непосредственно FQDN нашего хостера и порт nginx, который мы сконфигурируем ниже.</li>
+	<li><em>scrape_interval: 15s</em> - интервал, с которым prometheus будет опрашивать метрики. Вы выбрали частоту в 15 секунд.</li>
+</ul>
+<p>
+Запускаем сервисы:
+</p>
+<pre class="brush:bash;ruler:rule;">
+% service grafana start
+% service prometheus start
+</pre>
+<p>и на этом с контейнером и настройкой сервисов - все.</p>
+<p>
+Если вы не имеете доступ в контейнер напрямую, выполним на хостере команды для проброса необходимых портов:
+</p>
+<pre class="brush:bash;ruler:rule;">
+% cbsd expose mode=add in=3000 jname=grafana
+% cbsd expose mode=add in=9090 jname=grafana
+</pre>
+</p>
+Далее напишем скрипт, который будет запускаться при старте сервера и через необходимый интервал времени будет регенирировать index.html файл с метриками
+на основе данных из 'cbsd jrctl'. Интервал времени логично ставить такой, с какой частотой забирает prometheus - ранее мы зафиксировали этот интервал в 15 секунд.
+</p>
+<p>Сам скрипт может выглядеть следующим образом (<a href="/ru/misc/cbsdrctl">скачать</a>):</p>
+<pre class="brush:bash;ruler:rule;">
+#!/bin/sh
+while getopts "r:i:" opt; do
+        case "$opt" in
+                r) root_dir="${OPTARG}" ;;
+                i) interval="${OPTARG}" ;;
+        esac
+        shift $(($OPTIND - 1))
+done
+
+export TMPDIR="${root_dir}"
+unset jname
+
+if [ -z "${root_dir}" ]; then
+        echo "Empty root_dir, please use $0 -r path"
+        exit 1
+fi
+
+[ -z "${interval}" ] && interval="15"
+[ ! -d "${root_dir}" ] && mkdir -p ${root_dir}
+
+while [ true ]; do
+        INDEX_OLD=$( readlink ${root_dir}/index.html )
+        INDEX_TMP=$( mktemp )
+
+        trap "/bin/rm -f ${INDEX_TMP}" HUP INT ABRT BUS TERM EXIT
+
+        chmod 0644 ${INDEX_TMP}
+
+        truncate -s0 ${INDEX_TMP}
+        /usr/bin/lockf -s -t0 /tmp/cbsd-rctl.lock /usr/local/bin/cbsd jrctl mode=show prometheus=1 > ${INDEX_TMP}
+
+        ln -sf ${INDEX_TMP} ${root_dir}/index.html
+        rm -f ${INDEX_OLD}
+        sleep ${interval}
+done
+</pre>
+<p>
+На входе скрипту через параметр <strong>-r</strong> мы задаем корневой каталог, в котором будем сохранять index.html, через аргумент <strong>-i</strong> -
+регулировать частоту обновления.</p>
+<p>Как мы видим, скрипт входит в бесконечный цикл с паузой в конце.</p>
+<p>Поместим этот файл в каталог /root/bin под именем cbsdrctl: /root/bin/cbsdrctl и установим флаг выполняемого:</p>
+<pre class="brush:bash;ruler:rule;">
+% chmod +x /root/bin/cbsdrctl
+</pre>
+<p>Осталось создать rc.d-скрипт, который будет контроллировать запуск и останов /root/bin/cbsdrctl.</p>
+<p>Напишем скрипт следующего содержания (<a href="/ru/misc/cbsdrctl-rc.d">скачать</a>):</p>
+<pre class="brush:bash;ruler:rule;">
+#!/bin/sh
+#
+# PROVIDE: cbsdrctl
+# REQUIRE: LOGIN FILESYSTEMS sshd
+# KEYWORD: shutdown
+#
+# cbsd_rctl_enable="YES"
+#
+
+. /etc/rc.subr
+
+name=cbsdrctl
+rcvar=cbsdrctl_enable
+load_rc_config $name
+
+start_cmd=${name}_start
+stop_cmd=${name}_stop
+status_cmd="${name}_status"
+restart_cmd=${name}_restart
+extra_commands="restart"
+
+# Set defaults
+: ${cbsdrctl_enable:="NO"}
+: ${cbsdrctl_interval:="15"}
+: ${cbsdrctl_root:="/tmp/metrics/rctl"}
+
+cbsdrctl_start()
+{
+        if [ -r ${pidfile} ]; then
+                echo "Already running: `cat ${pidfile}`"
+                exit 0
+        fi
+        /usr/sbin/daemon -f -p ${pidfile} /root/bin/cbsdrctl -r ${cbsdrctl_root} -i ${cbsdrctl_interval}
+        echo "STARTED: -r ${cbsdrctl_root} -i ${cbsdrctl_interval}"
+}
+
+cbsdrctl_status()
+{
+        if [ -f "${pidfile}" ]; then
+                pids=$( pgrep -F ${pidfile} 2&gt;&1 )
+                _err=$?
+                if [ ${_err} -eq  0 ]; then
+                        echo "Running"
+                else
+                        echo "Not running"
+                fi
+        else
+                echo "Not running"
+        fi
+}
+
+cbsdrctl_restart()
+{
+        cbsdrctl_stop
+        cbsdrctl_start
+}
+
+cbsdrctl_stop()
+{
+        if [ -f "${pidfile}" ]; then
+                pids=$( pgrep -F ${pidfile} 2&gt;&1 )
+                _err=$?
+                if [ ${_err} -eq  0 ]; then
+                        kill -9 ${pids} && /bin/rm -f ${pidfile}
+                else
+                        echo "pgrep: ${pids}"
+                        return ${_err}
+                fi
+        fi
+}
+
+pidfile=/var/run/$name.pid
+run_rc_command "$1"
+</pre>
+<p>Сохраним этот скрипт как <em>/usr/local/etc/rc.d/cbsdrctl</em> и выдадим ему выполняемый флаг:</p>
+<pre class="brush:bash;ruler:rule;">
+% chown root:wheel /usr/local/etc/rc.d/cbsdrctl
+% chmod 0555 /usr/local/etc/rc.d/cbsdrctl
+</pre>
+<p>
+<p>Параметры интервала и рабочего каталога вынесены в переменные:</p>
+<p>cbsdrctl_interval (значение по-умолчанию: <strong>15</strong>)</p>
+<p>cbsdrctl_root (значение по-умолчанию: <strong>/tmp/metrics/rctl</strong>)</p>
+</p>
+<p>Если эти значения вас не устраивают, вы можете переопределить через rc.conf:</p>
+<pre class="brush:bash;ruler:rule;">
+% sysrc cbsdrctl_interval="15"
+% sysrc cbsdrctl_root="/tmp/metrics/rctl"
+</pre>
+<p>Установим скрипт как запускаемый:</p>
+<pre class="brush:bash;ruler:rule;">
+% sysrc cbsdrctl_enable="YES"
+</pre>
+<p>И наконец, запустим:</p>
+<pre class="brush:bash;ruler:rule;">
+% service cbsdrctl start
+</pre>
+
+<h1><span>Настройка NGINX</span></h1>
+<p>Если в предыдущем шаге у вас все получилось, в каталоге <em>/tmp/metrics/rctl</em> начнет обновлятся символическая ссылка index.html укащывающая на файл с метрикой</p>
+<p>Нам необходимо настроить WEB сервер на отдачу этих файлов. Установим nginx на нашей ноде:</p>
+<pre class="brush:bash;ruler:rule;">
+% pkg install -y nginx
+% sysrc nginx_enable=YES
+</pre>
+<p>Допишем в конфигурационный файл nginx /usr/local/etc/nginx/nginx.conf описание нашего виртуального хоста (в примере, FQDN сервера: rctl.olevole.ru)</p>
+<pre class="cli">
+server {
+        listen       80;
+        listen      [::]:80;
+        server_name  rctl.olevole.ru;
+
+        location /rctl {
+                root /tmp/metrics;
+        }
+}
+</pre>
+<p>И запустим NGINX.</p>
+<pre class="brush:bash;ruler:rule;">
+% service nginx start
+</pre>
+<p>На данном этапе, при обращении на http://&lt;FQDN&gt;/rctl вы должны видеть содержимое файла <em>/tmp/metrics/rctl/index.html</em></p>
+<h1><span>Проверяем работу</span></h1>
+<p>Мы можем убедится, что prometheus получает метрики корректно. Для этого откроем броузером интерфейс предоставляемый процессом prometheus на 9090 порту.</p>
+<p>Напротив Execute в выпадающем списке, вы увидете все метрики, которые предоставляет CBSD. Если метрика относится к контейнеру, то метрика
+будет начинаться с префикса <strong>jail_</strong>, если это параметр виртуальной машины, то с <strong>bhyve_</strong>.
+<p class="text-center"><img src="/img/grafana/grafana_prometheus.png" width="800" height="600" alt="" /></p>
+<p>Нам осталось воспользоваться плодами работы в Grafana и создать отдельный Dashboard для наших виртуальных сред.</p>
+
+<h1><span>GRAFANA</span></h1>
+
+<p>Для работы с GRAFANA, отрокем в броузере сервер на порту 3000. Инсталляция GRAFANA по-умолчанию имеет пользователя 'admin' с паролем 'admin':</p>
+<p class="text-center"><img src="/img/grafana/grafana_prometheus2.png" width="800" height="600" alt="" /></p>
+<p>На первом экране нам предлагают сконфигурировать различые компонент - завести пользователя, добавить источники данных и добавить дополнительные плагины:</p>
+<p class="text-center"><img src="/img/grafana/grafana_prometheus3.png" width="800" height="600" alt="" /></p>
+<p>Поскольку мы получаем данные от prometheus, добавим соответствующий источник. В данном примере, поскольку prometheus работает в том же
+самом окружении что и grafana, мы можем устанавить значение url как <em>http://localhost:9090</em>. Нажимаем Save&Test и переходим к созданию первого графика.</p>
+<p class="text-center"><img src="/img/grafana/grafana_prometheus4.png" width="800" height="600" alt="" /></p>
+<p>Для добавления индивидуальной метрики, вы можете начать вводить его в поле Metric lookup. Здесь работает автодополнение и вам будет проще найти искомый параметр</p>
+<!--<p class="text-center"><img src="/img/grafana/grafana_prometheus5.png" width="800" height="600" alt="" /></p>-->
+<p class="text-center"><img src="/img/grafana/grafana_prometheus6.png" width="800" height="600" alt="" /></p>
+Изучите на man странице rctl, в каких мерах выдается статистика - в процентах, в байтах, bit/sec или попугаях и настраивайте метрику в соответствии с этой системой счисления:</p>
+<p class="text-center"><img src="/img/grafana/grafana_prometheus7.png" width="800" height="600" alt="" /></p>
+<p>
+<p>Как мы видим, экспортировать доступные параметры как по jail, так и по bhyve достаточно легко. Новые сервера будут автоматически попадать в базу метрик и настроенные
+скрипты вам трогать уже не придется. В данном примере мы получаем метрику из FreeBSD RACCT и она доступна для снятия с каждого сервера по пути /rctl. Вы можете увеличивать
+и расширять метрики, например по пути /trafstat вы можете настроить метрики по трафику контейнеров, а по /billing настроить метрики с графикой тарификаций по потребляемым ресурсам.
+Данная работа ограничена только вашей фантазией и потребностью в информации о состоянии ваших систем и возможных трендах по утилизацию ресурсов. Информация
+позволяет вам держать руку на пульсе и заранее прогнозировать потенциальные проблемы и в случае с FreeBSD и CBSD - получить эту информацию можно достаточно легко.
+<p class="text-center"><img src="/img/grafana/grafana_art_2.png" width="800" height="600" alt="" /></p>
+<!--# include file="/ru/_end.html" -->

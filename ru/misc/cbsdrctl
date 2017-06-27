@@ -1,0 +1,35 @@
+#!/bin/sh
+while getopts "r:i:" opt; do
+	case "$opt" in
+		r) root_dir="${OPTARG}" ;;
+		i) interval="${OPTARG}" ;;
+	esac
+	shift $(($OPTIND - 1))
+done
+
+export TMPDIR="${root_dir}"
+unset jname
+
+if [ -z "${root_dir}" ]; then
+	echo "Empty root_dir, please use $0 -r <path>"
+	exit 1
+fi
+
+[ -z "${interval}" ] && interval="15"
+[ ! -d "${root_dir}" ] && mkdir -p ${root_dir}
+
+while [ true ]; do
+	INDEX_OLD=$( readlink ${root_dir}/index.html )
+	INDEX_TMP=$( mktemp )
+
+	trap "/bin/rm -f ${INDEX_TMP}" HUP INT ABRT BUS TERM EXIT
+
+	chmod 0644 ${INDEX_TMP}
+
+	truncate -s0 ${INDEX_TMP}
+	/usr/bin/lockf -s -t0 /tmp/cbsd-rctl.lock /usr/local/bin/cbsd jrctl mode=show prometheus=1 > ${INDEX_TMP}
+
+	ln -sf ${INDEX_TMP} ${root_dir}/index.html
+	rm -f ${INDEX_OLD}
+	sleep ${interval}
+done

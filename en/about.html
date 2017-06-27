@@ -14,8 +14,9 @@
 			<li>support for ZFS feature system: ZFS quotes, ZFS send, ZFS snapshots and so on;</li>
 			<li>lack of binding to ZFS: CBSD works transparently on the UFS, HammerFS or any other FS: some of people use jail and bhyve on cluster filesystem such NFS, <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_glusterfs.html">GlusterFS</a> and Ceph which is typical for DC and Failover</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> for integration with external DevOPS stuff ( DDNS, DNSmasq, Consul, etc ..)</li>
+			<li>exporting metrics for jail and  bhyve resources usage <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
 			<li>bsdconfig-style dialog TUI with which you do not need to learn a large number of commands and arguments</li>
-			<li>Modular structure - each command is a separate file and it makes a CBSD project easy to maintain. Also, there are number of complex external modules ( vncterm, noVNC, WS/WSS notification, Puppet helpers)</li>
+			<li>modular structure - each command is a separate file and it makes a CBSD project easy to maintain. Also, there are number of complex external modules ( vncterm, noVNC, WS/WSS notification, Puppet helpers)</li>
 			<li>quick creation of the deployment of virtual environments from scratch by manifest file;</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">Profiles</a> for jail creation</li>
 			<li>import and export of environments into image;</li>
@@ -28,7 +29,8 @@
 			<li>Ready to use repository with environment template</li>
 			<li>Puppet support and Puppet CBSD module for <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_puppet_ssi.html">mass management</a>;</li>
 			<li>bhyve: support for ZVOL and MD-backend;</li>
-			<li>bhyve: VNC support;</li>
+			<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bvnc_ssi.html">VNC support</a></li>
+			<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html">PCI Passthrough</a></li>
 			<li>bhyve: <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">UEFI PXE boot</a> support (with unattended install);</li>
 			<li>bhyve: virtual disc management;</li>
 			<li>bhyve: VALE support: the virtual switch;</li>

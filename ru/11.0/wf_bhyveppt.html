@@ -1,0 +1,34 @@
+	<h1><span>bhyve PCI Passthrough</span></h1>
+	
+	<h2><a name="bhyveppt_cmd">Commands bhyve-ppt</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bhyve-ppt
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>CBSD позволяет сконфигурировать аргументы bhyve для пробрасывания устройств внутрь гостя, если ваше оборудование это поддерживает</p>
+		<p>Внимание! Ознакомьтесь с информацией на странице <a href="https://wiki.freebsd.org/bhyve/pci_passthru" target="_blank">FreeBSD Wiki: bhyve pci_passthru</a></p>
+		<p>Для того, чтобы пометить устройство как пробрасываемое, вы должны поместить в /boot/loader.conf параметр, как написано в странице wiki, например:</p>
+		<pre class="brush:bash;ruler:true;">
+		pptdevs="2/0/0"
+		</pre>
+		<p>Если необходимо указать несколько устройств:</p>
+		<pre class="brush:bash;ruler:true;">
+		pptdevs="2/0/0 1/2/6 4/9/0"
+		</pre>
+		<p>Обратите внимание, что при использовании pptdevs, <strong>vmm</strong> модуль должен быть проинициализирован на этапе <em>/boot/loader.conf</em>, чтобы подхватить эти записи.</p>
+		<p>Если вы загружаете <strong>vmm</strong> уже после загрузки ядра, например через kldload, то pptdevs не сработает.</p>
+		<p>Далее, после загрузки системы убедитесь, что CBSD видит маркированные устройства. По команде 'cbsd bhyve-ppt mode=list' вы должны увидете ваши устройства:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-ppt mode=list
+5/1/0 :  DGE-528T Gigabit Ethernet Adapter :  D-Link System Inc : -
+0/31/3 :  7 Series/C216 Chipset Family SMBus Controller :  Intel Corporation : -
+		</pre>
+		<p>Теперь, используя ppt устройство ( <strong>5/1/0</strong> или <strong>0/31/3</strong> в этом примере) вы можете подключить или отключить это устройство к определенной виртуальной машине:</p>
+		<pre class="brush:bash;ruler:true;">
+		cbsd bhyve-ppt mode=attach jname=vmname
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+		cbsd bhyve-ppt mode=detach jname=vmname
+		</pre>
+	</div>

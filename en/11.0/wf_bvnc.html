@@ -16,6 +16,12 @@
 		<p>If <strong>vm_vnc_port</strong> set to <strong>1</strong> - CBSD it will not open a port for VNC</p>
 		<p>If <strong>vm_vnc_port</strong> any other numerical value, for example <strong>5905</strong> - CBSD will always use current VNC port for a virtual machine</p>
 		<br>
+		<p>Beginning with CBSD version 11.1.0, a VNC connection requires a password that is specified in the vnc.conf configuration file (~cbsd/etc/defaults/vnc.conf):</p>
+		<p>In order to change (or remove) the password, duplicate your own value of <strong>default_vnc_password</strong> via <em>~cbsd/etc/vnc.conf</em> file:</p>
+		<pre class="brush:bash;ruler:true;">
+			% echo default_vnc_password='test' > ~cbsd/etc/vnc.conf
+		</pre>
+		<p>If default_vnc_password takes an empty value, the password for the VNC was not set.</p>
 		<p>Note that by default, the VNC port opens on loopback address: 127.0.0.1</p>
 		<p>This is done for security reasons, or any user can connect to the VNC conclusion of your virtual machine</p>
 		<p>To connect to the VNC on a remote server, please use SSH tunnels, or any proxies that are protected by a password or a certificate</p>

@@ -4,7 +4,14 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li></li>
+		<li>bhyve: bls now show bhyve pid in jid column</li>
+		<li>jail: add allow_reserved_ports options (<a href="https://svnweb.freebsd.org/base?view=revision&revision=r319611" target="_blank">r319611</a>)</li>
+		<li>trafshow and jrctl support for prometheus format output <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
+		<li>bhyve: detach ppt devices when vm removed, pointed by will666 via <a href="https://github.com/cbsd/cbsd/issues/172" target="_blank">Issue #172</a></li>
+		<li>bhyve: multiple ppt devices support in <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html">bhyve-ppt</a></li>
+		<li>bhyve: Add bhyve vnc password support on FreeBSD 11.1+ (default password now: 'cbsd')</li>
+		<li>Add skip_bhyve_init_warning options for bhyve which control bhyve_init behavior</li>
+		<li>add get_profile_list</li>
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 </div>

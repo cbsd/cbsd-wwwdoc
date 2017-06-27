@@ -63,7 +63,8 @@ writebps=0
 readiops=0
 writeiops=0
 </pre>
-<p>Если аргумент <em>jname=</em> опустить, вы увидете информацию по всем имеющимся окружениям. Если данная команда вызвана с ключем <em>prometheus=1</em>, вывод будет осуществляться в том формате, который ожидают <a href="https://prometheus.io/docs/introduction/getting_started/#starting-up-some-sample-targets" target="_blank">prometheus targets</a>.<p>
+<p>Если аргумент <em>jname=</em> опустить, вы увидете информацию по всем имеющимся окружениям. Если данная команда вызвана с ключем <em>prometheus=1</em>, вывод будет осуществляться в том формате, 
+который ожидают <a href="https://prometheus.io/docs/introduction/getting_started/#starting-up-some-sample-targets" target="_blank">prometheus targets</a>.</p>
 <p>Экспортировать метрики в prometheus можно по-разному. Один из способов - отправлять метрику напрямую в prometheus используя любой комфортный для вас язык программирования, где имеется библиотека <a href="https://prometheus.io/docs/instrumenting/clientlibs/" target="_blank">клиента  prometheus</a>.
 <p>Мы реализуем второй вариант, когда сервер prometheus будет сам обходить точки и собирать необходимую статистику.
 Для этого можно написать простенький демон, проксирующий вывод команды <em>'cbsd jrctl mode=show prometheus=1'</em> на определенном tcp порту. 
@@ -318,7 +319,7 @@ server {
 
 <h1><span>GRAFANA</span></h1>
 
-<p>Для работы с GRAFANA, отрокем в броузере сервер на порту 3000. Инсталляция GRAFANA по-умолчанию имеет пользователя 'admin' с паролем 'admin':</p>
+<p>Для работы с GRAFANA, отроем в броузере сервер на порту 3000. Инсталляция GRAFANA по-умолчанию имеет пользователя 'admin' с паролем 'admin':</p>
 <p class="text-center"><img src="/img/grafana/grafana_prometheus2.png" width="800" height="600" alt="" /></p>
 <p>На первом экране нам предлагают сконфигурировать различые компонент - завести пользователя, добавить источники данных и добавить дополнительные плагины:</p>
 <p class="text-center"><img src="/img/grafana/grafana_prometheus3.png" width="800" height="600" alt="" /></p>

@@ -1,0 +1,34 @@
+<!--# include file="/ru/_start.html" -->
+<h1><span>Создание отказоустойчивой к обновлениям прошивки на базе FreeBSD</h1>
+<div class="block">
+<p>Здесь должно быть введение, но его пока нет</p>
+<p>Здесь должно быть описание и подготовка к работе, но его пока нет</p>
+<p>Для UFS:</p>
+<p>Можем воспользоваться пунктом Auto (UFS).</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-01.png" alt="" /></p>
+<p>При этом, система сделает разбивку партишенов, мы используем GPT:</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-02.png" alt="" /></p>
+<p>На этапе подтверждения автоматической разбивки мы можем исправить то, что нам требуется:</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-03.png" alt="" /></p>
+<p>Удаляем партишен для Swap и единственный созданный корневой раздел на 19 Гб.:</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-04.png" alt="" /></p>
+<p>И создаем раздел в два раза меньше, поскольку у нас будут одинаковые партишены.
+Указывая размер, не забывайте о SWAP разделе, который будет общим для обоих разделов. 
+Поэтому, вместо 19 GB, у нас будут два по 9 GB:
+Создавая первый кусок, не забываем указать Moutpoint: в корень (/), создавай второй - укажите
+произвольную точку монтирования, например /rt02
+</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-05.png" alt="" /></p>
+<p>Оставшеемя место потратим на восстановление SWAP раздела. Инсталлятор всегда предлагает
+оставшееся свободное место, поэтому Size можно просто принять без редактирования:</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-07.png" alt="" /></p>
+<p>Финальная картина для UFS-based установки будет выглядеть следующим образом:</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/ufs-09.png" alt="" /></p>
+<hr>
+<p>ДЛЯ ZFS. WIP</p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/zfs-01.png" alt="" /></p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/zfs-02.png" alt="" /></p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/zfs-03.png" alt="" /></p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/zfs-04.png" alt="" /></p>
+<p class="text-center"><img src="/img/freebsd_firmware_ha/zfs-05.png" alt="" /></p>
+<!--# include file="/ru/_end.html" -->

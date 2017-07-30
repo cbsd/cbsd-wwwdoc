@@ -1,0 +1,19 @@
+	<h1><span>Переименовывание виртуальной машины</span></h1>
+	
+	<h2><a name="jrename_cmd">Команда brename</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd brename
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Выполняет переименовывание виртуальной машины и соответствующих каталогов данных в новое имя. Может выполнятся только на неактивной виртуальной машине. В качестве обязательных параметров:</p>
+		<ul>
+			<li><strong>old</strong>&nbsp;— старое имя VM</li>
+			<li><strong>new</strong>&nbsp;— новое имя VM</li>
+		</ul>
+		<p><strong>Пример</strong> (переименовывание виртуальной машины debian1 в debian50:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd brename old=debian1 new=debian50
+		</pre>
+	</div>
+

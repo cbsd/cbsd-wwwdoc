@@ -1,0 +1,21 @@
+	<h1><span>Jail login</span></h1>
+	
+	<h2><a name="jlogin_cmd">jlogin command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jlogin
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Performs a login to the jail as root user. If the jail isn't present on the local node, but rather on one of the remote nodes, <strong>jlogin</strong> will attempt to login over ssh.</p>
+		<p>If no jail is specified, a list of all known online jails in the farm is displayed (provided remote hosts were added).</p>
+		<p>If you remotely connect to a jail and node which have <strong>tmux</strong> installed, tmux will be launched at login and the session is given the name taken from  the server's <em>nodename</em> (taken from jlogin).</p>
+		<p>Additional sessions will automatically join the tmux session through a <strong>tmux-attach</strong>. When the last connection is closed the tmux session ends (you may detach via <strong>Ctrl + b , d</strong> to keep it running).</p>
+		<p>Should you prefer <strong>NOT</strong> to use <strong>tmux</strong> on jlogin, copy <em>${workdir}/defaults/jlogin.conf</em> to <em>${workdir}/etc/jlogin.conf</em> and set tmux_login to <strong>0</strong>.
+		<p>In order to deactivate "try to login?" when logging in to remote nodes, set always_rlogin to <strong>1</strong> in your <em>${workdir}/etc/jlogin.conf</em>.
+		<p><strong>Example</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jlogin kde4
+		</pre>
+		<p class="text-center"><img src="/img/jlogin1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jlogin2.png" alt="" /></p>
+	</div>

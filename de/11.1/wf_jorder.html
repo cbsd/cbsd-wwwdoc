@@ -1,0 +1,35 @@
+	<h1><span>Priority launch environments</span></h1>
+	
+	<h2><a name="jrorder_cmd">Commands: jorder, jorder-tui, border, border-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+% cbsd jls display=jname,b_order
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Sometimes a <strong>jail/vm</strong> will require an already running service from another machine/jail before it is launched. Examples might be a database <strong>SQL</strong> or a running <strong>LDAP</strong>.</p>
+		<p>In this case, you can edit <strong>Boot Order</strong> (<em>b_order</em> in jail/vm settins)</p>
+		<p>By default, all environments are created with <em>b_order</em> set to <strong>10</strong> (which is defined in the profile and can be changed)</p>
+		<p>If you need <strong>jail2</strong> to be launched before <strong>jail1</strong>, its value for <em>b_order</em> must be set to a lower one than that of the second jail.</p>
+		<p>You can display the current configuration with the command <strong>jls</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd jls display=jname,b_order
+JNAME    B_ORDER
+firefly  3
+jail1    10
+kde4     1
+kdeold   9
+spicy2   2
+test     2
+	</pre>
+	<p>This sample configuration will launch <strong>kde4</strong> first while <strong>jail1</strong> will come up last</p>
+	<p>You can also display the sequence using the command <strong>jorder</strong></p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd jorder
+	</pre>
+	<p>In what sequence jail printer - in this sequence they will run</p>
+	<p>To edit a launch sequence use <strong>jset</strong> or the TUI-editor <strong>jorder-tui</strong></p>
+	<p>To edit bhyve priority, use the commands <strong>border</strong> or <strong>border-tui</strong></p>
+	<p class="text-center"><img src="/img/jorder1.png" alt="" /></p>
+	<p>
+	<p class="text-center"><img src="/img/jorder2.png" alt="" /></p>
+	</div>

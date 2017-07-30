@@ -1,0 +1,112 @@
+	<h1><span>Jail config</span></h1>
+	
+	<h2><a name="jconfig_cmd">jconfig, jset commands</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig
+			% cbsd jset
+		</pre>
+		<p><strong>Descriptions</strong>:</p>
+		<p>Cconfiguration parameters jail</p>
+		<p>Each <strong>CBSD</strong> jail stores the settings in SQLite3 database. In addition, <em>$workdir/jails-fstab/</em> may have fstab files (see below).  To change the settings of jail can serve <strong>cbsd jconfig</strong> command, which is runs the TUI menu to change basic settings:</p>
+	</div>
+	
+	<h2><a name="ip">Jails IP address</a></h2>
+	<div class="block">
+		<p>IP addresses that are bound to the jail sets in <strong>ip4_addr</strong> parameter. As an IP may serve as IPv4, and the IPv6 address. When starting and stopping jail, working with IP may take place in two modes:</p>
+		<ul>
+			<li>automatic on-the-fly creation of IP addresses for the jail at the time of launch + automatic removal from the interface IP when stopping</li>
+			<li>the use of previously initialized IP addresses.</li>
+		</ul>
+		<p>When for jails assigned to more than one address, they should be listed separated by commas without spaces. IP can include network prefix specified through IP/<strong>prefix</strong>. By default, aliases created with the prefix /32, that may not be appropriate if the jail uses a separate subnet from the network server — in this case, the correct <strong>/prefix </strong> is needed.</p>
+		<p>The parameter that controls this behavior pointed by <strong>interface</strong> parameter. When <strong>interface=0</strong>, jstart and jstop will not be called ifconfig alias and ifconfig -alias, respectively. If its value is <strong>auto</strong> or name of network nics, this command will be executed:</p>
+			<pre class="brush:bash;ruler:true;">
+				% ifconfig interface ips alias
+			</pre>
+		<p>and when jail stop:</p>
+		<pre class="brush:bash;ruler:true;">
+				% ifconfig interface ips -alias
+		</pre>
+		<p>Be careful with this option, if you have only one IP for server that is used and this IP is assigned to the same jail, when stopping jail, ip address of the server will be removed automatically that will make the server unavailable. In this case, you need to use:</p>
+		<pre class="brush:bash;ruler:true;">
+			interface=0
+		</pre>
+		<p>For example, to run the configuration tool for the <strong>jail1</strong>, run:
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=jail1
+		</pre>
+	</div>
+	
+	<h2><a name="fstab">Mounting File Systems in jail</a></h2>
+	<div class="block">
+		<p>Each jail can have your fstab file, which lists the file systems that are mounted jail is startup. System records (they are managed by <strong>CBSD</strong> and edit this file inappropriately) are located in the file <em>$workdir/jails-fstab/fstab.name</em> and the same syntax to format the file system <strong>/etc/fstab</strong> with the exception that as a mount point is the path relative to the root jail, not the master system.</p>
+		<p>For user entries, you can use the file in the same directory with the extension <em>.local</em>. For example, if you want to make between <strong>jail1</strong> and <strong>jail2</strong> a shared directory (via nullfs), which physically located in the master node (e.g.: <em>/usr/home/sharefs</em>), the files <em>$workdir/jails-fstab/fstab.jail1.local</em> and <em>$workdir/jails-fstab/fstab.jail2.local</em> should have:</p>
+		<pre class="brush:bash;ruler:true;">
+			/usr/home/sharefs /usr/home/sharefs nullfs rw 0 0
+		</pre>
+		<p>If you want to mount tmpfs to /tmp dir in jail1 (those actually in /usr/jails/jails/jail1/tmp), then the entry in the <em>$workdir/jails-fstab/fstab.jail1.local</em> should have:</p>
+		<pre class="brush:bash;ruler:true;">
+			tmpfs /tmp tmpfs rw 0 0
+		</pre>
+		<p>If you want to mount into <strong>jail2</strong> a directory from <strong>jail1</strong>, jail1 path should point to the directory containing the data jail1 (and their mount points ${workdir}/jails/jail1). For example entry <em>$workdir/jails-fstab/fstab.jail2.local</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+			/usr/jails/jails-data/jail1-data/usr/local/www /usr/local/www nullfs ro 0 0
+		</pre>
+		<p>Make the shared directory /usr/local/www between jail1 and jail2, but it will jail2 in read-only mode</p>
+	</div>
+	
+	<h2><a name="allow_zfs">Presentation of ZFS file systems in jail</a></h2>
+	<div class="block">
+		<p>If you want to attach separate ZFS filesystems in jail (ie, want to be able to perform in jail zfs mount), ZFS dataset must list in <em>$workdir/jails-fstab/fstab.$jname.local</em> file with specifying the keyword zfs in FStype field. For example, if you want to present the file system ZFS: <strong>zroot/jail1_webfs</strong> for jail jail1 <em>$workdir/jails-fstab/fstab.jail1.local</em> must have:</p>
+		<pre class="brush:bash;ruler:true;">
+			zroot/jail1_webfs /usr/home/web zfs rw 0 0
+		</pre>
+		<p><em>Note:</em> mount point (/usr/home/web in this example) is not important</p>
+		<p><em>Note:</em> jail must have <em>allow_zfs</em> paramaters set to 1, what can be done via <strong>cbsd jconfig jname=$jname</strong></p>
+		<p>In fact, it makes <strong>CBSD</strong> execute commands:</p>
+		<pre class="brush:bash;ruler:true;">
+			% zfs set jailed=on $FS
+			% zfs jail $jname $FS
+		</pre>
+		<p>when jail started and</p>
+		<pre class="brush:bash;ruler:true;">
+			% zfs set jailed=off $FS
+			% zfs unjail $jname $FS
+		</pre>
+		<p>when stoped.</p>
+	</div>
+	
+	<h2><a name="jset">Change settings via the jset</a></h2>
+	<div class="block">
+		<p>Another possibility is to change certain parameters of the jail — use the command <strong>cbsd jset</strong>. Full list of possible arguments can be accessed through <em>--help</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jget --help
+		</pre>
+		<p>For example, to change ip of jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jset jname=jail1 ip4_addr="10.0.0.20/24,192.168.0.20/24" 
+		</pre>
+		<p><em>cbsd jconfig jname=jail2</em></p>
+		<p class="text-center"><img src="/img/jconfig1.png" alt="" /></p>
+		<p><em>cbsd jset</em></p>
+		<p class="text-center"><img src="/img/jconfig2.png" alt="" /></p>
+	</div>
+	<h2><a name="execscript">Custom scripts for starting and stopping action on jail</a></h2>
+	<div class="block">
+		<p>You can write your own scripts to be executed within the jail and in the master host on startup and shutdown of the environment. For this, the system directory of jail ( <em><strong>$workdir</strong>/jails-system/<strong>$jname</strong>/</em> ) have the following directories:</p>
+		<ul>
+			<li><strong>master_poststart.d</strong> - scripts for executing in the master host after jail starts (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>master_poststop.d</strong> - scripts for executiong in the master host after jail stops (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>master_prestart.d</strong> - scripts for executing in master host before jail starts (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>master_prestop.d</strong> - scripts for execution in master host after jail stops (<em>Be careful, because the scripts are is not jailed</em>)</li>
+			<li><strong>start.d</strong> - scripts for execution within jail when jail is starts. Analog of parameter <strong>exec.start</strong> from original <em>jail.conf</em></li>
+			<li><strong>stop.d</strong> - scripts for execution within jail when jail is starts. Analog of parameter <strong>exec.stop</strong> from original <em>jail.conf</em></li>
+		</ul>
+		<p>Write scripts to the <em>master_\*</em> directories can be useful if at the start-stop jail you need to perform some action is not associated with content of environment - for example, create a ZFS snapshot, put rules in IPFW and etc.</p>
+		<p>In scripts, you can use CBSD variables, such as <strong>$jname, $path, $data, $ip4_addr</strong>, for example, by placing a script (with execute permission) in <em>/usr/jails/jails-system/jail1/master_poststart.d/notify.sh</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+		#!/bin/sh
+		echo "Jail $jname started with $ip4_addr IP and placed on $path path" | mail -s "$jname started" root@example.net
+		</pre>
+		<p>You will receive notification upon startup cells by email: root@example.net</p>
+	</div>

@@ -2,3 +2,17 @@
 *.swp
 *.swo
 .DS_Store
+.well-known
+google0f6868c6aab885e6.html
+yandex_4ac9a54adabb1252.html
+b187c77fc7e8.html
+basels
+bhyvels
+imgls
+kernells
+objls
+srcls
+cbsd.index
+rss.xml
+releases/*
+downloads/*

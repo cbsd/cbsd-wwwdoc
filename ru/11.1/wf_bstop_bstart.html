@@ -1,0 +1,27 @@
+	<h1><span>Запуск и останов виртуальной машины</span></h1>
+	
+	<h2><a name="bstart_cmd">Команда bstart, bstop</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart jname=vm1
+			% cbsd bstart vm1 vm2 ... vmX
+
+			% cbsd bstop jname=vm1
+			% cbsd bstop vm1 vm2 ... vmX
+		</pre>
+		<strong>Описание</strong>:
+		<p>Запуск виртуальных машин происходит при запуске cbsd/сервера автоматически, если параметр <strong>astart</strong> (auto-start) соответствующей VM установлен в 1. Изменить этот параметр можно через <strong>cbsd bconfig</strong> или <strong>cbsd bset</strong>. При остановке сервера или сервиса <strong>cbsdd</strong>, автоматически останавливаются все запущенные виртуальные машины. Запуск VM вручную производится командой:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart jname=vm1
+		</pre>
+		<p>либо</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart vm1
+		</pre>
+		<p>либо</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart vm1 vm2 vm3 ..
+		</pre>
+		<p>(для запуска нескольких виртуальных машин одной командой)</p>
+		<p>Если команда bstart/bstop запускается без аргументов, будет выведен список всех неактивных/активных машин для интерактивного выбора</p>
+	</div>

@@ -1,0 +1,153 @@
+<!--# include file="_start.html" -->
+	<h1><span>About the project</span></h1>
+	<div class="block">
+		<p><strong>CBSD</strong> is&nbsp;a&nbsp;management layer written for the <a href="http://www.freebsd.org" target="_blank">FreeBSD</a> <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a> subsystem,
+		<a href="http://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank">bhyve</a> and <a href="http://www.xenproject.org/">Xen</a>.
+		The project is positioned as a single integrated tool of comprehensive solution for building and deploying virtual environments quickly with pre-defined software sets with minimal configuration.</p>
+		<p>No&nbsp;extra&nbsp;OS functionality has been exposed yet, and everything that <strong>CBSD</strong> can&nbsp;do, you could also run manually with tens or&nbsp;hundreds of&nbsp;commands in&nbsp;the CLI using the underlying utilities (Not that you would want&nbsp;to!)</p>
+	</div>
+
+	<h2><a name="features">Features&hellip;</a></h2>
+	<div class="block">
+		<ul>
+			<li><a href="https://clonos.tekroutine.com" target="_blank">WEB-interfaces for manage virtual environment</a> (see <strong>Installation on FreeBSD</strong> articles)</li>
+			<li>support for ZFS feature system: ZFS quotes, ZFS send, ZFS snapshots and so on;</li>
+			<li>lack of binding to ZFS: CBSD works transparently on the UFS, HammerFS or any other FS: some of people use jail and bhyve on cluster filesystem such NFS, <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_glusterfs.html">GlusterFS</a> and Ceph which is typical for DC and Failover</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> for integration with external DevOPS stuff ( DDNS, DNSmasq, Consul, etc ..)</li>
+			<li>exporting metrics for jail and  bhyve resources usage <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
+			<li>bsdconfig-style dialog TUI with which you do not need to learn a large number of commands and arguments</li>
+			<li>modular structure - each command is a separate file and it makes a CBSD project easy to maintain. Also, there are number of complex external modules ( vncterm, noVNC, WS/WSS notification, Puppet helpers)</li>
+			<li>quick creation of the deployment of virtual environments from scratch by manifest file;</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">Profiles</a> for jail creation</li>
+			<li>import and export of environments into image;</li>
+			<li>cloning virtual environments (including remote node cloning);</li>
+			<li>cold migration of invironment between nodes;</li>
+			<li>resource limit control  (prioritization, quotes);</li>
+			<li>replication and/or backup to remote nodes;</li>
+			<li>distribution of popular environments with a specific set of software and services</li>
+			<li>Startup order control;</li>
+			<li>Ready to use repository with environment template</li>
+			<li>Puppet support and Puppet CBSD module for <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_puppet_ssi.html">mass management</a>;</li>
+			<li>bhyve: support for ZVOL and MD-backend;</li>
+			<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bvnc_ssi.html">VNC support</a></li>
+			<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html">PCI Passthrough</a></li>
+			<li>bhyve: <a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">UEFI PXE boot</a> support (with unattended install);</li>
+			<li>bhyve: virtual disc management;</li>
+			<li>bhyve: VALE support: the virtual switch;</li>
+			<li>jail: Full or partia jail data encryption (via GELI);</li>
+			<li>jail: <a href="/ru/xorg_in_jail.html">XJails</a> (Xorg in jail);</li>
+			<li>jail: support for no native architectures via qemu user mode (for example jail on arm and mips64 on x86-64 nodes);</li>
+			<li>jail: A ready repository for kernels and world that does not require <strong>buildworld/installworld;</strong></li>
+			<li>Catalog can stored on memory disks, in ram or on tmpfs with a RO mounted base;</li>
+			<li>jail: NAT support (pf, ipfw, ipfilter);</li>
+			<li>jail: VIMAGE support;</li>
+			<li>jail: CARP support;</li>
+			<li>jail: RACCT/RCTL support;</li>
+			<li>jail: Per-jail Traffic Accounting;</li>
+			<li>jail: port expose - network port forwarding into jail;</li>
+			<li>jail: Jail Conversion to PXE/ISO/Memstick-image;</li>
+			<li>jail: VNC jail support;</li>
+			<li>&hellip;</li>
+		</ul>
+	</div>
+
+	<h2><a name="goals">Goals</a></h2>
+	<div class="block">
+		<ul>
+			<li>Provide FreeBSD users easy management for virtual environments</li>
+			<li>Show features of FreeBSD as a Cloud-hosting platform;</li>
+			<li>Environment deployment automation;</li>
+			<li>Creation of&nbsp; ( your own/personal ) application platform with services on&nbsp;demand (PaaS);</li>
+			<li>Environment (Image) library for rapid provisioning;</li>
+			<li>&hellip;</li>
+		</ul>
+	</div>
+
+	<h2><a name="why">Why&hellip;</a></h2>
+	<div class="block">
+		<p><strong>Q:</strong> &laquo;Why FreeBSD?:</p>
+		<ul>
+			<li>
+				<p>According to the authors of the project, Linux is no longer a member of the common people,
+				it is fully controlled by big commercial organization. while FreeBSD is developed mostly by  enthusiasts. 
+				Today, Linux - it is a commercial machine for making money - is that it was Microsoft Windows in 90 years.
+				While many Linux users have struggled against the Windows monopoly (CBSD author of one of them).
+				Yes, FreeBSD very far behind in their characteristics in comparing to Linux.
+				Just look at the abundance of such powerfull decisions as the <strong>OpenVZ, Docker, Rancher, Kubernetis, LXD, Ceph, GlusterFS, OpenNebula, OpenStack, Proxmox, ISPPanel</strong> and a dozen others. 
+				All this is created by commercial companies for Linux and this is done very well. However, Linux is oversaturated with similar solutions. 
+				Therefore, it's much more interesting to create it on FreeBSD, where nothing like that exists. This is an excellent <strong>challenge</strong> to improve and fix in FreeBSD.
+				We all love independence and freedom and FreeBSD today - an independent and free 
+				operating system, which is in the hands of ordinary people.</p>
+			</li>
+		</ul>
+		<p><strong>Q:</strong> &laquo;Why CBSD written on <strong>sh</strong>:</p>
+		<ul>
+			<li>
+				<p>Most of&nbsp;the code has been written in&nbsp;<strong>sh</strong>, since there are no&nbsp;demands for complex logic  (<a href="/de/cbsdsh.html">details</a>) 
+				- CBSD core should be considered as shell-command backend, which is achieved is necessary and in case of problems, any system engineer can always locate and correct the problem in the code. </p>
+				<p>The problems of the complexity of maintaining "large <strong>sh</strong> code" were originally solved by the modular structure of the project, where each script does only its task.
+				The rest, more complex CBSD components (eg, a Frontend, which implements RestAPI for interfaces) written in a language go, nodejs, php, and is not part of CBSD Core.</p>
+			</li>
+
+		<p><strong>Q:</strong> <strong>CBSD</strong> production ready?</p>
+		<ul>
+			<li>
+				<p>It depends only on you and your requirements. CBSD exists since 2013 and at the moment is one of the oldest systems for managing virtual environments on FreeBSD, 
+				while it is in the current state and continues to improve. A number of users successfully use CBSD in large production installations.</p>
+				<p>We are also interested in learning more about the using of CBSD and ClonOS, so we created a <a href="/en/press.html">separate page</a> where we collect articles and reviews from different users</p>
+			</li>
+		</ul>
+
+		<p><strong>Q:</strong> ezjail, qjail, zjail, warden, iocage, bsdploy, jailctl, and other: What the hell is so many projects, what is the difference between all of them?</p>
+		<ul>
+			<li>
+				<p>Short answer: each project has a very special developmental vector and goals in comparison with other tools; You have a choice between several different implementation options.
+				The main difference between CBSD and others is that CBSD is positioned as a complete solution with as simple (where is possible) management interface.
+				CBSD for this reason is much larger and bigger and not all of this is suitable. But we have different goals in comparison with others and focused on complex cluster solutions.
+				</p>
+			</li>
+		</ul>
+
+		<p><strong>Q:</strong> jail, bhyve, xen... What about <strong>Docker</strong>, any plan to support Docker in CBSD?</p>
+		<ul>
+			<li>
+				<p>No. We focus on large production-ready <strong><u>and</u></strong> <strong>FreeBSD-based</strong> installations.
+				Docker is great, but it does not have official FreeBSD support, so it makes no sense to use inappropriate tools in the serious work.</p>
+				<p>You can use the Docker as it is in MacOS or FreeNAS - through an intermediate layer with [x/b]hyve hypervisor. But it suits more for fun and games than for serious
+				application in the production infrastructure. But if you really want, all this <a href="/<!--#echo var="lang" -->/articles/docker_on_freebsd.html">easy to make by yourself</a> without CBSD.</p>
+			</li>
+		</ul>
+	</div>
+
+
+	<h2><a name="contactus"><span>CBSD-related support, talks and usergroup channel</span></a></h2>
+	<div class="block">
+		<p>We are started <a href="https://web.telegram.org/" target="_blank">Telegram</a> channel for discussion about using and CBSD development.</p>
+		<p>Please join us in <a href="https://web.telegram.org/#/im?p=%40cbsdofficial" target="_blank">@cbsdofficial</a>
+	</div>
+
+	<h2><a name="thanks"><span>Support of the CBSD project!</span></a></h2>
+	<div class="block">
+	<p>
+	<p>Work on the <strong>CBSD Project</strong> largely depends on the following factors:</p>
+	<ul>
+		<li>The availability of free time outside the daily job (the project is not a commercial): working on CBSD, we sacrifice their time to rest and to communicate with family and friends;</li>
+		<li>On the demand for the project;</li>
+		<li>From the proposals relating to the using part of CBSD or the development and adaptation CBSD components for real / commercial projects;</li>
+	</ul>
+	<p>If you want to help or make donations to the project, use the button below:</p>
+	<p>PayPal: <a href="https://www.paypal.me/cbsd" target="_blank">Donate CBSD"</a></p>
+	<p>Via Yandex.Money, RUR:</p>
+	<iframe style="text-align:center" frameborder="0" allowtransparency="true" scrolling="no" src="https://money.yandex.ru/embed/donate.xml?account=410011345077413&quickpay=donate&payment-type-choice=on&default-sum=100&&targets=CBSD&&project-name=CBSD&project-site=https%3A%2F%2Fbsdstore.ru&button-text=05" width="508" height="105"></iframe>
+	<p>Additionally, you can disseminate information about the project or to write an article about how to use. Besides, you can like the project on <a href="https://github.com/cbsd/cbsd">Github CBSD</a>, by pressing <strong>Star</strong>.  Trifle small, but nice  ;-)</p>
+
+<p>
+    <i class="icon-rss"></i>
+    <a href="section-rss.jsp?section=1">
+      RSS-подписка на новости
+    </a>
+  </p>
+
+	</div>
+
+<!--# include file="_end.html" -->

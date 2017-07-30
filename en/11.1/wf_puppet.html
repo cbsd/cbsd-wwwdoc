@@ -1,0 +1,64 @@
+	<h1><span>Work with CBSD through Puppet</span></h1>
+	
+	<p>When you operate a large number of nodes and containers, handmade container management becomes ineffective</p>
+	<p>There are many of today's popular configuration management systems: <strong>Ansible</strong>, <strong>Chef</strong>, <strong>Saltstack</strong>, <strong>Puppet</strong> etc., written in different languages and with different concepts and principles of.</p>
+	<p>At this point, we support <stromg>CBSD</strong> module for <strong>Puppet</strong> and here is a brief information on its use.</p>
+
+	<p>Project page at <strong>Puppet Forge</strong>: <a href="https://forge.puppet.com/olevole/cbsd" target="_blank">CBSD puppet</a>
+
+	<h2><span>Description - for which this module</span></h2>
+
+	<p>Puppet CBSD</p> module allows to write server configuration using declarative programming (Ruby DSL, domain-specific language).</p>
+	<p>In other words, you create a manifesto describing what the container and with what parameters and characteristics should be on a particular server.</p>
+	<p>Further work on the implementation of these requirements <strong>Puppet</strong> takes over.</p>
+
+	<h2><span>Examples of the use of the module</span></h2>
+
+	<p>For installing <strong>CBSD</strong> on the server, just declare the class <i>cbsd</i>:</p>
+
+	<pre class="brush:bash;ruler:true;">
+		class { 'cbsd': }
+	</pre>
+
+	<p>If you are installing <strong>CBSD</strong> manually (eg not via pkg/ports, and have Git version, you can disable installation/registration CBSD package by module:</p>
+
+	<pre class="brush:bash;ruler:true;">
+	class { 'cbsd':
+		manage_repo => false,
+	}
+	</pre>
+
+	<p>In the class of all parameters can be defined initenv. For example, to initialize <strong>CBSD</strong> with <i>/usr/jails</i> workdir and enable <strong>NAT</strong> framework:</p>
+	<pre class="brush:bash;ruler:true;">
+	class { 'cbsd':
+		jnameserver => "8.8.8.8",
+		nat_enable => '1',
+		defaults => {
+			'workdir'         => '/usr/jails',
+		}
+	}
+	</pre>
+
+	<p>You can force <strong>CBSD</strong> download specific base version:</p>
+
+	<pre class="brush:bash;ruler:true;">
+	class { "cbsd::freebsd_bases":
+		ver => [ '12' ],
+		stable => 1,
+	}
+	</pre>
+
+	<p>Create jail:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd::jail { 'myjail0':
+		pkg_bootstrap => '0',
+		host_hostname => 'myjail0.my.domain',
+	}
+	</pre>
+
+	<p>If you prefer to work with parameters through <strong>Yaml</strong>, в <strong>Hierra</strong> it might look like:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd::jails:
+	  myjail0:
+	    host_hostname: 'myjail0.my.domain'
+	</pre>

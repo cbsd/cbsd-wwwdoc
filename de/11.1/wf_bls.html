@@ -1,0 +1,33 @@
+	<h1><span>List of Virtual Machines</span></h1>
+	
+	<h2><a name="bls_cmd">comannd bls</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls
+		</pre>
+		<strong>Description</strong>:
+		<p>Displays the list of virtual machines on the local node or all of the added nodes. through argument <strong>display</strong> you can specify the fields to fetch the data. If <strong>display</strong> not specified, the value specified in the file <em>$workdir/etc/defaults/jls.conf</em>, which you can change at its discretion through <em>$workdir/etc/bls.conf</em></p>
+				<p>All possible parameters for samples described in the file <em>$workdir/share/local-bhyve.schema</em></p>
+		<ul>
+			<li><strong>JNAME</strong>&nbsp;— Name of virtual machine</li>
+			<li><strong>VM_RAM</strong>&nbsp;— memory space, in MB</li>
+			<li><strong>VM_CPUS</strong>&nbsp;— The number of virtual CPU cores</li>
+			<li><strong>VM_OS_TYPE</strong>&nbsp;— Guest OS type</li>
+			<li><strong>PATH</strong>&nbsp;— directory in which there are images of hard disks of the virtual machine</li>
+			<li><strong>STATUS</strong>&nbsp;— state of virtual machine</li>
+		</ul>
+		<p>If added to the local server RSA/DSA keys remote node, you can display all the virtual machines in the farm through</p> 
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls alljails=1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls alljails=1 shownode=1
+		</pre>
+		<p>to display the name of the node that hosts this virtual machine.</p>
+		<p><strong>Example</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls
+		</pre>
+		<p class="text-center"><img src="/img/bls1.png" alt="" /></p>
+	</div>

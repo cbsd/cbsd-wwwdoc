@@ -15,12 +15,21 @@
 	<ul>
 		<li>bhyve: bls now show bhyve pid in jid column</li>
 		<li>jail: add allow_reserved_ports options (<a href="https://svnweb.freebsd.org/base?view=revision&revision=r319611" target="_blank">r319611</a>)</li>
-		<li>trafshow and jrctl support for prometheus format output <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
+		<li>jrctl support for prometheus format output <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
 		<li>bhyve: detach ppt devices when vm removed, pointed by will666 via <a href="https://github.com/cbsd/cbsd/issues/172" target="_blank">Issue #172</a></li>
 		<li>bhyve: multiple ppt devices support in <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html">bhyve-ppt</a></li>
 		<li>bhyve: Add bhyve vnc password support on FreeBSD 11.1+ (default password now: 'cbsd')</li>
 		<li>Add skip_bhyve_init_warning options for bhyve which control bhyve_init behavior</li>
-		<li>add get_profile_list</li>
+		<li>bhyve: Automatic selection of a suitable mirror when downloading images</li>
+		<li>add external <strong>get_profile_list</strong> script to show available profiles</li>
+		<li>Allow to show cbsd version even workdir is not set. <a href="https://github.com/cbsd/cbsd/issues/173" target="_blank">Issue #173</a> (Reported by: <strong>Vladislav V. Prodan aka click0</strong>)</li>
+		<li>Fixes for grep error on initial setup.  <a href="https://github.com/cbsd/cbsd/issues/176" target="_blank">Issue #176</a> (Reported by: <strong>Vladislav V. Prodan aka click0</strong>)</li>
+		<li>jail: add support for aarch64 aka ARMv8 and arm-64 via qemu-aarch64-static emulator type</li>
+		<li>jail: make <strong>childrenmax, persist, enforce_statfs</strong> configurable</li>
+		<li>add trusted profile via <strong>jail-freebsd-trusted.conf</strong>: all possible jail params is allowed here. For personal/trusted environments</li>
+		<li>bhyve: add support for [jb]snapshot on ZFS platform. Currenlty only first devices in snapshot</li>
+		<li>add vmpackage schema: cumilative configs for vm_cpu/storage/vm_mem pairs</li>
+		<li>copy-binlib scipt: learn for hardlink; update index files</li>
 	</ul>
 </div>
 <div class="block">

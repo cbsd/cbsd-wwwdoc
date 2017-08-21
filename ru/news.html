@@ -10,6 +10,19 @@
 
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
+	<p><strong>11.1.1</strong>&nbsp;&mdash; 2017-08-22</p>
+	<ul>
+		<li>[bj]login support for external custom command via [bj]login.conf config file</li>
+		<li>freejname: also check remote nodes databases</li>
+		<li>add facter instance variables for external hooks command:
+		<li>${ipv4_first_public} ${ipv4_first_private} ${ipv4_first}
+		${ipv6_first_public} ${ipv6_first_private} ${ipv6_first}</li>
+		<li>add vmpackages: grouped settings for vm</li>
+		<li>add zfs-migrator: ZFS-based cloning instances between ZFS nodes,
+		at the moment without integration with jcoldmigrate and work only
+		via root ssh connection. <a href="https://github.com/cbsd/cbsd/issues/118" target="_blank">Issue #118</a> also participates here</li>
+</div>
+<div class="block">
 	<p><strong>11.1.1</strong>&nbsp;&mdash; 2017-08-05</p>
 	<ul>
 		<li>bugfix release: enable VNC password for bhyve only for FreeBSD > 11.1</li>

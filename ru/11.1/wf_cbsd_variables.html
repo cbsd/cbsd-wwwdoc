@@ -64,7 +64,6 @@
 			<tr><td class="bg-gray">${host_hostname}</td><td>(jail) :: параметр jail(8)</td></tr>
 			<tr><td class="bg-gray">${interface}</td><td>(jail, bhyve, xen) :: к какому сетевому интерфейсу привязано окружение</td></tr>
 			<tr><td class="bg-gray">${ip4_addr}</td><td>(jail, bhyve, xen) :: список указанных в CBSD IP адресов окружения (разделение через запятую)</td></tr>
-			<tr><td class="bg-gray">${jname}</td><td>(jail, bhyve, xen) :: имя окружения</td></tr>
 			<tr><td class="bg-gray">${maintenance}</td><td>(jail, bhyve, xen) :: признак обслуживания</td></tr>
 			<tr><td class="bg-gray">${mdsize}</td><td>(jail) :: объем образа jail, если jail в md-backend образе</td></tr>
 			<tr><td class="bg-gray">${mkhostsfile}</td><td>(jail) :: признак контроля содержимим /etc/hosts</td></tr>
@@ -91,5 +90,11 @@
 			<tr><td class="bg-gray">${vm_vnc_port}</td><td>(bhyve, xen) :: VNC порт</td></tr>
 			<tr><td class="bg-gray">${vnc_password}</td><td>(jail, bhyve, xen) :: VNC пароль</td></tr>
 			<tr><td class="bg-gray">${vnet}</td><td>(jail) :: признак vnet CBSD</td></tr>
+			<tr><td class="bg-gray">${ipv4_first_public}</td><td>(jail, bhyve) :: первый публичный IPv4 адрес окружения</td></tr>
+			<tr><td class="bg-gray">${ipv4_first_private}</td><td>(jail, bhyve) :: первый приватный IPv4 адрес окружения</td></tr>
+			<tr><td class="bg-gray">${ipv4_first}</td><td>(jail, bhyve) :: первый IPv4 (любой) адрес окружения</td></tr>
+			<tr><td class="bg-gray">${ipv6_first_public}</td><td>(jail, bhyve) :: первый публичный IPv6 адрес окружения</td></tr>
+			<tr><td class="bg-gray">${ipv6_first_private}</td><td>(jail, bhyve) :: первый приватный IPv6 адрес окружения</td></tr>
+			<tr><td class="bg-gray">${ipv6_first}</td><td>(jail, bhyve) :: первый IPv4 (любой) адрес окружения</td></tr>
 		</table>
 	</div>

@@ -1,0 +1,100 @@
+	<h1><span>CBSD variables</span></h1>
+	
+	<div class="block">
+		<p><strong>Description</strong>:</p>
+		<p><strong>CBSD</strong> is written taking into account the extensibility and flexibility, giving system engineers the opportunity to increase the functionality of the framework through modules or integration with various other
+		tools through hooks available at various stages of script execution, such as
+		such as <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript"><strong>pre/post start/stop hooks</strong></a> or customization of blogin/jlogin command.</p>
+		<p>Here is a list of reserved variables participating in these stages and available for use:</p>
+	</div>
+
+	<div class="block">
+		<table class="images">
+			<tr><td class="bg-gray">${jname}</td><td>(jail, bhyve, xen) :: the variable contains the name of the environment</td></tr>
+			<tr><td class="bg-gray">${allow_devfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_dying}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_kmem}</td><td>(jail) :: parameter of kmem CBSD</td></tr>
+			<tr><td class="bg-gray">${allow_mount}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_nullfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_procfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_reserved_ports}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_sysvipc}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_tmpfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_zfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${applytpl}</td><td>(jail) :: parameter of applytpl CBSD</td></tr>
+			<tr><td class="bg-gray">${arch}</td><td>(jail) :: arch of containers</td></tr>
+			<tr><td class="bg-gray">${astart}</td><td>(jail, bhyve, xen) :: a sign of auto-start of the environment</td></tr>
+			<tr><td class="bg-gray">${b_order}</td><td>(jail, bhyve, xen) :: order/priority (weight) of environment launch</td></tr>
+			<tr><td class="bg-gray">${basename}</td><td>(jail) :: name of the base for containers</td></tr>
+			<tr><td class="bg-gray">${baserw}</td><td>(jail) :: parameter of baserw CBSD</td></tr>
+			<tr><td class="bg-gray">${bhyve_flags}</td><td>(bhyve) :: additional flags for bhyve</td></tr>
+			<tr><td class="bg-gray">${bhyve_force_msi_irq}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_generate_acpi}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_ignore_msr_acc}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_mptable_gen}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_rts_keeps_utc}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_vnc_resolution}</td><td>(bhyve) :: VNC server resolution in 1024x768 format</td></tr>
+			<tr><td class="bg-gray">${bhyve_vnc_tcp_bind}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_vnc_tcp_ipconnect}</td><td>(bhyve) :: IP address for connecting a VNC client</td></tr>
+			<tr><td class="bg-gray">${bhyve_wire_memory}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_x2apic_mode}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${cd_vnc_wait}</td><td>(bhyve) :: parameter of bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${childrenmax}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${cpuset}</td><td>(jail, bhyve, xen) :: to which processor cores the environment is attached</td></tr>
+			<tr><td class="bg-gray">${data}</td><td>(jail) :: actual container data path</td></tr>
+			<tr><td class="bg-gray">${devfs_ruleset}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${emulator}</td><td>(jail, bhyve, xen) :: name of the engine for virtualization/containirisation</td></tr>
+			<tr><td class="bg-gray">${emulator_flags}</td><td>(jail) :: flags for qemu</td></tr>
+			<tr><td class="bg-gray">${enforce_statfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${exec_consolelog}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${exec_fib}</td><td>(jail, bhyve, xen) :: applied routing table</td></tr>
+			<tr><td class="bg-gray">${exec_master_poststart}</td><td>(jail, bhyve, xen) :: scripts for master_poststart</td></tr>
+			<tr><td class="bg-gray">${exec_master_poststop}</td><td>(jail, bhyve, xen) :: scripts for master_poststop</td></tr>
+			<tr><td class="bg-gray">${exec_master_prestart}</td><td>(jail, bhyve, xen) :: scripts for master_prestart</td></tr>
+			<tr><td class="bg-gray">${exec_master_prestop}</td><td>(jail, bhyve, xen) :: scripts for master_prestop</td></tr>
+			<tr><td class="bg-gray">${exec_poststart}</td><td>(jail) :: scripts for poststart</td></tr>
+			<tr><td class="bg-gray">${exec_poststop}</td><td>(jail) :: scripts for poststop</td></tr>
+			<tr><td class="bg-gray">${exec_prestart}</td><td>(jail) :: scripts for prestart</td></tr>
+			<tr><td class="bg-gray">${exec_prestop}</td><td>(jail) :: scripts for prestop</td></tr>
+			<tr><td class="bg-gray">${exec_start}</td><td>(jail) :: scripts for start</td></tr>
+			<tr><td class="bg-gray">${exec_stop}</td><td>(jail) :: scripts for stop</td></tr>
+			<tr><td class="bg-gray">${exec_timeout}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${floatresolv}</td><td>(jail) :: parameter of baserw CBSD</td></tr>
+			<tr><td class="bg-gray">${hidden}</td><td>(jail, bhyve, xen) :: visibility in the WEB interface </td></tr>
+			<tr><td class="bg-gray">${host_hostname}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${interface}</td><td>(jail, bhyve, xen) :: to which network interface is the environment bound</td></tr>
+			<tr><td class="bg-gray">${ip4_addr}</td><td>(jail, bhyve, xen) :: the list of IP addresses of the environment specified in CBSD (comma separated)</td></tr>
+			<tr><td class="bg-gray">${maintenance}</td><td>(jail, bhyve, xen) :: service mark</td></tr>
+			<tr><td class="bg-gray">${mdsize}</td><td>(jail) :: the volume of the jail image, if jail is in the md-backend image</td></tr>
+			<tr><td class="bg-gray">${mkhostsfile}</td><td>(jail) :: control of contents /etc/hosts</td></tr>
+			<tr><td class="bg-gray">${mount_devfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${mount_fdescfs}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${mount_fstab}</td><td>(jail) :: fstab file for the jail</td></tr>
+			<tr><td class="bg-gray">${mount_kernel}</td><td>(jail) :: mount kernel dir in jail?</td></tr>
+			<tr><td class="bg-gray">${mount_obj}</td><td>(jail) :: mount obj dir in jail?</td></tr>
+			<tr><td class="bg-gray">${mount_ports}</td><td>(jail) :: mount /usr/ports dir in jail?</td></tr>
+			<tr><td class="bg-gray">${mount_src}</td><td>(jail) :: mount /usr/src dir in jail?</td></tr>
+			<tr><td class="bg-gray">${nic_hwaddr}</td><td>(jail, bhyve, xen) :: MAC address of the virtual interface</td></tr>
+			<tr><td class="bg-gray">${path}</td><td>(jail) :: root jail in the host file system</td></tr>
+			<tr><td class="bg-gray">${persist}</td><td>(jail) :: parameter of jail(8)</td></tr>
+			<tr><td class="bg-gray">${protected}</td><td>(jail, bhyve, xen) :: a sign of protecting the environment from uninstallation via the remove command</td></tr>
+			<tr><td class="bg-gray">${stop_timeout}</td><td>(jail) :: timeout of soft container stop</td></tr>
+			<tr><td class="bg-gray">${ver}</td><td>(jail) :: FreeBSD base version for jail</td></tr>
+			<tr><td class="bg-gray">${virtio_type}</td><td>(bhyve) :: type of disk controller</td></tr>
+			<tr><td class="bg-gray">${vm_cpus}</td><td>(bhyve, xen) :: number of guest virtual cores</td></tr>
+			<tr><td class="bg-gray">${vm_hostbridge}</td><td>(bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_iso_path}</td><td>(bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_os_profile}</td><td>(bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_ram}</td><td>(bhyve, xen) :: amount of guest RAM</td></tr>
+			<tr><td class="bg-gray">${vm_rd_port}</td><td>(jail, bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_vnc_port}</td><td>(bhyve, xen) :: VNC port</td></tr>
+			<tr><td class="bg-gray">${vnc_password}</td><td>(jail, bhyve, xen) :: VNC password</td></tr>
+			<tr><td class="bg-gray">${vnet}</td><td>(jail) :: vnet enabled jail?</td></tr>
+			<tr><td class="bg-gray">${ipv4_first_public}</td><td>(jail, bhyve) :: first public IPv4 address of the environment</td></tr>
+			<tr><td class="bg-gray">${ipv4_first_private}</td><td>(jail, bhyve) :: first private IPv4 address of the environment</td></tr>
+			<tr><td class="bg-gray">${ipv4_first}</td><td>(jail, bhyve) :: first (any) IPv4 address of the environment</td></tr>
+			<tr><td class="bg-gray">${ipv6_first_public}</td><td>(jail, bhyve) :: first public IPv6 address of the environment</td></tr>
+			<tr><td class="bg-gray">${ipv6_first_private}</td><td>(jail, bhyve) :: first public IPv6 address of the environment</td></tr>
+			<tr><td class="bg-gray">${ipv6_first}</td><td>(jail, bhyve) :: first (any) IPv6 address of the environment</td></tr>
+		</table>
+	</div>

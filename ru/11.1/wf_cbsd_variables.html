@@ -1,0 +1,95 @@
+	<h1><span>Переменные CBSD</span></h1>
+	
+	<div class="block">
+		<p><strong>Описание</strong>:</p>
+		<p><strong>CBSD</strong> пишется с учетом расширяемости и гибкости, предоставляя системным инженерам возможность увеличения функциональности фреймворка через модули или интеграцию с различными другими
+		инструментами посредством хуков, доступных на различных этапах выполнения скриптов, 
+		таких как <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript"><strong>pre/post start/stop хуки</strong></a> или кастомизацию blogin/jlogin команд.</p>
+		<p>Здесь размещен список зарезервированных переменных, учавствующих на этих этапах и доступных для использования:</p>
+	</div>
+
+	<div class="block">
+		<table class="images">
+			<tr><td class="bg-gray">${jname}</td><td>(jail, bhyve, xen) :: переменная содержит имя окружения</td></tr>
+			<tr><td class="bg-gray">${allow_devfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_dying}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_kmem}</td><td>(jail) :: параметр kmem CBSD</td></tr>
+			<tr><td class="bg-gray">${allow_mount}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_nullfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_procfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_reserved_ports}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_sysvipc}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_tmpfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${allow_zfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${applytpl}</td><td>(jail) :: параметр applytpl CBSD</td></tr>
+			<tr><td class="bg-gray">${arch}</td><td>(jail) :: архитектура контейнера</td></tr>
+			<tr><td class="bg-gray">${astart}</td><td>(jail, bhyve, xen) :: признак авто-старта окружения</td></tr>
+			<tr><td class="bg-gray">${b_order}</td><td>(jail, bhyve, xen) :: очередность/приоритет (вес) запуска</td></tr>
+			<tr><td class="bg-gray">${basename}</td><td>(jail) :: используемое имя базы контейнера</td></tr>
+			<tr><td class="bg-gray">${baserw}</td><td>(jail) :: параметр baserw CBSD</td></tr>
+			<tr><td class="bg-gray">${bhyve_flags}</td><td>(bhyve) :: дополнительные флаги для bhyve</td></tr>
+			<tr><td class="bg-gray">${bhyve_force_msi_irq}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_generate_acpi}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_ignore_msr_acc}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_mptable_gen}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_rts_keeps_utc}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_vnc_resolution}</td><td>(bhyve) :: разрешение VNC сервера в формате 1024x768</td></tr>
+			<tr><td class="bg-gray">${bhyve_vnc_tcp_bind}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_vnc_tcp_ipconnect}</td><td>(bhyve) :: IP адрес для подключения VNC клиентом</td></tr>
+			<tr><td class="bg-gray">${bhyve_wire_memory}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${bhyve_x2apic_mode}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${cd_vnc_wait}</td><td>(bhyve) :: параметр bhyve(8)</td></tr>
+			<tr><td class="bg-gray">${childrenmax}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${cpuset}</td><td>(jail, bhyve, xen) :: к каким ядрам процессора привязано окружение</td></tr>
+			<tr><td class="bg-gray">${data}</td><td>(jail) :: фактический путь данных контейнера</td></tr>
+			<tr><td class="bg-gray">${devfs_ruleset}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${emulator}</td><td>(jail, bhyve, xen) :: имя движка виртуализации или контейниризации</td></tr>
+			<tr><td class="bg-gray">${emulator_flags}</td><td>(jail) :: флаги для эмулятора qemu</td></tr>
+			<tr><td class="bg-gray">${enforce_statfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${exec_consolelog}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${exec_fib}</td><td>(jail, bhyve, xen) :: применяемая таблица маршрутизации</td></tr>
+			<tr><td class="bg-gray">${exec_master_poststart}</td><td>(jail, bhyve, xen) :: скрипт master_poststart</td></tr>
+			<tr><td class="bg-gray">${exec_master_poststop}</td><td>(jail, bhyve, xen) :: скрипт master_poststop</td></tr>
+			<tr><td class="bg-gray">${exec_master_prestart}</td><td>(jail, bhyve, xen) :: скрипт master_prestart</td></tr>
+			<tr><td class="bg-gray">${exec_master_prestop}</td><td>(jail, bhyve, xen) :: скрипт master_prestop</td></tr>
+			<tr><td class="bg-gray">${exec_poststart}</td><td>(jail) :: скрипт poststart</td></tr>
+			<tr><td class="bg-gray">${exec_poststop}</td><td>(jail) :: скрипт poststop</td></tr>
+			<tr><td class="bg-gray">${exec_prestart}</td><td>(jail) :: скрипт prestart</td></tr>
+			<tr><td class="bg-gray">${exec_prestop}</td><td>(jail) :: скрипт prestop</td></tr>
+			<tr><td class="bg-gray">${exec_start}</td><td>(jail) :: скрипт start</td></tr>
+			<tr><td class="bg-gray">${exec_stop}</td><td>(jail) :: скрипт stop</td></tr>
+			<tr><td class="bg-gray">${exec_timeout}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${floatresolv}</td><td>(jail) :: параметр baserw CBSD</td></tr>
+			<tr><td class="bg-gray">${hidden}</td><td>(jail, bhyve, xen) :: признак видимости в WEB интерфейсе </td></tr>
+			<tr><td class="bg-gray">${host_hostname}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${interface}</td><td>(jail, bhyve, xen) :: к какому сетевому интерфейсу привязано окружение</td></tr>
+			<tr><td class="bg-gray">${ip4_addr}</td><td>(jail, bhyve, xen) :: список указанных в CBSD IP адресов окружения (разделение через запятую)</td></tr>
+			<tr><td class="bg-gray">${jname}</td><td>(jail, bhyve, xen) :: имя окружения</td></tr>
+			<tr><td class="bg-gray">${maintenance}</td><td>(jail, bhyve, xen) :: признак обслуживания</td></tr>
+			<tr><td class="bg-gray">${mdsize}</td><td>(jail) :: объем образа jail, если jail в md-backend образе</td></tr>
+			<tr><td class="bg-gray">${mkhostsfile}</td><td>(jail) :: признак контроля содержимим /etc/hosts</td></tr>
+			<tr><td class="bg-gray">${mount_devfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${mount_fdescfs}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${mount_fstab}</td><td>(jail) :: файл fstab клетки</td></tr>
+			<tr><td class="bg-gray">${mount_kernel}</td><td>(jail) :: признак монтирования файлов ядра в клетку</td></tr>
+			<tr><td class="bg-gray">${mount_obj}</td><td>(jail) :: признак монтирования объектны файлов от /usr/src в клетку</td></tr>
+			<tr><td class="bg-gray">${mount_ports}</td><td>(jail) :: признак монтирования /usr/ports каталога в клетку</td></tr>
+			<tr><td class="bg-gray">${mount_src}</td><td>(jail) :: признак монтирования /usr/src каталога в клетку в режиме RO</td></tr>
+			<tr><td class="bg-gray">${nic_hwaddr}</td><td>(jail, bhyve, xen) :: MAC адрес виртуального интерфейса</td></tr>
+			<tr><td class="bg-gray">${path}</td><td>(jail) :: корень jail в файловой системе хостера</td></tr>
+			<tr><td class="bg-gray">${persist}</td><td>(jail) :: параметр jail(8)</td></tr>
+			<tr><td class="bg-gray">${protected}</td><td>(jail, bhyve, xen) :: признак защиты окружения от удаления через команду remove</td></tr>
+			<tr><td class="bg-gray">${stop_timeout}</td><td>(jail) :: таймаут мягкой остановки контейнера</td></tr>
+			<tr><td class="bg-gray">${ver}</td><td>(jail) :: версия базы FreeBSD контейнера</td></tr>
+			<tr><td class="bg-gray">${virtio_type}</td><td>(bhyve) :: тип дискового контроллера</td></tr>
+			<tr><td class="bg-gray">${vm_cpus}</td><td>(bhyve, xen) :: количество виртуальных ядер гостя</td></tr>
+			<tr><td class="bg-gray">${vm_hostbridge}</td><td>(bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_iso_path}</td><td>(bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_os_profile}</td><td>(bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_ram}</td><td>(bhyve, xen) :: количество RAM гостя</td></tr>
+			<tr><td class="bg-gray">${vm_rd_port}</td><td>(jail, bhyve, xen) :: </td></tr>
+			<tr><td class="bg-gray">${vm_vnc_port}</td><td>(bhyve, xen) :: VNC порт</td></tr>
+			<tr><td class="bg-gray">${vnc_password}</td><td>(jail, bhyve, xen) :: VNC пароль</td></tr>
+			<tr><td class="bg-gray">${vnet}</td><td>(jail) :: признак vnet CBSD</td></tr>
+		</table>
+	</div>

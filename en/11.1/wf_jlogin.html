@@ -16,6 +16,15 @@
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jlogin kde4
 		</pre>
+		<p>Starting with the version of CBSD 11.1.2, you can customize the command, redefining the action on you more suitable</p>
+		<p>This is achieved through the configuration file blogin.conf and the parameter <strong>login_cmd</strong>.</p>
+		<p>The file can be placed for the individual environment in the directory <em>$workdir/jails-system/$jname/etc</em>, and globally, overwriting the value from <em>$workdir/etc/defaults/blogin.conf</em>.
+		To do this, create a file with your configuration in the directory <em>$workdir/etc/</em></p>
+		<p>With a custom call, you can use <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a> - for this or that environment</p>
+		<p>For example, if you want instead of the standard behavior, when the blogin lauched ssh client, the file <em>$workdir/etc/blogin.conf</em> can look like this:
+		<pre class="cli;">
+		login_cmd="/usr/bin/ssh your_user@${ipv4_first}"
+		</pre>
 		<p class="text-center"><img src="/img/jlogin1.png" alt="" /></p>
 		<p class="text-center"><img src="/img/jlogin2.png" alt="" /></p>
 	</div>

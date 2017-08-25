@@ -16,6 +16,15 @@
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jlogin kde4
 		</pre>
+		<p>Начиная с версии CBSD 11.1.2, вы можете кастомизировать команду, переопределив действие на вам более подходящее</p>
+		<p>Достигается это через конфигурационный файл jlogin.conf и параметр <strong>login_cmd</strong>.</p>
+		<p>Файл вы можете разместить как для индивидуального окружения в каталоге <em>$workdir/jails-system/$jname/etc</em>, так и глобально, перезаписав значение из <em>$workdir/etc/defaults/jlogin.conf</em>. Для этого, создайте файл с вашей конфигурацией в каталоге
+		<em>$workdir/etc/</em></p>
+		<p>При кастомном вызове, вы можете использовать <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a> - переменные CBSD для того или иного окружения</p>
+		<p>Например, если вы хотите, чтобы вместо стандартного поведения, при jlogin происходило соединение по ssh, файл <em>$workdir/etc/defaults/jlogin.conf</em> может выглядеть так:
+		<pre class="cli;">
+		login_cmd="/usr/bin/ssh your_user@${ipv4_first}"
+		</pre>
 		<p class="text-center"><img src="/img/jlogin1.png" alt="" /></p>
 		<p class="text-center"><img src="/img/jlogin2.png" alt="" /></p>
 	</div>

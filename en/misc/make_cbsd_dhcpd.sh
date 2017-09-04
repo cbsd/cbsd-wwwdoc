@@ -66,7 +66,7 @@ case "${ret}" in
 		;;
 	2)
 		# Fake DHCP - we need learn to get IPS from real dhcpd (tap iface + mac ?)
-		tmp_addr=$( dhcpd )
+		tmp_addr=$( /usr/local/bin/cbsd dhcpd )
 		ip4_addr=${tmp_addr%%/*}
 		# check again
 		ip_type ${ip4_addr}
@@ -113,4 +113,6 @@ cat >> ${DHCPD_CONF} <<EOF
 }				# CBSD-AUTO-${jname}
 EOF
 
-service dhcpd restart
+#service isc-dhcpd restart
+service isc-dhcpd stop
+service isc-dhcpd start

@@ -12,11 +12,14 @@
 		<p>Например, маска вида jname='test*jail' выполнит команду в контейнерах с таким именем, как test1jail, test2jail и тд. Если вы хотите запустить команду сразу во всех контейнерах данной ноды, используйте jname='*'</p>
 		<p>Будьте осторожны, запуская долгие команды или действия, которые могут приводить к интерактивным диалогам. Вы можете получить вывод последних записей активных лог-файлов через посылку SIGINFO команды через нажатие Ctrl+'t' клавиш - 
 		эта функциональность позволит вам посмотреть и понять, на какой стадии находится выполнение команды в том или ином контейнере</p>
+		<p>Результат отработки вы увидете на stdout, в то время, как вспомогательные сообщения - на stderr, соотв., если сообщения CBSD вам мешают, используйте перенаправление stderr в /dev/null</p>
 		<p><strong>Пример</strong>:</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jexec jname='jail*' pkg update -f
 			% cbsd jexec jname='*' pkg update -y
 			% cbsd jexec jname='*' pkg clean -ya
 		</pre>
+		<p class="text-center"><img src="/img/exec1.png" alt="" /></p>
+		<br>
 		<p>Multiple command execution: <script type="text/javascript" src="https://asciinema.org/a/136221.js" id="asciicast-136221" async></script></p>
 	</div>

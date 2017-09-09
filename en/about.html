@@ -12,7 +12,7 @@
 		<ul>
 			<li><a href="https://clonos.tekroutine.com" target="_blank">WEB-interfaces for manage virtual environment</a> (see <strong>Installation on FreeBSD</strong> articles)</li>
 			<li>support for ZFS feature system: ZFS quotes, ZFS send, ZFS snapshots and so on;</li>
-			<li>lack of binding to ZFS: CBSD works transparently on the UFS, HammerFS or any other FS: some of people use jail and bhyve on cluster filesystem such NFS, <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_glusterfs.html">GlusterFS</a> and Ceph which is typical for DC and Failover</li>
+			<li><a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">lack of binding to ZFS</a>: CBSD works transparently on the UFS, HammerFS or any other FS: some of people use jail and bhyve on cluster filesystem such NFS, <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_glusterfs.html">GlusterFS</a> and Ceph which is typical for DC and Failover</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> for integration with external DevOPS stuff ( DDNS, DNSmasq, Consul, etc ..)</li>
 			<li>exporting metrics for jail and  bhyve resources usage <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
 			<li>bsdconfig-style dialog TUI with which you do not need to learn a large number of commands and arguments</li>

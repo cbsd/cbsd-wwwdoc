@@ -11,13 +11,32 @@
 	cbsd repo action=get sources=kernel
 	</pre>
 	<p>значит ваше ядро VIMAGE поддерживает.</p>
-	<p>В том случае, если опции в ядре нет, параметр <strong>vnet</strong> в файле <em>${workdir}/nc.inventory</em> всегда будет установлен в <strong>0</strong>. Если опция в ядре присутствует, в конфигураторе по созданию Jail будет присутствовать параметр <strong>vnet</strong>. Во-вторых, имейте ввиду, что хотя <strong>VIMAGE</strong> (доступная с FreeBSD 8.0) и прошла статус эксперементальной особенности за 4 года своего существования в базе ОС, с ней до сих пор встречаются различные проблемы, исправление которых крайне затянуто: в GNATS (текущая тикет-система FreeBSD)  довольно <a href="http://www.freebsd.org/cgi/query-pr-summary.cgi?category=&amp;severity=&amp;priority=&amp;class=&amp;state=&amp;sort=none&amp;text=vimage&amp;responsible=&amp;multitext=&amp;originator=&amp;release=" target="_blank">много</a> сообщений о паниках при использовании VIMAGE в связке с различными компонентами; Помимо этого, <a href="http://www.freebsd.org/cgi/query-pr.cgi?pr=164763" target="_blank">замечены</a> случаи подтекания памяти.</p>
-	<p>Ну а теперь о хорошем ;)</p>
-	<p><strong>vnet</strong>-featured клетка получает в свое распоряжение полностью виртуализированный и изолированный сетевой стек, что в свою очередь позволяет пользоваться в jail собственным (хоть и виртуальным) интерфейсом, "правильный" <strong>loopback</strong>, возможность использовать внутри клетки пакетные фильтры (<strong>pf, ipfw, pfilter</strong>), поднимать туннели и перенастраивать таблицу маршрутизации. При создании vnet-клетки, в поле ip4_addr следует указать <strong>0</strong>, что запретит cbsd устанавливать самой IP адрес для vnet клетки.</p>
+	<p>В том случае, если опции в ядре нет, параметр <strong>vnet</strong> в файле <em>${workdir}/nc.inventory</em> всегда будет установлен в <strong>0</strong>. 
+	Если опция в ядре присутствует, в конфигураторе по созданию Jail будет присутствовать параметр <strong>vnet</strong>. 
+	<p><strong>vnet</strong>-featured клетка получает в свое распоряжение полностью виртуализированный и изолированный сетевой стек, что в свою очередь позволяет пользоваться в jail собственным (хоть и виртуальным) интерфейсом, 
+	"правильный" <strong>loopback</strong>, возможность использовать внутри клетки пакетные фильтры (<strong>pf, ipfw, pfilter</strong>), поднимать туннели и перенастраивать таблицу маршрутизации. 
+	При создании vnet-клетки, в поле ip4_addr следует указать <strong>0</strong>, что запретит cbsd устанавливать самой IP адрес для vnet клетки.</p>
 	<p><em>Примечание: установка IP адреса в vnet клетке пока не реализовано</em></p>
-	<p>Также, если вы хотите, чтобы jail получал себе IP адрес автоматически ( через DHCP ), следует написать отдельную секцию devfs.rules, в котором необходимо раскрыть  <a href="http://www.freebsd.org/cgi/man.cgi?query=bpf&amp;sektion=4" target="_blank"><strong>bpf(4)</strong></a>-устройство ( unhide bpf*), и указать этот номер devfs <strong>vnet</strong>-клетке (через <strong>cbsd jconfig jname=XXXX</strong>).  <strong>CBSD</strong> создает виртуальные интерфейсы используя пары <a href="http://www.freebsd.org/cgi/man.cgi?query=epair&amp;sektion=4" target="_blank"><strong>epair(4)</strong></a>, однако "второй конец" виртуального кабеля, который подключается к jail, средствами <strong>CBSD</strong> переименовывается в интерфейс <strong>eth0</strong>.</p>
+	<p>Также, если вы хотите, чтобы jail получал себе IP адрес автоматически ( через DHCP ), следует написать отдельную секцию devfs.rules, 
+	в котором необходимо раскрыть  <a href="http://www.freebsd.org/cgi/man.cgi?query=bpf&amp;sektion=4" target="_blank"><strong>bpf(4)</strong></a>-устройство ( unhide bpf*). Например, дописать в файле <em>/etc/devfs.rules</em>:
+<pre class="cli">
+[devfsrules_jail=4]
+add include $devfsrules_hide_all
+add include $devfsrules_unhide_basic
+add include $devfsrules_unhide_login
+add path zfs unhide
+add path 'bpf*' unhide
+</pre>
+	и указать этот номер (4) devfs <strong>vnet</strong>-клетке (через <strong>cbsd jconfig jname=XXXX</strong>).
+	<p>Также, если вы полностью доверяете контейнеру и приложениям, которые в нем запущены (те, оно - ваше), вы можете в качестве devfs rules в настройках контейнера
+	указать любой несуществующий номер правил, например '99'. Или выбрать тип профиля 'trusted' при создании контейнера через cbsd jconstruct-tui.
+	В таких случаях, внутри контейнера будут все устройства devfs</p>
+	<strong>CBSD</strong> создает виртуальные интерфейсы используя пары <a href="http://www.freebsd.org/cgi/man.cgi?query=epair&amp;sektion=4" target="_blank"><strong>epair(4)</strong></a>, 
+	однако "второй конец" виртуального кабеля, который подключается к jail, средствами <strong>CBSD</strong> переименовывается в интерфейс <strong>eth0</strong>.</p>
 	<p><em>Примечание</em>: данное переименовывание актуально только для FreeBSD клеток. Если в клетке запускается Linux-based клетка, переименовывания не произойдет.</p>
-	<p>Переименовывание в <strong>eth0</strong> вызвано тем, что каждый новый <strong>epair</strong> инкрементирует номер интерфейса, те, у первого <strong>vnet</strong>-jail в оригинале, интерфейс будет называться epair<strong>0</strong>a. В запущенной пятой по счету клетки, интерфейс будет называться epair<strong>5</strong>a. Что не совсем удобно при миграции клетки (на другом сервере она может быть под другим номером) и однозначно не удобно, что каждый раз вам придется исправлять содержимое rc.conf с сетевой настройкой.</p>
+	<p>Переименовывание в <strong>eth0</strong> вызвано тем, что каждый новый <strong>epair</strong> инкрементирует номер интерфейса, те, у первого <strong>vnet</strong>-jail в оригинале, интерфейс будет называться epair<strong>0</strong>a. 
+	В запущенной пятой по счету клетки, интерфейс будет называться epair<strong>5</strong>a. Что не совсем удобно при миграции клетки (на другом сервере она может быть под другим номером) и однозначно не удобно, 
+	что каждый раз вам придется исправлять содержимое rc.conf с сетевой настройкой.</p>
 	<p class="text-center"><em>Указываем 0 (empty) в поле ip4_addr при создании vnet-jail</em></p>
 	<p class="text-center"><img src="/img/vnet1.png" alt="" /></p>
 	<p class="text-center"><em>Если ядро имеет VIMAGE опцию, становится возможным установить параметр vnet в 1</em></p>

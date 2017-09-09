@@ -103,7 +103,7 @@ sysrc -q rpc_lockd_enable="YES"
 % mount_nfs -o vers=4 192.168.10.201:/usr/jails/jails-rcconf /usr/jails/jails-rcconf
 </pre>
 
-<p>Вы можете использовать файл <em>/etc/fstab<em> с опцией 'late' для монтирования каталогов при старте ноды, либо использовать automount  ( <a href="http://man.freebsd.org/autofs/5" target="_blank">autofs(5)</a> )</p>
+<p>Вы можете использовать файл <em>/etc/fstab</em> с опцией 'late' для монтирования каталогов при старте ноды, либо использовать automount  ( <a href="http://man.freebsd.org/autofs/5" target="_blank">autofs(5)</a> )</p>
 <p>Теперь вы можете создавать ваши контейнера на любой из нод и через миграцию или последовательность команд:</p>
 
 <pre>

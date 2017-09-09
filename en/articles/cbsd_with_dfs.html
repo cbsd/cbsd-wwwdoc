@@ -60,7 +60,7 @@ with the speed of the local disk and the absence of possible network problems.</
 
 <p>Using <strong>CBSD</strong> with NFS (option when NFS is not a dedicated NAS, but one of three <strong>CBSD</strong> nodes)</p>
 
-<p>Through various failover mechanisms, such as <a href="http://man.freebsd.org/carp/4" target="_blank">carp(4)</a>,<strong>pacemaker/corosync</strong>
+<p>Through various failover mechanisms, such as <a href="http://man.freebsd.org/carp/4" target="_blank">carp(4)</a>,<strong>pacemaker/corosync</strong>,
 <strong>keepalive</strong>, <strong>sentinel/consul</strong>, you can create a fully automatic faylover when, when you exit the NFS server,
 any other node is selected as the repository, and the rest are reconfigured to it. However, these settings are beyond the scope of this article, designed to give surface data about DFS.</p>
 

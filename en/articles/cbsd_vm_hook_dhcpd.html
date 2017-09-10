@@ -35,11 +35,11 @@ we'll point to <strong> CBSD </strong> for the MAC address that the virtual envi
 <p>We assume that <strong>CBSD</strong> already installed and configured, and its version is not lower than <strong>11.0.10</strong></p>
 <p>1) Install <strong>isd-dhcpd</strong> package via <a href="http://man.freebsd.org/pkg/8" target="_blank">pkg</a>:</p>
 <pre class="brush:bash;ruler:rule;">
-% pkg install net/dhcpd
+% pkg install net/isc-dhcp43-server
 </pre>
 <p>or from the ports:</p>
 <pre class="brush:bash;ruler:rule;">
-% env BATCH=no make -C /usr/ports/net/dhcpd install
+% env BATCH=no make -C /usr/ports/net/isc-dhcp43-server
 </pre>
 <p>2) The next step is to define the network that will be used in the automatic configuration and writing the corresponding configuration block
 file for <strong>DHCP</strong>. Let's say our network will be <i>198.168.0.0/24</i>, DNS take from <strong>Google</strong>, and default gateway is <strong>192.168.0.1</strong>:</p>
@@ -108,7 +108,7 @@ fi
 # Insert new records into config file
 printf "host ${jname} { hardware ethernet ${nic_hwaddr0}; fixed-address ${ip4_addr}; } # CBSD-AUTO-${jname}\n" >> ${DHCPD_CONF}
 
-service dhcpd restart
+service isc-dhcpd restart
 </pre>
 
 <p>And put it in the catalog <i>/root/bin</i> as <i>/root/bin/make_cbsd_dhcpd.sh</i>:

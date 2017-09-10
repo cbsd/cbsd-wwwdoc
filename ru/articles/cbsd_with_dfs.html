@@ -12,7 +12,7 @@
 
 <p>Здесь будут освещены вопросы использования <strong>CBSD</strong> в подобных инсталляциях и описаны Howto-style записи по применению.</p>
 
-<p>Общее требование при использовании <strong>CBSD</strong> на DFS, характерное для любых реализаций, это выключение zfsfeat и hammerfeat опции в <strong>CBSD</strong> initenv и необходимость выносить на общее хранилище следующих каталогов:</p>
+<p>Общее требование при использовании <strong>CBSD</strong> на DFS, характерное для любых реализаций, это выключение <em>zfsfeat</em> и <em>hammerfeat</em> опции в 'cbsd initenv-tui' и необходимость выносить на общее хранилище следующих каталогов:</p>
 
 <ul>
 	<li>~cbsd/jails-data: каталог с данными контейнера или виртуальной машины</li>
@@ -103,7 +103,7 @@ sysrc -q rpc_lockd_enable="YES"
 % mount_nfs -o vers=4 192.168.10.201:/usr/jails/jails-rcconf /usr/jails/jails-rcconf
 </pre>
 
-<p>Вы можете использовать файл <em>/etc/fstab<em> с опцией 'late' для монтирования каталогов при старте ноды, либо использовать automount  ( <a href="http://man.freebsd.org/autofs/5" target="_blank">autofs(5)</a> )</p>
+<p>Вы можете использовать файл <em>/etc/fstab</em> с опцией 'late' для монтирования каталогов при старте ноды, либо использовать automount  ( <a href="http://man.freebsd.org/autofs/5" target="_blank">autofs(5)</a> )</p>
 <p>Теперь вы можете создавать ваши контейнера на любой из нод и через миграцию или последовательность команд:</p>
 
 <pre>
@@ -117,10 +117,10 @@ node2 % cbsd jregister jname='jail*'       // на другой ноде
 <h2><a name="dfs_glusterfs">CBSD и GlusterFS</a></h2>
 
 <br>
-<p>WIP/<p>
+<p>WIP. Короткий HowTo доступен здесь: <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_glusterfs.html">CBSD и GlusterFS</a></p>
 <br>
 
-<h2><a name="dfs_ceph">CBSD и GlusterFS</a></h2>
+<h2><a name="dfs_ceph">CBSD и CEPH</a></h2>
 
 <br>
 <p>WIP/<p>

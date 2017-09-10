@@ -2,8 +2,6 @@
 <!--# include file="currentver.html" -->
 <!--# include file="/en/translate.html" -->
 	<h1><span>Building and upgrading bases</span></h1>
-	
-	<h2><a name="knowit">General information</a></h2>
 	<div class="block">
 		<p>Commands:</p>
 		<pre class="brush:bash;rule:true">
@@ -11,9 +9,39 @@
 			% cbsd buildworld
 			% cbsd installworld
 			% cbsd world
+			% cbsd bases
+			% cbsd removebase
 		</pre>
-		<p><em>remark</em>: "base" refers to a catalog containing a full copy/hierarchy of FreeBSD OS files.</p>
-		<p>For the creation of new jails (or starting jails which require a RO mounted base), a copy of base is necessary. Described below are the steps needed to get the initial FreeBSD sources from the project's SVN repository (<a href="http://svn.freebsd.org/" target="_blank">http://svn.freebsd.org</a>), its compilation and installation in a separate  directory which will act as base. These actions are necessary, if you don't want to use pre compiled versions available on <a href="ftp://ftp.freebsd.org" target="_blank">ftp://ftp.freebsd.org</a> or <a href="http://www.bsdstore.ru" target="_blank">http://bsdstore.ru</a>,  which can be retrieved with the <strong>cbsd repo</strong> command. Also, by manually building becomes possible to not only get releases, but also individual branches.</p>
+	</div>
+	<h2><a name="general">General information</a></h2>
+	<div class="block">
+		<p><em>remark</em>: "base" refers to a directories containing a full copy/hierarchy of FreeBSD OS files.</p>
+		<p>The directory for the base directory is located in the ~cbsd/basejail/ directory and has the form base_'arch '_' target_arch '_' ver ', for example: <em>/usr/jails/basejail/base_amd64_amd64_11.1</em></p>
+
+		<p>You can view the bases registered in CBSD and their versions via command:</p>
+		<pre class="brush:bash;rule:true">
+		% cbsd bases
+		</pre>
+
+		<p>For the creation of new jails (or starting jails which require a RO mounted base), a copy of base is necessary.</p>
+
+		<p>If you created a container and the base files are missing, when you start CBSD automatically offers several options for obtaining the base of your choice, this is:</p>
+		<ul>
+			<li>Download the base archive over the network. Depending on the fbsdrepo=0,1 setting in initenv-tui, ONLY official FreeBSD repo will be used, or
+			first the CBSD project repository will be used and if there is no archive on it - the official FreeBSD repository after.</p>
+			<li>If you create a container of the same architecture and version as your hoster system, CBSD can get base without downloading on the network and without compilation,
+			by constructing a copy of the base from your files</li>
+			<li>Get the base by unpacking the .txz archive. In this case, you specify the path where the archive is located</li>
+			<li>Compile the database yourself, running the command sequence: cbsd srcup and cbsd world. This is a very long process.</li>
+	</ul>
+	<p>Thus, you control where and how files will be received, depending on your level of trust and security requirements</p>
+	<br>
+	<p class="text-center"><img src="/img/bases1.png" alt="" /></p>
+	<br>
+	<p>Described below are the steps needed to get the initial FreeBSD sources from the project's SVN repository (<a href="http://svn.freebsd.org/" target="_blank">http://svn.freebsd.org</a>), its compilation and installation in a separate  directory which will act as base. These actions are necessary, if you don't want to use pre compiled versions available on <a href="ftp://ftp.freebsd.org" target="_blank">ftp://ftp.freebsd.org</a> or <a href="http://www.bsdstore.ru" target="_blank">http://bsdstore.ru</a>,  which can be retrieved with the <strong>cbsd repo</strong> command. Also, by manually building becomes possible to not only get releases, but also individual branches.</p>
+	</div>
+	<h2><a name="general">Base obtaining</a></h2>
+	<div class="block">
 		<p>building or updating consists of the following three steps:</p>
 		<ul>
 			<li>
@@ -22,13 +50,13 @@
 				<pre class="brush:bash;rule:true">
 					% cbsd srcup
 				</pre>
-				Receiving or updating of an source code for the concrete FreeBSD version, for example, for 10.1:
+				Receiving or updating of an source code for the concrete FreeBSD version, for example, for 11.1:
 				<pre class="brush:bash;rule:true">
-					% cbsd srcup ver=10.1
+					% cbsd srcup ver=11.1
 				</pre>
-				Receiving or updating of source code for STABLE (for example, for RELENG_10):
+				Receiving or updating of source code for STABLE (for example, for RELENG_11):
 				<pre class="brush:bash;rule:true">
-					% cbsd srcup ver=10 stable=1
+					% cbsd srcup ver=11 stable=1
 				</pre>
 				These commands, at existence of source code in SVN, will fill catalogs <em>$workdir/src/src_$ver</em>
 			</li>
@@ -65,9 +93,9 @@
 				<pre class="brush:bash;rule:true">
 					% cbsd installworld
 				</pre>
-				Installation of files for version 10.1 builded with src.conf named as <em>lite</em>:
+				Installation of files for version 11.1 builded with src.conf named as <em>lite</em>:
 				<pre class="brush:bash;rule:true">
-					% cbsd installworld basename=lite ver=10.1
+					% cbsd installworld basename=lite ver=11.1
 				</pre>
 				other params for installworld:
 				<ul>
@@ -79,4 +107,16 @@
 		<p><strong>cbsd world</strong> command is sequence for <strong>cbsd buildworld && cbsd installworld</strong></p>
 		<p>When you have the base in <em>${workdir}/basejail</em>,you can go to the <a href="/en/<!--#echo var="version" -->/wf_jcreate_ssi.html">jail creation</a>.</p>
 	</div>
+
+	<h2><a name="general">Deleting the base</a></h2>
+	<div class="block">
+	<p>The base can be removed via cbsd removebase command. 
+	By default, the version and architecture of your hoster is inherited.
+	If the versions and/or architecture do not match, use the previously described arguments ver, arch, target_arch and stable. For example:</p>
+	<pre class="brush:bash;rule:true">
+	% cbsd removebase
+	% cbsd removebase ver=11 stable=1
+	% cbsd removebase ver=11.1 stable=0 arch=i386 target_arch=i386
+	</pre>
+</div>
 <!--# include file="_end.html" -->

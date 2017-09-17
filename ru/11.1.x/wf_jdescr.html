@@ -1,0 +1,24 @@
+	<h1><span>Описание jail</span></h1>
+	
+	<h2><a name="jdescr_cmd">Команда jdescr</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jdescr
+		</pre>
+		<strong>Описание</strong>:
+		<p>Для каждой клетки можно ввести какое-то описание/аннотацию, что может быть использовано различными админками для построения динамической документации. <strong>cbsd jdescr</strong> без параметров выводит описание для всех клеток на ноде.</p>
+		<p>Команда</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jdescr mode=update jname=jname
+		</pre>
+		<p>запустит редактор <strong>nvi</strong> в режиме редактирования описания. Через параметр <strong>editor</strong> можно указать альтернативный редактор, например <strong>vim</strong>, <strong>mcedit</strong> и тп. Описание хранится в ASCII-файле, сохраняемый в каталоге <em>$workdir/jails-system/jname/descr</em>, где <strong>jname</strong>&nbsp;— имя редактируемой клетки. Соответственно, файл можно просто скопировать. Поскольку каталог jails-system учавствует в <strong>jcoldmigrate, jclone, jimport/export</strong> и тп операциях,  описание будет сохраняться.</p>
+		<p><strong>Пример</strong> (запустить редактор mcedit для редактирования описания клетки kde4 на русском языке в UTF8):</p>
+		<pre class="brush:bash;ruler:true;">
+			% setenv LANG ru_RU.UTF-8
+			% cbsd jdescr jname=kde4 editor=mcedit mode=update
+		</pre>
+		<p>Подобные описания рекомендуется взять за правило при заведении клеток, если их количество большое. Впоследствии, удобно агрегировать данную информацию в каких-то своих dashboard и построения карты jail-ов. К примеру, таким простым скриптиком: <a href="/ru/misc/jmap2html.sh.html" target="_blank">jmap2html.sh.html</a> получается HTML страница вида <a href="/ru/misc/dashboard/index.html" target="_blank">dashboard sample</a>, где по наведению на название клетки выводится описание, а ссылка на имя клетки ведет на список ПО клетки.</p>
+		<p class="text-center"><img src="/img/jdescr1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jdescr2.png" alt="" /></p>
+	</div>
+

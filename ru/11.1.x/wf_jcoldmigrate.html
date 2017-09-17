@@ -1,0 +1,32 @@
+	<h1><span>Холодная миграция jail</span></h1>
+	
+	<h2><a name="jcoldmigrate_cmd">Команда jcoldmigrate</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jcoldmigrate
+		</pre>
+		<strong>Описание</strong>:
+		<p><strong>cbsd jcoldmigrate</strong> выполняет холодную (с отстановкой) миграцию клетки с одной ноды на другую. Параметр <strong>node</strong> указывает, на какую ноду следует мигрировать клетку. Предварительно, RSA/DSA ключ удаленной ноды должнен быть добавлен через команду <strong>cbsd node mode=add</strong>, а также, на удаленной ноде  должен работать сервис rsyncd <strong>cbsdrsync</strong>.</p>
+		<p>По-умолчанию, статус клетки на новой ноде наследуется&nbsp;— если клетка работала, она также будет автоматически запущена на новой ноде. Если клетка не работала&nbsp;— останется в статусе Off. Управлять, какой статус должен быть на удаленной клетке не зависимо от состояния на оригинале, можно через параметр <strong>start</strong>.</p>
+		<p>Клетка на первоисточние, после успешного выполнения <strong>jcoldmigrate</strong> останавливается и переводится в статус <strong>Slave</strong>. В rc.conf файле клетки на новой ноде остается запись, с какой именно ноды этот jail был мигрирован.</p>
+		<p>Примечание: миграция происходит в следующие этапы (в процессе выполния, они проходят автоматически и не видны)</p>
+		<ul>
+			<li>перенос конфигурационных файлов на удаленную ноду, статус клетки&nbsp;— Slave (<strong>cbsd j2prepare</strong>)</li>
+			<li>запуск rsync, которая делает полную копию каталога с данными на удаленной ноду (<strong>cbsd j2slave</strong>)</li>
+			<li>останов клетки (<strong>cbsd j2slave</strong>)</li>
+			<li>повторный запус rsync, которая должна отработать быстрее первого раза за счет того, меньшее кол-во файлов успело модифицироваться</li>
+			<li>перевод клетки на локальной ноде в статус Slave (<strong>cbsd jswmode</strong>)</li>
+			<li>перевод клетки на удаленной ноде в статус Master (<strong>cbsd rexe + jswmode</strong>)</li>
+			<li>если клетка была запущена&nbsp;— запуск клетки на удаленной ноде (<strong>cbsd rexe + cbsd jstart</strong>)</li>
+		</ul>
+		<p><strong>Пример</strong> (выполнить холодную миграцию на ноду netsnap):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jcoldmigrate node=netsnap jname=amp123
+		</pre>
+		<p><em>на сервере netsnap ничего нет:</em></p>
+		<p class="text-center"><img src="/img/jcoldmigrate1.png" alt="" /></p>
+		<p><em>с сервера cbuilder64 мигрируем клетку amp123 на netsnap:</em></p>
+		<p class="text-center"><img src="/img/jcoldmigrate2.png" alt="" /></p>
+		<p><em>клетка amp123 на netsnap запущена автоматически:</em></p>
+		<p class="text-center"><img src="/img/jcoldmigrate3.png" alt="" /></p>
+	</div>

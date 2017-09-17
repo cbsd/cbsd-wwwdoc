@@ -1,0 +1,47 @@
+	<h1><span>Dynamic DNS для jail</span></h1>
+	<h2><a name="ddns_cmd">Команда ddns</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd ddns
+		</pre>
+		<strong>Описание</strong>:
+		<p>Выполняет регистрацию записей DNS в соответствующих зонах, относящихся к клетке. Для ее корректной работы необходим корректно настроенный DNS сервер и ключ для обновления зоны. Поскольку заинтересованных в обновлении зон  при запуске и остановке клетки может быть несколько, их можно перечислить в <strong>rc.conf</strong> соответствующей клетки. Если параметр <strong>ddns_zone_list</strong> не пустой, при выполнении <strong>jstart</strong> и <strong>jstop</strong>, команды
+		<pre class="brush:bash;ruler:true;">
+% cbsd ddns mode=add jname=xxx
+		</pre>
+		и
+		<pre class="brush:bash;ruler:true;">
+% cbsd ddns mode=delete jname=xxx
+		</pre>
+		<p>выполняются автоматически. Параметр <strong>mode</strong> означает выполняемое действие с записью&nbsp;— может быть <strong>add</strong> или <strong>delete</strong>. Минимальная конфигурация в rc.conf клетки:</p>
+		<pre class="cli;">
+ddns_zone_list="";
+		</pre>
+		<p>должна иметь список имен конфигураций для зон. Одна запись для одной зоны. В имени не должно быть точек.</p>
+		<pre class="cli;">
+ddns_key_<strong>name_of_zone</strong>="";
+		</pre>
+		<p>Параметр содержит путь к файлу приватного ключа зоны <em>name_of_zone</em>, перечисленной в <strong>ddns_zone_list</strong>.</p>
+		<pre class="cli;">
+ddns_zones_<strong>name_of_zone</strong>="";
+		</pre>
+		<p>содержит список тех записей, которые должны быть обновлены в соответствующей зоне.</p>
+		<p><strong>Пример:</strong></p>
+		<p>конфигурация для обновления двух зон: my.domain и bsdstore.ru и добавлении или удалении IP адресов клетки под записями test1.my.domain + test2.my.domain и relay.bsdstore.ru:</p>
+		<pre class="cli;">
+ddns_zone_list="my_domain bsdstore";
+ddns_key_my_domain="/usr/jails/etc/zonekeys/Kmy.domain.+157+52142.private";
+ddns_key_bsdstore="/usr/jails/etc/zonekeys/Kbsdstore.+157+52142.private";
+ddns_zones_my_domain="jail1.my.domain jail1.my.domain";
+ddns_zones_bsdstore="relay.bsdstore.ru";
+		</pre>
+		<p>Конфигурация для DNS сервера (named):</p>
+		<pre class="cli;">
+key bsdstore.ru. {algorithm "HMAC-MD5";secret "YrVW9yP6gNMA7VbcU/r2mSIwYnFj/XkCDd6QuqOHE26/ipnrPy+eXrKrUyaFhB2XWNdVLUX7QCUkfhg4zN5YiA==";};
+zone "bsdstore.ru" {type master;file "/etc/namedb/dynamic/bsdstore.ru";allow-update {key bsdstore.ru; };};
+		</pre>
+		<p>ключи сгеренированы через:</p>
+		<pre class="cli;">
+dnssec-keygen -b 512 -a HMAC-MD5 -v 2 -n HOST bsdstore.ru.
+		</pre>
+	</div>

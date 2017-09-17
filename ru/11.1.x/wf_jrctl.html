@@ -1,0 +1,155 @@
+	<h1><span>Управление лимитами jail</span></h1>
+	
+	<h2><a name="jrctl_cmd">Команды jrctl, jrctl-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl
+			% cbsd jrctl-tui
+		</pre>
+		<strong>Описание</strong>:
+		<p><strong>CBSD</strong> поддерживает различные подсистемы FreeBSD для установки лимитов на ресурсы клетки.</p>
+	</div>
+	
+	<h2><a name="filequota">Файловые квоты</a></h2>
+	<div class="block">
+		<p>Плавающие файловые квоты возможны только для клеток, размещенных на <strong>ZFS</strong>-файловой системе. Для систем на <strong>UFS</strong> подобное можно осуществить лишь md(4)-based vnode файл/имидж (параметр <strong>mdsize</strong> у клетки).</p>
+	</div>
+	
+	<h2><a name="renice">Приоритезация через renice</a></h2>
+	<div class="block">
+		<p>Для приоритезации используется подсистема <a href="http://www.freebsd.org/cgi/man.cgi?query=renice&amp;sektion=8" target="_blank">renice(8)</a>. Вы можете указывать различные приоритеты у разных клеток, чтобы наиболее важные клетки получали максимум CPU-времени за счет клеток, которые процессорное время могут уступить. К примеру, вы можете захотеть выдать клеткам distcc минимальный приоритет, тогда как клетке с WEB сервером&nbsp;— средний, а клетке с базой данных&nbsp;— максимальный. За это поведение отвечает параметр <strong>nice</strong> в настройках jrctl клетки, его значение и поведение соответствует nice(1)&nbsp;— чем ниже коэффициент, тем клетка приоритетнее.</p>
+		<p>Демонстрация работы nice:</p>
+		<p>1) Создадим AMP клетку, поместив в docroot .php скрипт выполняющий некоторые математические действия, например <a href="/ru/misc/bench.zip" target="_blank">bench.zip</a> взятый с <a href="http://www.php-benchmark-script.com/" target="_blank">http://www.php-benchmark-script.com/</a> с увеличенными в 10 раз итерациями в циклах. Склонируем клетку, первой дав имя <strong>highprio1</strong>, второй&nbsp;— <strong>lowprio1</strong>. Через <strong>cbsd jrctl-tui</strong> укажем первой максимальный приоритет <strong>-20</strong>, второй&nbsp;— минимальный, <strong>20</strong>. Кроме этого, повесим клетки на одно ядро через <strong>cpuset</strong> в  <strong>cbsd jconfig</strong> (одноядерные системы сейчас найти сложно, а умный шедулер ОС не позволит провести чистый эксперемент без этих действий ;-).</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls display=jid,jname,ip4_addr,cpuset
+				16   highprio1   10.0.0.121/24  4
+				17   lowprio1    10.0.0.122/24  4
+		</pre>
+		<p>— jid 16 имеет приоритетная клетка и jid 17&nbsp;— неприоритетная, обе на четвертом ядре.</p>
+		<p>сделаем опрос через <strong>top</strong> состояния загруженности <strong>php-fpm</strong> и выводом JID:</p>
+		<pre class="brush:bash;ruler:true;">
+			% export iter=1
+			% while [ 1 ]; do
+				printf "Iter: $iter" ;
+				iter=$((iter+1))
+				top -jab | grep php
+				sleep 1
+			done
+		</pre>
+		<p>Запускаем скрипт одновременно в обоих IP:</p>
+		<pre class="cli">
+	% fetch -T 300 -o /dev/stdout http://10.0.0.121 &amp; fetch -T 300 -o /dev/stdout http://10.0.0.122 &amp; 
+	[1] 65985
+	[2] 65986
+	
+	--------------------------------------
+	|        PHP BENCHMARK SCRIPT        |
+	--------------------------------------
+	Start : 2014-01-06 16:28:59
+	Server : @10.0.0.121
+	PHP version : 5.4.23
+	Platform : FreeBSD
+	--------------------------------------
+	test_math                 : 12.870 sec.
+	test_stringmanipulation   : 15.896 sec.
+	test_loops                : 8.968 sec.
+	test_ifelse               : 7.864 sec.
+	--------------------------------------
+	Total time:               : 45.598 sec.
+	
+	--------------------------------------
+	|        PHP BENCHMARK SCRIPT        |
+	--------------------------------------
+	Start : 2014-01-06 16:29:02
+	Server : @10.0.0.122
+	PHP version : 5.4.23
+	Platform : FreeBSD
+	--------------------------------------
+	test_math                 : 32.632 sec.
+	test_stringmanipulation   : 18.053 sec.
+	test_loops                : 6.323 sec.
+	test_ifelse               : 5.504 sec.
+	--------------------------------------
+	Total time:               : 62.512 sec.
+	
+	[2]    Done                          fetch -T 300 -o /dev/stdout http://10.0.0.122
+	[1]  + Done                          fetch -T 300 -o /dev/stdout http://10.0.0.121
+		</pre>
+		<p>во время чего наблюдаем следующую картину top:</p>
+		<pre class="cli">
+	Iter: 1
+	65101  16 www           1  35  -20 32548K 11456K CPU4    4   0:35  20.56% php-fpm: pool www (php-fpm)
+	65587  17 www           1  52   20 32548K 11456K RUN     4   0:32   0.00% php-fpm: pool www (php-fpm)
+	Iter: 2
+	65101  16 www           1  60  -20 32548K 11456K RUN     4   0:36  25.98% php-fpm: pool www (php-fpm)
+	65587  17 www           1  42   20 32548K 11456K CPU4    4   0:33   2.10% php-fpm: pool www (php-fpm)
+	Iter: 3
+	65101  16 www           1  60  -20 32548K 11456K CPU4    4   0:36  26.27% php-fpm: pool www (php-fpm)
+	65587  17 www           1  94   20 32548K 11456K RUN     4   0:33   8.59% php-fpm: pool www (php-fpm)
+	Iter: 4
+	65101  16 www           1  61  -20 32548K 11456K CPU4    4   0:37  31.69% php-fpm: pool www (php-fpm)
+	65587  17 www           1  95   20 32548K 11456K RUN     4   0:34   9.47% php-fpm: pool www (php-fpm)
+	Iter: 5
+	65101  16 www           1  62  -20 32548K 11456K CPU4    4   0:37  35.60% php-fpm: pool www (php-fpm)
+	65587  17 www           1  95   20 32548K 11456K RUN     4   0:34  11.18% php-fpm: pool www (php-fpm)
+	Iter: 6
+	65101  16 www           1  64  -20 32548K 11456K CPU4    4   0:38  38.96% php-fpm: pool www (php-fpm)
+	65587  17 www           1  96   20 32548K 11456K RUN     4   0:34  12.79% php-fpm: pool www (php-fpm)
+	..
+		</pre>
+		<p>Клетка с jid 16 получила бОльший приоритет и выполнилась в почти в 1.5 раза быстрее.</p>
+	</div>
+	
+	<h2><a name="rctl">RACCT/RCTL фреймворк</a></h2>
+	<div class="block">
+		<p>Если ваше ядро имеет поддержку RACCT/RCTL, вы можете устанавливать лимиты, описанные в rctl(8) на клетки и смотреть текущую статистику по потребляемым ресурсам jail. Для установки и снятия лимитов используется команда <strong>cbsd jrctl</strong>, которая с аргументами</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl mode=apply  ...
+		</pre>
+		и
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl mode=unset  ...
+		</pre>
+		<p>вызываются автоматически для установки или снятия лимитов при работе команд jstart и jstop соответственно. Через флаг</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl mode=show
+		</pre>
+		<p>высвечивается текущая статистика по потребляемым ресурсам jail, что может быть использовано для генерации отчетов и графиков по загрузке jail, а также, используется демоном <strong>CBSD</strong> для генерации рекомендаций о необходимости добавлять новые ресурсы и предупреждений перегрузок.</p>
+		<p>Через команду</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl
+		</pre>
+		<p>без аргументов, вы можете увидеть установленные лимиты для всех клеток. Через аргумент <strong>display</strong> можно указать конкретные поля для выборки данных. Если <strong>display</strong> не указан, используется значение, заданное в файле <em>$workdir/etc/defaults/jrctl.conf</em>, которое вы можете изменить на свое усмотрение через <em>$workdir/etc/jrctl.conf</em></p>
+		<p>Вы можете редактировать лимиты через</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrctl-tui jname=jname
+		</pre>
+		<p>Либо, если вы строите хостинг площадку и хотите создавать лимиты не-интерактивно, вы можете генерировать файл <em>$workdir/$jname/jail.limits</em></p>
+		<p>Через jrctl можно установить следующие лимиты jail:</p>
+		<p>a) Все что позволяет делать подсистема <a href="http://man.freebsd.org/rctl/8" target="_blank">rctl(8)</a> FreeBSD, а именно:</p>
+		<pre class="cli">
+	cputime 	   CPU time, in seconds
+	datasize	   data size, in bytes
+	stacksize	   stack size, in bytes
+	coredumpsize	   core dump size, in bytes
+	memoryuse	   resident set size, in bytes
+	memorylocked	   locked memory, in bytes
+	maxproc 	   number of processes
+	openfiles	   file descriptor table size
+	vmemoryuse	   address space limit, in bytes
+	pseudoterminals    number of PTYs
+	swapuse 	   swap usage, in bytes
+	nthr		   number of threads
+	msgqqueued	   number of queued SysV messages
+	msgqsize	   SysV message queue size, in bytes
+	nmsgq		   number of SysV message queues
+	nsem		   number of SysV semaphores
+	nsemop		   number of SysV semaphores modified in a single semop(2) call
+	nshm		   number of SysV shared memory segments
+	shmsize 	   SysV shared memory size, in bytes
+	wallclock	   wallclock time, in seconds
+		</pre>
+		<p class="text-center"><img src="/img/jrctl1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jrctl2.png" alt="" /></p>
+	</div>
+

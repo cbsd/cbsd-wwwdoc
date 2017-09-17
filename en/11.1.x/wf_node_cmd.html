@@ -1,0 +1,21 @@
+<b>Commands</b>:<br>
+<pre>
+% cbsd jcoldmigrate
+% cbsd jbackup
+% cbsd jrclone
+% cbsd jailmapdb
+...
+</pre>
+
+Part of commands can demand existence of a key of a remote node for performance of the functions. Some list of similar commands:
+<br><br>
+<li><b>cbsd jcoldmigrate</b> - cold migration jail from one node to other
+<li><b>cbsd jbackup, jrclone</b> - single synchronization or replication of jail data on-the-fly on a remote node
+<li><b>cbsd jailmapdb</b> - generate jmap.txt file, containing records of a look nodename="jail1 jail2 .." - list and location for jails
+<li><b>cbsd jwhereis</b> - return node name, where this jail is located (work under jmap.txt file)
+<li><b>cbsd jlogin</b> - to try to login into a jails if it isn't present locally, but is present in jmap.txt
+<li><b>cbsd rexe</b> - execute command on remote node
+<li><b>cbsd rnode</b> - login via ssh in cbsd shell on remote node
+<li><b>...</b>
+</pre>
+</p>

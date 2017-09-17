@@ -1,0 +1,27 @@
+	<h1><span>starting and stoping VM</span></h1>
+	
+	<h2><a name="bstart_cmd">commands: bstart, bstop</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart jname=vm1
+			% cbsd bstart vm1 vm2 ... vmX
+
+			% cbsd bstop jname=vm1
+			% cbsd bstop vm1 vm2 ... vmX
+		</pre>
+		<strong>Description</strong>:
+		<p>Running virtual machines happens when you start cbsd/server automatically if parameter <strong>astart</strong> (auto-start) corresponding VM is set to 1 This setting can be through <strong>cbsd bconfig</strong> or <strong>cbsd bset</strong>. When you stop the server or service <strong>cbsdd</strong>, automatically stops all running virtual machines. Running VM manually by the command:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart jname=vm1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart vm1
+		</pre>
+		<p>or</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bstart vm1 vm2 vm3 ..
+		</pre>
+		<p>(to run multiple virtual machines as a command)</p>
+		<p>If the start/bstop command run with no arguments, this will list all inactive/active VM for interactive selection</p>
+	</div>

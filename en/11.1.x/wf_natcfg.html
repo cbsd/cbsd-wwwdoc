@@ -1,0 +1,59 @@
+	<h1><span>Working with NAT</span></h1>
+	
+	<h2><a name="natcfg_cmd">natcfg, naton, natoff commands</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd natcfg
+			% cbsd naton
+			% cbsd natoff
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Jails do not always require external IP, or, for security reasons, a number of services need to deploy on private IPs, so they were not available from the Internet.  Thus, the jails may be needed for Internet access.</p>
+		<p>In this case the NAT translating the private IP address of the jails to external IP of the server. <strong>CBSD</strong> functional has a configuration template NAT rules for translating of private networks <a href="http://tools.ietf.org/html/rfc1918" target="_blank">RFC1918</a>. To do this, this command as the first step is required:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd natcfg
+		</pre>
+		<p>for selecting the appropriate framework for which the configuration will be loaded NAT: pf, ipfw and ipfilter. The names of the relevant frameworks</p>
+	</div>
+	<div class="warning">
+		<p><strong>Attention!</strong> When you configure this, system file <strong>/boot/loader.conf</strong> nodes will be modified to load the appropriate modules.</p>
+	</div>
+	
+	<div class="block">
+		<p>Selection framework and IP for NAT alias executed when you first start <strong>cbsd initenv</strong>, can later be reconfigured  through <strong>cbsd initenv-tui</strong> To natip changed in force, you must run <strong>cbsd natcfg</strong> and <strong>cbsd naton</strong> again. Currently, the cbsd configuration NAT limited to the creation of rules for translating private networks.  If you need to get something more from simple NAT rule, you can edit the rules file created manually in the directory <em><strong>$workdir/etc/</strong></em> in files:</p>
+		<ul>
+			<li><strong>pfnat.conf</strong>, when PF is used
+			<li><strong>ipfw.conf</strong>, when IPFW is used, or
+			<li><strong>ipfilter.conf</strong>, wnen using IPNAT from IPFilter
+		</ul>
+		<p>Note:</p>
+		<p>If <strong>nodeip</strong> (IP of nodes), he is within RFC1918 networks for the subnet broadcast NAT rule will not be created. To disable nat control by <strong>CBSD</strong>, use the follow command:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd natoff
+		</pre>
+		<div class="warning">
+			<p><strong>Attention!</strong> Be careful, if you activate NAT through <strong>ipfw</strong>. This rule loads the module ipfw.ko, the settings of which are prohibited by default all packets. If you spend this operation remotely, you can through <em>/boot/loader.conf</em> enable ipfw rule, by default allowing all packets:</p>
+		</div>
+		<pre class="cli">
+ipfw_load="YES"
+net.inet.ip.fw.default_to_accept=1
+		</pre>
+		<p>Example. Start the configurator and activate the NAT through pf, with aliasing-IP as 192.168.1.2, previously initialized in /etc/rc.conf:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd natcfg
+Configure NAT for RFC1918 Network?
+[yes(1) or no(0)]
+yes
+Set IP address as the aliasing NAT address, e.g: 192.168.1.2
+
+Which NAT framework do you want to use: [pf]
+(type FW name, eg pf,ipfw,ipfilter or "exit" for break)
+
+% cbsd naton
+No ALTQ support in kernel
+ALTQ related functions disabled
+No ALTQ support in kernel
+ALTQ related functions disabled
+pfctl: pf already enabled
+		</pre>
+	</div>

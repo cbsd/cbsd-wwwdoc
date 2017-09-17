@@ -1,0 +1,31 @@
+	<h1><span>INITENV</span></h1>
+	
+	<h2><a name="jcreate_cmd">commands: initenv, initenv-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler=true;">
+		% cbsd initenv
+		% cbsd initenv-tui
+		</pre>
+	</div>
+	<div class="block">
+		<strong>Description</strong>:
+		<p>initenv-tui script is a dialogue for global CBSD settings allowing you to change those settings that the user entered on the first initialize</p>
+		<p>In addition, runs initenv synchronization scripts and templates in the working directory from directory-distribution</p>
+		<ul>
+			<li>rcconf - enable or disable CBSD via /etc/rc.conf ( cbsdd_enable ). Please note that this will not stop and start CBSD service and jails</li>
+			<li>nodename - unique identifier of the node, usually FQDN of the server. If you change the name of the node, it will be re-generated keys that require perezavedenie this node on the parties and the relationship is needed</li>
+			<li>nodeip - management-IP address of node. Must be fixed (static or tied to a MAC address when DHCP is used)</li>
+			<li>nodedescr - contents of the file description of the node (at your discretion). You can also edit it through the ascii file: $workdir/node.desc</li>
+			<li>jnameserver - a list of IP addresses that will prescribe CBSD in /etc/resolv.conf of jails that are executed if the jail has a setting applytpl=1. This setting is particularly useful when the jail can migrate to a node in another subnet, which is serviced by a different DNS server. For multiple IP servers, specify addresses with a comma. eg: 8.8.8.8,8.8.4.4</li>
+			<li>nodeippool - list of subnets to be allocated under the use of jail. IP from this range will be offered automatically assigned jails and if the jails is set to ip4_addr DHCP. For multiple networks, use a space as a separator. eg: "10.0.0.0/16 192.168.1.0/24". Currently, CBSD not address range checks, and only uses the first subnet.</li>
+			<li>nat_enable - disable or enable the use of NAT by CBSD. In fact, this team makes running: cbsd natcfg. Recommended framework NAT: pf. For more information pleas read "working with NAT"</li>
+			<li>natip - select the IP, which will be used for CBSD NAT. IP must be initialized. May coincide with the nodeip.</li>
+			<li>fbsdrepo - where to download the base and kernel. If there is a 1, the official repository of FreeBSD is preferable. When 0 - used repository project CBSD (which however can not always be fresh, but, unlike FreeBSD repository also contains the intermediate builds ( FreeBSD-current, FreeeBSD RELENG ) when stable params set to 1.</li>
+			<li>ipfw_enable - enable IPFW for count traffic in jail. For more details, see: Counting traffic jail</li>
+			<li>zfsfeat - If $workdir posted on ZFS, CBSD, instead of creating the data directory to jail would create separate ZFS file systems that can bring additional benefits</li>
+			<li>parallel - interval in seconds for starting and stopping CBSD, through which will be started or stopped from the following list of jail, if the previous management did not return (slowly initialized blocking bug in the script start and stop). This setting prevents a situation where because of the blocked first cell rest - do not run and wait.</li>
+			<li>sqlreplica - Currently this option is responsible for the ascent SSH tunnel between the added nodes.</li>
+		</ul>
+		<p>When you select a COMMIT, runs initenv and script done</p>
+	</div>
+	

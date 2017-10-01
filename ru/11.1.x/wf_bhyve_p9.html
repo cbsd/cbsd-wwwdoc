@@ -1,0 +1,46 @@
+	<h1><span>Общие папки для виртуальных машин bhyve через virtio-p9</span></h1>
+
+	<h2><a name="bhyveppt_cmd">Commands bhyve-p9shares</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bhyve-p9shares
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p><em>Эта возможность доступна в <strong>CBSD</strong> версии 11.1.7 и выше.</em></p>
+		<p>Общие папки служат для обмена файлами между виртуальными машинами или между виртуальной машиной и хост системой.</p>
+		<p>Данная возможность работает только если ваша система поддерживает VirtFS/<a target="_blank" href="https://en.wikipedia.org/wiki/9P_(protocol)">P9</a> и <strong>bhyve</strong> поддерживает <strong>virtio-p9</strong>.</p>
+		<p>На момент написания этой статьи (2017-10-01), такой системой является <strong>TrueOS</strong>, тогда как для FreeBSD подготовлен патч и загружен в <strong>Phabricator</strong>:  <a target="_blank" href="https://reviews.freebsd.org/D10335">D10335</a></p>
+		<p>Кроме этого, работа с общими папками будет доступна только в том случае, если ваши гостевые ОС имеют поддержку монтирования p9 файловой системы через virtio.</p>
+		<p>Для настройки, вам необходимо иметь на файловой системе непосредственно сам каталог, который будет презентован виртуальной машине и придумать имя (одно слово) шары, по которому будете подключать его в гостевой ОС.</p>
+
+		<p>Для просмотра существующих shared folders, используется команда:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-p9shares mode=list
+
+JNAME    P9PATH       P9DEVICE
+f111     /root        root
+debian1  /tmp/share1  share1
+debian1  /tmp/share2  share2
+		</pre>
+
+		<p>Или для индивидуальной виртуальной машины:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-p9shares mode=list jname=XXX
+		</pre>
+
+		<p>Для включения shared folders для конкретной виртуальной машины, используйте <strong>mode=attach</strong> и аргументы <strong>p9path</strong>,<strong>p9device</strong> для задания каталога и наименования shared</p>
+		<p>Для отключения shared folders для конкретной виртуальной машины, используйте <strong>mode=detach</strong> и аргумент <strong>p9device</strong>.</p>
+		<p>После запуска виртуальной машины, подключить shared folders можно разными способами, в зависимости от конкретного дистрибутива. Например в Debian-based дистрибутиве Linux это осуществляется через пакет <strong>9mount</strong> и эту команду:</p>
+		<pre class="brush:bash;ruler:true;">
+% mount -t 9p -o trans=virtio sharename /mnt
+		</pre>
+		<p>или:</p>
+		<pre class="brush:bash;ruler:true;">
+% 9mount -i 'virtio!sharename' /mnt
+		</pre>
+		<p>
+		<p class="text-center"><img src="/img/bhyve-p9fs1.png" alt="" /></p>
+		</p>
+		<br>
+		<p class="text-center">bhyve shared folders via VirtFS/virtio-p9: <script type="text/javascript" src="https://asciinema.org/a/140432.js" id="asciicast-140432" async></script></p>
+	</div>

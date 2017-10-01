@@ -1,0 +1,46 @@
+	<h1><span>bhyve shared folders via virtio-p9</span></h1>
+
+	<h2><a name="bhyveppt_cmd">Commands bhyve-p9shares</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bhyve-p9shares
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p><em>This feature available from <strong>CBSD</strong> 11.1.7 and above.</em></p>
+		<p>Shared folders are used to exchange files between virtual machines or between a virtual machine and a host system.</p>
+		<p>This feature works only if your system supports VirtFS/<a target="_blank" href="https://en.wikipedia.org/wiki/9P_(protocol)">P9</a> and <strong>bhyve</strong> support <strong>virtio-p9</strong>.</p>
+		<p>At the time of writing this article (2017-10-01), such a system is <strong>TrueOS</strong>, whereas for FreeBSD a patch is prepared and loaded into <strong>Phabricator</strong>: <a target="_blank" href="https://reviews.freebsd.org/D10335">D10335</a></p>
+		<p>In addition, working with shared folders will only be available if your guest OSs have support for mounting the p9 file system via virtio.</p>
+		<p>To configure shared folders, you need to have the directory to share on on the file system, which will be presented to the virtual machine and sets name (one word) for this resources for guest OS.</p>
+
+		<p>To view existing shared folders, use the command:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-p9shares mode=list
+
+JNAME    P9PATH       P9DEVICE
+f111     /root        root
+debian1  /tmp/share1  share1
+debian1  /tmp/share2  share2
+		</pre>
+
+		<p>Or for an individual virtual machine:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-p9shares mode=list jname=XXX
+		</pre>
+
+		<p>To enable shared folders for a specific virtual machine, use <strong>mode=attach</strong> with <strong>p9path</strong>,<strong>p9device</strong> arguments to specify a directory and a shared resource name</p>
+		<p>To disable shared folders for a specific virtual machine, use <strong>mode=detach</strong> with <strong>p9device</strong> argument.</p>
+		<p>After running the virtual machine, you can connect shared folders in different ways, depending on the specific distribution. For example, in a Debian-based Linux distribution, this is done through a <strong>9mount</strong> package and this command:</p>
+		<pre class="brush:bash;ruler:true;">
+% mount -t 9p -o trans=virtio sharename /mnt
+		</pre>
+		<p>or:</p>
+		<pre class="brush:bash;ruler:true;">
+% 9mount -i 'virtio!sharename' /mnt
+		</pre>
+		<p>
+		<p class="text-center"><img src="/img/bhyve-p9fs1.png" alt="" /></p>
+		</p>
+		<br>
+		<p class="text-center">bhyve shared folders via VirtFS/virtio-p9: <script type="text/javascript" src="https://asciinema.org/a/140432.js" id="asciicast-140432" async></script></p>
+	</div>

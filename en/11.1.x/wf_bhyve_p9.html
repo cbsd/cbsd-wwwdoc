@@ -28,7 +28,10 @@ debian1  /tmp/share2  share2
 % cbsd bhyve-p9shares mode=list jname=XXX
 		</pre>
 
-		<p>To enable shared folders for a specific virtual machine, use <strong>mode=attach</strong> with <strong>p9path</strong>,<strong>p9device</strong> arguments to specify a directory and a shared resource name</p>
+		<p>To enable shared folders for a specific virtual machine, use <strong>mode=attach</strong> with <strong>p9path</strong>,<strong>p9device</strong> arguments to specify a directory and a shared resource name, e.g:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-p9shares mode=attach p9device=share1 p9path=/tmp/share1 jname=debian1
+		</pre>
 		<p>To disable shared folders for a specific virtual machine, use <strong>mode=detach</strong> with <strong>p9device</strong> argument.</p>
 		<p>After running the virtual machine, you can connect shared folders in different ways, depending on the specific distribution. For example, in a Debian-based Linux distribution, this is done through a <strong>9mount</strong> package and this command:</p>
 		<pre class="brush:bash;ruler:true;">

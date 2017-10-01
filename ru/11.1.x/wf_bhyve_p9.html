@@ -28,7 +28,10 @@ debian1  /tmp/share2  share2
 % cbsd bhyve-p9shares mode=list jname=XXX
 		</pre>
 
-		<p>Для включения shared folders для конкретной виртуальной машины, используйте <strong>mode=attach</strong> и аргументы <strong>p9path</strong>,<strong>p9device</strong> для задания каталога и наименования shared</p>
+		<p>Для включения shared folders для конкретной виртуальной машины, используйте <strong>mode=attach</strong> и аргументы <strong>p9path</strong>,<strong>p9device</strong> для задания каталога и наименования shared, например:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd bhyve-p9shares mode=attach p9device=share1 p9path=/tmp/share1 jname=debian1
+		</pre>
 		<p>Для отключения shared folders для конкретной виртуальной машины, используйте <strong>mode=detach</strong> и аргумент <strong>p9device</strong>.</p>
 		<p>После запуска виртуальной машины, подключить shared folders можно разными способами, в зависимости от конкретного дистрибутива. Например в Debian-based дистрибутиве Linux это осуществляется через пакет <strong>9mount</strong> и эту команду:</p>
 		<pre class="brush:bash;ruler:true;">

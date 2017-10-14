@@ -73,7 +73,7 @@
     </description>
     <link>http://www.bsdstore.local/en/11.1.x/wf_bhyve_p9_ssi.html</link>
     <guid>CBSD and bhyve VirtFS</guid>
-    <pubDate>Sun, 01 Oct 2017 09:40:00 +0000</pubDate>
+    <pubDate>Sun, 01 Oct 2017 09:40:00 +0000 </pubDate>
   </item>
   <item>
     <title>FreeBSD Cloud and DevOPS, Part 3, by Goran Mekić</title>
@@ -83,9 +83,9 @@
     </description>
     <link>http://meka.rs/blog/2017/10/01/freebsd-cloud-and-devops-3/</link>
     <guid>Goran Mekić, FreeBSD Cloud and DevOps, part 3</guid>
-    <pubDate>Sun, 01 Oct 2017 19:40:00 +0000</pubDate>
+    <pubDate>Sun, 01 Oct 2017 19:40:00 +0000 </pubDate>
   </item>
-    <item>
+  <item>
     <title>CBSD 11.1.7 available</title>
     <description>Relnotes:&lt;br /&gt;
     - bhyve: add virtio-p9 for shared folders feature&lt;br /&gt;
@@ -95,8 +95,7 @@
     <guid>CBSD 11.1.7 available</guid>
     <pubDate>Tue, 03 Oct 2017 12:12:00 +0000 </pubDate>
   </item>
-    </item>
-    <item>
+  <item>
     <title>CBSD 11.1.8 available</title>
     <description>Relnotes:&lt;br /&gt;
     - bhyve: OpenBSD UEFI support (on FreeBSD 11.1-RELEASE)&lt;br /&gt;

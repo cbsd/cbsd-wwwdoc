@@ -10,11 +10,29 @@
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 	<ul>
-		<li>bhyve: общие папки для виртуальных машин bhyve через SharedFS/Virtio-p9: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_p9_ssi.html">bhyve-p9shares</a></li>
 	</ul>
 </div>
 
 <h2><a name="release">Релизы</a></h2>
+<div class="block">
+	<p><strong>11.1.8</strong>&nbsp;&mdash; 2017-10-14</p>
+	<ul>
+		<li>bhyve: OpenBSD UEFI support (on FreeBSD 11.1-RELEASE)</li>
+		<li>bhyve: add vgaconf settings (for FreeBSD 11.1-RELEASE)</li>
+		<li>bhyve: fix for FreeBSD guest boot on serial console in legacy MBR mode</li>
+		<li>bhyve: add p9 patch</li>
+		<li>dhcpd: also check IP free address via bhyve list</li>
+		<li>colorized active/passive state of environment in [jb]ls and [jb]config</li>
+		<li>bhyve: fix mynic variable with full NIC list (reported by <strong>Elea Molokan via CBSD Telegram</strong>)</li>
+	</ul>
+</div>
+<div class="block">
+	<p><strong>11.1.7</strong>&nbsp;&mdash; 2017-10-03</p>
+	<ul>
+		<li>bhyve: add virtio-p9 for shared folders feature</li>
+		<li>jail bugfix: Fix execution for custom pre/post script. <a href="https://github.com/cbsd/cbsd/issues/197" target="_blank">Issue #197</a>, reported by: <strong>Christopher Haglund (aka sweco-secfha)</strong></li></li>
+	</ul>
+</div>
 <div class="block">
 	<p><strong>11.1.6</strong>&nbsp;&mdash; 2017-09-17</p>
 	<ul>

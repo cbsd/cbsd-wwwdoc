@@ -85,5 +85,31 @@
     <guid>Goran Mekić, FreeBSD Cloud and DevOps, part 3</guid>
     <pubDate>Sun, 01 Oct 2017 19:40:00 +0000</pubDate>
   </item>
+    <item>
+    <title>CBSD 11.1.7 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - bhyve: add virtio-p9 for shared folders feature&lt;br /&gt;
+    - jail bugfix: Fix execution for custom pre/post script. Issue #197, reported by: Christopher Haglund (aka sweco-secfha)&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.7 available</guid>
+    <pubDate>Tue, 03 Oct 2017 12:12:00 +0000 </pubDate>
+  </item>
+    </item>
+    <item>
+    <title>CBSD 11.1.8 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - bhyve: OpenBSD UEFI support (on FreeBSD 11.1-RELEASE)&lt;br /&gt;
+    - bhyve: add vgaconf settings (for FreeBSD 11.1-RELEASE)&lt;br /&gt;
+    - bhyve: fix for FreeBSD guest boot on serial console in legacy MBR mode&lt;br /&gt;
+    - bhyve: add p9 patch&lt;br /&gt;
+    - dhcpd: also check IP free address via bhyve list&lt;br /&gt;
+    - colorized active/passive state of environment in [jb]ls and [jb]config&lt;br /&gt;
+    - bhyve: fix mynic variable with full NIC list (reported by Elea Molokan via CBSD Telegram)&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.8 available</guid>
+    <pubDate>Sat, 14 Oct 2017 01:01:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

@@ -9,7 +9,6 @@
 		% cbsd bcreate jconf=/path/to/conf.jconf
 		</pre>
 	</div>
-	
 	<div class="block">
 		<strong>Описание:</strong>
 		<p>Виртуальная машина создается по заранее сформированному конфигурационному файлу через <strong>cbsd bcreate jconf=path_to_cfg</strong>.</p>
@@ -27,6 +26,80 @@
 		положительно ответа, <strong>bcreate</strong> будет выполнен на новую конфигурацию автоматически. В противном случае,
 		скрипт выведет путь к конфигурационному файлу (в <em>$workdir/tmp</em>), по которой можно создать виртуальную.</p>
 	</div>
+	<h2><a name="bhyve_profiles">Профили виртуальных машин</a></h2>
+	<div class="block">
+	<p>Профили, которые поставляются в комплекте с <strong>CBSD</strong> и по которым системы определяют URL откуда скачивается ISO образ, 
+	находятся в каталоге <em>~workdir/etc/defaults/</em> и начинаются с префикса <strong>vm-</strong></p>. Например, увидеть список можно по команде:</p>
+	<pre class="brush:bash;ruler=true;">
+% ls -1 ~cbsd/etc/defaults | grep ^vm-
+vm-dflybsd-x86-5.conf
+vm-freebsd-FreeBSD-x64-11.1.conf
+vm-freebsd-FreeBSD-x64-12.0-LATEST.conf
+vm-freebsd-FreeNAS-x64-11.conf
+vm-freebsd-pfSense-2-RELEASE-amd64.conf
+vm-linux-CentOS-7.4-x86_64.conf
+vm-linux-Debian-x86-9.conf
+vm-linux-fedora-server-26-x86_64.conf
+	</pre>
+	<p>Поскольку релизы <strong>CBSD</strong> выходят гораздо реже, чем версии различных дистрибутивов, эти профили могут свойство устаревать достаточно быстро и как следствие - тот или иной образ становится недоступным по старым ссылкам.</p>
+	<p>Для того, чтобы не попадать в подобные ситуации и получать новые профили, вы можете обновлять их отдельно от <strong>CBSD</strong> через Makefile в каталоге <em>~workdir/etc</em>. В Makefile есть две команды (вы их увидете, если напишете просто make в этом каталоге):</p>
+	<ul>
+		<li> make profiles-create  - делается единоразово, запуская инициализируя git репозиторий из GitHub: <a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a></li>
+		<li> make profiles-update  - делается каждый раз (после profiles-create), когда вы хотите обновить профили</li>
+	</ul>
+	<p>Поскольку эти операции используется git, вам необходимо его предварительно установить в систему: pkg install devel/git (или из портов: make -C /usr/ports/devel/git install)</p>
+	<p>Например:</p>
+	<pre class="brush:bash;ruler=true;">
+% cd ~cbsd/etc
+% make profiles-create
+% make profiles-update
+	</pre>
+	<div class="warning">
+	<p>Если вы заметите, что какая-то версия профиля устарела и в репозиторий <a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a> никто не выслал исправление, вы можете законтрибьютить <strong>CBSD</strong>, выслав изменения (в старом профиле или создав новый)
+	самостоятельно через Pull Request, имея эккаунт на github.com</p>
+	</div>
+	</div>
+	<h2><a name="custom_bhyve_profiles">Создание собственных профилей виртуальных машин</a></h2>
+	<div class="block">
+	<p>Если необходимый вам профиль ОС отсутствует в базовой поставке <strong>CBSD</strong>, или по каким-то причинам вас неудовлетворяет, вы можете создать свой профиль по аналогии с уже существующими</p>
+	<p>Собственные профили должны располагаться в каталоге <em>~cbsd/etc</em>  ( например <em>/usr/jails/etc</em> ), тогда как профили <strong>CBSD</strong> находятся в каталоге <em>~cbsd/etc/defaults</em> ( например <em>/usr/jails/etc/defaults</em>)</p>
+	<p>Если вы будете редактировать файлы в каталоге <em>~cbsd/etc/defaults</em>, все ваши изменения будут удалятся каждый раз при обновлении <strong>CBSD</strong></p>
+	<p>Если вы хотите перезаписать базовый профиль, просто сделайте его копию в каталог <em>~cbsd/etc</em> и редактируйте его. В этом случае, при одинаковых именах профилей, система всегда будет предпочитать профиль
+	из каталога <em>~cbsd/etc</em>, не смотря на его наличие в каталоге <em>~cbsd/etc/defaults</em>.</p>
+	<p>При создании нового профиля, соблюдайте следующие правила:</p>
+	<ul>
+		<li>Имя файла должно начинаться с vm-"категория"-XXX.conf, где категория - это тип ОС - freebsd, openbsd, linux, windows, other</li>
+		<li>Внутри профиля обязательными являются аргументы: <strong>long_description</strong>, <strong>vm_profile</strong> и <strong>vm_os_type</strong></li>
+	<ul>
+	<p>Где:</p>
+	<ul>
+		<li><strong>long_description</strong> содержит произвольное описание, например: long_description="Linux Debian 9.2.1"</li>
+		<li><strong>vm_os_type</strong> - содержит тип ОС и должна быть также в имени файла. Так, если тип ОС - linux, пишите: vm_os_type="linux", а файл профиля будет начинатся с vm-linux-</li>
+		<li><strong>vm_profile</strong> - имя профиля, который также составляет часть профиля. Например, если вы создали профиль для Debian 9.2.1, вы можете написать vm_profile="Debian-9.2.1", а полное имя файла профиля будет: vm-linux-<strong>Debian-9.2.1</strong>.conf</li>
+	</ul>
+	<p>Остальные параметры являются опциональны (как количество ядер, RAM, имя виртуальной машины по-умолчанию, различные настройки bhyve) и если они отсутствуют в профиле, будут использоваться общие значения из профиля <em>etc/defaults/bhyve-default-default.conf</em>, который
+	вы также можете скопировать в файл <em>etc/bhyve-default-default.conf</em>, если глобальные параметры вас не устраивают и вы хотите их отредактировать</p>
+	<p>Также, обратите внимание на параметры <strong>fetch</strong>, <strong>iso_img</strong>, <strong>register_iso_name</strong> и <strong>register_iso_as</strong>.</p>
+	<p>Если вы создаете профиль виртуальной машины, которую можно получить по сети, скорее всего, они вам также понадобятся.</p>
+	<p>fetch говорит <strong>CBSD</strong>, доступен ли образ ISO для скачивания (0 - нет, 1 -да)</p>
+	<p>iso_img указывает на имя ISO образа, как он называется на источнике откуда его скачивать (например ubuntu-17.04-server-amd64.iso)</p>
+	<p>Параметры register_iso_name и register_iso_as регулируют, под каким именем сохранить скачиваемый образ и под каким именем зарегистрировать в <strong>CBSD</strong> media, например:
+	<pre class="cli;">
+register_iso_name="cbsd-iso-ubuntu-17.04-server-amd64.iso"
+register_iso_as="iso-Ubuntu-Server-17.04"
+</pre>
+	</p>
+	<p>Если с сайта скачивается не ISO образ, а архив с ISO образом, например <strong>.tgz</strong> или <strong>.gz</strong> или <strong>.xz</strong> и тд. (например, таким является профиль <strong>vm-dflybsd-</strong>), через параметр <strong>iso_extract</strong> можно указать команду для разархивирования, например:</p>
+	<pre class="cli;">
+iso_extract="bzip2 -d "
+	</pre>
+	<p>И конечно, всегда полезно предварительно посмотреть, как созданы базовые образы, профиль которых можно взять за основу.</p>
+	<div class="warning">
+	<p>Если вы создали рабочий профиль ОС, вы  можете выслать его в репозиторий <a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a> имея эккаунт на GitHub, тем самым, осчастливив других пользователей <strong>CBSD</strong>. Также, этот профиль войдет в следующий релиз <strong>CBSD</strong> и вы станете
+	участником проекта!</p>
+	</div>
+	</div>
+	<h2><a name="bhyve_settings">Описание настроек bhyve в меню bconstruct-tui</a></h2>
 	<div class="block">
 	<p>Опции и их краткое описание, которые фигурируют в диалоговой форме. В зависимости от выбранного типа OS и профиля, некоторые из них могут быть недоступны:</p>
 	<ul>

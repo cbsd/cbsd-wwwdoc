@@ -1,0 +1,43 @@
+<!--# include file="_start.html" -->
+<h1><span><strong>CBSD</strong> quick start</span></h1>
+	
+<h2><a name="knowit">Инициализация</a></h2>
+<div class="block">
+	<p>Инструкция для быстрого начала использования <strong>CBSD</strong></p>
+	<p>Установить CBSD из портов или pkg:</p>
+	<pre class="brush:bash;ruler:true;">
+	make -C /usr/ports/sysutils/cbsd install
+	</pre>
+	<pre class="brush:bash;ruler:true;">
+	pkg install -y cbsd
+	</pre>
+	<p>Настроить рабочий каталог в /usr/jails и произвести инициализацию:</p>
+	<pre class="brush:bash;ruler:true;">
+	env workdir=/usr/jails /usr/local/cbsd/sudoexec initenv
+	</pre>
+	<p>В большинстве случаев подойдут параметры по-умолчанию, просто нажимайте Enter если согласны с ними</p>
+	<p>Если возникли вопросы по индивидуальной настройки, просмотрите страницу <a href="/<!--#echo var="lang" -->/installing_cbsd.html#initenv">Первичная инициализация</a></p>
+</div>
+<h2><a name="knowit">Создание и запуск jail</a></h2>
+<div class="block">
+	<p>Запустить конфигуратор создания контейнера</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd jconstruct-tui
+	</pre>
+	<p>Запустить контейнер</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd jstart
+	</pre>
+</div>
+<h2><a name="knowit">Создание и запуск bhyve</a></h2>
+<div class="block">
+	<p>Запустить конфигуратор создания виртуальной машины</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd bconstruct-tui
+	</pre>
+	<p>Запустить виртуальную машину</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd bstart
+	</pre>
+</div>
+<!--# include file="_end.html" -->

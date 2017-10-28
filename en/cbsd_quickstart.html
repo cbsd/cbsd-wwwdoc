@@ -1,0 +1,43 @@
+<!--# include file="_start.html" -->
+<h1><span><strong>CBSD</strong> quick start</span></h1>
+	
+<h2><a name="knowit">Initialization</a></h2>
+<div class="block">
+	<p><strong>CBSD</strong> Quick Start Guide </p>
+	<p>Install CBSD from ports or pkg:</p>
+	<pre class="brush:bash;ruler:true;">
+	make -C /usr/ports/sysutils/cbsd install
+	</pre>
+	<pre class="brush:bash;ruler:true;">
+	pkg install -y cbsd
+	</pre>
+	<p>Configure the working directory in /usr/jails and initialize:</p>
+	<pre class="brush:bash;ruler:true;">
+	env workdir=/usr/jails /usr/local/cbsd/sudoexec initenv
+	</pre>
+	<p>In most cases, the default parameters are acceptable, just press Enter if you agree with them</p>
+	<p>If you have any questions about customization, please see the page <a href="/<!--#echo var="lang" -->/installing_cbsd.html#initenv">Ininital setup</a></p>
+</div>
+<h2><a name="knowit">Create and run jail</a></h2>
+<div class="block">
+	<p>Run the container creation configurator</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd jconstruct-tui
+	</pre>
+	<p>run jail</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd jstart
+	</pre>
+</div>
+<h2><a name="knowit">Create and run bhyve</a></h2>
+<div class="block">
+	<p>Run the VM creation configurator</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd bconstruct-tui
+	</pre>
+	<p>run bhyve</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd bstart
+	</pre>
+</div>
+<!--# include file="_end.html" -->

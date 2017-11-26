@@ -16,6 +16,26 @@
 </div>
 <h2><a name="release">Releases</a></h2>
 <div class="block">
+	<p><strong>11.1.10</strong>&nbsp;&mdash; 2017-11-26</p>
+	<ul>
+		<li>jexec, jlogin: add user= params, suggested by <strong>Goran Mekić</strong> aka <strong>meka</strong></li>
+		<li>zfsattach: make zfs jail after jail create but before /etc/rc boot sequence, force persist flags for this cases. <a href="https://github.com/cbsd/cbsd/issues/213" target="_blank">Issue #213</a>, reported by <strong>sturican</strong></li>
+		<li>bugfix: [jb]create proper removejconf args, reported <strong>Goran Mekić</strong> aka <strong>meka</strong></li>
+		<li>bugfix: Preserve jconf perms, submitted by <strong>Goran Mekić</strong> aka <strong>meka</strong></li>
+		<li>bugfix: jstop: fix ip4_addr list for removeing, add work-around for unstoppable cron via pkill</li>
+		<li>bugfix: bhyve: skip loopback interface as uplink, (reported by <strong>Denis Bezkrovniy via Telegram</strong>)</li>
+		<li>bugfix: bhyve: skip CBSDSYSTEM0 tap interface when no default route, (reported by <strong>Denis Bezkrovniy via Telegram</strong>)</li>
+		<li>bugfix: zfsattach: fix for syntax error. <a href="https://github.com/cbsd/cbsd/issues/213" target="_blank">Issue #213</a>, reported by <strong>sturican</strong></li>
+	</ul>
+</div>
+<div class="block">
+	<p><strong>11.1.9</strong>&nbsp;&mdash; 2017-11-05</p>
+	<ul>
+		<li>bugfix release</li>
+		<li>fix broken build after <a href="https://svnweb.freebsd.org/ports?view=revision&revision=r452700" target="_blank">r452700</a></li>
+	</ul>
+</div>
+<div class="block">
 	<p><strong>11.1.8</strong>&nbsp;&mdash; 2017-10-14</p>
 	<ul>
 		<li>bhyve: <a href="https://youtu.be/mTpvNpj1564">OpenBSD UEFI</a> support (on FreeBSD 11.1-RELEASE)</li>

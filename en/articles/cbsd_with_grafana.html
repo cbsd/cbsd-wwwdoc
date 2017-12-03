@@ -1,6 +1,8 @@
 <!--# include file="/en/_start.html" -->
 <!--# include file="/en/translate.html" -->
-<h1><span>Export and display jail and bhyve statistic metrics with <strong>CBSD</strong>, Grafana and Prometheus</span></h1>
+<h1><span>CBSD, Grafana, and Prometheus</span></h1>
+<div align="right"><strong>Export and display jail and bhyve statistic metrics.</strong></div>
+</br>
 <div class="block">
 <p>Statistics about the jails and containers used in a virtual environment, the
 components being used and the resources being consumed over time, are used to
@@ -120,10 +122,6 @@ intermediate file that can then be served through any web server, for example
 <a href="https://www.nginx.com/" target="_blank">NGINX</a>.
 </p>
 <p>Schematically, this setup might look like this:</p>
-<!--<p class="text-center"><img src="/img/grafana/cbsd_grafana_schema.png" width="800" height="600" alt="" /></p>-->
-<!--
-TODO: Resizing an image via HTML is a bad idea, and causes delays on page load. The image is actually 568x514
--->
 <p class="text-center"><img src="/img/grafana/cbsd_grafana_schema.png" alt="" /></p>
 <p>The collector and generator of the index.html file can act as a self-written 
 daemon, or be a script called from <a href="http://man.freebsd.org/cron/8"> cron</a>, 
@@ -416,12 +414,7 @@ server {
 <h1><span>Check the Work</span></h1>
 <p>Prometheus provides a way to verify that the metrics are being gathered 
   correctly via port 9090 on the host the prometheus process is running on. 
-  Open a web browser, and go to 127.0.0.1:9090 to open the prometheus interface.
-<!--
-TODO: 
-Is the address 127.0.0.1:9090 correct? would this be better described as the 
-prometheus admin interface?
--->
+  Open a web browser, and go to 127.0.0.1:9090 to open the Prometheus server.
 </p>
 <p>The dropdown list next to the Execute button lists all of the metrics that 
   CBSD is able to provide.</br>
@@ -469,22 +462,22 @@ accordingly.
 <p>Hopefully this article shows how easy it is to export the available 
   metrics for both jails and bhyve. New servers added will automagically be added 
   into the metric database. Previously configured scripts do not need to be modified.
-  The examples used in this article obtained metrics from FreeBSD RACCT. 
-  <!--
-TODO: 
-This is the original line;
-", and it is available for removal from each server along the path /rctl."
-I wasn't sure what this actually means.
--->
-  Metrics can be increased and expand. For example, using /trafstat, metrics for 
-  the traffic of containers can be gathered and displayed. For /billing, metrics 
-  can be adjusted with a schedule of tariffs and costs associated with the 
+  The examples used in this article obtained metrics from the FreeBSD RACCT 
+  framework using the data available using the <em>/rctl path</em> in the URL. 
+  <strong>CBSD</strong> is not limited to using only RACCT metrics. Additional 
+  metrics can be created, for example traffic metrics or billing data, which 
+  can then be accessed using the respective path. /traffic or /billing ect. 
+  These metrics can then be exported to grafana. 
+
+  Metrics can be increased and expanded. For example, using /trafstat, metrics for 
+  the traffic of containers can be gathered and then displayed. For /billing, metrics 
+  can be adjusted with a schedule of taxes/tariffs and costs associated with the 
   resources that have been consumed.
-  Configuration, and the display of statistics is only limited by the imagination 
-  of the administrator doing the configuration. Information about the status of 
-  monitored systems allows an adminstrator to easily identify possible trends, 
-  be it the need for more resources, or to identify potential issues before they 
-  become emergencies. </br>
+  Configuration, and the statistics that can be displayed is only limited by the 
+  imagination of the administrator doing the configuration. Information about the 
+  status of monitored systems allows an adminstrator to easily identify possible 
+  trends, be it the need for more resources, or to identify potential issues 
+  before they become emergencies. </br>
   </br>
   <strong>Finally, FreeBSD and CBSD make obtaining, and configuring useful information easy, and 
     displaying this information as easy as clicking a button.</strong>

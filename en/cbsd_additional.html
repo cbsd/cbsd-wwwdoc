@@ -1,11 +1,16 @@
 <!--# include file="_start.html" -->
 <!--# include file="currentver.html" -->
-<!--# include file="/en/translate.html" -->
 	<h1><span>What you need to know about <strong>CBSD</strong></span></h1>
 	<h2><a name="knowit">General information</a></h2>
 	<div class="block">
-		<p><strong>CBSD</strong> represents an additional layer of abstraction over <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">Jail framework</a> and the part on FreeBSD functional</p>
-		<p>A list of some of the functional involved in the cbsd:</p>
+    <p><strong>CBSD</strong> is an additional layer of abstraction for the 
+    <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a>
+    framework, and provides additional functionality not currently available in
+    FreeBSD.
+    </p>
+    <p>The additional functionality <strong>CBSD</strong> provides uses the 
+    following;
+    </p>
 		<ul>
 			<li>vnet (VIMAGE)</li>
 			<li>zfs</li>
@@ -16,109 +21,329 @@
 			<li>hastd</li>
 			<li>bhyve</li>
 		</ul>
-		<p>Many of these subsystems are not directly related to the <strong>jail</strong>, however, allow <strong>CBSD</strong> (which is the connecting link between these components) to provide a system administrator more advanced and integrated system solutions for the problems. Below provides information useful to the system administrator and describes the architecture <strong>CBSD</strong> more detail.</p>
-		<p>First, the official articles about <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/jails.html" target="_blank">FreeBSD Jails</a> required for the study to understand what is a jail in the usual way.</p>
-		<p>Secondly, it is useful to know about the file system hierarchy <strong>CBSD</strong>. Let us agree to use the following naming documentation and values:</p>
+    <p>While many of these subsystems are not directly related to 
+    <strong>jails</strong>, <strong>CBSD</strong> uses these components to 
+    provide system administrators a more advanced, integrated system in which 
+    to implement solutions for issues faced in today's envirnonment. 
+    </br>
+    This page will provide information to help system administrators familiarize 
+    themselves with CBSD. While this page is not intended to be a comprehensive, 
+    all encompassing how-to, it will provide details about where files are 
+    stored, and how to use <strong>CBSD</strong> to manage and interact with 
+    the virtual environment.
+    </p>
+    <p>The information provided here assumes a basic understanding of jails, 
+    how they are used, and how they are managed in FreeBSD. The official 
+    documentation about jails is a highly recommended starting point, and can be 
+    found in Chapter 14 of the FreeBSD Handbook: 
+    <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/jails.html" target="_blank">Jails</a>.
+    The <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a>
+    manpage is also a great resource.
+    </p>
+    <p>It will also be useful to understand how the filesystem hierarchy is laid 
+    out in <strong>CBSD</strong>.
+ <!--TODO: 1 
+    Should this be linked to https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/dirstructure.html?
+-->
+    </p>
+    <p>Before getting started, be aware of the following terminology, and how 
+    it will be used;
+    </p>
 		<ul>
-			<li><strong>Node</strong> — physical server / resource unit.</li>
-			<li><strong>Jail</strong> — isolated environment with its own set of software/services. They can be a server-side components (DNS, Apache / nginx, postfix) and graphic environment.</li>
-			<li><strong>Cloud</strong> — Farm/cluster of interconnected nodes, a full-fledged peer network (each node can do other tasks through <strong>CBSD</strong>)</li>
-			<li><strong>Base</strong> — in the <strong>CBSD</strong> content — copy of FreeBSD file base.</li>
-			<li><strong>CBSD</strong> — an entity that has control over the particular node(s) and certain subsystems of FreeBSD, is able to provide a simplified and unified action (API) on the nodes or jails and provides ACL and setting permissions for <strong>CBSD</strong> customers</li>
-			<li><strong>$workdir</strong> — working directory on <strong>CBSD</strong> node is initialized through cbsd initenv the first run. Usually <strong>/usr/jails</strong>.</li>
-			<li><strong>$jname</strong> — Name some jails, participate in the example.</li>
-		</ul>
-		<p>&nbsp;</p>
-		
-		<p>All working data of <strong>CBSD</strong> placed in the directory <strong>$workdir</strong>(e.g.: <em>/usr/jails</em>), it is also the home directory for the user <strong>CBSD</strong> and you always can quickly change dit to it via:</p>
+      <li><strong>Node</strong>: A physical server that hosts the virtual 
+      environment.</li>
+      <li><strong>Jail</strong>: An isolated environment, complete  with its own 
+      set of software and services. A jail can be a server-side component; DNS, 
+      Apache/nginx, or postfix for example.</li>
+<!--TODO: 2
+        The following was also included "and graphic environmet" I wasn't 100% what
+        was meant here. Are we saying that a jail can also run a graphical environment, 
+        that it can be installed in a graphical environment? Once clarified, it can 
+        be added back in, or we can leave it out.
+-->
+      <li><strong>Cloud:</strong> A farm/cluster of interconnected nodes, or a 
+      full-fledged peer network (each node can do other tasks through <strong>CBSD</strong>)</li>
+      <li><strong>Base:</strong> In the context of <strong>CBSD</strong>, a copy 
+      of the files in the FreeBSD base.</li>
+      <!--The description for what 'Base' is needs to be worded better.-->
+      <li><strong>CBSD:</strong> An entity that has control over the specified 
+      node(s) and certain subsystems of FreeBSD. CBSD provides a unified way to 
+      interact with and perform actions on the specified nodes or jails via the 
+      provided API. <strong>CBSD</strong> also provides the ability to implement 
+      and use <a href="https://www.freebsd.org/doc/handbook/fs-acl.html"> ACL</a>, 
+      and change permissions on specified resources.</li>
+      <li><strong>$workdir:</strong> The working directory on a <strong>CBSD</strong> 
+      node that is initialized via the <em>cbsd initenv</em> command on the 
+      initial run. This directory is <strong>/usr/jails</strong> unless otherwise 
+      specified.</li>
+      <li><strong>$jname:</strong> The name of a jail in the <strong>CBSD</strong> 
+      environment.</li>
+    </ul>
+<!--TODO: 3
+    The original description of $jname was "Name some jails, participate in the example.
+    I know $jail refers to a jail name, but wasn't sure if there was a better way to 
+    say it. I am also not sure what the translation "participate in the example" means.
+-->
+    <p>The largest directory used by CBSD is where all of the data <strong>CBSD</strong> 
+    uses is stored. This is the directory <strong>$workdir</strong>, and is a 
+    symlink to <strong><em>/usr/jails</em></strong> by default. This directory 
+    can be changed when necessary. $workdir is also the <strong>CBSD</strong> 
+    user's home directory. To quickly enter this dir from any other path, pass 
+    '~cbsd' to the <strong>cd</strong> command.
+    </p>
 		<pre class="brush:bash;ruler:true;">
 			% cd ~cbsd
 		</pre>
-		<p>The most important data are located in <em>$workdir/jails-data/$jname</em>, as it is directly the root of the file system jails called <strong>$jname</strong>, if jail is created with the flag <strong>baserw=1</strong>, or contains the data of jail, which are superimposed on the standard <em>$workdir/basejail/$basename</em> in the directory <em>${workdir}/jails</em></p>
-		<p>Given that the base you can always get through the building source code, or by downloading from the repository.  The other words, <strong>CBSD</strong> jail to migrate to any other project management of jails or use the basic functionality FreeBSD jail, the main thing — is to have a consistent data in this directory.</p>
-		<p><br><em>Notes:</em> if you use a jails type md, then the directory $workdir/jails-data/$jname will contain the image of the jail.</p>
-		<p><em>Notes2:</em>If you are using ZFS and discovered that the data directories is empty (when the jail is inactive), check the output of the command:</p>
+    <p>
+    There are two main directories used to store jail data. The deciding factor 
+    for which directory is used depends on whether or not a newly created jail 
+    should be able to write to it's base or not. This option is specified by 
+    passing the flag <strong>baserw=0 or baserw=1</strong> when creating a new
+    jail.
+    </p>
+    <p><u><strong>baserw=0;</strong></u></br>
+    To create a jail with a readonly base, pass the flag <strong>baserw=0</strong>.
+    Instead of writing to the base, the new jail will use the standard 
+    base from <em>$workdir/basejail/$basename</em>. Jails with a read only 
+    base are stored in the directory <strong><em>$workdir/jails/$jname</em></strong>.
+    Any baserw=0 jail will mount the $basename through nullfs. This allows for 
+    the easy upgrade of all baserw=0 jails, as upgrading the $basename jail 
+    upgrades all of the jails using it. Another advantage is the fact that if a 
+    read only jail is compromised, the attacker will be unable to modify anything 
+    in base as it is read only.
+    </p>
+    <p><u><strong>baserw=1;</strong></u>
+    When a new jail is created with the flag <strong>baserw=1</strong>, the jail 
+    will have the ability to write to it's own base. Jails with this ability 
+    store data in the directory <strong><em>$workdir/jails-data/$jname</em></strong>.
+    </p>
+    <p><strong>CBSD</strong> uses the standard directories specified by jail(8). 
+    This allows jails to migrated to or from any other jail management system 
+    that also follows the standards set by jail. The goal for the directories where 
+    jails are stored is to be consistent, and adhere to the jail standards. This 
+    allows for the greatest compatibility.
+    </p>
+    </br>
+    <p><strong><em>Note:</em></strong> When using the jail type md, the directory $workdir/jails-data/$jname 
+    will contain the image of the jail.
+    </p>
+    <p><strong><em>Note:</em></strong> When using ZFS, CBSD has the ability to unmount a jail's 
+    data directory while the the jail is inactive. If a jail's data directory 
+    is found to be empty, don't panic. (At least when the jail is inactive). 
+    Check the output of the command;
+    </p>
 		<pre class="brush:bash;ruler:true;">
 			% zfs list
 		</pre>
-		<p>cbsd can unmount the data when the jail is inactive. To access the data, use:</p>
+    <p>To access the data use;
+    </p>
 		<pre class="brush:bash;ruler:true;">
 			% zfs mount $jname_file_system
-		</pre>
-		<p>The second-largest in the directory hierarchy can act <strong>CBSD</strong> configuration files to create jail that are in the directory <em>$workdir/var/db/</em>. All settings of jails are stored in the SQLite3 file pointed to by the symbolic link <em>${workdir}/var/db/local.sqlite</em> in <strong>jails</strong> table. Table schema describes in <em>${workdir}/share/local-jails.schema</em> file. For example, to see all the jails on the node and their ip address execute:</p>
+    </pre>
+    </br>
+    <p>The second-largest directory in the <strong>CBSD</strong> hierarchy is 
+    <em>$workdir/var/db/</em>. This directory is where the configuration files 
+    for all of the jails created are stored. All jail settings are stored in the 
+    <strong>jails</strong> table in an SQLite3 database. The symbolic link 
+    <em>${workdir}/var/db/local.sqlite</em> should always point to the correct/ 
+    current database. The table schema is described in the file 
+    <em>${workdir}/share/local-jails.schema</em>. SQLite3 can be used to query 
+    information about all jails on a node. </br> 
+    For example, to see all jails on the node, and their IP address' execute;</p>
 		<pre class="brush:bash;ruler:true;">
 			% sqlite3 /usr/jails/var/db/local.sqlite "select jname,ip4_addr from jails"
 		</pre>
-		<p>When a jail is started, <strong>CBSD</strong> generate jail.conf file from this database via</p>
+    <p>When a jail is started, <strong>CBSD</strong> generates a jail.conf from 
+    the database using the command;
+    </p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jmkrcconf jname=jailname
 		</pre>
-		<p>You can use this command if you want to return from <strong>CBSD</strong> back to base version (with losing functionality of <strong>CBSD</strong>)
-		<p>The <em>$workdir/jails-system/</em> directory serves as an additional storage for <strong>CBSD</strong> jail data, for example it may be configurators services, file with the description of the jail, traffic statistics, resources statistics, and so on. Internal information for cbsd stored in $workdir/db directory. For example, the information on the list of added nodes, inventory both the local and remote nodes, and so on.</p>
-		<p>Important in terms of security, is the directories <em>${workdir}/.rssh</em> and <em>${workdir}/.ssh</em>, in which there are private RSA keys with remote user <strong>CBSD</strong> nodes and local respectively. Make sure that the data of these directories were not available to other users of the system. Besides, to you information about <a href="/en/cbsd_geli.html">scan be interesting for GELI encryption</a>. By default, the key can be read only by a system <strong>CBSD</strong> user.</p>
-		<p>Finally, thirdly, be sure to read the modifications that prepares <strong>CBSD</strong> in your configuration: <a href="/en/custom_freecbsd.html">Modification which are carried out by <strong>CBSD</strong> scripts in FreeBSD</a></p>
-	</div>
-	
-	<h2><a name="hier">A brief summary of the hierarchy <strong>CBSD</strong></a></h2>
+    <p>This command can be used to return a jail back to the base version. 
+    Doing so will cause the loss of <strong>CBSD</strong> functionality.
+    </pre>
+<!--TODO: 4
+    I don't understand the "loss of CBSD funcionality." part. Does this mean
+    you will lose any modifications made to jail.conf? I think it's trying to say 
+    that this command is run to generate jail.conf, if it's run again at a later 
+    date, it would be like creating a brand new jail, hence losing any changes. 
+    If I don't have this right, please let me know. 
+-->
+    <p>The <em>$workdir/jails-system/</em> directory serves as additional 
+    storage for <strong>CBSD</strong> jail data.</br> 
+    <u>For example:</u> There may be configurator's services, files with the description 
+    of the jails, traffic statistics, resources statistics, and so on.</br>
+    Internal information for <strong>CBSD</strong> is stored in the $workdir/db directory.</br>
+    <u>For example:</u> The information on the list of added nodes, inventory of both 
+    the local and remote nodes, and so on.
+    </p>
+    <p>One important thing to note in regards to security are the directories 
+    <strong><em>${workdir}/.rssh</em> and <em>${workdir}/.ssh</em></strong>. 
+    These dirs contain the private RSA keys for the remote user <strong>CBSD</strong>
+    nodes (.rssh) and the local nodes(.ssh). Make sure that the data in these 
+    directories are not available to other users of the system. For more 
+    information, please see the article about 
+    <a href="/en/cbsd_geli.html"> GELI encryption</a>. By default, the key can 
+    be read only by a system <strong>CBSD</strong> user. 
+    </p>
+    Finally, be sure to read about the modifications that <strong>CBSD</strong> 
+    does to the system. This <a href="/en/custom_freecbsd.html">page</a> describes 
+    all of the modifications that are carried out by <strong>CBSD</strong> 
+    scripts after installing on a FreeBSD system.
+    </p>
+</div>
+
+<h2><a name="hier">A brief summary of the filesystem hierarchy <strong>CBSD</strong></a></h2>
 	<div class="block">
 		<table class="images">
-			<tr><td class="bg-gray">${workdir}/.rssh/</td><td>Directory for storage of private keys of remote nodes. The files are added and removed via the command <strong>cbsd node</strong></td></tr>
-			<tr><td class="bg-gray">${workdir}/.ssh</td><td>Here is kept private and a public key of the node itself. Formed during the initialization with the command cbsd initenv. It is from here will take the public key of remote hosts on the <strong>cbsd node mode=add</strong> command. Key file name is the md5 sum of the nodename.</td></tr>
-			<tr><td class="bg-gray">${workdir}/basejail</td><td>Here are kept ready for use at the bases and kernels FreeBSD (the result of cbsd buildworld/buildkernel, cbsd installworld/installkernel or cbsd repo action=get sources=base/kernel)</td></tr>
+			<tr><td class="bg-gray">${workdir}/.rssh/</td><td>This directory stores the private keys of remote nodes. The files are added and removed via the command <strong>cbsd node</strong></td></tr>
+      <tr><td class="bg-gray">${workdir}/.ssh</td><td>This directory stores the private and public keys of the nodes. The directory is created during initialization with the command <strong><em>cbsd initenv</em></strong>. This is also where the public key comes from when the command <strong>cbsd node mode=add</strong> is issued to copy the pub key to a remote host. The Key file name is the md5 sum of the nodename.</td></tr>
+			<tr><td class="bg-gray">${workdir}/basejail</td><td>This directory is used to store the bases and kernels for FreeBSD that are used when creating baserw=0 jails. These are generated via cbsd buildworld/buildkernel, cbsd installworld/installkernel, or cbsd repo action=get sources=base/kernel)</td></tr>
 			<tr><td class="bg-gray">${workdir}/etc</td><td>Configuration files needed to run <strong>CBSD</strong></td></tr>
-			<tr><td class="bg-gray">${workdir}/export</td><td>Default directory, which will be stored in a file exported by the jail (when the cbsd jexport jname=$jname, this directory will file $jname.img)</td></tr>
-			<tr><td class="bg-gray">${workdir}/import</td><td>Default directory of which will be imported to jail (at cbsd jimport jname=$jname, will be deployed jail $jname)</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails</td><td>This directory contains the mount point for the root jails, who use baserw=0.</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-data</td><td>This catalog have the jails data. It is these places need to backup jails (including fstab and rc.conf files).  Also, if the jail use baserw=1, these directories are the root of the jail when it starts</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-fstab</td><td>fstab file for the jails. The syntax for regular FreeBSD with the only exception that the path to the mount point is written relative to the root jail (record <strong>/usr/ports /usr/ports nullfs rw 0 0 </strong> in the file fstab.$jname means that of the master node directory /usr/ports will be mounted at startup in ${workdir}/jails/$jname/usr/ports)</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-rcconf</td><td>rc.conf files for jail creation. These parameters can be changed at your editor, or via the command cbsd jset $jname param=val (eg cbsd jset jname=$jname ip="192.168.0.2/24"). To change these settings jail should be turned off. </td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-system</td><td> This catalog may contain some helper scripts related to the jail (eg wizards to configure, configurators, etc) as well as the preserved jail traffic when using ipfw and its description. This catalog participates in jimport/jexport operations and migration of jail </td></tr>
-			<tr><td class="bg-gray">${workdir}/var</td><td> directory that contains system information <strong>CBSD</strong>. For example, in ${workdir}/var/db is an inventory of local and remote nodes if were added </td></tr>
-			<tr><td class="bg-gray">/usr/local/cbsd</td><td> A copy of the original files installed by <strong>CBSD</strong> port. Also contains the working scripts in sudoexec </td></tr>
+			<tr><td class="bg-gray">${workdir}/export</td><td>The default directory that will be stored in a file exported by the jail (a cbsd jexport jname=$jname, this directory will file $jname.img)</td></tr>
+			<tr><td class="bg-gray">${workdir}/import</td><td>The default directory containing data to be imported to a jail (a cbsd jimport jname=$jname, will be deployed jail $jname)</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails</td><td>This directory contains the mount point for the root jails that use baserw=0.</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails-data</td><td>This directory stores all jail data. Backup these directories to take a backup of the jails (including fstab and rc.conf files). Note: if a jail uses baserw=1, these directories are the root of the jail when it starts.</td></tr>
+      <tr><td class="bg-gray">${workdir}/jails-fstab</td><td>The fstab file for the jails. The syntax for regular FreeBSD with the only exception that the path to the mount point is written relative to the root <em>jail</em> (record <strong>/usr/ports /usr/ports nullfs rw 0 0 </strong> in the file fstab.$jname means that of the master node directory /usr/ports will be mounted at startup in ${workdir}/jails/$jname/usr/ports)</td></tr>
+      <tr><td class="bg-gray">${workdir}/jails-rcconf</td><td>rc.conf files for jail creation. These parameters can be changed using $editor, or via the command <strong><em>cbsd jset $jname param=val</em></strong> (eg <em>cbsd jset jname=$jname ip="192.168.0.2/24"</em>). To change these settings, the jail should be turned <strong>off</strong>. </td></tr>
+			<tr><td class="bg-gray">${workdir}/jails-system</td><td> This directory may contain some helper scripts related to the jail (eg wizards to configure, configurators, etc) as well as the preserved jail traffic when using ipfw and its description. This catalog participates in jimport/jexport operations and migration of jail </td></tr>
+			<tr><td class="bg-gray">${workdir}/var</td><td> This directory contains system information for <strong>CBSD</strong>. For example, in ${workdir}/var/db is an inventory of local and remote nodes that were added. </td></tr>
+			<tr><td class="bg-gray">/usr/local/cbsd</td><td> A copy of the original files installed by the <strong>CBSD</strong> port. The working scripts for sudoexec can also be found here. </td></tr>
 		</table>
+  </div>
+<h2><a name="traffic">Counting jail traffic</a></h2>
+    <div class="block">
+    <p><strong>CBSD</strong> uses the <strong>count</strong> ruleset of 
+    <a href="https://www.freebsd.org/doc/en/books/handbook/firewalls-ipfw.html"><strong>ipfw</strong></a> 
+    filter to count jail traffic. <strong>CBSD</strong> sets the number of counters 
+    in the <strong>99 — 2000</strong> range. The range can be easily adjusted in 
+    cbsd.conf if this interfes with existing rules. Be mindful when changing 
+    firewall rules.
+<!--TODO: 5
+    Original sentence: So be careful and make sure to follow your rules IPFW after a specified range.</p>
+    I'm not quite sure what this is trying to say. I have a vague idea what it's 
+    trying to say, somethig to the effect of "make sure your rules make sense, and 
+    don't interfere with other rulesets.
+-->
+    <p>
+    Read more about <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html"> counting jail traffic </a>.
+    </p>
 	</div>
-	
-	<h2><a name="traffic">Counting traffic jail</a></h2>
-	<div class="block">
-		<p>At this point,  for counting jail traffic used <strong>count</strong> ruleset of <strong>ipfw</strong> filter. <strong>CBSD</strong> sets number of counters in <strong>99 — 2000</strong> range (you can change this in cbsd.conf). So be careful and make sure to follow your rules IPFW after a specified range.</p>
-		<p><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html">Read more about jail traffic counting</a></p>
-	</div>
-
 	<h2><a name="expose">Expose: tcp/udp port forwarding from master host to jail</a></h2>
 	<div class="block">
-		<p>At this point,  for port forwarding used <strong>fwd</strong> ruleset of <strong>ipfw</strong>. <strong>CBSD</strong> sets number of counters in <strong>2001&nbsp;— 2999</strong> range (you can change this in cbsd.conf). So be careful and make sure to follow your rules IPFW after a specified range.</p>
-		<p><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_expose_ssi.html">Read more about expose</a></p>
+    <p><strong>CBSD</strong> uses the <strong>fwd</strong> ruleset of 
+    <strong>ipfw</strong> to configure port forwarding. <strong>CBSD</strong> 
+    sets the number of counters in the <strong>2001 - 2999</strong> range. This 
+    range can easily be changed in cbsd.conf if need be. Again, always be mindful 
+    when changing firewall rules.
+<!--TODO: 6
+    This is that same sentence again;
+    So be careful and make sure to follow your rules IPFW after a specified range.
+    Will modify this according to what we figure out above.
+-->
+    <p>
+    Read more about <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_expose_ssi.html">expose</a>.
+    </p>
 	</div>
-
 	<h2><a name="secrsyncd"><span>About rsync-based copying jail data between nodes</span></a></h2>
 	<div class="block">
-		 <p>If you activate <strong>cbsdrsyncd</strong>, keep in mind, it is standard <strong>rsyncd(1)</strong> daemon who looks at a particular <em>$jail-data</em> directory and protected only by rsync password, which generates <strong>CBSD</strong> via:</p>
+     <p><strong>CBSD</strong> offers a wrapper to rsync called cbsdrsyncd. If 
+     <strong>cbsdrsyncd</strong> is activated, please keep in mind that there 
+     is the standard <strong>rsyncd(1)</strong> daemon running that looks at 
+     the specified <em>$jail-data</em> directory, and is protected by the rsync 
+     password. <strong>CBSD</strong> generates a strong password via the 
+     following command;
+     </p>
 		 <pre class="brush:bash;ruler:true;">
 		 head -c 30 /dev/random | uuencode -m - | tail -n 2 | head -n1
 		 </pre>
-		 <p>Currently used transmission through the daemon, rather than rsync over ssh for the reason of avoiding open access for the user root. Accordingly, as an additional protection, it is recommended to close the port <strong>1873/tcp</strong> which uses <stgrong>CBSD</strong> from untrusted hosts and used to separate management interface for nodeip or use encrypted communications between nodes (eg IPSec)</p>
+     <p>As of right now, <strong>CBSD</strong> transmits rsync data through 
+     the rsync daemon, rather than rsync over ssh. This avoids allowing open 
+     access for the root user. It is also recommended to close the port 
+     <strong>1873/tcp</strong> which allows access to <strong>CBSD</strong> 
+     from untrusted hosts and is used to seperate out the management interface 
+     for the node IP, or use encrypted communiction between the nodes using 
+     something like IPSec.
+     </p>
+<!--TODO: 7
+    Please review the above section about rsync/cbsdrsyncd for accuracy.
+    I'm not 100% how to phrase the part about rsync "transmitting data through
+    the daemon" I think the part about disabling port 1873/tcp could be reworded
+    a bit better as well.
+-->
 	</div>
 	<h2><a name="color">ANSII Color</a></h2>
 	<div class="block">
-		<p>By default, <strong>CBSD</strong> displayed text in color (using escape sequences ANSII).  If for some reason the color is unpleasant, or you can use output from utilities <strong>CBSD</strong> in your scripts,  which prevents ANSII sequence, you can disable the color through the environment variable NOCOLOR=1. For example, the command</p>
+    <p><strong>CBSD</strong> displays output using colorized text by default 
+    using ANSII escape sequences. Doing so helps important information standout. 
+    If the colors are found to be unpleasant, or interfere with using output 
+    from commands or utilities available in <strong>CBSD</strong>, colors can 
+    be disabled by setting the environment variable NOCOLOR=1.</br>
+    For example, issuing the command;
 		<pre class="brush:bash;ruler:true;">
 			% env NOCOLOR=1 cbsd jls
 		</pre>
-		<p>prohibit the use of color in the derivation of the title.</p>
+    will disable the use of color in the output of the names of the jails.
+    </p>
 	</div>
 	
 	<h2><a name="troubles">If something went wrong</a></h2>
 	<div class="block">
-		<p>In the case when with <strong>CBSD</strong> tools errors and <a href="/<!--#echo var="lang" -->/cmdsyntax_cbsd.html#cmddebug">CBSD command debuging</a> enlightenment has not brought, it is recommended to make the problem a bug-tracker of the project: If something went wrong <a href="https://github.com/cbsd/cbsd/issues" target="_blank">cbsd issues</a>  or report via e-mail: <strong>CBSD</strong> <em>at</em> <strong>bsdstore.ru</strong></p>
-		<p>Please make backup copies of directory ${workdir}/var/db, ${workdir}/var/db, ${workdir}/jails-fstab, ${workdir}/jails-system regularly. And also, of course, the data of their cells <em>${workdir}/jails-data</em></p>
-		<p>If you restore jail from backup, you will need to file ${workdir}/jails-system/${jname}/rc.conf_${jname} -after return back jails-data and jails-fstab directories for this jail to $workdir directory structure, copy this rc.conf_${jname} in  ${workdir}/jails-rcconf/ directory — then, at the command</p>
+    <p>While the <strong>CBSD</strong> project strives to be bug free, like 
+    any software, bugs happen. If a component or tool that is part of 
+    <strong>CBSD</strong> crashes, or returns unexpected data or behaviour, 
+    <a href="/<!--#echo var="lang" -->/cmdsyntax_cbsd.html#cmddebug">CBSD command debuging</a> 
+    can be enabled. If the bug is reproducible, and an actaul bug discovered, 
+    please report the issue via e-mail: <strong>CBSD </strong> <em>at</em> 
+    <strong> bsdstore.ru</strong>, or better yet submit a pull request that 
+    identifies the issue found, and contains the code to resolve the issue.
+    </p>
+    <p>
+  <h2><a name="backups">Taking backups of CBSD virtual environment.</a></h2> 
+  <div class="block">
+    <p><strong>Taking a backup</strong></br>
+    Any sys admin worth their salt would agree that taking regular backups is a 
+    must to ensure data is safe. To properly backup the virtual environments on 
+    the node, the following directories must be included (The description of each 
+    of these directories is in the table above;
+    <ul>
+        <li>${workdir}/var/db</li>
+        <li>${workdir}/jails-fstab</li>
+        <li>${workdir}/jails-system</li>
+        <li>${workdir}/jails-data</li>
+    </ul>
+    <p><strong>Restoring a backup</strong></br>
+    To restore a jail from a backup, the following will need to be done as well;</br>
+
+    Restore ${workdir}/jails-system/${jname}/rc.conf_${jname} then after the 
+    VM reboots, and is back online, restore the <strong><em>jails-data</em></strong> 
+    and <strong></em> jails-fstab</em></strong> directories to the respective 
+    jail $workdir directory structure, then copy the rc.conf_${jname} into the 
+    ${workdir}/jails-rcconf/ directory, then issue the following commands;
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jls
 		</pre>
-		<p>Jail will appear in the list whit status Unregister. At the command</p>
+    <p>The jail will appear in the list with the status 'Unregister'. </br>
+    Issue the following command;
+    </p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jregister jname=$jname
 		</pre>
 		<p>you return jail  into a common pool and working condition.</p>
 	</div>
+<!--TODO: 8
+    This is the original text that the Restoring a backup was written from. I'm 
+    not sure what "you will need to file" actaully means. I wrote the above 
+    like it meant "restore these files"
+
+    <p>If you restore jail from backup, you will need to file ${workdir}/jails-system/${jname}/rc.conf_${jname} -after return back jails-data and jails-fstab directories for this jail to $workdir directory structure, copy this rc.conf_${jname} in  ${workdir}/jails-rcconf/ directory — then, at the command</p>
+    <pre class="brush:bash;ruler:true;">
+      % cbsd jls
+    </pre>
+    <p>Jail will appear in the list whit status Unregister. At the command</p>
+    <pre class="brush:bash;ruler:true;">
+      % cbsd jregister jname=$jname
+    </pre>
+    <p>you return jail  into a common pool and working condition.</p>
+    -->
 <!--# include file="_end.html" -->

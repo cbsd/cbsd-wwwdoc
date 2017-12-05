@@ -78,7 +78,7 @@
   <item>
     <title>FreeBSD Cloud and DevOPS, Part 3, by Goran Mekić</title>
     <description>
-    Goran Mekić, one of the participants CBSD Project published the third part of the article 'FreeBSD Cloud and DevOps 3' &lt;br /&gt;
+    Goran Mekić, one of the participants CBSD Project published the third part of the article: FreeBSD Cloud and DevOps 3&lt;br /&gt;
     Details: http://meka.rs/blog/2017/10/01/freebsd-cloud-and-devops-3/ &lt;br /&gt;
     </description>
     <link>http://meka.rs/blog/2017/10/01/freebsd-cloud-and-devops-3/</link>
@@ -109,6 +109,31 @@
     <link>https://www.bsdstore.ru</link>
     <guid>CBSD 11.1.8 available</guid>
     <pubDate>Sat, 14 Oct 2017 01:01:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>CBSD 11.1.9 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - fix broken build after r452700&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.9 available</guid>
+    <pubDate>Sun, 05 Nov 2017 01:01:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>CBSD 11.1.10 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - jexec, jlogin: add user= params, suggested by Goran Mekić aka meka&lt;br /&gt;
+    - zfsattach: make zfs jail after jail create but before /etc/rc boot sequence, force persist flags for this cases. Issue #213, reported by sturican&lt;br /&gt;
+    - bugfix: [jb]create proper removejconf args, reported Goran Mekić aka meka&lt;br /&gt;
+    - bugfix: Preserve jconf perms, submitted by Goran Mekić aka meka&lt;br /&gt;
+    - bugfix: jstop: fix ip4_addr list for removeing, add work-around for unstoppable cron via pkill&lt;br /&gt;
+    - bugfix: bhyve: skip loopback interface as uplink, (reported by Denis Bezkrovniy via Telegram)&lt;br /&gt;
+    - bugfix: bhyve: skip CBSDSYSTEM0 tap interface when no default route, (reported by Denis Bezkrovniy via Telegram)&lt;br /&gt;
+    - bugfix: zfsattach: fix for syntax error. Issue #213, reported by sturican&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.10 available</guid>
+    <pubDate>Sun, 26 Nov 2017 01:01:00 +0000 </pubDate>
   </item>
 </channel>
 </rss>

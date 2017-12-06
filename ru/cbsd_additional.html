@@ -106,14 +106,5 @@
 	<div class="block">
 		<p>В случае, если при выполнении утилит <strong>CBSD</strong> возникают ошибки и <a href="/<!--#echo var="lang" -->/cmdsyntax_cbsd.html#cmddebug">Debug отработки CBSD команд</a> ясности не дал, рекомендуется оформить проблему в баг-трекере проекта: <a href="https://github.com/cbsd/cbsd/issues" target="_blank">cbsd issues</a> или сообщить об ошибке по email: <strong>CBSD</strong> <em>at</em> <strong>bsdstore.ru</strong></p>
 		<p>Делайте резервные копии каталогов ${workdir}/var/db, ${workdir}/var/db, ${workdir}/jails-fstab, ${workdir}/jails-system и, конечно же, данные клеток в каталоге ${workdir}/jails-data</p>
-		<p>Если вы будете восстанавливать Jail из бекапа, вам потребуется файл ${workdir}/jails-system/${jname}/rc.conf_${jname}&nbsp;— после того как каталоги jails-data и jails-fstab клетки вы вернете обратно в структуру $workdir каталогов, скопируйте данный rc.conf_${jname} в каталог ${workdir}/jails-rcconf/&nbsp;— после этого, по команде</p>
-		<pre class="brush:bash;ruler:true;">
-		% cbsd jls
-		</pre>
-		<p>Jail будет выводится в списке в статусе Unregister. По команде</p>
-		<pre class="brush:bash;ruler:true;">
-		% cbsd jregister jname=$jname
-		</pre>
-		<p>вы вернете клетку в общий пул и рабочее состояние.</p>
 	</div>
 <!--# include file="_end.html" -->

@@ -217,12 +217,8 @@
     <strong>ipfw</strong> to configure port forwarding. <strong>CBSD</strong> 
     sets the number of counters in the <strong>2001 - 2999</strong> range. This 
     range can easily be changed in cbsd.conf if need be. Again, always be mindful 
-    when changing firewall rules.
-<!--TODO: 6
-    This is that same sentence again;
-    So be careful and make sure to follow your rules IPFW after a specified range.
-    Will modify this according to what we figure out above.
--->
+    when changing firewall rules. Make sure no rules conflict with the range 
+    configrured for <strong>CBSD</strong> to use.
     <p>
     Read more about <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_expose_ssi.html">expose</a>.
     </p>

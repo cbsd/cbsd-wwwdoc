@@ -201,13 +201,12 @@
     filter to count jail traffic. <strong>CBSD</strong> sets the number of counters 
     in the <strong>99 — 2000</strong> range. The range can be easily adjusted in 
     cbsd.conf if this interfes with existing rules. Be mindful when changing 
-    firewall rules.
-<!--TODO: 5
-    Original sentence: So be careful and make sure to follow your rules IPFW after a specified range.</p>
-    I'm not quite sure what this is trying to say. I have a vague idea what it's 
-    trying to say, somethig to the effect of "make sure your rules make sense, and 
-    don't interfere with other rulesets.
--->
+    firewall rules. <strong>CBSD</strong> "takes ownership" of the rules in the 
+    range given. In otherwords, if there are other rules already in place using 
+    the specified range, there is the posibility that <strong>CBSD</strong> could 
+    delete and re-add the rules in the range. This means all rules in the range 
+    would be deleted, but only the <strong>CBSD</strong> rules would be added 
+    back in.
     <p>
     Read more about <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html"> counting jail traffic </a>.
     </p>

@@ -66,6 +66,10 @@
       specified.</li>
       <li><strong>$jname:</strong> The name of a jail in the <strong>CBSD</strong> 
       environment.</li>
+<!--TODO: 1
+    Can (should?) be descriptive. Jail names are limited to n characters, and can 
+    only be alphanumeric.
+-->
     </ul>
     <p>
       A quick word about jails. As stated, most any software available to the 
@@ -79,11 +83,6 @@
       <a href="https://www.bsdstore.ru/en/xorg_in_jail.html" target="blank">xjails</a>, 
       Xorg running inside a jail isolated from the host.
     </p>
-<!--TODO: 3
-    The original description of $jname was "Name some jails, participate in the example.
-    I know $jail refers to a jail name, but wasn't sure if there was a better way to 
-    say it. I am also not sure what the translation "participate in the example" means.
--->
     <p>The largest directory used by CBSD is where all of the data <strong>CBSD</strong> 
     uses is stored. This is the directory <strong>$workdir</strong>, and is a 
     symlink to <strong><em>/usr/jails</em></strong> by default. This directory 
@@ -153,22 +152,6 @@
 		<pre class="brush:bash;ruler:true;">
 			% sqlite3 /usr/jails/var/db/local.sqlite "select jname,ip4_addr from jails"
 		</pre>
-    <p>When a jail is started, <strong>CBSD</strong> generates a jail.conf from 
-    the database using the command;
-    </p>
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jmkrcconf jname=jailname
-		</pre>
-    <p>This command can be used to return a jail back to the base version. 
-    Doing so will cause the loss of <strong>CBSD</strong> functionality.
-    </pre>
-<!--TODO: 4
-    I don't understand the "loss of CBSD funcionality." part. Does this mean
-    you will lose any modifications made to jail.conf? I think it's trying to say 
-    that this command is run to generate jail.conf, if it's run again at a later 
-    date, it would be like creating a brand new jail, hence losing any changes. 
-    If I don't have this right, please let me know. 
--->
     <p>The <em>$workdir/jails-system/</em> directory serves as additional 
     storage for <strong>CBSD</strong> jail data.</br> 
     <u>For example:</u> There may be configurator's services, files with the description 

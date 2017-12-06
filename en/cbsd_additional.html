@@ -47,14 +47,8 @@
       <li><strong>Node</strong>: A physical server that hosts the virtual 
       environment.</li>
       <li><strong>Jail</strong>: An isolated environment, complete  with its own 
-      set of software and services. A jail can be a server-side component; DNS, 
-      Apache/nginx, or postfix for example.</li>
-<!--TODO: 2
-        The following was also included "and graphic environmet" I wasn't 100% what
-        was meant here. Are we saying that a jail can also run a graphical environment, 
-        that it can be installed in a graphical environment? Once clarified, it can 
-        be added back in, or we can leave it out.
--->
+      set of software and services. A jail is able to run any software that is 
+      available to the OS installed in the jail (cli or graphical).</li> 
       <li><strong>Cloud:</strong> A farm/cluster of interconnected nodes, or a 
       full-fledged peer network (each node can do other tasks through <strong>CBSD</strong>)</li>
       <li><strong>Base:</strong> In the context of <strong>CBSD</strong>, a copy 
@@ -64,7 +58,7 @@
       node(s) and certain subsystems of FreeBSD. CBSD provides a unified way to 
       interact with and perform actions on the specified nodes or jails via the 
       provided API. <strong>CBSD</strong> also provides the ability to implement 
-      and use <a href="https://www.freebsd.org/doc/handbook/fs-acl.html"> ACL</a>, 
+      and use <a href="https://www.freebsd.org/doc/handbook/fs-acl.html" target="blank"> ACL</a>, 
       and change permissions on specified resources.</li>
       <li><strong>$workdir:</strong> The working directory on a <strong>CBSD</strong> 
       node that is initialized via the <em>cbsd initenv</em> command on the 
@@ -73,6 +67,18 @@
       <li><strong>$jname:</strong> The name of a jail in the <strong>CBSD</strong> 
       environment.</li>
     </ul>
+    <p>
+      A quick word about jails. As stated, most any software available to the 
+      OS the jail runs can be ran inside of a jail. Server-side components such 
+      as DNS, Apache/nginx, or postfix, can run isolated from the host. Perhaps 
+      lesser known is graphical environments/applications can also run inside a 
+      jail isolated from the host. For example, run an XServer or VNCServer, 
+      then connect to it. A single application can be run from inside a jail, 
+      and then connected to using Xforwarding. <em>firefox -display=REMOTEADDR:PORT</em> 
+      There is also 
+      <a href="https://www.bsdstore.ru/en/xorg_in_jail.html" target="blank">xjails</a>, 
+      Xorg running inside a jail isolated from the host.
+    </p>
 <!--TODO: 3
     The original description of $jname was "Name some jails, participate in the example.
     I know $jail refers to a jail name, but wasn't sure if there was a better way to 

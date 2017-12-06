@@ -235,20 +235,11 @@
 		 <pre class="brush:bash;ruler:true;">
 		 head -c 30 /dev/random | uuencode -m - | tail -n 2 | head -n1
 		 </pre>
-     <p>As of right now, <strong>CBSD</strong> transmits rsync data through 
-     the rsync daemon, rather than rsync over ssh. This avoids allowing open 
-     access for the root user. It is also recommended to close the port 
-     <strong>1873/tcp</strong> which allows access to <strong>CBSD</strong> 
-     from untrusted hosts and is used to seperate out the management interface 
-     for the node IP, or use encrypted communiction between the nodes using 
-     something like IPSec.
+     <p><strong>CBSD</strong> transmits data through the rsync daemon over 
+     port 1873/tcp. Please secure this port from any traffic excpet for remote 
+     <strong>CBSD</strong>, or use encrypted communication between the nodes 
+     using something like IPSec.
      </p>
-<!--TODO: 7
-    Please review the above section about rsync/cbsdrsyncd for accuracy.
-    I'm not 100% how to phrase the part about rsync "transmitting data through
-    the daemon" I think the part about disabling port 1873/tcp could be reworded
-    a bit better as well.
--->
 	</div>
 	<h2><a name="color">ANSII Color</a></h2>
 	<div class="block">

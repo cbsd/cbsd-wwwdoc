@@ -153,22 +153,6 @@
 		<pre class="brush:bash;ruler:true;">
 			% sqlite3 /usr/jails/var/db/local.sqlite "select jname,ip4_addr from jails"
 		</pre>
-    <p>When a jail is started, <strong>CBSD</strong> generates a jail.conf from 
-    the database using the command;
-    </p>
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jmkrcconf jname=jailname
-		</pre>
-    <p>This command can be used to return a jail back to the base version. 
-    Doing so will cause the loss of <strong>CBSD</strong> functionality.
-    </pre>
-<!--TODO: 4
-    I don't understand the "loss of CBSD funcionality." part. Does this mean
-    you will lose any modifications made to jail.conf? I think it's trying to say 
-    that this command is run to generate jail.conf, if it's run again at a later 
-    date, it would be like creating a brand new jail, hence losing any changes. 
-    If I don't have this right, please let me know. 
--->
     <p>The <em>$workdir/jails-system/</em> directory serves as additional 
     storage for <strong>CBSD</strong> jail data.</br> 
     <u>For example:</u> There may be configurator's services, files with the description 

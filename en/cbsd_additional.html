@@ -40,12 +40,6 @@
     The <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a>
     manpage is also a great resource.
     </p>
-    <p>It will also be useful to understand how the filesystem hierarchy is laid 
-    out in <strong>CBSD</strong>.
- <!--TODO: 1 
-    Should this be linked to https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/dirstructure.html?
--->
-    </p>
     <p>Before getting started, be aware of the following terminology, and how 
     it will be used;
     </p>
@@ -53,14 +47,8 @@
       <li><strong>Node</strong>: A physical server that hosts the virtual 
       environment.</li>
       <li><strong>Jail</strong>: An isolated environment, complete  with its own 
-      set of software and services. A jail can be a server-side component; DNS, 
-      Apache/nginx, or postfix for example.</li>
-<!--TODO: 2
-        The following was also included "and graphic environmet" I wasn't 100% what
-        was meant here. Are we saying that a jail can also run a graphical environment, 
-        that it can be installed in a graphical environment? Once clarified, it can 
-        be added back in, or we can leave it out.
--->
+      set of software and services. A jail is able to run any software that is 
+      available to the OS installed in the jail (cli or graphical).</li> 
       <li><strong>Cloud:</strong> A farm/cluster of interconnected nodes, or a 
       full-fledged peer network (each node can do other tasks through <strong>CBSD</strong>)</li>
       <li><strong>Base:</strong> In the context of <strong>CBSD</strong>, a copy 
@@ -70,7 +58,7 @@
       node(s) and certain subsystems of FreeBSD. CBSD provides a unified way to 
       interact with and perform actions on the specified nodes or jails via the 
       provided API. <strong>CBSD</strong> also provides the ability to implement 
-      and use <a href="https://www.freebsd.org/doc/handbook/fs-acl.html"> ACL</a>, 
+      and use <a href="https://www.freebsd.org/doc/handbook/fs-acl.html" target="blank"> ACL</a>, 
       and change permissions on specified resources.</li>
       <li><strong>$workdir:</strong> The working directory on a <strong>CBSD</strong> 
       node that is initialized via the <em>cbsd initenv</em> command on the 
@@ -78,12 +66,23 @@
       specified.</li>
       <li><strong>$jname:</strong> The name of a jail in the <strong>CBSD</strong> 
       environment.</li>
-    </ul>
-<!--TODO: 3
-    The original description of $jname was "Name some jails, participate in the example.
-    I know $jail refers to a jail name, but wasn't sure if there was a better way to 
-    say it. I am also not sure what the translation "participate in the example" means.
+<!--TODO: 1
+    Can (should?) be descriptive. Jail names are limited to n characters, and can 
+    only be alphanumeric.
 -->
+    </ul>
+    <p>
+      A quick word about jails. As stated, most any software available to the 
+      OS the jail runs can be ran inside of a jail. Server-side components such 
+      as DNS, Apache/nginx, or postfix, can run isolated from the host. Perhaps 
+      lesser known is graphical environments/applications can also run inside a 
+      jail isolated from the host. For example, run an XServer or VNCServer, 
+      then connect to it. A single application can be run from inside a jail, 
+      and then connected to using Xforwarding. <em>firefox -display=REMOTEADDR:PORT</em> 
+      There is also 
+      <a href="https://www.bsdstore.ru/en/xorg_in_jail.html" target="blank">xjails</a>, 
+      Xorg running inside a jail isolated from the host.
+    </p>
     <p>The largest directory used by CBSD is where all of the data <strong>CBSD</strong> 
     uses is stored. This is the directory <strong>$workdir</strong>, and is a 
     symlink to <strong><em>/usr/jails</em></strong> by default. This directory 
@@ -202,13 +201,12 @@
     filter to count jail traffic. <strong>CBSD</strong> sets the number of counters 
     in the <strong>99 — 2000</strong> range. The range can be easily adjusted in 
     cbsd.conf if this interfes with existing rules. Be mindful when changing 
-    firewall rules.
-<!--TODO: 5
-    Original sentence: So be careful and make sure to follow your rules IPFW after a specified range.</p>
-    I'm not quite sure what this is trying to say. I have a vague idea what it's 
-    trying to say, somethig to the effect of "make sure your rules make sense, and 
-    don't interfere with other rulesets.
--->
+    firewall rules. <strong>CBSD</strong> "takes ownership" of the rules in the 
+    range given. In otherwords, if there are other rules already in place using 
+    the specified range, there is the posibility that <strong>CBSD</strong> could 
+    delete and re-add the rules in the range. This means all rules in the range 
+    would be deleted, but only the <strong>CBSD</strong> rules would be added 
+    back in.
     <p>
     Read more about <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html"> counting jail traffic </a>.
     </p>
@@ -219,12 +217,8 @@
     <strong>ipfw</strong> to configure port forwarding. <strong>CBSD</strong> 
     sets the number of counters in the <strong>2001 - 2999</strong> range. This 
     range can easily be changed in cbsd.conf if need be. Again, always be mindful 
-    when changing firewall rules.
-<!--TODO: 6
-    This is that same sentence again;
-    So be careful and make sure to follow your rules IPFW after a specified range.
-    Will modify this according to what we figure out above.
--->
+    when changing firewall rules. Make sure no rules conflict with the range 
+    configrured for <strong>CBSD</strong> to use.
     <p>
     Read more about <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_expose_ssi.html">expose</a>.
     </p>
@@ -241,20 +235,11 @@
 		 <pre class="brush:bash;ruler:true;">
 		 head -c 30 /dev/random | uuencode -m - | tail -n 2 | head -n1
 		 </pre>
-     <p>As of right now, <strong>CBSD</strong> transmits rsync data through 
-     the rsync daemon, rather than rsync over ssh. This avoids allowing open 
-     access for the root user. It is also recommended to close the port 
-     <strong>1873/tcp</strong> which allows access to <strong>CBSD</strong> 
-     from untrusted hosts and is used to seperate out the management interface 
-     for the node IP, or use encrypted communiction between the nodes using 
-     something like IPSec.
+     <p><strong>CBSD</strong> transmits data through the rsync daemon over 
+     port 1873/tcp. Please secure this port from any traffic excpet for remote 
+     <strong>CBSD</strong>, or use encrypted communication between the nodes 
+     using something like IPSec.
      </p>
-<!--TODO: 7
-    Please review the above section about rsync/cbsdrsyncd for accuracy.
-    I'm not 100% how to phrase the part about rsync "transmitting data through
-    the daemon" I think the part about disabling port 1873/tcp could be reworded
-    a bit better as well.
--->
 	</div>
 	<h2><a name="color">ANSII Color</a></h2>
 	<div class="block">
@@ -297,4 +282,5 @@
         <li>${workdir}/jails-data</li>
     </ul>
   </div>
+
 <!--# include file="_end.html" -->

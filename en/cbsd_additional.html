@@ -281,23 +281,6 @@
         <li>${workdir}/jails-system</li>
         <li>${workdir}/jails-data</li>
     </ul>
-    <p><strong>Restoring a backup</strong></br>
-    To restore a jail from a backup, the following will need to be done as well;</br>
+  </div>
 
-    Restore ${workdir}/jails-system/${jname}/rc.conf_${jname} then after the 
-    VM reboots, and is back online, restore the <strong><em>jails-data</em></strong> 
-    and <strong></em> jails-fstab</em></strong> directories to the respective 
-    jail $workdir directory structure, then copy the rc.conf_${jname} into the 
-    ${workdir}/jails-rcconf/ directory, then issue the following commands;
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jls
-		</pre>
-    <p>The jail will appear in the list with the status 'Unregister'. </br>
-    Issue the following command;
-    </p>
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jregister jname=$jname
-		</pre>
-		<p>you return jail  into a common pool and working condition.</p>
-	</div>
 <!--# include file="_end.html" -->

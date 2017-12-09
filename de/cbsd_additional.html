@@ -49,11 +49,6 @@
 		<pre class="brush:bash;ruler:true;">
 			% sqlite3 /usr/jails/var/db/local.sqlite "select jname,ip4_addr from jails"
 		</pre>
-		<p>When a jail is started, <strong>CBSD</strong> generate jail.conf file from this database via</p>
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jmkrcconf jname=jailname
-		</pre>
-		<p>You can use this command if you want to return from <strong>CBSD</strong> back to base version (with losing functionality of <strong>CBSD</strong>)
 		<p>The <em>$workdir/jails-system/</em> directory serves as an additional storage for <strong>CBSD</strong> jail data, for example it may be configurators services, file with the description of the jail, traffic statistics, resources statistics, and so on. Internal information for cbsd stored in $workdir/db directory. For example, the information on the list of added nodes, inventory both the local and remote nodes, and so on.</p>
 		<p>Important in terms of security, is the directories <em>${workdir}/.rssh</em> and <em>${workdir}/.ssh</em>, in which there are private RSA keys with remote user <strong>CBSD</strong> nodes and local respectively. Make sure that the data of these directories were not available to other users of the system. Besides, to you information about <a href="/en/cbsd_geli.html">scan be interesting for GELI encryption</a>. By default, the key can be read only by a system <strong>CBSD</strong> user.</p>
 		<p>Finally, thirdly, be sure to read the modifications that prepares <strong>CBSD</strong> in your configuration: <a href="/en/custom_freecbsd.html">Modification which are carried out by <strong>CBSD</strong> scripts in FreeBSD</a></p>
@@ -112,14 +107,5 @@
 	<div class="block">
 		<p>In the case when with <strong>CBSD</strong> tools errors and <a href="/<!--#echo var="lang" -->/cmdsyntax_cbsd.html#cmddebug">CBSD command debuging</a> enlightenment has not brought, it is recommended to make the problem a bug-tracker of the project: If something went wrong <a href="https://github.com/cbsd/cbsd/issues" target="_blank">cbsd issues</a>  or report via e-mail: <strong>CBSD</strong> <em>at</em> <strong>bsdstore.ru</strong></p>
 		<p>Please make backup copies of directory ${workdir}/var/db, ${workdir}/var/db, ${workdir}/jails-fstab, ${workdir}/jails-system regularly. And also, of course, the data of their cells <em>${workdir}/jails-data</em></p>
-		<p>If you restore jail from backup, you will need to file ${workdir}/jails-system/${jname}/rc.conf_${jname} -after return back jails-data and jails-fstab directories for this jail to $workdir directory structure, copy this rc.conf_${jname} in  ${workdir}/jails-rcconf/ directory — then, at the command</p>
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jls
-		</pre>
-		<p>Jail will appear in the list whit status Unregister. At the command</p>
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jregister jname=$jname
-		</pre>
-		<p>you return jail  into a common pool and working condition.</p>
 	</div>
 <!--# include file="_end.html" -->

@@ -322,7 +322,11 @@ cat &gt;&gt; ${DHCPD_CONF} &lt;&lt;EOF
 }				# CBSD-AUTO-${jname}
 EOF
 
-service dhcpd restart
+arp -d ${ip4_addr}
+arp -s ${ip4_addr} ${nic_hwaddr0} pub
+
+service isc-dhcpd restart
+
 </pre>
 <p>And we put this script instead of the old one <i>/root/bin/make_cbsd_dhcpd.sh</i></p>
 <p>Now, we can create dhcpd_extra.conf file in the system catalogs of virtual machines that will be loaded on the PXE, where the main role will be played by parameters such as:</p>

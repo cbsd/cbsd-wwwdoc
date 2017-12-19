@@ -320,8 +320,13 @@ cat &gt;&gt; ${DHCPD_CONF} &lt;&lt;EOF
 }				# CBSD-AUTO-${jname}
 EOF
 
-service dhcpd restart
+arp -d ${ip4_addr}
+arp -s ${ip4_addr} ${nic_hwaddr0} pub
+
+service isc-dhcpd restart
+
 </pre>
+
 <p>И кладем этот скрипт вместо старого <i>/root/bin/make_cbsd_dhcpd.sh</i></p>
 <p>Теперь, нам остается создать файл dhcpd_extra.conf в тех системных каталогах виртуальных машин, которые будут загружаться по PXE, где главную роль будут играть такие параметры, как:</p>
 <pre class="cli">

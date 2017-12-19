@@ -113,6 +113,9 @@ cat >> ${DHCPD_CONF} <<EOF
 }				# CBSD-AUTO-${jname}
 EOF
 
+arp -d ${ip4_addr}
+arp -s ${ip4_addr} ${nic_hwaddr0} pub
+
 #service isc-dhcpd restart
 service isc-dhcpd stop
 service isc-dhcpd start

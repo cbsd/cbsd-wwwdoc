@@ -145,5 +145,20 @@
     <guid>CBSD at FOSDEM 2018</guid>
     <pubDate>Tue, 05 Dec 2017 10:02:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 11.1.12 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - Fetching base.txz for CURRENT also possible from ftp.freebsd.org&lt;br /&gt;
+    - Identify HBSD environment with platform="HardenedBSD" global variable&lt;br /&gt;
+    - show_profile_list: separate filter by show_xen/show_bhyve instead if active=&lt;br /&gt;
+    - nics-list: support for phyonly= arguments&lt;br /&gt;
+    - sync xen module with bhyve&lt;br /&gt;
+    - fix broken build if databases/sqlite3 was built with ICU=on, thanks to Pavel Volkov via https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=214551&lt;br /&gt;
+    - fixes for natcfg-tui ( Issue #134 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.12 available</guid>
+    <pubDate>Fri, 19 Jan 2018 10:47:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

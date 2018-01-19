@@ -14,7 +14,6 @@
 	</ul>
 	
 </div>
-<div class="block">
 <h2><a name="fosdem2018">&nbsp;CBSD at FOSDEM'2018</a></h2>
 	<hr>
 	<p><strong><a href="https://meka.rs/">Goran Mekić</a></strong> one of the participants of the CBSD Project published in <a href="https://twitter.com/meka_floss">his tweet</a>:
@@ -23,6 +22,18 @@
 	<hr>
 </div>
 <h2><a name="release">Releases</a></h2>
+<div class="block">
+	<p><strong>11.1.12</strong>&nbsp;&mdash; 2018-01-19</p>
+	<ul>
+		<li>Fetching base.txz for CURRENT also possible from ftp.freebsd.org</li>
+		<li>Identify HBSD environment with platform="HardenedBSD" global variable;</li>
+		<li>show_profile_list: separate filter by show_xen/show_bhyve instead of active=;</li>
+		<li>nics-list: support for phyonly= arguments</li>
+		<li>sync xen module with bhyve</li>
+		<li>fix broken build if databases/sqlite3 was built with ICU=on, thanks to <strong>Pavel Volkov</strong> via <a href="https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=214551" target="_blank">PR 214551</a></li>
+		<li>fixes for natcfg-tui  <a href="https://github.com/cbsd/cbsd/issues/134" target="_blank">Issue #134</a></li>
+	</ul>
+</div>
 <div class="block">
 	<p><strong>11.1.11</strong>&nbsp;&mdash; 2017-12-11</p>
 	<ul>

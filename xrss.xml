@@ -160,5 +160,15 @@
     <guid>CBSD 11.1.12 available</guid>
     <pubDate>Fri, 19 Jan 2018 10:47:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD at FOSDEM 2018: Video available</title>
+    <description>CBSD at FOSDEM 2018:&lt;br /&gt;
+    - CBSD, Isolation manager: How to manage jails, bhyve VMs and Xen via CBSD, while keeping it all simple&lt;br /&gt;
+    by Goran Mekić&lt;br /&gt;
+    </description>
+    <link>https://video.fosdem.org/2018/K.3.401/cbsd_isolation_manager.mp4</link>
+    <guid>CBSD at FOSDEM 2018: Video available</guid>
+    <pubDate>Mon, 05 Feb 2018 12:20:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

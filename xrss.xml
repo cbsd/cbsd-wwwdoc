@@ -170,5 +170,16 @@
     <guid>CBSD at FOSDEM 2018: Video available</guid>
     <pubDate>Mon, 05 Feb 2018 12:20:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 11.1.14 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - HardenedBSD platform: fix official repo&lt;br /&gt;
+    - jails: search for fastest mirror for base.txz&lt;br /&gt;
+    - fix for boot order menu in [jb]config&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.14 available</guid>
+    <pubDate>Sat, 10 Feb 2018 10:47:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

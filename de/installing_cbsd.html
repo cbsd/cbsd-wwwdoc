@@ -61,7 +61,7 @@
 			% mkdir -p /usr/local/libexec/bsdconfig
 			% ln -s /usr/local/cbsd/share/bsdconfig/cbsd /usr/local/libexec/bsdconfig/cbsd
 		</pre>
-		<p><strong>2) Ininital setup</strong></p>
+		<p><strong>2) Initial setup</strong></p>
 		<p>In the classic install, there are two copies of <strong>CBSD</strong>. One of them (<em>/usr/local/cbsd</em>), contains a distribution kit, initial code and configuration files by default. This copy can qlwo be used to manage jails in case the main copy is damaged (for example after an incorrect update).  Scripts to work with can be found in the environment variable <strong>workdir</strong>.</p>
 		<p>To initialize the main working copy of <strong>CBSD</strong> we need to run <strong>initenv</strong>, while setting the environment variable <strong>workdir</strong> to the location of the working directory. We then answer a series of questions to complete the configuration. The file system for <strong>CBSD</strong> (or rather, the directory <strong>jails-data</strong> in it) needs to be large enough to accommodate the jail's data. After finalizing the location of the working directory, ensure it is set as the home directory for <strong>CBSD</strong> user (in this case the working directory in /usr/jails):</p>
 		<p>Initialization with the working catalogue into <em>/usr/jails</em>:</p>

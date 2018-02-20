@@ -83,7 +83,7 @@
 				operating system, which is in the hands of ordinary people.</p>
 			</li>
 		</ul>
-		<p><strong>Q:</strong> &laquo;Why CBSD written on <strong>sh</strong>:</p>
+		<p><strong>Q:</strong> &laquo;Why <strong>CBSD</strong> written on <strong>sh</strong>:</p>
 		<ul>
 			<li>
 				<p>Most of&nbsp;the code has been written in&nbsp;<strong>sh</strong>, since there are no&nbsp;demands for complex logic  (<a href="/de/cbsdsh.html">details</a>)
@@ -91,9 +91,15 @@
 				<p>The problems of the complexity of maintaining "large <strong>sh</strong> code" were originally solved by the modular structure of the project, where each script does only its task.
 				The rest, more complex CBSD components (eg, a Frontend, which implements RestAPI for interfaces) written in a language go, nodejs, php, and is not part of CBSD Core.</p>
 			</li>
-
-		<p><strong>Q:</strong> <strong>CBSD</strong> production ready?</p>
+		</ul>
+		<p><strong>Q:</strong> <strong>CBSD</strong> is FreeBSD only? How about porting to another platform?</p>
 		<ul>
+			<li>
+			<p>In most cases porting will be tantamount to writing from scratch since the project is based on the FreeBSD-only features. We are interested in porting to platforms derived from FreeBSD. For example we support the HardenedBSD platform.</p>
+			<p>Another fantastic idea is porting <strong>CBSD</strong> to <a href="https://www.dragonflybsd.org/">DragonFly BSD</a>. If the developers of <strong>DFLYBSD</strong> can synchronize jail framework (libjail) and <a href="https://www.dragonflybsd.org/docs/developer/gsocprojectspage/">be able to port <strong>bhyve</strong></a> (see: <em>Port bhyve - The BSD Hypervisor</em>), moving CBSD will be an easy task, and we can get an incredible bundle of DFLY / HammerFS / jail / bhyve / CBSD</p>
+		</ul>
+		<p><strong>Q:</strong> <strong>CBSD</strong> production ready?</p>
+			<ul>
 			<li>
 				<p>It depends only on you and your requirements. CBSD exists since 2013 and at the moment is one of the oldest systems for managing virtual environments on FreeBSD,
 				while it is in the current state and continues to improve. A number of users successfully use CBSD in large production installations.</p>

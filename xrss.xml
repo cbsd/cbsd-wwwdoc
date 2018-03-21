@@ -184,9 +184,8 @@
   <item>
     <title>CBSD 11.1.15 available</title>
     <description>Relnotes:&lt;br /&gt;
-    - (bugfixes) bhyve: fixes for double values after 11.1.13 migrations/settings&lt;br /&gt;
-    - (bugfixes) fix for inter=0 at nat framework question when /usr/local/cbsd/sudoexec/initenv inter=0 path_file used, skip read on NAT framework choosing when non-interactive flags used&lt;br /&gt;
-    - (jb)consturct-tui: store previous profile choices&lt;br /&gt;
+    - fix for inter=0 at nat framework question&lt;br /&gt;
+    - [jb]consturct-tui: store previous profile choices&lt;br /&gt;
     </description>
     <link>https://www.bsdstore.ru</link>
     <guid>CBSD 11.1.15 available</guid>

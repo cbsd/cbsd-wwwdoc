@@ -1,0 +1,86 @@
+<!--# include file="_start.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>fetch</span></h1>
+<h2><a name="intro"><span>Description</span></a></h2>
+	<div class="block">
+		<p> With <strong>CBSD</strong>, you may need to download any additional resources from the Internet. It can be, for example: FreeBSD base for building a jail,
+		the ISO image of the OS you want to install, the various templates and service images of virtual machines. </p>
+		<p> It's important to understand that the links to these resources are stored in certain configuration files, monitored and verified by the <strong>CBSD</strong> project participants. </p>
+		<p> To ensure integrity and security, configuration files contain a checksum of <strong>sha256</strong> that corresponds to the received file of your <strong>CBSD</strong>. </p>
+		<p> The CRC amounts are also accompanied by the <strong>CBSD</strong> project participants and are taken from official sources (OS website, official FreeBSD website, etc.). </p>
+		<p> As the information on the Internet is in constant dynamic motion, some resources have properties that become obsolete or disappear through the old links, and this happens very often. </p>
+		<p> The <strong>CBSD</strong> project in most cases tries to protect users from such changes - for this we have launched the official mirror for <strong>CBSD resources</strong>, and we very much welcome any help with resources and maintenance
+		project on the part of users. You can read about this in the <em>"Expand Resource Mirror <strong>CBSD</strong>"</em> section below. </p>
+	</div>
+
+	<h1><a name="fetch_config"><span>fetch.conf</span></a></h1>
+
+	<div class="block">
+		<p> Configuration files for <strong>CBSD</strong> that contain links to external resources (for example, bhyve virtual machine templates located in the <em>$workdir/etc/defaults/</em> directory and starting with <strong>vm-*</strong>,
+		are divided into two types: </p>
+		<ul>
+			<li><strong>iso_site</strong> - the official site or official mirror of the project, the main data source. It is from these resources that the sum of the CRC files is counted.</li>
+			<li><strong>cbsd_iso_mirrors</strong> is the official mirror for the <strong>CBSD</strong> project. These mirrors participate in receiving files, but they are never used as a source of CRC sums, since they can be located
+			to the resources of the user or partner. Ensuring the integrity of these mirrors is guaranteed by checking the amount of SHA256 created by the source file.</li>
+		</ul>
+		<p> If there are several mirrors, <strong>CBSD</strong> automatically scans them within a few seconds that are most useful to you. This happens by measuring the download speed from each resource of a small part
+		data. It does not matter in which order the mirrors are written in the configuration file - <strong>CBSD</strong> reorganizes the order of the mirrors with the maximum benefit for your connection.</p>
+		<p> There are times when the file specified in the configuration file changes on the official resource, and for this reason it does not pass the verification. In this case, two behavioral algorithms
+		the <strong>broken_crc_fetch_order</strong> parameter in the configuration file <strong>fetch.conf</strong>:</p>
+		<ul>
+			<li><strong>cbsd_mirror</strong> - in case the amount of CRC on the first attempt was incorrect, build the following list of mirrors in such a way that the second attempt necessarily took place with the official mirror
+			<strong>CBSD</strong>, and only then - all the rest. </li>
+			<li><strong>mirror_list</strong> - the download will go strictly by sorting, unchanged.</li>
+		</ul>
+		<p> In both cases, attempts to download a file will continue until the file is found with the correct amount of CRC or the list of mirrors ends.</p>
+		<p> By default, the <strong>broken_crc_fetch_order="mirror_list"</strong> method is selected, if you prefer to change the behavior to the first option, overwrite this parameter,
+		creating a file in <em>$workdir/etc/fetch.conf</em> and reassigning the parameter: <p>
+		<pre class = "cli"> broken_crc_fetch_order="cbsd_mirror"</pre>
+		<p> This option may save traffic if the <strong>CBSD</strong> speed rating is at the bottom of the list. </p>
+		<p> If you notice an incorrect amount of CRC, you can help the project and send a profile update and the amount of CRC, as described below. </p>
+	</div>
+	<h1><a name="wrong_crc"><span>If the CRC does not match</span></a></h1>
+	<div class="block">
+		<p> During the release of <strong>CBSD</strong>, all profiles are checked and contain the correct amounts of CRC, however this situation may change over time - for example, OS authors released an update to the image on their resource.</p>
+		<p> In such cases, the attempt to get an image from the official site (and its mirrors) will result in a CRC amount error, while the official </strong>CBSD</strong> mirrors of the project will return the correct, but old copy. </p>
+		<p> In such cases, you need to update the checksums in the profiles and update the image. </p>
+		<p> The first thing you can do if you are in this situation - try to update your profiles with <a href="https://github.com/cbsd/cbsd-vmprofiles">GitHub</a> - then, in your situation already updated these profiles for you. </p>
+		<p> To do this, your system must have the <strong>git</strong> utility installed. The update occurs through the Makefile script in the <em>$workdir/etc</em> directory. To update: </p>
+		<pre class = "cli"> make -C ~cbsd/etc profiles-update</pre>
+		<p> You can add this operation to <strong>crontab</strong> for automatic periodic updates. If you do this for the first time, before you update the profile, you must initialize the git repository (it is executed only once): </p>
+		<pre class = "cli"> make -C ~cbsd/etc profiles-create</pre>
+		<p> If there are no updates, you can help the project (and make the same users happy as you are) by creating a <strong>GitHub</strong> corresponding <strong>pull-request</strong> to change the CRC (or updating links and versions). </p>
+		<p> If you are at your own risk and want to take an ISO image, despite the discrepancy between the amounts of CRC, you have two options: </p>
+		<ul>
+			<li> Adjust the <strong>sha256sum</strong> value in a particular profile by setting <strong>sha256sum=0</strong>. When <strong>sha256sum=0</strong>, this causes <strong>CBSD</strong> to skip the CRC check.
+				Refer to the section <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">CBSD profiles</a></strong> for details on how to overwrite certain parameters.</li>
+				<li>Prevent CRC checksums globally through the <strong>BSD_ISO_SKIP_CHECKSUM=[yes|no]</strong> environment variable (or configuration file), for example: env CBSD_ISO_SKIP_CHECKSUM=yes cbsd bstart ..</li>
+			</ul>
+			<p>To automatically update CRC amounts in profiles, you can use the <strong>fetch_iso</strong> script, which we will discuss below.</p>
+		</div>
+		<h1><a name="cbsd_partners"><span>Affiliate program or "Expand the CBSD Resource Mirror"</span></a></h1>
+		<div class = "block">
+		<p> To simplify tasks for working with CRC amounts, the script <strong>fetch_iso</strong> is written. The scenario solves two main tasks: </p>
+		<ul>
+			<li> Automatically update sha256 amounts in profiles by uploading ISO image (only from official resources, <strong>iso_site</strong>) and recalculating sha256, then CRC
+			is updated in the file <em>/usr/local/cbsd/etc/defaults/vm-*</em>. For this to take effect, you must <strong>cbsd initenv</strong>. In addition, this file can be sent
+			<strong>pull-request</strong> through <strong>GitHub</strong>. To do this, use the <strong>fetch_iso</strong> call with the <strong>gensha256=1</strong> argument.</li>
+			<li> Help <strong>CBSD</strong> users to automate the process of creating their own mirrored resources referenced by profiles.</li>
+		</ul>
+		<p> In turn, the process of creating your own mirror can be divided into two types: </p>
+		<ul>
+			<li> with the <strong>keepname=1</strong> argument - save the ISO under this name, since they are listed in the source (official) resource. This option can be used if you want to raise your own local mirror
+			<strong>CBSD</strong> and use it as a local resource (and, of course, the fastest resource available to you).</li>
+			<li> with the <strong>keepname=0</strong> argument - in this case, the files will be saved under the names that are waiting for <strong>CBSD</strong> profiles. This operation can be performed as a "warm-up" of images,
+			with the goal of downloading all the resources for yourself in advance. Typically, <strong>dstdir=</strong> is the <em>/usr/jails/src/iso</em> directory (if $workdir=/usr/jails), in which <strong>CBSD</strong> stores
+			all ISO images.</li>
+		</ul>
+		<p> If you have the processing power available on the Internet (hosting, data center, etc.), you can create your own <strong> CBSD mirror </strong> and publish a link to your profiles in it
+		virtual machines. So, you become a participant in the <strong>CBSD</strong> project and help your region (country) get, perhaps, the best mirror for them. </p>
+		<p> In addition, for those who want to help the project with a local mirror in your resources, in the <strong>RO</strong> mode, an rsync server is open, from which you can initiate through <strong>cron</strong>
+		content synchronization. The URL of this property is <strong>rsync://cbsd.lifec0re.net:30873</strong>. If your mirror is accessible from the Internet, you can send <strong>pull-request</strong> to GitHub to the repository
+		<a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a> by adding your mirror to <strong>cbsd_iso_mirrors=</strong>. With the release of the new version of <strong>CBSD</strong>
+		your mirror will go to <strong>CBSD</strong>.
+		</p>
+	</div>
+<!--# include file="_end.html" -->

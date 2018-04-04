@@ -203,5 +203,17 @@
     <guid>CBSD 11.1.16 available</guid>
     <pubDate>Wed, 21 Feb 2018 10:47:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 11.1.17 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    - bhyve: CPU topology support&lt;br /&gt;
+    - bhyve: check ISO's CRC SHA256 sum (optional)&lt;br /&gt;
+    - bhyve: an existing bridge can be selected (for those who customize/setup the interface themselves)&lt;br /&gt;
+    - bhyve: Sparse ZVOL now by default. Can be reassigned via zfs_create_sparse="0" in $workdir/etc/zfs.conf&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.17 available</guid>
+    <pubDate>Sat, 07 Apr 2018 10:47:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

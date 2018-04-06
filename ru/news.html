@@ -20,6 +20,7 @@
 		<li>bhyve: <a href="/<!--#echo var="lang" -->/cbsd_fetch.html">check ISO's CRC SHA256 sum</a> (optional)</li>
 		<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyvenetwork_ssi.html#bhyvenetwork_opt2">an existing bridge can be selected</a> (for those who customize/setup the interface themselves)</li>
 		<li>bhyve: Sparse ZVOL now by default. Can be reassigned via <strong>zfs_create_sparse="0"</strong> in <em>$workdir/etc/zfs.conf</em></li>
+		<li>bhyve: grub-bhyve dependency has been removed: <strong>CBSD</strong> support OS only via UEFI due to the poor and unstable implementation of the grub-bhyve method, which is terrible</li>
 	</ul>
 </div>
 <div class="block">

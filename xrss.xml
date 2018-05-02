@@ -225,5 +225,16 @@
     <guid>CBSD 11.1.18 available</guid>
     <pubDate>Tue, 10 Apr 2018 10:47:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 11.1.19 available</title>
+    <description>Relnotes&lt;br /&gt;
+          - bhyve: Initial checkpoint&lt;br /&gt;
+	  - bhyve: update UEFI-EDK2 firmware, this fixes booting linux kernels >= 4.15 (Ubuntu 18.04+, Fedora 18+, Kali 2018 and so on)&lt;br /&gt;
+	  - initial support for syslog&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.1.19 available</guid>
+    <pubDate>Wed, 02 May 2018 06:02:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

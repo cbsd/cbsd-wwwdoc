@@ -1,0 +1,33 @@
+	<h1><span>Список виртуальных машин</span></h1>
+	
+	<h2><a name="bls_cmd">Команда bls</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls
+		</pre>
+		<strong>Описание</strong>:
+		<p>Выводит список виртуальных машин на локальной ноде или всех добавленных нодах. Через аргумент <strong>display</strong> можно указать конкретные поля для выборки данных. Если <strong>display</strong> не указан, используется значение, заданное в файле <em>$workdir/etc/defaults/jls.conf</em>, которое вы можете изменить на свое усмотрение через <em>$workdir/etc/bls.conf</em></p>
+				<p>Все возможные параметры для выборок описаны в файле <em>$workdir/share/local-bhyve.schema</em></p>
+		<ul>
+			<li><strong>JNAME</strong>&nbsp;— Имя виртуальной машины</li>
+			<li><strong>VM_RAM</strong>&nbsp;— объем выделенной оперативной памяти, в Мб</li>
+			<li><strong>VM_CPUS</strong>&nbsp;— Количество виртуальных ядер CPU</li>
+			<li><strong>VM_OS_TYPE</strong>&nbsp;— тип гостевой ОС</li>
+			<li><strong>PATH</strong>&nbsp;— каталог, в котором расположены образы жестких дисков виртуальной машины</li>
+			<li><strong>STATUS</strong>&nbsp;— состояние виртуальной машины</li>
+		</ul>
+		<p>В случае, если к локальному серверу добавлены RSA/DSA ключи удаленных нод, можно вывести все виртуальные машины в ферме через</p> 
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls alljails=1
+		</pre>
+		<p>или</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls alljails=1 shownode=1
+		</pre>
+		<p>для вывода имени ноды, где размещается данная виртуальная машина.</p>
+		<p><strong>Пример</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bls
+		</pre>
+		<p class="text-center"><img src="/img/bls1.png" alt="" /></p>
+	</div>

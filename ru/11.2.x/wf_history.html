@@ -1,0 +1,15 @@
+	<h1><span>История команд cbsd</span></h1>
+	
+	<h2><a name="history_cmd">Команда history</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd history
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>В том случае, если команды <strong>CBSD</strong> поступают с терминала и не задана переменная окружения <strong>NO_CBSD_HISTORY</strong>, то команды будут протоколироваться в файле <em>$workdir/.cbsd_history</em>. Вы можете использовать команду:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd history [N]
+		</pre>
+		<p>(где N&nbsp;— необязательный параметр) для вывода всех введеных <strong>CBSD</strong> команд или лишь N последних.</p>
+		<p>Размер файла <em>$workdir/.cbsd_history</em> по-умолчанию лимитирован объемом в 300 Кб и при достижению этого лимита, старые команды будут удалятся.</p>
+	</div>

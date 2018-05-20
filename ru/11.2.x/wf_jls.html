@@ -1,0 +1,35 @@
+	<h1><span>Список клеток</span></h1>
+	
+	<h2><a name="jls_cmd">Команда jls</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls
+		</pre>
+		<strong>Описание</strong>:
+		<p>Выводит список клеток на локальной ноде или всех добавленных нодах. Через аргумент <strong>display</strong> можно указать конкретные поля для выборки данных. Если <strong>display</strong> не указан, используется значение, заданное в файле <em>$workdir/etc/defaults/jls.conf</em>, которое вы можете изменить на свое усмотрение через <em>$workdir/etc/jls.conf</em></p>
+				<p>Все возможные параметры для выборок описаны в файле <em>$workdir/share/jail-arg</em></p>
+		<ul>
+			<li><strong>JID</strong>&nbsp;— Jail ID</li>
+			<li><strong>JNAME</strong>&nbsp;— имя jail</li>
+			<li><strong>IP4_ADDR</strong>&nbsp;— список привязанных к Jail IP адресов (IPv4,IPv6)</li>
+			<li><strong>HOST_HOSTNAME</strong>&nbsp;— FQDN jail</li>
+			<li><strong>PATH</strong>&nbsp;— корень клетки</li>
+			<li><strong>STATUS</strong>&nbsp;— On (запущена), Off (остановлена), Unregister (клетка имеет свой rc.conf (старый формат) но отсутствует в SQL базе)</li>
+		</ul>
+		<p>Прим: клетки в статусе Unregister могут быть внесены в SQL через команду <strong>cbsd jregister</strong>. Также, они автоматически конвертируются при отработке <em>Upgrading</em> стадии команды <strong>cbsd initenv</strong>. В случае, если к локальному серверу добавлены RSA/DSA ключи удаленных нод, можно вывести все клетки в ферме через</p> 
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls alljails=1
+		</pre>
+		<p>или</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls alljails=1 shownode=1
+		</pre>
+		<p>для вывода имени ноды, где размещается данная клетка.</p>
+		<p><strong>Пример</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls
+		</pre>
+		<p class="text-center"><img src="/img/jls1.png" alt="" /></p>
+		<p>Вывод кастомизированных данных (Внимание, прочерки в полях может означать, что версия <strong>CBSD</strong> на удаленной ноде более старая, соответственно, SQL запрос в ее базу не находит актуальных записей).</p>
+		<p class="text-center"><img src="/img/jls2.png" alt="" /></p>
+	</div>

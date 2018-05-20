@@ -1,0 +1,29 @@
+	<h1><span>Adding nodes</span></h1>
+	
+	<h2><a name="nodeadd_cmd">node mode=add command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=add
+		</pre>
+		<p>Commands <strong>cbsd node mode=add ..</strong>, at availability of the remote node via ssh and the correct password of the user <strong>CBSD</strong>, takes away a private key from the remote server and save it in the catalog <em>$workdir/.rssh</em></p>
+		<p>Obligatory parameters for mode=add:</p>
+		<ul>
+			<li><strong>node</strong> = IP address or FQDN of server (in the list of notes, however, this server will be called how is specified in <strong>nodename</strong> on the remote node in <em>$workdir/nc.inventory</em>. This that name which is asked at the first start <strong>cbsd initenv</strong></li>
+			<li><strong>pw</strong> = password for <strong>CBSD</strong> user</li>
+		</ul>
+		<p>Unessential argument:</p>
+		<ul>
+			<li><strong>port</strong> = alternative number of sshd port. By default, nodes of <strong>CBSD</strong> use port 22222 for connection on SSH.</li>
+		</ul>
+	</div>
+	<div class="warning">
+		<p><strong>Attention:</strong> the password of <strong>CBSD</strong> user is used only at the moment of receiving a private key. Respectively, access on the server will be until the key won't be removed or re-generated. Change of the password of the user account in this case won't work.</p>
+	</div>
+	<div class="block">
+		<p><strong>Example:</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=add node=192.168.1.2 pw=superpw port=22
+		</pre>
+		<p class="text-center"><img src="/img/nodeadd1.png" alt="" /></p>
+	</div>
+

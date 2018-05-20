@@ -1,0 +1,24 @@
+	<h1><span>Jail description</span></h1>
+	
+	<h2><a name="jdescr_cmd">jdescr command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jdescr
+		</pre>
+		<strong>Description</strong>
+		<p>Each jail can have an optional description/summary. With this it is possible to generate dynamic documentation on admin pages. Using <strong>cbsd jdescr</strong> by itself outputs a description of all local jails.</p>
+		<p>Command</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jdescr mode=update jname=jname
+		</pre>
+		<p>runs <strong>nvi</strong> in edit mode and opens the description of the jail specified by <strong>jname</strong>. If you prefer using a different editor such (such as <strong>vim</strong> or <strong>mcedit</strong> it can easily be done by passing your choice with the <strong>editor</strong> variable. Descriptions for each jail are stored in a text file residing at <em>$workdir/jails-system/$jname/descr</em>, where <strong>jname</strong> is the name of the jail. When a jail is moved or copied with jcoldmigrate, jclone, jimport/export operations, the description will remain the same.</p>
+		<p><strong>Example</strong> (running mcedit to modify the kde4 jail using russian UTF8 charset):</p>
+		<pre class="brush:bash;ruler:true;">
+			% setenv LANG ru_RU.UTF-8
+			% cbsd jdescr jname=kde4 editor=mcedit mode=update
+		</pre>
+		<p>It is advisable to maintain meaningful descriptions as your collection of jails grows. In addition it can be quite convenient to aggregate this information in order to create dashboards and build jail maps. One example of how this could look is the following simple script: <a href="/en/misc/jmap2html.sh.html" target="_blank">jmap2html.sh.html</a> which generates an overview in the form of a HTML page <a href="/en/misc/dashboard/index.html" target="_blank">dashboard sample</a></p>
+		<p class="text-center"><img src="/img/jdescr1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jdescr2.png" alt="" /></p>
+	</div>
+

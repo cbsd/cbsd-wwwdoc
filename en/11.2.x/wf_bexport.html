@@ -1,0 +1,15 @@
+	<h1><span>Virtual Machine EXport</span></h1>
+	
+	<h2><a name="bexport_cmd">command: bexport</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bexport
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Export the VM file (* .img). The argument <strong>jname</strong> the name of the virtual machine. img-file is saved in the directory <em>$workdir/export</em>. The original VM after exporting remains unchanged.</p>
+		<p><strong>EXample</strong> (export VM debian1 to $workdir/export/debian1.img):</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bexport jname=debian1
+		</pre>
+	</div>
+

@@ -1,0 +1,52 @@
+	<h1><span>Снапшоты (zfs-only)</span></h1>
+	
+	<h2><a name="jsnapshot_cmd">Команда jsnapshot</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot
+		</pre>
+		<strong>Описание</strong>:
+		<p>Выводит список, создает, удаляет и откатывает файловые снэпшоты для клетки, если нода запущена на файловой системе ZFS и <strong>zfsfeat</strong> в файле <strong>nc.inventory</strong> установлена в 1. Через параметр <strong>mode</strong> указывается, что именно необходимо выполнить. Возможные варианты:</p>
+		<ul>
+			<li><strong>list</strong>&nbsp;— вывести список снапшотов для указанной клетки</li>
+			<li><strong>create</strong>&nbsp;— создать снапшот для указанной клетки</li>
+			<li><strong>destroy</strong>&nbsp;— удалить снапшот для указанной клетки</li>
+			<li><strong>destroyall</strong>&nbsp;— удалить все снапшоты для указанной клетки</li>
+			<li><strong>clone</strong>&nbsp;— клонировать снашпот для указанной клетки</li>
+			<li><strong>rollback</strong>&nbsp;— откатить снапшот для указанной клетки</li>
+		</ul>
+		<p>Дополнительные параметры:</p>
+		<ul>
+			<li><strong>jname</strong>&nbsp;— для какого jail выполняется действие</li>
+			<li><strong>snapname</strong>&nbsp;— указать имя снапшота</li>
+		</ul>
+		<p>Следует иметь ввиду, что снапшоты имеют древовидную структуру. Тоесть, если вы создали последовательно снапшоты: <strong>1,2,3,4</strong> и откатились на снапшот <strong>2</strong>, то снапшотов <strong>3</strong> и <strong>4</strong> не будет, поскольку по отношению ко времени создания снапшота <strong>2</strong> они были созданы в будущем. Кроме произвольного и уникального имени снапшота, при создании вы можете указать snapname=gettimeofday. В этом случае, система автоматически в качестве имени подставит timestamp от текущего времени. При выводе списка снапшотов, вы можете пользоваться модификаторами для уточнения к какому jail вы хотите увидеть снапшоты, а также кастомизировать выводимые поля через аргумент <strong>display=</strong>. <strong>Пример</strong>:</p>
+		<p>создаем snapshot с именем <em>gromozeka</em> для клетки <strong>jail1</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=create jname=jail1 snapname=gromozeka
+		</pre>
+		<p>создаем snapshot с именем <em>zelepuka</em> для клетки <strong>jail1</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=create jname=jail1 snapname=zelepuka
+		</pre>
+		<p>Запустим jail1, выполним какие-либо модификации, остановим:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jstart jail1
+			..
+			% cbsd jexec jname=jail1 cp /bin/date /root
+			% cbsd jexec jname=jail1 file -s /root/date
+			/root/date: ELF 64-bit LSB executable, x86-64, version 1 (FreeBSD), dynamically linked (uses shared libs), for FreeBSD 9.0 (900506), stripped
+			% cbsd jstop jail1
+			..
+		</pre>
+		<p>Откатим jail1 на состояние, когда был создан снапшот zelepuka:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=rollback snapname=zelepuka jname=jail1
+			% cbsd jstart jail1
+			...
+			% cbsd jexec jname=jail1 file -s /root/date
+			/root/date: ERROR: cannot open `/root/date' (No such file or directory)
+		</pre>
+		<p class="text-center"><img src="/img/jsnapshot1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jsnapshot2.png" alt="" /></p>
+	</div>

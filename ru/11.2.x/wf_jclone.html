@@ -1,0 +1,33 @@
+	<h1><span>Клонирование jail</span></h1>
+	
+	<h2><a name="jclone_cmd">Команда jclone</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jclone
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrclone
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Выполняет клонирование jail в новый. В качестве обязательных аргументов, указывается источник/оригинал клетки через <strong>old</strong>,новое имя через аргумент <strong>new</strong> и FQDN (hostname) через <strong>host_hostname</strong>. В качестве необязательного&nbsp;— новые ip адреса через <strong>ip4_addr</strong> (если IP несколько, адреса указываются через запятую без пробелов)</p>
+		<div class="warning">
+			<p><strong>Внимание:</strong> Начиная с версии 11.0.10, CBSD на ZFS системах применяет средства ZFS clone!</p>
+		</div>
+		<p>ZFS клонирование, это мгновенная операция независимо от объемов (спасибо Copy-on-write), но накладывает некоторые ограничения - вы будете записимы от наличия родительского снапшота. Если вы попробуете удалить родительское окружение,, CBSD автоматически выполнит команду <strong>zfs promote</strong>,
+		однако если вы работаете со снапшотами независимо от CBSD - имейте это ввиду</p>
+		<p>Вы можете контроллировать это поведение через аргумент <strong>clone_method=</strong>. Либо можете выставить его глобально через <i>rclone.conf</i> и <i>bclone.conf</i>, переопределив настройку с 'auto' на 'rsync':
+		<pre class="brush:bash;ruler:true;">
+		% echo 'clone_method="rsync"' > ~cbsd/etc/rclone.conf
+		% echo 'clone_method="rsync"' > ~cbsd/etc/bclone.conf
+		<pre>
+		<p>Когда <i>~cbsd/etc/bclone.conf</i> (для bclone) и <i>~cbsd/etc/rclone.conf</i> содержат:
+		<pre>
+		clone_method="rsync"
+		</pre>
+		<p>клон не будет использовать zfs clone, даже если вы работаете на ZFS</p>
+		<p><strong>Пример:</strong> клонирование клетки jail2 в jail3 со сменой имени хоста <strong>host_hostname</strong> и ip адреса <strong>ip4_addr</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jclone old=jail2 new=jail3 host_hostname=jail3.my.domain ip4_addr=10.0.0.22/24
+		</pre>
+		<p class="text-center"><img src="/img/jclone1.png" alt="" /></p>
+	</div>

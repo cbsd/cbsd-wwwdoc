@@ -1,0 +1,55 @@
+	<h1><span>Wirking with packages and pkg(7) in jail via CBSD </span></h1>
+	
+	<h2><a name="pkd_cmd">Command: pkg</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p><strong>cbsd pkg</strong> - is wrapper around standart FreeBSD <a href="http://man.freebsd.org/pkg/7" target="_blank">pkg(7)</a> tools to use <strong>jname</strong> argument for more comfort work with the jail from the master host</p>
+		<p>Via <strong>mode=</strong> argument indicating a needet action. Values can be:</p>
+		<ul>
+			<li><strong>add, install</strong> - to install packages</li>
+			<li><strong>remove</strong> - to remove packages</li>
+			<li><strong>bootstrap</strong> - init pkg (normally done in the jail one times on creating)</li>
+			<li><strong>info, query</strong> - execute queries <em>info</em> or <em>query</em> with the same syntax pkg</li>
+			<li><strong>update</strong> - execute pkg update</li>
+			<li><strong>upgrade</strong> - execute upgrade</li>
+			<li><strong>clean</strong> - execute clean to purge pkg cache</li>
+		</ul>
+		<p>For some commands (clean, update, upgrade) it is permissible jname= to specify as mask for performing the operation simultaneously in several jails</p>
+		<p>Keep in mind that must first be specified parameters <strong>mode</strong> and <strong>jname</strong>. All that comes after - not analyzed and treated <a href="http://man.freebsd.org/pkg/7" target="_blank">pkg(7)</a> as is.</p>
+		<p>In addition, please note that all operations are performed with the set environment variables <strong>ASSUME_ALWAYS_YES=yes</strong> and <strong>IGNORE_OSVERSION=yes</strong> to suppress the interactivity that basically, you need to work in automated scripts. If for some reason this does not work for you, use <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jexec_ssi.html">cbsd rexe</a> to work with pkg directly.</p>
+		<p><strong>Example1:</strong> Update pkg index files inside ALL containers:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=update jname='*'
+		</pre>
+		<p><strong>Example2:</strong> Update ALL packages inside containers, whose name starts with redis*:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=upgrade jname='redis*'
+		</pre>
+		<p><strong>Example3:</strong> Clear pkg cache in ALL containers:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=clean jname='*'
+		</pre>
+		<p><strong>Example4:</strong> Get installed packages frin jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=query jname=jail1 %o
+		</pre>
+		<p><strong>Example5:</strong> Install bash, mc, wget in mytest1 jail:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=install jname=mytest1 bash mc wget
+		</pre>
+		<p>or that much better (in order to avoid the same name in different categories) indicate origin package, not the name:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=install jname=mytest1 shells/bash ftp/wget misc/mc
+		</pre>
+		<p><strong>Example6:</strong> Upgrade mc package in jail1:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=upgrade jname=jail1 mc
+		</pre>
+		<p><strong>Example7:</strong> Remove wget and lsof packages:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd pkg mode=remove jname=jail1 wget lsof
+		</pre>
+	</div>

@@ -1,0 +1,26 @@
+	<h1><span>Переименовывание клетки</span></h1>
+	
+	<h2><a name="jrename_cmd">Команда jrename</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrename
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Выполняет переименовывание jail и соответствующих каталогов данных в новое имя. Может выполнятся только на погашенной клетке. В качестве обязательных параметров:</p>
+		<ul>
+			<li><strong>old</strong>&nbsp;— старое имя jail</li>
+			<li><strong>new</strong>&nbsp;— новое имя jail</li>
+		</ul>
+		<p>В качестве необязательных параметров:</p>
+		<ul>
+			<li><strong>host_hostname</strong>&nbsp;— FQDN, новое полное имя клетки</li>
+			<li><strong>ip4_addr</strong>&nbsp;— новый IP адрес клетки (если несколько IP, указываются через запятую без пробелов)</li>
+		</ul>
+		<p>&nbsp;</p>
+		<p><strong>Пример</strong> (переименовывание клетки jail1 в jail50 со сменой имени хоста клетки и ip адреса:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jrename old=jail1 new=jail50 host_hostname=jail50.my.domain ip4_addr=192.168.0.5/24
+		</pre>
+		<p class="text-center"><img src="/img/jrename1.png" alt="" /></p>
+	</div>
+

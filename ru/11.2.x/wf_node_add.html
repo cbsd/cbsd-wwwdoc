@@ -1,0 +1,29 @@
+	<h1><span>Добавление нод</span></h1>
+	
+	<h2><a name="nodeadd_cmd">Команда node mode=add</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=add
+		</pre>
+		<p>Команда <strong>cbsd node mode=add ..</strong>, при доступности удаленной машины по ssh и правильном пароле пользователя cbsd, забирает с удаленной машины приватный ключ, сохраняя его в каталоге <em>$workdir/.rssh</em></p>
+		<p>Обязательные параметры для mode=add:</p>
+		<ul>
+			<li><strong>node</strong> = IP адрес или FQDN сервера (в списке нод, однако, этот сервер будет называться именно так, как указано в <strong>nodename</strong> на удаленной машине. Это то имя, которое спрашивается при первом запуске <strong>cbsd initenv</strong>, в дальнейшем его можно изменить через <strong>cbsd inienv-tui</strong>.</li>
+			<li><strong>pw</strong> = пароль для пользователя <strong>CBSD</strong></li>
+		</ul>
+		<p>Необязательный аргумент:</p>
+		<ul>
+			<li><strong>port</strong> = альтернативный номер порта sshd. По-умолчанию, ноды <strong>CBSD</strong> используют порт 22222 для соединения по SSH.</li>
+		</ul>
+	</div>
+	<div class="warning">
+		<p><strong>Внимание:</strong> пароль пользователя <strong>CBSD</strong> используется только в момент получения приватного ключа. Соответственно, доступ на сервер будет до тех пор, пока ключ не будет удален или перегенерирован. Смена пароля пользователя роли в этом случае играть не будет.</p>
+	</div>
+	<div class="block">
+		<p><strong>Пример:</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=add node=192.168.1.2 pw=superpw port=22
+		</pre>
+		<p class="text-center"><img src="/img/nodeadd1.png" alt="" /></p>
+	</div>
+

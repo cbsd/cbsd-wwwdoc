@@ -1,0 +1,29 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>FreeBSD: syslog and debugging</span></h1>
+<h2><a name="intro"><span>syslog</span></a></h2>
+<div class="block">
+			<p>Starting from <strong>CBSD</strong> 11.1.19 You can use the syslog subsystem to collect messages that occur during the process of <strong>CBSD</strong> scripts</p>
+			<p>The configuration file for the log subsystem: <em>~cbsd/etc/defaults/logger.conf</em>. Create new file <em>~cbds/etc/logger.conf</em> to override the default values.</p>
+			<p>Using the syslog configuration file, you can redirect all messages of <strong>CBSD</strong> in a separate file and in the future use different solutions for the collection and analysis of messages.</p>
+			<p><em>/etc/syslog.d/cbsd.conf</em>:</p>
+			<pre class="cli">
+!cbsd
+*.*                     /var/log/cbsd.log
+			</pre>
+			<p>And create empty file:</p>
+			<pre class="cli">
+touch /var/log/cbsd.log
+			</pre>
+			<p>After syslog restarting, messages from <strong>CBSD</strong> can be read in a file /var/log/cbsd.log</p>
+			
+</div>
+<h2><a name="intro"><span>debugging</span></a></h2>
+<div class="block">
+<p>If you encounter an error in the script, you can get a trace of all sh commands executed by running a particular <strong>CBSD</strong> script through the <strong>CBSD_DEBUG</strong> environment variable, for example:</p>
+<pre class="cli">
+env CBSD_DEBUG=1 cbsd jls
+</pre>
+</div>
+<!--# include file="_end.html" -->

@@ -70,10 +70,10 @@
 </div>
 <h2><a name="cmddebug">Debug отработки CBSD команд</a></h2>
 <div class="block">
-	<p>Для включения дебага через <strong>sh xtrace</strong> и трассировки операций, используйте аргумент <em>--debug</em> после CBSD команд, например:</p>
+	<p>Для включения дебага через <strong>sh xtrace</strong> и трассировки операций, используйте переменную окружения <strong>CBSD_DEBUG</strong>, например:</p>
 	<pre class="brush:bash;ruler:true;">
-		% env NOCOLOR=1 cbsd node --debug mode=add node=192.168.1.222 pw=very_strong_plain_password port=22
-		% env NOCOLOR=1 cbsd jls --debug
+		% env CBSD_DEBUG=1 cbsd node mode=add node=192.168.1.222 pw=very_strong_plain_password port=22
+		% env CBSD_DEBUG=1 cbsd jls
 	</pre>
 </div>
 <h2><a name="cmdoutput">Вывод в XML, JSON, HTML и человеческом формате</a></h2>

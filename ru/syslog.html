@@ -1,0 +1,28 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<h1><span>FreeBSD: syslog и debugging</span></h1>
+<h2><a name="intro"><span>syslog</span></a></h2>
+<div class="block">
+			<p>С версии <strong>CBSD</strong> 11.1.19 вы можете использовать подсистему syslog для сбора сообщений, возникающих в процессе работы <strong>CBSD</strong> скриптов</p>
+			<p>Конфигурационный файл для подсистемы логов: <em>~cbsd/etc/defaults/logger.conf</em>. Создайте файл <em>~cbds/etc/logger.conf</em> для того, чтобы переопределить стандартные значения.</p>
+			<p>Используя конфигурационный файл syslog, вы можете перенаправить все сообщения <strong>CBSD</strong> в отдельный файл и в дальнейшем использовать различные решения для забора и анализа сообщений.</p>
+			<p><em>/etc/syslog.d/cbsd.conf</em>:</p>
+			<pre class="cli">
+!cbsd
+*.*                     /var/log/cbsd.log
+			</pre>
+			<p>И создайте пустой файл:</p>
+			<pre class="cli">
+touch /var/log/cbsd.log
+			</pre>
+			<p>После перезапуска syslog, сообщения от <strong>CBSD</strong> можно будет прочесть в файле /var/log/cbsd.log</p>
+			
+</div>
+<h2><a name="intro"><span>debugging</span></a></h2>
+<div class="block">
+<p>Если вы столкнулись с ошибкой в работе скрипта, вы можете получить трейс всех sh команд, выполняемых при работе того или иного скрипта <strong>CBSD</strong> через включенную переменную окружения <strong>CBSD_DEBUG</strong>, например:</p>
+<pre class="cli">
+env CBSD_DEBUG=1 cbsd jls
+</pre>
+</div>
+<!--# include file="_end.html" -->

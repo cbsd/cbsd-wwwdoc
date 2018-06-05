@@ -1,0 +1,287 @@
+<!--# include file="_start.html" -->
+<!--# include file="/en/translate.html" -->
+<!--# include file="currentver.html" -->
+<h1><span>CBSD RoadMap, TODO and Ideas</span></h1>
+<h2><a name="intro"><span>Intro</span></a></h2>
+	<div class="block">
+			<p>Here are collected various notes about ideas that would be interesting to implement in the CBSD project.
+			It does not mean that all of them will be fulfilled, that they are correct or there are no other ideas. Our goal is to develop for FreeBSD full-stack cloud solution and jail/bhyve/XEN management tools.
+			You can influence these ideas and also if the objectives of the project are close to you and you find the CBSD projectinteresting - you can join us while working on any of these tasks or your ideas...</p>
+	</div>
+	<h2><a name="multi-workdir"><span>Support for multiple $workdir on single hoster</span></a></h2>
+	<div class="block">
+			<p>В первых версиях CBSD был введен $workdir, отдельный от $distdir (/usr/local/cbsd). По первоначальной версии, это было необходимо для безболезненного апгрейда. Если операция initenv записала в $workdir плохую версию или битые файлы, через скрипты копии в /usr/local/cbsd всегда можно было получить контроль над окружениями или задаунгрейдится/обновится вновь.
+
+На данный момент это не требуется, но этот функционал необходимо доработать и адаптировать для других целей - чтобы на одном хостере можно было инсталлировать и работать сразу с несколькими $workdir окружениями.
+
+В первую очередь, это полезно для тех, кто делает коммерческий хостинг и ему необходимо разделить окружения. Например на толстом по ресурсам хостере и файловой системой ZFS, можно нарезать отдельные пулы (могут быть отдельные ZFS пулы с разными типами дисков):
+
+/client1/
+/client2/
+/clientX/
+
+и проинициализировать в каждом из них окружения:
+
+env workdir=/client1 cbsd initenv
+env workdir=/client2 cbsd initenv
+..
+
+Соотв, в каждом /clientX будет своя собственная структура CBSD, баз FreeBSD и SQLite3, когда команды вроде:
+
+env workdir=/client1 cbsd jls
+env workdir=/client2 cbsd jstart jail1
+
+будут выводить разные списки окружений и соотв, работать с ними.
+
+Это решает проблему одинаковых именований окружений между разными клиентами. Тем не менее, поскольку jail/bhyve - один, внутри системы нужно мапить именование окружений клиента на реальное именование., тк оно не может быть неуникальным.</p>
+	</div>
+	<h2><a name="billing"><span>Billing system integration modules</span></a></h2>
+	<div class="block">
+	Links: https://github.com/cbsd/cbsd/issues/165
+	Нам надо как-то обсчитывать клиентов за различные услуги, самая первичная услуга-минимум - оплата арендованных ресурсов (bhyve виртуалка).
+
+Те, в биллинге заводится клиент и раз в месяц с него списывается/выставляется счет за (варианты):
+
+1) использование фиксированного номера темлейта, например:
+
+    512 RAM, 1 core, 10 GB HDD
+    1024 RAM, 2 core, 10 GB HDD
+    2048 RAM, 2 core, 20 GB HDD
+
+- каждый темплейт может быть просто "услугой" у которой есть цена.
+
+2) Более сложный вариант - если пользователь захочет кастомизировать (скорее всего это будет массово), выставлять счет за конкретные компоненты:
+
+    RAM
+    Core num ( Ghz?)
+    Storage
+
+Нам нужно скрещивать WEBDEV скрипты с Базой биллинга, где находится список взятых клиентом услуг (чтобы по нему создать виртуалки), либо нужна промежуточная база данных, где хранится ID клиента и информация о заказанных виртуалках. Туда же CBSD должна иметь доступ на запись, тк она должна оставить информацию какая и где создана для него виртуальная машина. По этой причине, думается, что это не должна быть БД биллинга, а именно БД нашей инфраструктуры.
+	</div>
+	<h2><a name="auto-shared-dfs"><span>sharedfs признак может быть автоматом</span></a></h2>
+	<div class="block">
+	<p>нода-источник просто создает сигнатуру и проверяет его на ноде-приемнике</p>
+	</div>
+	<h2><a name="ubuntu-vm-obtain-broken"><span>сломана загрузка ubuntu при vm_obtain</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="centos-vm-obtain"><span>vm_obtain: centos support</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="local-iso-preseed"><span>pxe preseed - обкатать установку с локальным cd</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="qemu-usermode-qa"><span>qemu usermode - перепроверить, написать unit test</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="cpr-doc"><span>cpr: вынести как модуль, написать документацию</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="cpr-base-in-pkg"><span>cpr: смержить код для борки base-in-pkg</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="dhcp-pxe-mod"><span>dhcp/pxe control</span></a></h2>
+	<div class="block">
+	<p>стабилизировать функционал и сделать его частью clonos/cbsd через модуль</p>
+	</div>
+	<h2><a name="cbsd-sep-env-racct"><span>cbsd и разделение на environment: сделать возможность shared ресурсов, квоты и приоритеты на окружения</span></a></h2>
+	<div class="block">
+	<p>отдельные ресурсы, такие как: src, base, obj, ports. устанавливать приоритеты окружений друг перед другом через nice + иметь возможность выделить скоп ресурсов на environment в целом, потребуется хорошая статистика и учет</p>
+	</div>
+	<h2><a name="clonos-descr"><span>clonos: добавить поддержку jdescr</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="mkinventory-sysinv-merge"><span>mkinventory пересекается с sysinv во многом, смержить?</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="vm-boot-cfg-multiple-nic"><span>vm_bootcfg не отработал на виртуалке с двумя сетевыми</span></a></h2>
+	<div class="block">
+	<p>a) из-за ошибки в jregister было две сетевухи, но хелпер не применил адрес ни на одну (при этом в логе сообщение от отработке было)</p>
+	</div>
+	<h2><a name="trafstat"><span>улучшение trafstat</span></a></h2>
+	<div class="block">
+	<p>- bhyve support ( by tap iface) ? + prometheus metric output support</p>
+	</div>
+	<h2><a name="j2slave-no-system"><span>j2slave - не тащит jail-system, а надо</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="bhyve-remove-tap-upon-stop"><span>нужно удалятт в bhyve интерфейсы и бридж призавершении вм</span></a></h2>
+	<div class="block">
+	<p>повесит на trap например. если старт зафейлился, нужно удалить за собой сетевухи к жанной вм и мкембершип бриджа</p>
+	</div>
+	<h2><a name="non-inter-initenv-qa"><span>проверить initenv.conf и неинтерактивную инсталляцию</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="ext-cmd-macros"><span>initenv должна делать which всех команд и генерировать макросы</span></a></h2>
+	<div class="block">
+	<p>сохранять в workdir</p>
+	</div>
+	<h2><a name="bsnap-mult-disk"><span>bsnapshot: улучшения - multidisk + state check</span></a></h2>
+	<div class="block">
+	<p>a) нужно добавить проверку состояния
+b) нужно снапшотить одновременно все диски
+c) либо индивидуальный диск (возможно через online + remount через агента? )</p>
+	</div>
+	<h2><a name="merge-popcdir-copybin"><span>объединить populate_cdir с copy-binlib</span></a></h2>
+	<div class="block">
+	<p>тк это дубляж кода</p>
+	</div>
+	<h2><a name="ext-var-qa"><span>unit-test для exported переменных</span></a></h2>
+	<div class="block">
+	<p>
+
+оч неплохо было бы написать юнит тест из проверочного скрипта аля:
+
+root@acer:~ # cat /usr/jails/jails-system/jail1/master_prestart.d/a.sh
+#!/bin/sh
+
+cat > /tmp/cool.txt EOF
+PATH: ${PATH}
+myjname: ${jname}
+myip4: ${ip4_addr}
+mydata: ${data}
+
+FIRST IPv4 public: ${ipv4_first_public}
+FIRST IPv4 private: ${ipv4_first_private}
+FIRST IPv4: ${ipv4_first}
+
+FIRST IPv6 public: ${ipv6_first_public}
+FIRST IPv6 private: ${ipv6_first_private}
+FIRST IPv6: ${ipv6_first}
+EOF
+
+и проверки значений после jstart
+</p>
+	</div>
+	<h2><a name="cbsd-oci-spec"><span>CBSD и OCI spec</span></a></h2>
+	<div class="block">
+	<p>https://github.com/clovertrail/runc/tree/1501-SupportOnFreeBSD</p>
+	</div>
+	<h2><a name="getyesno-time"><span>добавить в getyesno опциональый таймаут </span></a></h2>
+	<div class="block">
+	<p>read -t <val></p>
+	</div>
+	<h2><a name="domain-history"><span>История изменений или дкйствий в sysdir</span></a></h2>
+	<div class="block">
+	<p>ранить в Sqlite3 историю операций над виртуальной машиной.
+Должна быть опциональность не вести журнал
+Должее быть механизм ротации старых записей и полная очистка
+Тк эта операция по прерываниям близка к wss хукам, подумать о совмещении хука в коде в виде одного, с обоаботкой нв ws/log/other в отдельном месте, возможно в параллельном режиме</p>
+	</div>
+	<h2><a name="ip4addr-with-nic"><span>реализовать поддержку фиксации интерфейсов в ip4_addr </span></a></h2>
+	<div class="block">
+	<p>усеры этого хотят + такая форма записи стала дефолтом через конфигурационный файл. Даст возможность создавать контейнеры на нескольких интерфейсах и бондингах
+<val></p>
+	</div>
+	<h2><a name="ovf"><span>Осилить формат OVF</span></a></h2>
+	<div class="block">
+	<p>
+
+Пока только с raw диском.
+Возможно, прикрутить поддержку vmdktools для конвертации в менее прожорливые форматы
+
+Тк ovf это xml, что потянет существенный депенс, подумать об адаптации к формату и jimport/jexport
+</p>
+	</div>
+	<h2><a name="beanstalkd"><span>маленький брокер сообщений, вместо zmq?</span></a></h2>
+	<div class="block">
+	<p>beanstalkd for taskd</p>
+	</div>
+	<h2><a name="vm_bootcfg-auth-upon-import"><span>подумать про vm_bootcfg и node authkey при иморте сервисных образов</span></a></h2>
+	<div class="block">
+	<p>образ сервисного контейнера идет без конфиграции vm_bootcfg и в нем остается authorized_keys оригинальной ноды. Таким образом, нода принявшая через repo или import вынуждена сначала сделать vm_bootcfg</p>
+	</div>
+	<h2><a name="cpr-conf-jconf"><span>cpr conf</span></a></h2>
+	<div class="block">
+	<p>меняются:
+
+ver
+baserw
+mount_src
+mount_kernel
+(проверку сделать на наличие ядра и сырцов)</p>
+	</div>
+	<h2><a name="hw.usb.no_boot_wait"><span>clonos hw.usb.no_boot_wait</span></a></h2>
+	<div class="block">
+	<p>
+
+hw.usb.no_boot_wait
+
+для пресечения root mount waiting for usbus0
+
+- подумать про инсталлер и если это VM, воткнуть по дефолту
+
+Также, должна быть в темплейте для CloudVM FreeBSD
+</p>
+	</div>
+	<h2><a name="bhyvearm"><span>bhyve arm</span></a></h2>
+	<div class="block">
+	<p>https://github.com/nihr43/freebsd-11-RELEASE-bhyve64-minimal-autoinst, bhyvearm64 https://github.com/FreeBSD-UPB/freebsd</p>
+	</div>
+	<h2><a name="cbsd-syslog"><span>syslog support</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="wss-racct"><span>clonos racct daemon with WSS support for real-time graph</span></a></h2>
+	<div class="block">
+	<p>json: { "name": "bhyve1", "cputime": 24, "memoryuse": 23233 " ... } ..</p>
+	</div>
+	<h2><a name="bhyve-sec-cdrom"><span>secondary CDROM</span></a></h2>
+	<div class="block">
+	<p>usefull for Windows and virtio drivers</p>
+	</div>
+	<h2><a name="ls-size"><span>cbsd [b|j|x]ls - добавить size</span></a></h2>
+	<div class="block">
+	<p>должна показывать суммарный объем занимаемой памяти по всем дискам (ufs/jail - ??), + возможно RAM usage + swap</p>
+	</div>
+	<h2><a name="pkg-elf-ver"><span>pkg должна наследовать версию из base</span></a></h2>
+	<div class="block">
+	<p>pkg -o OSVERSION=elf</p>
+	</div>
+	<h2><a name="cbsd-dht-mod"><span>cbsd DHT</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="cold-migrate-ready"><span>jcoldmigrate проверка на готовность принять ноду</span></a></h2>
+	<div class="block">
+	<p>Есть много причин, по которым клетка не заработает на новой ноде, и это необходимо диагностировать на этапе j2prepare, до того как польется трафик.
+
+Тоесть, нода-источник должна инициировать проверку с нодой-приемником на предмет проверок условий, таких как:
+
+1) если клетка в baserw=0, имеется ли на приемнике база нужной версии ( cbsd basels )
+2) достаточно ли места на ноде-приемнике ( если на источнике zfs, то размер jail узнается моментально через zfs get, если же UFS - либо du -sh либо find понять какой размер занимает jail и спросить приемник - есть ли у него столько места )
+3) дозволено ли на ноде-приемнике использовать те подсети, которую использует jail. Этот пункт под вопросом либо опционален (варнинг).
+
+Другими словами:
+jail имеет IP из подсети 192.168.0.0/24 , соотв на ноде источнике NODE IP POOL имеет эту сеть.
+Инициировали миграцию клетки на сервер, где NODE_IP_POOL = "10.0.0.0/24, 10.1.0.0/24". Тоесть, 192.168.0.X там нет. Должен быть дроп.
+
+4) есть много других потенциальных проверок, но первые две - обязательны.
+
+Я это вижу в виде отправки errcode при общении между источником-приемником. Например если вернулся код 0 - все хорошо, если 1 - нет базы, если 2 - недостаточно места, если 3 - пул не соответствует IP клетки , ...
+
+jcoldmigrate активно будет исползоваться для миграции jail на хостинг</p>
+	</div>
+	<h2><a name="initenv-nat-inter"><span>initenv - nat_interfaces inter=0</span></a></h2>
+	<div class="block">
+	<p>В клоносе в initenv.conf не работает nat interfaces указанный в vtnet</p>
+	</div>
+	<h2><a name="jconstruct"><span>sync/update jbconstruct with tui</span></a></h2>
+	<div class="block">
+	<p></p>
+	</div>
+	<h2><a name="bhyve-ppt-msix-test"><span>Как проверить что msi и msix держится</span></a></h2>
+	<div class="block">
+	<p>https://lists.freebsd.org/pipermail/freebsd-virtualization/2018-January/006023.html</p>
+	</div>
+<!--# include file="_end.html" -->

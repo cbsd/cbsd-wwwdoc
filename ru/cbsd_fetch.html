@@ -61,8 +61,8 @@
 	</div>
 	<h1><a name="cbsd_partners"><span>Партнерская программа, или "Разворачиваем зеркало ресурсов CBSD"</span></a></h1>
 	<div class="block">
-		      <p>Для облегчения задач по работе с CRC суммами написан скрипт <strong>fetch_iso</strong>. Скрипт решает две основных задачи:</p>
-		      <ul>
+			<p>Для облегчения задач по работе с CRC суммами написан скрипт <strong>fetch_iso</strong>. Скрипт решает две основных задачи:</p>
+			<ul>
 				<li>Автоматически обновить sha256 суммы в профилях путем скачивания ISO образа (только с официальных ресурсов, <strong>iso_site</strong>) и переподсчетом sha256, после чего CRC
 				обновляется в файле <em>/usr/local/cbsd/etc/defaults/vm-*</em>. Для того, чтобы он вступил в силу, необходимо выполнить <strong>cbsd initenv</strong>. Кроме этого, этот файл можно отправить
 				в качестве <strong>pull-request</strong> через <strong>GitHub</strong>. Для этого, используйте вызов <strong>fetch_iso</strong> с аргументом <strong>gensha256=1</strong>.
@@ -77,12 +77,101 @@
 				с целью скачать все ресурсы к себе заранее. Как правило, в качестве <strong>dstdir=</strong> выступает каталог <em>/usr/jails/src/iso</em> (если $workdir = /usr/jails), в котором <strong>CBSD</strong> хранит
 				все ISO образы.</li>
 			</ul>
-		      <p>Если вы имеете вычислительные мощности, доступные из сети интернет (хостинг, датацентр и тд), вы можете построить собственное зеркало <strong>CBSD</strong> ресурсов и опубликовать ссылку на него в профилях
-		      виртуальных машин. Таким образом, вы станете участником проекта <strong>CBSD</strong> и поможете вашему региону (стране) получить, возможно, наилучшее зеркало для них.</p>
-		      <p>Также, для желающих помочь проекту с локальным зеркалом на ваших ресурсах, есть открытый в режиме <strong>RO</strong> сервер rsync, с которого через <strong>cron</strong> вы можете инициировать
-		      синхронизацию контента. Адрес этого ресурса: <strong>rsync://cbsd.lifec0re.net:30873</strong>. Если ваше зеркало доступно из интернет, вы можете послать <strong>pull-request</strong> на GitHub в репозиторий 
-		      <a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a> добавив ваше зеркало в параметре <strong>cbsd_iso_mirrors=</strong>. С выходом нового релиза <strong>CBSD</strong>,
-		      ваше зеркало войдет в <strong>CBSD</strong>.
-		      </p>
+			<p>Если вы имеете вычислительные мощности, доступные из сети интернет (хостинг, датацентр и тд), вы можете построить собственное зеркало <strong>CBSD</strong> ресурсов и опубликовать ссылку на него в профилях
+			виртуальных машин. Таким образом, вы станете участником проекта <strong>CBSD</strong> и поможете вашему региону (стране) получить, возможно, наилучшее зеркало для них.</p>
+			<p>Также, для желающих помочь проекту с локальным зеркалом на ваших ресурсах, есть открытый в режиме <strong>RO</strong> сервер rsync, с которого через <strong>cron</strong> вы можете инициировать
+			синхронизацию контента. Адрес этого ресурса: <strong>rsync://cbsd.lifec0re.net:30873</strong>. Если ваше зеркало доступно из интернет, вы можете послать <strong>pull-request</strong> на GitHub в репозиторий 
+			<a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a> добавив ваше зеркало в параметре <strong>cbsd_iso_mirrors=</strong>. С выходом нового релиза <strong>CBSD</strong>,
+			ваше зеркало войдет в <strong>CBSD</strong>.</p>
+	</div>
+	<h1><a name="cbsd_mirror_howto"><span>Как поднять зеркало, HowTo</span></a></h1>
+	<div class="block">
+		<p>Step-by-step конфигурирования зеркала с периодической синхронизацией через <a href="http://rsync.samba.org/">rsync</a> в <a href="http://man.freebsd.org/crontab/5" target="_blank">crontab(5)</a>:</p>
+		<p>1) Установить пакеты:</p>
+		<pre class="brush:bash;ruler:true;">
+			pkg install -y rsync nginx
+		</pre>
+		<p>2) Активировать сервис nginx:</p>
+		<pre class="brush:bash;ruler:true;">
+		sysrc nginx_enable="YES"
+		</pre>
+		<p>3) Создать каталог <em>/usr/local/www/cbsd-mirror</em> куда будем сохранять образы, создадим лог файл для rsync и выставим корректные права для пользователя <strong>www</strong>, от которого мы будем синхронизировать</p>
+		<pre class="brush:bash;ruler:true;">
+		mkdir -p /usr/local/www/cbsd-mirror
+		touch /var/log/cbsd_mirror.log
+		chown www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log
+		</pre>
+		<p>4) Откорректируем <strong>nginx.conf</strong>, указав в качестве <strong>server_name</strong> корректное имя сервера (в данном примере: <strong>electrode.bsdstore.ru</strong>) и путь к корневому каталогу:</p>
+		<pre class="cli;">
+		cat &gt; /usr/local/etc/nginx/nginx.conf &lt;&lt;EOF
+		user nobody;
+		worker_processes  2;
+
+		error_log /var/null;
+		pid /var/run/nginx.pid;
+
+		events {
+			worker_connections  1024;
+			kqueue_changes  1024;
+			use kqueue;
+		}
+
+		http {
+			server_tokens off;
+			include       mime.types;
+			default_type  application/octet-stream;
+
+			log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+				'$status $body_bytes_sent "$http_referer" '
+				'"$http_user_agent" "$http_x_forwarded_for"';
+
+			error_log       /dev/null;
+			access_log      /dev/null;
+			client_header_timeout  3m;
+			client_body_timeout    3m;
+			send_timeout           3m;
+			client_header_buffer_size    1k;
+			large_client_header_buffers  4 8k;
+			client_body_buffer_size 32K;
+			log_not_found off;
+
+			client_max_body_size 20m;
+
+			gzip off;
+			output_buffers   1 32k;
+			postpone_output  1460;
+			reset_timedout_connection  on;
+			sendfile         on;
+			tcp_nopush       on;
+			tcp_nodelay      on;
+			send_lowat       12000;
+			keepalive_timeout  8;
+
+			server {
+				listen       *:80;
+				#listen      [::]:80;	# Enable IPv6
+
+				server_name  electrode.bsdstore.ru;
+				access_log /var/log/nginx/electrode.bsdstore.ru.acc main;
+				error_log /var/log/nginx/electrode.bsdstore.ru.err;
+
+				root   /usr/local/www/cbsd-mirror;
+			}
+		}
+		EOF
+		</pre>
+		<p>5) Создадим запись в Crontab с вызовом rsync в интервале 15 минут через lockf, чтобы пресечь дубляж процессов</p>
+		<pre class="brush:bash;ruler:true;">
+		cat &gt; /etc/cron.d/cbsd_mirror &lt;&lt;EOF
+		SHELL=/bin/sh
+		PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://cbsd.lifec0re.net:30873/iso/ /usr/local/www/cbsd-mirror/ > /var/log/cbsd_mirror.log 2>&1
+		EOF
+		</pre>
+		<p>6) Стартуем сервис</p>
+		<pre class="brush:bash;ruler:true;">
+		service nginx restart
+		</pre>
+		<p>После синхронизации каталога и проверки, что ISO образы с вашего ресурса отдаются в мир - вы можете присылать <a href="https://github.com/cbsd/cbsd-vmprofiles/pulls">Pull Request</a> в профили <a href="https://github.com/cbsd/cbsd-vmprofiles">проекта</a> с добавленным в <strong>cbsd_iso_mirrors</strong> вашим сервером в профилях виртуальных машин.</p>
 	</div>
 <!--# include file="_end.html" -->

@@ -83,4 +83,94 @@
 		your mirror will go to <strong>CBSD</strong>.
 		</p>
 	</div>
+	<h1><a name="cbsd_mirror_howto"><span>How to setup a mirror, HowTo</span></a></h1>
+	<div class="block">
+		<p>Step-by-step setup of the mirror with periodic synchronization via <a href="http://rsync.samba.org/">rsync</a> in <a href="http://man.freebsd.org/crontab/5" target="_blank">crontab(5)</a>:</p>
+		<p>1) Install packages:</p>
+		<pre class="brush:bash;ruler:true;">
+			pkg install -y rsync nginx
+		</pre>
+		<p>2) Activate nginx services:</p>
+		<pre class="brush:bash;ruler:true;">
+		sysrc nginx_enable="YES"
+		</pre>
+		<p>3) Create <em>/usr/local/www/cbsd-mirror</em> directory where we will save ISO images, create a log file for rsync and set the right permissions for the <strong>www</strong> user, from which we will synchronize</p>
+		<pre class="brush:bash;ruler:true;">
+		mkdir -p /usr/local/www/cbsd-mirror
+		touch /var/log/cbsd_mirror.log
+		chown www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log
+		</pre>
+		<p>4) Correct <strong>nginx.conf</strong>, specifying <strong>server_name</strong> as correct name of the server (in this example: <strong>electrode.bsdstore.ru</strong>) and set path to root directory:</p>
+		<pre class="cli;">
+		cat &gt; /usr/local/etc/nginx/nginx.conf &lt;&lt;EOF
+		user nobody;
+		worker_processes  2;
+
+		error_log /var/null;
+		pid /var/run/nginx.pid;
+
+		events {
+			worker_connections  1024;
+			kqueue_changes  1024;
+			use kqueue;
+		}
+
+		http {
+			server_tokens off;
+			include       mime.types;
+			default_type  application/octet-stream;
+
+			log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+				'$status $body_bytes_sent "$http_referer" '
+				'"$http_user_agent" "$http_x_forwarded_for"';
+
+			error_log       /dev/null;
+			access_log      /dev/null;
+			client_header_timeout  3m;
+			client_body_timeout    3m;
+			send_timeout           3m;
+			client_header_buffer_size    1k;
+			large_client_header_buffers  4 8k;
+			client_body_buffer_size 32K;
+			log_not_found off;
+
+			client_max_body_size 20m;
+
+			gzip off;
+			output_buffers   1 32k;
+			postpone_output  1460;
+			reset_timedout_connection  on;
+			sendfile         on;
+			tcp_nopush       on;
+			tcp_nodelay      on;
+			send_lowat       12000;
+			keepalive_timeout  8;
+
+			server {
+				listen       *:80;
+				#listen      [::]:80;	# Enable IPv6
+
+				server_name  electrode.bsdstore.ru;
+				access_log /var/log/nginx/electrode.bsdstore.ru.acc main;
+				error_log /var/log/nginx/electrode.bsdstore.ru.err;
+
+				root   /usr/local/www/cbsd-mirror;
+			}
+		}
+		EOF
+		</pre>
+		<p>5) Create an entry in crontab with the rsync call for 15 minutes through lockf to stop duplication of processes</p>
+		<pre class="brush:bash;ruler:true;">
+		cat &gt; /etc/cron.d/cbsd_mirror &lt;&lt;EOF
+		SHELL=/bin/sh
+		PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://cbsd.lifec0re.net:30873/iso/ /usr/local/www/cbsd-mirror/ > /var/log/cbsd_mirror.log 2>&1
+		EOF
+		</pre>
+		<p>6) Start WEB service</p>
+		<pre class="brush:bash;ruler:true;">
+		service nginx restart
+		</pre>
+		<p>After synchronizing the directory and verifying that the ISO images from your resource are available to the rest of the world - you can send <a href="https://github.com/cbsd/cbsd-vmprofiles/pulls">Pull Request</a> in <a href="https://github.com/cbsd/cbsd-vmprofiles">profiles project</a> with added your servers in <strong>cbsd_iso_mirrors</strong> params of VM config files.</p>
+	</div>
 <!--# include file="_end.html" -->

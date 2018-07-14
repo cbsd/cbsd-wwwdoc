@@ -96,9 +96,9 @@
 		</pre>
 		<p>3) Create <em>/usr/local/www/cbsd-mirror</em> directory where we will save ISO images, create a log file for rsync and set the right permissions for the <strong>www</strong> user, from which we will synchronize</p>
 		<pre class="brush:bash;ruler:true;">
-		mkdir -p /usr/local/www/cbsd-mirror
+		mkdir -p /usr/local/www/cbsd-mirror/iso
 		touch /var/log/cbsd_mirror.log
-		chown www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log
+		chown -R www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log
 		</pre>
 		<p>4) Correct <strong>nginx.conf</strong>, specifying <strong>server_name</strong> as correct name of the server (in this example: <strong>electrode.bsdstore.ru</strong>) and set path to root directory:</p>
 		<pre class="cli;">
@@ -164,7 +164,7 @@
 		cat &gt; /etc/cron.d/cbsd_mirror &lt;&lt;EOF
 		SHELL=/bin/sh
 		PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://cbsd.lifec0re.net:30873/iso/ /usr/local/www/cbsd-mirror/ > /var/log/cbsd_mirror.log 2>&1
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://cbsd.lifec0re.net:30873/iso/ /usr/local/www/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
 		EOF
 		</pre>
 		<p>6) Start WEB service</p>

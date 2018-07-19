@@ -8,7 +8,8 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li>bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by <strong>Juronski</strong>, <a href="https://github.com/cbsd/cbsd/issues/287" target="_blank">Issue #287</a></li></li>
+		<li>sysutils/reggae: got added to ports. This package helps with common DevOps tasks, and it uses CBSD jails to acomplish that</li>
+		<li>bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by <strong>Juronski</strong>, <a href="https://github.com/cbsd/cbsd/issues/287" target="_blank">Issue #287</a></li>
 		<li>bugfix: pkg info: secure pkg execution by time limit and non-interactive flags. Reported by <strong>Alex Petrov</strong> via <strong>Telegram</strong></li>
 		<li>bhyve: manage storage controller (<strong>AHCI</strong>)</li>
 		<li>jlogin: support for jname as mask</li>
@@ -419,7 +420,7 @@
 		<li>mkhostsfile: edit only CBSD records in <em>/etc/hosts</em> via tpl string: <em># CBSD autotpl for mkhostsfile</em></li>
 		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jimport_ssi.html">jimport</a>: opportunity to set alternative IP for imported jail via <strong>newip=</strong> argument</li>
 		<li><em>(bugfix)</em> fixes for resource leaks in cbsdsh/cbsd_fwatch <a href="https://github.com/cbsd/cbsd/commit/466a0a9874e5210d1fa013705071574bafc9798e" target="_blank">466a0a9</a> (Reported by: <strong>Alexey Shubnikov</strong>).</li>
-		<li><em>(bugfix)</em> If mount_ports used, by default ports tree will be mount in RO, distfiles will be created in <em>/var/cache/</em> directory of jail. 
+		<li><em>(bugfix)</em> If mount_ports used, by default ports tree will be mount in RO, distfiles will be created in <em>/var/cache/</em> directory of jail.
 		If you want to change this behavior, refer to the paragraph <strong>mount_ports</strong> in <a href="/<!--#echo var="lang" -->/cbsd_rcconf.html">Jail settings</a> (Pointed: <strong>k at free.de</strong>)</li>
 	</ul>
 </div>

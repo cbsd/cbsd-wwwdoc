@@ -1,11 +1,6 @@
 	<h1><span>Jail upgrade</span></h1>
 
-	<h2><a name="jupgrade_cmd">jupgrade command</a></h2>
-	<div class="block">
-		<pre class="brush:bash;ruler:true;">
-			% cbsd jupgrade
-			% cbsd jconfig
-		</pre>
+	<h2><a name="jupgrade_warning">Warning</a></h2>
 		<strong>Description</strong>:
 		<p>Upgrade procedure jail always carries certain risks in the form of disruption of service, therefore, make it a rule to always create backups of the jail. If you are running on ZFS file system, you can use the command <a href="/en/<!--#echo var="version" -->/wf_jsnapshot_ssi.html">cbsd jsnapshot</a> for a frozen state of the jail before the start of work. For example:</p>
 		<pre class="brush:bash;ruler:true;">
@@ -21,6 +16,30 @@
 		</pre>
 		<p>And in the case of success, remove the image jail1.img from $workdir/export directory. An upgrade jail <strong>CBSD</strong>, we assume only update files base FreeBSD. Upgrade procedure 3rd-party software in jails similar to upgrade in the non-jail system. You can update the database as between different versions of the system (eg from version 9.2 to FreeBSD 9.3 or FreeBSD 9.3 -> FreeBSD 10.1), and update the files within the same version. It should be remembered that the jails have two modes — <strong>baserw=1</strong>, when the base part of each jail — have their own copy located in the directory $workdir/jails-data/$jail, and <strong>baserw=0</strong>, when one and the same base dir <em>${workdir}/basejail/base_\*_\*_ver</em> mounted to all jails.</p>
 	</div>
+	<h2><a name="jupgrade_cmd">jupgrade command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jupgrade
+			% cbsd jconfig
+		</pre>
+                <!--Missing info maybe?--!>
+                <p></p>
+
+	<h2><a name="basejail-upgrade">Upgrading the basejail</a></h2>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jset
+		</pre>
+                <p>This time, the idea is to set the basejail version of the
+                target jail to that of the desired FreeBSD release. We achieve
+                this by successively: shutting down the jail, setting the
+                appropriate version tag, starting the jail. In case we specified
+                a version for which we don't already have the base, it will be
+                downloaded at jail startup.</p>
+                <pre class="brush:bash;ruler:true;">
+                        % cbsd jstop XXX
+                        % cbsd jset jname=XXX ver=11.2
+                        % cbsd jstart XXX
+                </pre>
 	<h2><a name="freebsd-upgrade">Upgrading via freebsd-update</a></h2>
 	<div class="block">
 		<p><a href="http://man.freebsd.org/freebsd-update/8">freebsd-update</a> can be used without a reference to <strong>CBSD</strong>. Note that the utility works with the official FreeBSD resource and configure it to the repository <strong>CBSD</strong> is impossible, those only one source.</p>

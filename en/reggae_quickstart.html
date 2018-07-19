@@ -1,0 +1,63 @@
+<!--# include file="_start.html" -->
+<h1><span><strong>Reggae</strong> quick start</span></h1>
+
+<h2><a name="knowit">Initialization</a></h2>
+<div class="block">
+	<p><strong>Reggae</strong> Quick Start Guide </p>
+	<p>Install Reggae from ports or pkg:</p>
+	<pre class="brush:bash;ruler:true;">
+	make -C /usr/ports/sysutils/reggae install
+	</pre>
+	<pre class="brush:bash;ruler:true;">
+	pkg install -y reggae
+	</pre>
+	<p>Initialize PF, CBSD and ZFS dataset:</p>
+	<pre class="brush:bash;ruler:true;">
+	reggae network-init # it sets up PF and SSH, which you should (re)start
+	reggae cbsd-init
+	reggae master-init # creates resolver and dhcp jails
+  </pre>
+	<p>In most cases, the default config is acceptable, but if you want to change something /usr/local/etc/reggae.conf is the right place</p>
+</div>
+<h2><a name="knowit">Create service</a></h2>
+<div class="block">
+	<p>Create simple service</p>
+	<pre class="brush:bash;ruler:true;">
+	mkdir myservice
+	cd myservice
+	reggae init
+	make
+	</pre>
+	<p>Create service with shell and ansible provisioners</p>
+	<pre class="brush:bash;ruler:true;">
+	mkdir myservice
+	cd myservice
+	reggae init shell ansible
+	make
+	</pre>
+</div>
+<h2><a name="knowit">Create project</a></h2>
+<div class="block">
+	<p>Project consists of multiple services</p>
+	<pre class="brush:bash;ruler:true;">
+	mkdir myproject
+	cd myproject
+	reggae project-init
+	</pre>
+	<p>Resulting Makefile is this:</p>
+	<pre class="brush:bash;ruler:true;">
+	REGGAE_PATH = /usr/local/share/reggae
+	#SERVICES = consul https://github.com/mekanix/jail-consul \
+	#	   letsencrypt https://github.com/mekanix/jail-letsencrypt \
+	#	   ldap https://github.com/mekanix/jail-ldap \
+	#	   mail https://github.com/mekanix/jail-mail \
+	#	   jabber https://github.com/mekanix/jail-jabber \
+	#	   webmail https://github.com/mekanix/jail-webmail \
+	#	   web https://github.com/mekanix/jail-web \
+	#	   webconsul https://github.com/mekanix/jail-webconsul
+
+	.include <${REGGAE_PATH}/mk/project.mk>
+	</pre>
+  <p>Every service that is commented out is created using <strong>reggae init</strong> and edited to add extra functionality.</p>
+</div>
+<!--# include file="_end.html" -->

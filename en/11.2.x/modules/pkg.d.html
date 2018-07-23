@@ -32,13 +32,15 @@
 		<pre class="brush:bash;ruler:true;">
 			% cbsd pkg mode=clean jname='*'
 		</pre>
-		<p><strong>Example4:</strong> Get installed packages frin jail1:</p>
+		<p><strong>Example4:</strong> Get installed packages for box1 and for all jails with jname mask 'jail*' (in <strong>CBSD 11.2.1+</strong>):</p>
 		<pre class="brush:bash;ruler:true;">
-			% cbsd pkg mode=query jname=jail1 %o
+			% cbsd pkg mode=query jname=box1 %o
+			% cbsd pkg mode=query jname='jail*' %o
 		</pre>
-		<p><strong>Example5:</strong> Install bash, mc, wget in mytest1 jail:</p>
+		<p><strong>Example5:</strong> Install <strong>bash, mc, wget</strong> in mytest1 jail and <strong>nginx-devel,mysql57-server,postgresql96-server,mc</strong> for all jails with jname mask 'jail*' (in <strong>CBSD 11.2.1+</strong>:</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd pkg mode=install jname=mytest1 bash mc wget
+			% cbsd pkg jname='jail*' mode=install nginx-devel mysql57-server postgresql96-server mc
 		</pre>
 		<p>or that much better (in order to avoid the same name in different categories) indicate origin package, not the name:</p>
 		<pre class="brush:bash;ruler:true;">
@@ -48,8 +50,9 @@
 		<pre class="brush:bash;ruler:true;">
 			% cbsd pkg mode=upgrade jname=jail1 mc
 		</pre>
-		<p><strong>Example7:</strong> Remove wget and lsof packages:</p>
+		<p><strong>Example7:</strong> Remove wget and lsof packages in box1 and mc from all jails with jname mask 'jail*' (in <strong>CBSD 11.2.1+</strong>:</p>
 		<pre class="brush:bash;ruler:true;">
-			% cbsd pkg mode=remove jname=jail1 wget lsof
+			% cbsd pkg mode=remove jname=box1 wget lsof
+			% cbsd pkg jname='jail*' mode=remove mc
 		</pre>
 	</div>

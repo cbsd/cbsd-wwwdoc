@@ -11,6 +11,10 @@
 		<li><a href="https://www.freshports.org/sysutils/reggae/">sysutils/reggae</a>: got added to ports. This package helps with common DevOps tasks, and it uses CBSD jails to acomplish that</li>
 		<li>bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by <strong>Juronski</strong>, <a href="https://github.com/cbsd/cbsd/issues/287" target="_blank">Issue #287</a></li>
 		<li>bugfix: pkg info: secure pkg execution by time limit and non-interactive flags. Reported by <strong>Alex Petrov</strong> via <strong>Telegram</strong></li>
+		<li>bugfix: bhyve tap not added to bridge when MTU different. Reported by Andreas Wrede aka <strong>awrede</strong>, <a href="https://github.com/cbsd/cbsd/issues/301" target="_blank">Issue #301</a></li>
+		<li>bugfix: fixed the problem when some containers did not start, reported by (Reported and tested by: <strong>brahmann</strong>).</li>
+		<li>jail: disable <strong>allow_raw_sockets</strong> by default, added into jconstruct-tui/jconfig.  Reported by <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/307" target="_blank">Issue #307</a></li></li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/pkg.d_ssi.html">pkg</a>: add support for mutliple mask in jname args for: query,install,remove,info</li>
 		<li>bhyve: manage storage controller (<strong>AHCI</strong>)</li>
 		<li>jlogin: support for jname as mask</li>
 		<li>bhyve: vm priority</li>

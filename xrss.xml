@@ -259,5 +259,17 @@
     <guid>CBSD 11.2.0 available</guid>
     <pubDate>Mon, 28 May 2018 03:34:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>Reggae got added to FreeBSD ports tree</title>
+    <description>CBSD community, the ecosystem, the scale and level of the tasks is growing!&lt;br /&gt;
+      Reggae port has been commited into official FreeBSD ports tree!&lt;br /&gt;
+      - Freshports: https://www.freshports.org/sysutils/reggae/&lt;br /&gt;
+      - Project home page: https://github.com/cbsd/reggae&lt;br /&gt;
+      - Short intro and demo, by Goran Mekić: https://www.youtube.com/watch?v=6GPKO6Gp7b0&lt;br /&gt;
+    </description>
+    <link>https://github.com/cbsd/reggae</link>
+    <guid>Reggae port</guid>
+    <pubDate>Wed, 07 Jul 2018 03:34:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

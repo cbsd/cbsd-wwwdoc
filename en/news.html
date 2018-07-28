@@ -8,6 +8,17 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
+		<li>bhyve: support for NVMe controller</li>
+		<li>xen: sync code with bhyve, support for XEN 4.11</li>
+	</ul>
+	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
+	<ul>
+	</ul>
+</div>
+<h2><a name="release">Releases</a></h2>
+<div class="block">
+	<p><strong>11.2.1</strong>&nbsp;&mdash; 2018-07-28</p>
+	<ul>
 		<li><a href="https://www.freshports.org/sysutils/reggae/">sysutils/reggae</a>: got added to ports. This package helps with common DevOps tasks, and it uses CBSD jails to acomplish that</li>
 		<li>bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by <strong>Juronski</strong>, <a href="https://github.com/cbsd/cbsd/issues/287" target="_blank">Issue #287</a></li>
 		<li>bugfix: pkg info: secure pkg execution by time limit and non-interactive flags. Reported by <strong>Alex Petrov</strong> via <strong>Telegram</strong></li>
@@ -22,11 +33,7 @@
 		<li>jail: support for <strong>allow.mount.fusefs</strong> (on modern FreeBSD version only: 11.2+ and 12). CBSD options: <strong>allow_fusefs</strong>. FreeBSD <a href="https://svnweb.freebsd.org/base?view=revision&revision=r336565">r336565</a>,<a href="https://reviews.freebsd.org/D16371">D16371</a></li>
 		<li>bhyve <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">: support for alternative checkpoints name</a>
 	</ul>
-	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
-	<ul>
-	</ul>
 </div>
-<h2><a name="release">Releases</a></h2>
 <div class="block">
 	<p><strong><a href="https://github.com/cbsd/reggae">Reggae</a> got added to <a href="https://www.freshports.org/sysutils/reggae/">ports</a>!</strong>&nbsp;&mdash; 2018-07-11</p>
 	<p><a href="https://www.youtube.com/watch?v=6GPKO6Gp7b0">CBSD/Reggae Init and demo</a>, by <a href="https://meka.rs/">Goran Mekić</a>.

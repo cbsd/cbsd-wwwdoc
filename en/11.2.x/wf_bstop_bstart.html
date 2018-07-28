@@ -10,6 +10,8 @@
 			% cbsd bstop vm1 vm2 ... vmX
 		</pre>
 		<strong>Description</strong>:
+		<p><strong>bstop</strong> command send SIGTERM signal to virtual domain for soft shutdown. In the event that the virtual machine does not stop during <strong>hard_timeout</strong> (by default: <strong>30</strong>)
+		seconds, <strong>CBSD</strong> will terminate the process forcibly. Use <strong>noacpi=1</strong> args for instant/hard poweroff (without sending SIGTERM) virtual environment or <strong>hard_timeout=X</strong> to change the interval wait for soft off<p>
 		<p>Running virtual machines happens when you start cbsd/server automatically if parameter <strong>astart</strong> (auto-start) corresponding VM is set to 1 This setting can be through <strong>cbsd bconfig</strong> or <strong>cbsd bset</strong>. When you stop the server or service <strong>cbsdd</strong>, automatically stops all running virtual machines. Running VM manually by the command:</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd bstart jname=vm1
@@ -24,4 +26,6 @@
 		</pre>
 		<p>(to run multiple virtual machines as a command)</p>
 		<p>If the start/bstop command run with no arguments, this will list all inactive/active VM for interactive selection</p>
+		<p>If you have the appropriate build of FreeBSD and <strong>CBSD</strong> not less <strong>11.2.0</strong>, you can take advantage of instant start of the virtual machine from
+		<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">checpoint</a>, bypassing the boot phase. To do this, use the argument <strong>checkpoint=</strong> with name of checkpoint</p>
 	</div>

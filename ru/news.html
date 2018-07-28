@@ -7,12 +7,19 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li>bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by <strong>Juronski</strong>, <a href="https://github.com/cbsd/cbsd/issues/287" target="_blank">Issue #287</a></li></li>
+		<li><a href="https://www.freshports.org/sysutils/reggae/">sysutils/reggae</a>: got added to ports. This package helps with common DevOps tasks, and it uses CBSD jails to acomplish that</li>
+		<li>bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by <strong>Juronski</strong>, <a href="https://github.com/cbsd/cbsd/issues/287" target="_blank">Issue #287</a></li>
 		<li>bugfix: pkg info: secure pkg execution by time limit and non-interactive flags. Reported by <strong>Alex Petrov</strong> via <strong>Telegram</strong></li>
+		<li>bugfix: bhyve tap not added to bridge when MTU different. Reported by Andreas Wrede aka <strong>awrede</strong>, <a href="https://github.com/cbsd/cbsd/issues/301" target="_blank">Issue #301</a></li>
+		<li>bugfix: fixed the problem when some containers did not start, reported by (Reported and tested by: <strong>brahmann</strong>).</li>
+		<li>jail: disable <strong>allow_raw_sockets</strong> by default, added into jconstruct-tui/jconfig.  Reported by <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/307" target="_blank">Issue #307</a></li></li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/pkg.d_ssi.html">pkg</a>: add support for mutliple mask in jname args for: query,install,remove,info</li>
 		<li>bhyve: manage storage controller (<strong>AHCI</strong>)</li>
 		<li>jlogin: support for jname as mask</li>
 		<li>bhyve: vm priority</li>
 		<li>improve remote resources support</li>
+		<li>jail: support for <strong>allow.mount.fusefs</strong> (on modern FreeBSD version only: 11.2+ and 12). CBSD options: <strong>allow_fusefs</strong>. FreeBSD <a href="https://svnweb.freebsd.org/base?view=revision&revision=r336565">r336565</a>,<a href="https://reviews.freebsd.org/D16371">D16371</a></li>
+		<li>bhyve <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">: support for alternative checkpoints name</a>
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 </div>
@@ -39,7 +46,7 @@
 <div class="block">
 	<p><strong>11.1.19</strong>&nbsp;&mdash; 2018-05-02</p>
 	<ul>
-		<li>bhyve: Initial checkpoint <a href="https://youtu.be/cyFDnmTKY_c">support</a> (hope to soon meet a live migration ;-)</li>
+		<li>bhyve: Initial <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">checkpoint</a> <a href="https://youtu.be/cyFDnmTKY_c">support</a> (hope to soon meet a live migration ;-)</li>
 		<li>bhyve: update UEFI-EDK2 firmware, this fixes booting linux kernels >= 4.15 (Ubuntu 18.04+, Fedora 18+, Kali 2018 and so on)</li>
 		<li>Initial support for syslog</li>
 	</ul>

@@ -271,5 +271,26 @@
     <guid>Reggae port</guid>
     <pubDate>Wed, 07 Jul 2018 03:34:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 11.2.1 available</title>
+    <description>Relnotes&lt;br /&gt;
+      - sysutils/reggae: got added to ports. This package helps with common DevOps tasks, and it uses CBSD jails to acomplish that&lt;br /&gt;
+      - bugfix: jail: populate_cdir,switch_baserw: always use realpath. Reported by Juronski, Issue #287&lt;br /&gt;
+      - bugfix: pkg info: secure pkg execution by time limit and non-interactive flags. Reported by Alex Petrov via Telegram&lt;br /&gt;
+      - bugfix: bhyve tap not added to bridge when MTU different. Reported by Andreas Wrede aka awrede, Issue #301&lt;br /&gt;
+      - bugfix: fixed the problem when some containers did not start, reported by (Reported and tested by: brahmann).&lt;br /&gt;
+      - jail: disable allow_raw_sockets by default, added into jconstruct-tui/jconfig. Reported by ntinti, Issue #307&lt;br /&gt;
+      - pkg: add support for mutliple mask in jname args for: query,install,remove,info&lt;br /&gt;
+      - bhyve: manage storage controller (AHCI)&lt;br /&gt;
+      - jlogin: support for jname as mask&lt;br /&gt;
+      - bhyve: vm priority&lt;br /&gt;
+      - improve remote resources support&lt;br /&gt;
+      - jail: support for allow.mount.fusefs (on modern FreeBSD version only: 11.2+ and 12). CBSD options: allow_fusefs. FreeBSD r336565,D16371&lt;br /&gt;
+      - bhyve : support for alternative checkpoints name &lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 11.2.1 available</guid>
+    <pubDate>Sat, 28 Jul 2018 05:14:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

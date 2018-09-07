@@ -26,20 +26,37 @@
 			Zum Betriebssystem FreeBSD werden keine besonderen zustätzlichen Funktionalitäten hinzugefügt. Das Betriebssystem wird dadurch nicht verändert. Alles was <strong>CBSD</strong>  Es wurde bis jetzt keine Funktionalität des Betriebssystems beeinflusst und alles was <strong>CBSD</strong> kann, …
 			!-->
 		</p>
+		<p>
+			Funktionalitäten:</p>
+		<ul>
+			<li><a href="/<!--#echo var="lang" ->/cbsd_quickstart.html">Einfach zum Anfangen</a></p>
+			<li><a href="https://clonos.tekroutine.com" target="_blank">webbasierte grafisches Oberfläche für das Verwalten der virtuellen Umgebung</a> (siehe den Artikeln <strong>Installation auf FreeBSD</strong>)</li>
+			<li>Unterstützung für das System von Funktionalität von ZFS: Begrenzungen für ZFS, Senden für ZFS, Augenblickaufnahme für ZFS und so weiter;</li>
+			<li><a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">Mangel bestender Anbindung von ZFS</a>: CBSD funktioniert auch offenbar auf den Dateisystemen UFS, HammerFS oder jeglichen anderen: Manche Menschen nutzen jail und bhyve auf einem Dateisystem für Cluster wie NFS, <a href="/<!--#echo var="lang" -->/articles/cbsd_jail_glusterfs.html">GlusterFS</a> und Ceph, was typischen für Rechenzentren und Ausfallsicherung ist</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> für die Integration mit externen Sachen für DevOPS (DDNS, DNSmasq, Consul, usw. &hellip;)</li>
+			<li>Exportieren der Metriken für die Benutzung von Ressourcen für jail und bhyve <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">(Exportieren und Anzeigen der statistischen Metriken von jail and bhyve mit CBSD, Grafana und Prometheus)</a></li>
+			<li>kommandozeilenbasierte grafische Oberfläche für den Dialog im Stil von bsdconfig mit der Sie nicht eine große Anzahl von Kommandos und Argumenten lernen brauchen</li>
+			<li>modulare Struktur - Jede Kommando ist eine eigenständige Datei und das macht ein Projekt mit CBSD einfach zu betreuen. Außerdem gibt es einige komplexe externe Module (vncterm, noVNC, WS/WSS notification, Puppet helpers)</li>
+			<li>schnelle Erstellung der Bereitstellung von virtuellen Umgebungen von Grund aus mit einer Datei für das Manifest;</li>
+
+			<li>Schnelles Bereitstellen von Jails aus dem Nichts</li>
+			<li>Import und Export in und aus Images</li>
+			<li>Klonen und migrieren(auch auf enternte Rechner)</li>
+			<li>Snapshots mit ZFS</li>
+			<li>Traffic-Erfassung und Informationen über den Ressourcenverbrauch pro Jail</li>
+			<li>Ressoucenverwaltung: Prioritäten, RACCT/RCTL, Datei Quotas</li>
+			<li>Replikation auf entfernte Rechner</li>
+			<li>Jail Distributionen (Jails mit verschiedenen Software-Sets und Services)</li>
+			<li>Webinterface und zentrales Management</li>
+			<li><a href="/en/xorg_in_jail.html">XJails</a> (Xorg im jail)</li>
+			<li><a href="/en/bhyve.html">Bhyve</a> (BSD Hypervisor support)</li>
+			<li>&hellip;</li>
+		</ul>
 <!--
 ---- english version
 	<h2><a name="features">Features&hellip;</a></h2>
 	<div class="block">
 		<ul>
-			<li><a href="/<!-#echo var="lang" ->/cbsd_quickstart.html">Easy to start</a></p>
-			<li><a href="https://clonos.tekroutine.com" target="_blank">WEB-interfaces for manage virtual environment</a> (see <strong>Installation on FreeBSD</strong> articles)</li>
-			<li>support for ZFS feature system: ZFS quotes, ZFS send, ZFS snapshots and so on;</li>
-			<li><a href="/<!-#echo var="lang" ->/articles/cbsd_with_dfs.html">lack of binding to ZFS</a>: CBSD works transparently on the UFS, HammerFS or any other FS: some of people use jail and bhyve on cluster filesystem such NFS, <a href="/<!-#echo var="lang" ->/articles/cbsd_jail_glusterfs.html">GlusterFS</a> and Ceph which is typical for DC and Failover</li>
-			<li><a href="/<!-#echo var="lang" ->/<!--#echo var="version" ->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> for integration with external DevOPS stuff ( DDNS, DNSmasq, Consul, etc ..)</li>
-			<li>exporting metrics for jail and  bhyve resources usage <a href="/<!--#echo var="lang" ->/articles/cbsd_with_grafana.html">(Export and display jail and bhyve statistic metrics with CBSD, Grafana and Prometheus)</a></li>
-			<li>bsdconfig-style dialog TUI with which you do not need to learn a large number of commands and arguments</li>
-			<li>modular structure - each command is a separate file and it makes a CBSD project easy to maintain. Also, there are number of complex external modules ( vncterm, noVNC, WS/WSS notification, Puppet helpers)</li>
-			<li>quick creation of the deployment of virtual environments from scratch by manifest file;</li>
 			<li><a href="/<!-#echo var="lang" ->/<!-#echo var="version" ->/wf_profiles_ssi.html">Profiles</a> for jail creation</li>
 			<li>import and export of environments into image;</li>
 			<li>cloning virtual environments (including remote node cloning);</li>

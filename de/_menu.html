@@ -1,32 +1,106 @@
 <!--#if expr="$uri = /\/[a-z]{2}/(.*)/" --><!--#set var="data" value="$1" --><!--#else --><!--#set var="data" value="about" --><!--#endif -->
 			<ul class="menu-main">
-				<li><a href="/de/about.html">Über CBSD</a>
-				</li><li>
-					<a href="/de/news.html">Neuigkeiten</a>
-				</li><li>
-					<a href="/en/screenshots.html">Screenshots</a>
-				</li><li>
-					<a href="/en/tutorial.html">Tutorial</a>
-				</li><li>
-					<a href="/de/downloads.html">Downloads »</a>
+				<li>
+					<a href="/de/about.html">
+						Über CBSD
+					</a>
+				</li>
+				<li>
+					<a href="/de/news.html">
+						Neuigkeiten
+					</a>
+				</li>
+				<li>
+					<a title="Eine solche deutschsprachige Seite existiert derzeit nicht, weswegen wir vorübergehend auf die englischsprache Seite verweisen." href="/en/screenshots.html">
+						Screenshots
+					</a>
+				</li>
+				<li>
+					<a title="Eine solche deutschsprachige Seite existiert derzeit nicht, weswegen wir vorübergehend auf die englischsprache Seite verweisen." href="/en/tutorial.html">
+						Anleitungen
+					</a>
+				</li>
+				<li>
+				<!--
+				---- The current english (and russian) version has no submenu.
+					<a href="/de/downloads.html">
+						Downloads »
+					</a>
 					<ul class="submenu">
-						<li><a href="/de/rescuebsd.html">Rettungs-LiveCD</a></li>
-						<li><a href="/de/downloads.html">Jail images &amp; cbsd iso</a></li>
-						<li><a href="/de/modules.html">Module</a></li>
+						<li>
+							<a href="/de/rescuebsd.html">
+								Rettungs-LiveCD
+							</a>
+						</li>
+						<li>
+							<a href="/de/downloads.html">
+								Jail images &amp; cbsd iso
+							</a>
+						</li>
+						<li>
+							<a href="/de/modules.html">
+								Modul
+							e</a>
+						</li>
 					</ul>
-				</li><li>
-					<a href="/de/docs.html">Dokumentation</a>
-				</li><li>
-					<a href="/de/feedback.html">Feedback »</a>
-						<ul class="submenu">
-							<li><a href="/ru/vacancy.html">Währung (rus)</a></li>
+				!-->
+					<a href="/de/downloads.html">
+						Downloads
+					</a>
+				</li>
+				<li>
+					<a href="/de/docs.html">
+						Dokumentation »
+					</a>
+					<ul class="submenu">
+						<li>
+							<a href="/de/articles.html">
+								Artikel
+							</a>
+						</li>
+						<li>
+							<a href="/de/press.html">
+								Presse
+							</a>
+						</li>
 					</ul>
-				</li><li>
+				</li>
+				<li>
+					<!--
+					---- The current english (and russian) version has no submenu.
+					<a href="/de/feedback.html">
+						Feedback »
+					</a>
+					<ul class="submenu">
+						<li>
+							<a href="/ru/vacancy.html">
+								Währung (rus)
+							</a>
+						</li>
+					</ul>
+					!-->
+					<a href="/de/feedback.html">
+						Feedback
+					</a>
+				</li>
+				<li>
 					<a href="#">Sprachen »</a>
 					<ul class="submenu">
-						<li><a href="/ru/<!--#echo var="data" -->">Русский</a></li>
-						<li><a href="/en/<!--#echo var="data" -->">English</a></li>
-						<li><a href="/de/<!--#echo var="data" -->">Deutsch</a></li>
+						<li>
+							<a href="/ru/<!--#echo var="data" -->">
+								Русский
+							</a>
+						</li>
+						<li>
+							<a href="/en/<!--#echo var="data" -->">
+								English
+							</a>
+						</li>
+						<li>
+							<a href="/de/<!--#echo var="data" -->">
+								Deutsch
+							</a>
+						</li>
 					</ul>
 				</li>
 			</ul>

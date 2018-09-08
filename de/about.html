@@ -94,43 +94,46 @@
 			<li><a href="/<!-#echo var="lang" ->/roadmap.html">Roadmap</a></li>
 		</ul>
 	</div>
-<!--
----- english version
-
-
-	<h2><a name="why">Why&hellip;</a></h2>
+	<h2><a name="why">Warum&hellip;</a></h2>
 	<div class="block">
-		<p><strong>Q:</strong> &laquo;Why FreeBSD?:</p>
+		<p>
+			<strong>F:</strong> &laquo;Warum FreeBSD?:
+		</p>
 		<ul>
 			<li>
-				<p>According to the authors of the project, Linux is no longer a member of the common people,
-				it is fully controlled by big commercial organization. while FreeBSD is developed mostly by  enthusiasts.
-				Today, Linux - it is a commercial machine for making money - is that it was Microsoft Windows in 90 years.
-				While many Linux users have struggled against the Windows monopoly (CBSD author of one of them).
-				Yes, FreeBSD very far behind in their characteristics in comparing to Linux.
-				Just look at the abundance of such powerfull decisions as the <strong>OpenVZ, Docker, Rancher, Kubernetis, LXD, Ceph, GlusterFS, OpenNebula, OpenStack, Proxmox, ISPPanel</strong> and a dozen others.
-				All this is created by commercial companies for Linux and this is done very well. However, Linux is oversaturated with similar solutions.
-				Therefore, it's much more interesting to create it on FreeBSD, where nothing like that exists. This is an excellent <strong>challenge</strong> to improve and fix in FreeBSD.
-				We all love independence and freedom and FreeBSD today - an independent and free
-				operating system, which is in the hands of ordinary people.</p>
+				<p>
+					Nach Ansicht der Erstellenden des Projektes ist Linux kein Teil der einfachen Leute;
+					Es ist völlig kontrolliert von einer großen kommerziellen Organisation, während FreeBSD maßgeblich von Liebhaberinnen und Liebhabern entwickelt wird.
+					Heutzutage ist Linux - Es ist eine kommerzielle Maschine zum Geld machen. - das was Microsoft Windows in den 90er Jahren war,
+					Und das obwohl viele Benutzerinnen und Benutzer von Linux gegen das Monopol von Windows kämpften (Der Erschaffer von CBSD ist einer von denjenigen).
+					Ja, FreeBSD ist sehr weit beim Vergleichen bei derer Eigenschaften zu Linux hinterher.
+					Schauen Sie sich die nur einmal die Füllen an solchen mächtigen Möglichkeiten, wie <strong>OpenVZ, Docker, Rancher, Kubernetis, LXD, Ceph, GlusterFS, OpenNebula, OpenStack, Proxmox, ISPPanel</strong> und einem Dutzend anderen an.
+					All das wurde von kommerziellen Unternehmen zu Linux erstell und das ist sehr gut gemacht. Jedenfalls ist Linux übersättigt mit ähnlichen Lösungen.
+					Daher ist es viel mehr interessant es auf FreeBSD zu erstellen, wo nichts wie das existiert. Das ist eine exzellente <strong>Herausforderung</strong> zum Verbessern und Instandsetzen auf FreeBSD.
+					Wir lieben Unabhängigkeit und Frieden und FreeBSD heutzutage - ein unabhängiges und freies Betriebssystem, das in den Händen von gewöhnlichen Leuten ist. 
+				</p>
 			</li>
 		</ul>
-		<p><strong>Q:</strong> &laquo;Why <strong>CBSD</strong> written on <strong>sh</strong>:</p>
+		<p><strong>F:</strong> &laquo;Warum <strong>CBSD</strong> in <strong>sh</strong> geschrieben:</p>
 		<ul>
 			<li>
-				<p>Most of&nbsp;the code has been written in&nbsp;<strong>sh</strong>, since there are no&nbsp;demands for complex logic  (<a href="/de/cbsdsh.html">details</a>)
-				- CBSD core should be considered as shell-command backend, which is achieved is necessary and in case of problems, any system engineer can always locate and correct the problem in the code. </p>
-				<p>The problems of the complexity of maintaining "large <strong>sh</strong> code" were originally solved by the modular structure of the project, where each script does only its task.
-				The rest, more complex CBSD components (eg, a Frontend, which implements RestAPI for interfaces) written in a language go, nodejs, php, and is not part of CBSD Core.</p>
+				<p>
+					Der meiste Code wurde in <strong>sh</strong> geschrieben, da es keine Abrufe von komplexer Logik gibt (<a href="/de/cbsdsh.html">details</a>)-
+					Der Kern von CBSD sollte als Backend für ein Kommando der Shell angedacht sein, was erreichbar ist wenn es nötig ist und im Falle von Problemen, sodass jede Ingenieurin und jeder Ingenieur für das Systems das Problem im Code lokalisieren und berichtigen kann.
+				</p>
+				<p>
+					Die Probleme der Komplexität zur Betreuung von "großen Code für <strong>sh</strong>" wurde ursprünglich durch die modulare Struktur des Projektes gelöst, wo jedes Sktipt nur ihre jeweilige Aufgabe erledigt.
+					
+					Der Rest, komplexere Komponenten von CBSD (z.B. ein Frontend, das die RestAPI für Schnittstellen implementiert) sind in einer Sprache wie go, nodejs, php geschrieben und sind nicht Teil vom Kern von CBSD.</p>
 			</li>
 		</ul>
-		<p><strong>Q:</strong> <strong>CBSD</strong> is FreeBSD only? How about porting to another platform?</p>
+		<p><strong>F:</strong> <strong>CBSD</strong> ist nur für FreeBSD? Wie ist es mit dem Portieren zu einer anderen Platform?</p>
 		<ul>
 			<li>
 			<p>In most cases porting will be tantamount to writing from scratch since the project is based on the FreeBSD-only features. We are interested in porting to platforms derived from FreeBSD. For example we support the HardenedBSD platform.</p>
 			<p>Another fantastic idea is porting <strong>CBSD</strong> to <a href="https://www.dragonflybsd.org/">DragonFly BSD</a>. If the developers of <strong>DFLYBSD</strong> can synchronize jail framework (libjail) and <a href="https://www.dragonflybsd.org/docs/developer/gsocprojectspage/">be able to port <strong>bhyve</strong></a> (see: <em>Port bhyve - The BSD Hypervisor</em>), moving CBSD will be an easy task, and we can get an incredible bundle of DFLY / HammerFS / jail / bhyve / CBSD</p>
 		</ul>
-		<p><strong>Q:</strong> <strong>CBSD</strong> production ready?</p>
+		<p><strong>F:</strong> Ist <strong>CBSD</strong> bereit produktiv eingesetzt zu werde?</p>
 			<ul>
 			<li>
 				<p>It depends only on you and your requirements. CBSD exists since 2013 and at the moment is one of the oldest systems for managing virtual environments on FreeBSD,
@@ -139,7 +142,7 @@
 			</li>
 		</ul>
 
-		<p><strong>Q:</strong> ezjail, qjail, zjail, warden, iocage, bsdploy, jailctl, and other: What the hell is so many projects, what is the difference between all of them?</p>
+		<p><strong>F:</strong> ezjail, qjail, zjail, warden, iocage, bsdploy, jailctl, and other: Was zur Hölle sind soviele Projekte und was ist der Unterschied zwischen all diesen?</p>
 		<ul>
 			<li>
 				<p>Short answer: each project has a very special developmental vector and goals in comparison with other tools; You have a choice between several different implementation options.
@@ -149,7 +152,7 @@
 			</li>
 		</ul>
 
-		<p><strong>Q:</strong> jail, bhyve, xen... What about <strong>Docker</strong>, any plan to support Docker in CBSD?</p>
+		<p><strong>F:</strong> jail, bhyve, xen... Was ist mit <strong>Docker</strong> und gibt es einen Plan um Docker in CBSD zu unterstützen?</p>
 		<ul>
 			<li>
 				<p>No. We focus on large production-ready <strong><u>and</u></strong> <strong>FreeBSD-based</strong> installations.
@@ -159,8 +162,8 @@
 			</li>
 		</ul>
 	</div>
-
-
+<!--
+---- english version
 	<h2><a name="contactus"><span>CBSD-related support, talks and usergroup channel</span></a></h2>
 	<div class="block">
 		<p>We have <a href="https://web.telegram.org/" target="_blank">Telegram</a> channel for discussion about using and CBSD development.</p>

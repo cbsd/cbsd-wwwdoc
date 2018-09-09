@@ -8,8 +8,8 @@
 		<p>
 			<strong>
 CBSD
-		</strong>
- ist für 
+			</strong>
+ wurde für
 		<a href="http://www.freebsd.org" target="_blank">
 FreeBSD
 		</a>
@@ -25,15 +25,15 @@ bhyve
 		<a href="https://www.xenproject.org/">
 Xen
 		</a>
-. geschrieben worden. 
-Das Projekt ist als alleinstehendes integriertes Werkzeug eine umfassende Lösung für das schnelle Herstellen und Bereitstellen von virtuellen Umgebungen mit vorgefertigten Festlegungen für die Software mit minimaler Konfiguration angesiedelt.
+ geschrieben.
+ Angesiedelt ist das Projekt als alleinstehendes integriertes Werkzeug für eine umfassende Lösung zum schnellen Herstellen und Bereitstellen von virtuellen Umgebungen mit vorgefertigten Festlegungen der Software mit minimaler Konfiguration.
 		</p>
 		<p>
-			Es wurden jetzt dadurch keine zusätzlichen Funktionalitäten des Betriebssystems beeinflusst und alles was 
+Es wurden jetzt dadurch keine zusätzlichen Funktionalitäten des Betriebssystems beeinflusst. Alles was 
 			<strong>
 CBSD
 			</strong>
- kann, können Sie auch mit dem manuellen Laufen lassen von zehn oder hunderten von Befehlen in der Kommandozeile indem Sie die darunterliegenden Werkzeuge verwenden würden (also nicht, dass Sie das wollten).
+ kann, könnte auch erreicht werden, indem zehn oder hunderte Befehle manuell in der Kommandozeile für die Verwendung der darunterliegenden Werkzeuge laufen gelassen werden. (Aber nicht, dass das wer wollen würde.)
 			<!--
 			---- KISS
 			---- WIP
@@ -278,21 +278,21 @@ F:
 				<p>
 Nach Ansicht der Erstellenden des Projektes ist Linux kein Teil der einfachen Leute;
  Es ist völlig kontrolliert von einer großen kommerziellen Organisation, während FreeBSD maßgeblich von Liebhaberinnen und Liebhabern entwickelt wird.
- Heutzutage ist Linux - Es ist eine kommerzielle Maschine zum Geld machen. - das was Microsoft Windows in den 90er Jahren war,
+ Heutzutage ist Linux - Es ist eine kommerzielle Maschine zum Geld machen. - das was Microsoft Windows in den 90er Jahren war.
  Und das obwohl viele Benutzerinnen und Benutzer von Linux gegen das Monopol von Windows kämpften (Der Erschaffer von CBSD ist einer von denjenigen).
- Ja, FreeBSD ist sehr weit beim Vergleichen bei derer Eigenschaften zu Linux hinterher.
- Schauen Sie sich die nur einmal die Füllen an solchen mächtigen Möglichkeiten, wie 
+ Ja, FreeBSD ist sehr weit beim Vergleichen zu Linux bei derer beiden Eigenschaften hinterher.
+ Es muss sich nur einmal die Füllen an solchen mächtigen Möglichkeiten, wie 
 					<strong>
 OpenVZ, Docker, Rancher, Kubernetis, LXD, Ceph, GlusterFS, OpenNebula, OpenStack, Proxmox, ISPPanel
 					</strong>
- und einem Dutzend anderen an.
- All das wurde von kommerziellen Unternehmen zu Linux erstell und das ist sehr gut gemacht. Jedenfalls ist Linux übersättigt mit ähnlichen Lösungen.
- Daher ist es viel mehr interessant es auf FreeBSD zu erstellen, wo nichts wie das existiert. Das ist eine exzellente 
+ und einem Dutzend anderen angeschaut werden.
+ All das wurde von kommerziellen Unternehmen zu Linux erstellt und das ist sehr gut gemacht. Jedenfalls ist Linux übersättigt mit ähnlichen Lösungen.
+ Daher ist es viel mehr interessant was auf FreeBSD zu erstellen, wo nichts wie sowas existiert. Das ist eine exzellente 
 					<strong>
 Herausforderung
 					</strong>
- zum Verbessern und Instandsetzen auf FreeBSD.
- Wir lieben Unabhängigkeit und Frieden und FreeBSD heutzutage - ein unabhängiges und freies Betriebssystem, das in den Händen von gewöhnlichen Leuten ist. 
+ zum Verbessern und Instandhalten auf FreeBSD.
+ Wir lieben Unabhängigkeit und Frieden; Und FreeBSD heutzutage - ein unabhängiges und freies Betriebssystem, das in den Händen von gewöhnlichen Leuten ist.
 				</p>
 			</li>
 		</ul>
@@ -331,7 +331,7 @@ sh
 " wurde ursprünglich durch die modulare Struktur des Projektes gelöst, wo jedes Sktipt nur ihre jeweilige Aufgabe erledigt.
 				</p>
 				<p>
-Der Rest, komplexere Komponenten von CBSD (z.B. ein Frontend, das die RestAPI für Schnittstellen implementiert) sind in einer Sprache wie go, nodejs, php geschrieben und sind nicht Teil vom Kern von CBSD.</p>
+Der Rest - komplexere Komponenten von CBSD (z.B. ein Frontend, das die RestAPI für Schnittstellen implementiert) - sind in einer Sprache wie go, nodejs, php geschrieben und sind nicht Teil vom Kern von CBSD.</p>
 				</p>
 			</li>
 		</ul>
@@ -348,33 +348,33 @@ CBSD
 		<ul>
 			<li>
 			<p>
-In most cases porting will be tantamount to writing from scratch since the project is based on the FreeBSD-only features. We are interested in porting to platforms derived from FreeBSD. For example we support the HardenedBSD platform.
+In den meinsten Fällen wird Protieren gleichwertig mit von Grund auf Schreiben sein, seither das Projekt auf Funktionalitäten nur für FreeBSD basiert. Wir sind an der Portierung zu Plattformen interessiert, die sich von FreeBSD abgeleitet sind. Zum Beispiel unterstützen wir die Plattform HardenedBSD.
 			</p>
 			<p>
-Another fantastic idea is porting 
+Eine andere fantastische Idee ist das Portieren von 
 				<strong>
 CBSD
 				</strong>
- to 
+ zu 
 				<a href="https://www.dragonflybsd.org/">
-DragonFly BSD
+DragonFly&nbsp;BSD
 				</a>
-. If the developers of 
+. Wenn die Entwicklerinnen und Entwickler von 
 				<strong>
 DFLYBSD
 				</strong>
- can synchronize jail framework (libjail) and 
+ das Gerüst für jail (libjail) syncronisieren können und 
 				<a href="https://www.dragonflybsd.org/docs/developer/gsocprojectspage/">
-be able to port 
+in der Lage sind 
 					<strong>
 bhyve
 					</strong>
 				</a> 
-(see: 
+zu portieren (siehe: 
 				<em>
 Port bhyve - The BSD Hypervisor
 				</em>
-), moving CBSD will be an easy task, and we can get an incredible bundle of DFLY / HammerFS / jail / bhyve / CBSD
+), wäre CBSD zu verschieben eine einfache AUfgabe und wir könnten einen unglaublichen Verbund von DFLY / HammerFS / jail / bhyve / CBSD bekommen.
 			</p>
 		</ul>
 		<p>
@@ -390,15 +390,16 @@ CBSD
 		<ul>
 			<li>
 				<p>
-It depends only on you and your requirements. CBSD exists since 2013 and at the moment is one of the oldest systems for managing virtual environments on FreeBSD,
- while it is in the current state and continues to improve. A number of users successfully use CBSD in large production installations.
+ Das hängt an der Person und ihrer Anforderungen.
+ CBSD existiert seit 2013 und ist im Moment eines der ältesten Systeme für das Verwalten von virtuellen Umgebungen auf FreeBSD, während es im aktuellen Zustand ist und fortschreitet sich zu verbessern.
+ Eine gewisse Anzahl von Benutzerinnen und Benutzern verwenden CBSD in großen Installationen im produktiven Betrieb.
 				</p>
 				<p>
-We are also interested in learning more about the using of CBSD and ClonOS, so we created a 
+Wir sind auch daran interssiert mehr über die Verwendung von CBSD und ClonOSE zu erfahren, weswegen wir eine 
 					<a href="/en/press.html">
-separate page
+separate Seite
 					</a>
- where we collect articles and reviews from different users
+erstellt haben, wo wir Artikel und Rezensionen von verschiedenen Benutzerinnen und Benutzern sammeln.
 				</p>
 			</li>
 		</ul>
@@ -411,9 +412,11 @@ F:
 		<ul>
 			<li>
 				<p>
-Short answer: each project has a very special developmental vector and goals in comparison with other tools; You have a choice between several different implementation options.
- The main difference between CBSD and others is that CBSD is positioned as a complete solution with as simple (where is possible) management interface.
- CBSD for this reason is much larger and bigger and not all of this is suitable. But we have different goals in comparison with others and focused on complex cluster solutions.
+Kurze Antwort: Jedes Projekt hat einen sehr speziellen Vektor der Herstellung und Ziele im Vergleich zu anderen Werkzeugen;
+ Die Wahl liegt zwischen einzelnen unterschiedlichen Möglichkeiten der Implemtierungen.
+ Der hauptsächliche Unterschied zwischen CBSD und anderen ist, dass CBSD als eine komplette Lösung mit einer einfach (wo es möglich ist) Schnittstelle für die Verwaltung angesiedelt ist.
+ CBSD ist aus diesem Grund auch viel breiter und größer und nicht all das ist anwendbar.
+ Aber wir haben anderen Ziele im Vergleich zu anderen und fokusieren uns auf komplexe Lösungen für Cluster.
 				</p>
 			</li>
 		</ul>
@@ -430,25 +433,28 @@ Docker
 		<ul>
 			<li>
 				<p>
-No. We focus on large production-ready 
+Nein. Wir fokusieren uns auf große für den Betrieb fertige 
 					<strong>
 						<u>
-and
+und
 						</u>
 					</strong>
  
 					<strong>
-FreeBSD-based
+auf FreeBSD basierende
 					</strong>
- installations.
- Docker is great, but it does not have official FreeBSD support, so it makes no sense to use inappropriate tools in the serious work.
+ Installationen.
+ Docker ist großartig, aber es hat keine offizielle Unterstützung von FreeBSD, 
+ daher ergibt es keinen Sinn unsachgemäße Werkzeuge in der seriös Arbeit zu verwenden.
 				</p>
 				<p>
-You can use the Docker as it is in MacOS or FreeNAS - through an intermediate layer with [x/b]hyve hypervisor. But it suits more for fun and games than for serious application in the production infrastructure. But if you really want, all this 
+Docker kann wie es ist in MacOS oder FreeNAS - durch eine dazwischende Schicht mit dem Hypervisor [x/b]hyve - verwendet werden.
+ Aber es passt mehr für Spaß und und Spiele, als als seriöse Anwendung in einer Infrastruktur im produktiven Betrieb.
+ Aber wer das wirklich haben will, kann das alles 
 					<a href="/<!-#echo var="lang" ->/articles/docker_on_freebsd.html">
-easy to make by yourself
+einfach sich selbst machen
 					</a>
- without CBSD.
+ ohne CBSD.
 				</p>
 			</li>
 		</ul>

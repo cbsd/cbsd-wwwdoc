@@ -1,0 +1,35 @@
+	<h1><span>Очередность запуска окружений</span></h1>
+	
+	<h2><a name="jremove_cmd">Команды: jorder, jorder-tui, border, border-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+% cbsd jls display=jname,b_order
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Может возникнуть ситуации, когда запуск одного из <strong>jail/vm</strong> желателен до запуска остальных. Например таковыми могут быть клетки с критичными сервисами как базы данных <strong>SQL</strong> или <strong>LDAP</strong> сервера.</p>
+		<p>В этом случае, вы можете отредактировать <strong>Boot Order</strong> (<em>b_order</em> в настройках окружений)</p>
+		<p>По-умолчанию, все окружения создаются с индексом <em>b_order</em> равным <strong>10</strong> (задается в профиле, что вы можете изменить)</p>
+		<p>Если вам необходимо, чтобы <strong>jail2</strong> стартовал раньше <strong>jail1</strong>, его индекс <em>b_order</em> должен быть ниже чем у второй клетки.</p>
+		<p>Вы можете сделать выборку по текущей настройке через команду <strong>jls</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd jls display=jname,b_order
+JNAME    B_ORDER
+firefly  3
+jail1    10
+kde4     1
+kdeold   9
+spicy2   2
+test     2
+	</pre>
+	<p>Данный вывод изначает, что клетка с именем <strong>kde4</strong> запустится самой первой. Самой последней будет запущена клетка <strong>jail1</strong></p>
+	<p>Также, вы можете просмотреть очередность запуска клеток через команду <strong>jorder</strong></p>
+	<pre class="brush:bash;ruler:true;">
+% cbsd jorder
+	</pre>
+	<p>В какой последовательности вывелись клетки, в такой они и будут запускаться</p>
+	<p>Для редактирования очередности используейте комаду <strong>jset</strong> или TUI-редактор <strong>jorder-tui</strong></p>
+	<p>Для редактирования bhyve очередности, используйте команды: <strong>border</strong>, <strong>border-tui</strong></p>
+	<p class="text-center"><img src="/img/jorder1.png" alt="" /></p>
+	<p>
+	<p class="text-center"><img src="/img/jorder2.png" alt="" /></p>
+	</div>

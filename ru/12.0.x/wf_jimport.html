@@ -1,0 +1,21 @@
+	<h1><span>Импорт jail</span></h1>
+	
+	<h2><a name="jimport_cmd">Команда jimport</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jimport
+		</pre>
+		<strong>Описание</strong>:
+		<p>Импортировать из имиджа (*.img) клетку. В качестве аргумента <strong>jname</strong> указывается полный путь к файлу или имя имиджа (без расширения .<strong>img</strong>), который должен находится в соответствующем каталоге (<em>$workdir/import</em>). <strong>img</strong>-файл после импорта остается на месте. Дополнительно, вы можете импортировать клетку из образа в альтернативное имя (например, вы хотите развернуть клетку jail1 из образа jail1.img, однако в вашей системе уже имеется клетка с таким именем). В этом случае, используйте аргумент <strong>newjname</strong></p>
+		<p><strong>Пример:</strong></p>
+		<p>Импортировать имидж из файла <em>/tmp/mysqljail.img</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jimport jname=/tmp/mysqljail.img
+		</pre>
+		<p><strong>Пример:</strong></p>
+		<p>Импортировать образ jail2.img находящийся в <em>$workdir/import</em> под новым именем <strong>jail5</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jimport jname=jail2 newjname=jail5 
+		</pre>
+		<p class="text-center"><img src="/img/jimport1.png" alt="" /></p>
+	</div>

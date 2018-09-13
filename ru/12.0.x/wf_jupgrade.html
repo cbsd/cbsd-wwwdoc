@@ -1,0 +1,94 @@
+	<h1><span>Обновление клеток</span></h1>
+
+	<h2><a name="jupgrade_cmd">Команда jupgrade</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jupgrade
+			% cbsd jconfig
+		</pre>
+		<strong>Описание</strong>:
+		<p>Процедура обновления jail всегда сопряжена с определенными рисками в виде нарушения работы сервиса, поэтому, возьмите за правило всегда создавать резервные копии состояния клеток. Если вы работаете на ZFS файловой системе, вы можете воспользоваться командой <a href="/ru/<!--#echo var="version" -->/wf_jsnapshot_ssi.html" target="_blank">cbsd jsnapshot</a> для заморозки состояния клетки до начала работ. Например:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=create jname=jail1 snapname=before_update
+		</pre>
+		<p>и по окончанию работ, если все в порядке, удалить снимок через:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jsnapshot mode=destroy jname=jail1 snapname=before_update
+		</pre>
+		<p>Если файловая система UFS, вы можете создать образ клетки через:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jexport jname=jail1
+		</pre>
+		<p>И в случае успешной операции по обновлению, удалить образ jail1.img в каталоге <em>$workdir/export</em>. Под обновлением клетки <strong>CBSD</strong> будем предполагать только обновление базовых файлов FreeBSD. Процедура обновления 3rd-party ПО для клеток аналогична обновлению ПО в обычной системе. Обновить базу вы можете как между разными версиями системы ( например с версии FreeBSD 9.2 до 9.3, или FreeBSD 9.3 -> FreeBSD 10.1 ), так и обновить файлы в рамках одной и той же версии. Следует помнить, что клетки имеют 2 режима&nbsp;— <strong>baserw=1</strong>, когда базовая часть у каждой клетки&nbsp;— своя собственная копия расположенная в каталоге $workdir/jails-data/$jail, и <strong>baserw=0</strong>, когда одна и та же база в каталоге <em>${workdir}/basejail/base_\*_\*_ver</em> монтируется всем клеткам.</p>
+	</div>
+	<h2><a name="freebsd-upgrade">Обновление через базовую утилиту freebsd-update</a></h2>
+	<div class="block">
+		<p><a href="http://man.freebsd.org/freebsd-update/8">freebsd-update</a> можно использовать без к привязки к <strong>CBSD</strong>. Следует учитывать, что утилита работает с официальным ресурсом FreeBSD и сконфигурировать ее на репозиторий <strong>CBSD</strong> нельзя, те, источник только один.</p>
+		<p>Обновить базовые файлы для клеток через freebsd-update можно, указав через ключ <strong>-b</strong> путь к каталогу, используемому <strong>CBSD</strong> при монтировании клеток с baserw=0. Так, если ваш <strong>CBSD</strong> $workdir - <em>/usr/jails</em>, то для amd64 и версии 10.0 путь до базы будет <em>/usr/jails/basejail/base_amd64_amd64_10.0</em>. Этот каталог и следует обновить:</p>
+		<pre class="brush:bash;ruler:true;">
+% freebsd-update -b /usr/jails/basejail/base_amd64_amd64_10.0 fetch
+% freebsd-update -b /usr/jails/basejail/base_amd64_amd64_10.0 install
+		</pre>
+		<p>Если у вас нет baserw=1 клеток, то на этом - всё. Если baserw=1 клетки есть, то для их обновления возможны два варианта:</p>
+		<ul>
+			<li>Как и в случае выше, для каждого jail вызвать freebsd-update и указать путь к <strong>data</strong> каталогу клетки ( <em>$workdir/jails-data/$jname</em> )</li>
+			<li>Или, выполнив обновление basejail как написано выше, вызвать:
+			<pre class="brush:bash;ruler:true;">
+cbsd jupgrade jname=XXXX
+			</pre>
+			для каждой клетки baserw=1 - эта команда переформирует базу ( <em>$workdir/jails-data/$jname</em> ) клетки из файлов в <em>$workdir/basejail/*</em></li>
+		</ul>
+	</div>
+	<h2><a name="jupgrade_rw0">Обновление baserw=0 клеток между различными версиями баз средствами CBSD</a></h2>
+	<div class="block">
+		<p>Вариант с переходом клетки в режиме <strong>baserw=0</strong> на новую версию базы является самым простым и заключается в изменении версии в конфигураторе</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=XXX
+		</pre>
+		<p>Поскольку в этом случае лишь меняется каталог-источник, который линкуется при старте клетки. Пример обновления клетки с версии 9.2 на 10.0.</p>
+		<p>Исходные данные: есть x86-64 система с базой от FreeBSD 9.2 и клеткой jail1 на этой базе, которую необходимо перевести на 10.0.</p>
+		<p>При остановленной клетке заходим в конфигуратор по</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jconfig jname=jail1
+		</pre>
+		<p>и меняем параметр <em>ver</em> на <strong>10.0</strong>, после чего выбираем "Commit". Либо, как на снимке&nbsp;— делаем изменение через <strong>cbsd jset</strong></p>
+		<p>При следующем запуске, клетка будет монтировать уже базу 10.0 (на снимке этой базы в системе не оказалось и <strong>CBSD</strong> предложила ее скачать). Разумеется, при подобном переходе на новую мажорную версию, после этой операции пересобрать ПО в клетке или обновить через <strong>pkg</strong>&nbsp;— крайне желательная операция, поскольку библиотеки системы изменились. Как минимум, для выявления этого факта можно воспользоваться утилитой <strong>libchk</strong>.</p>
+		<p class="text-center"><img src="/img/jupgrade1.png" alt="" /></p>
+	</div>
+	
+	<h2><a name="jupgrade_rw1">Обновление baserw=1 клеток между различными версиями баз средствами CBSD</a></h2>
+	<div class="block">
+		<p>Обновление <strong>baserw=1</strong> клеток проходит несколько по иному сценарию, поскольку при этой операции <strong>CBSD</strong> будет перезаписывать системные файлы старой базы на новые в каталоге клетки по $workdir/jails-data/$jname. Исходные данные&nbsp;— клетка jail1 в режиме <strong>baserw</strong> (тесть, ее корневой путь PATH по jls указывает в jails-data, а не jail каталог) на версии 9.2. Необходимо обновить на версию 10.0.
+		<p>Убедимся через утилиту <strong>file</strong>, которая читает ELF таблицу, что файл <em>/bin/sh</em> клетки принадлежит версии 9x. И тем же образом, проверим версию файла после обновления:</p>
+		<pre class="brush:bash;ruler:true;">
+			% file -s /usr/jails/jails-data/jail1-data/bin/sh
+			/usr/jails/jails-data/jail1-data/bin/sh: ELF 64-bit LSB executable, x86-64, version 1 (FreeBSD), dynamically linked (uses shared libs), for FreeBSD 9.2, stripped
+		</pre>
+		<p>При остановленной клетке выполняем смену версии через <strong>cbsd jconfig</strong> или <strong>cbsd jset</strong>, после чего выполняем процедуру обновления:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jupgrade jname=jail1
+		</pre>
+		<p>Данная операция заставляет перезаписать все системные базовые файлы в клетке на файлы из вашего оригинального каталога <strong>$workdir/basejails/base_\*_\*_ver</strong></p>
+		<p class="text-center"><img src="/img/jupgrade2.png" alt="" /></p>
+	</div>
+	
+	<h2><a name="jupgrade_stable">Обновление baserw=0,1 клеток в рамках одной версии, переход на stable=1</a></h2>
+	<div class="block">
+		<p>Иногда бывают случаи, когда необходимо обновить файлы в рамках одной версии, например базу 10.0 на базу 10.0-p1. Для клеток, монтирующих базу через nullfs, достаточно просто перезакачать в каталог $workdir/basejail/base_\*_\*_ver более свежую версию. Для этого вы можете использовать команду:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=base mode=upgrade
+		</pre>
+		<p>— аргумент <strong>mode=upgrade</strong> разрешает <strong>CBSD</strong> перезаписать данный каталог новыми файлами, если у вас уже имеется версия базы под этой версией.</p>
+		<p>Либо, вы можете собрать более свежую версию баз, воспользовавшись <a href="/ru/base_cbsd.html">Сборка и обновление базы</a>. Также, вы можете перейти с версии базы с RELEASE на STABLE (в этом случае, имя каталога базы будет не X.Y, а X. Тоесть, вместо base_\*_\*_9.2 будет использоваться base_\*_\*_9. Для этого вам необходимо в конфигураторе клетки ( cbsd jconfig ) изменить параметр stable=0 на stable=1 ( либо через cbsd initenv-tui выставить режим работы со STABLE ветками глобально ), и при команде cbsd repo не забыть stable=1 (если не выставлен глобально )</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd repo action=get sources=base mode=upgrade stable=1
+		</pre>
+		<p>Аналогичные правила характеры также для клеток с baserw=1, необходимо лишь не забывать после обновления баз в <strong>CBSD</strong> запустить процедуру обновления файлов в конкретном jail через <strong>cbsd jupgrade</strong>.  Кроме этого, при условии что у вас в системе есть база соответствующей версии (или вы мигрировали клетку на другой сервер где есть база новее), при запуске клетки baserw,  <strong>CBSD</strong> способна автоматически проверить наличие более свежих файлов для этой версии и выдать соответствующее информационное сообщение "You have a more recent version of the base in &hellip;":</p>
+		<p class="text-center"><img src="/img/jupgrade3.png" alt="" /></p>
+	</div>
+	
+	<h2><a name="jail_etcupdate">Обновление конфигурационных файлов клеток, etcupdate/mergemaster</a></h2>
+	<div class="block">
+				<p>// to be continued</p>
+	</div>
+

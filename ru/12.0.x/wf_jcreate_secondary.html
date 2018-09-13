@@ -1,0 +1,89 @@
+	<h1><span>Другие методы создание jail</span></h1>
+	
+	<h2><a name="jcreate2_cmd">Команда jcreate, часть 2</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jconstruct
+		</pre>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jcreate jconf=/path/to/conf.jconf
+		</pre>
+	</div>
+	
+	<div class="block">
+		<strong>Описание:</strong>
+		<p>Если DIALOG-based скрипт jconstruct-tui по каким-то причинам не подошел, для конфигурации новой клетки можно воспользоваться скриптом-диалогом вида "вопрос-ответ" jconstruct:</p>
+		<pre class="brush:bash;ruler:true;">
+		   % cbsd jconstruct
+		</pre>
+		<p>Который задает те же вопросы, что и tui-версия.</p>
+		<p>Также, можно обойтись формированием конфигураций без вспомогательных интерактивных утилит, например для
+		создания систем, автоматически создающих необходимые клетки.</p>
+		<p>Пример стандартной конфигурации для <strong>jcreate</strong> может выглядеть так:</p>
+		
+		<pre class="brush:bash;ruler:true;">
+		jname="jail1";
+		path="/usr/jails/jails/jail1";
+		host_hostname="jail1.my.domain";
+		ip4_addr="10.0.0.24/24";
+		mount_devfs="1";
+		allow_mount="1";
+		allow_devfs="0";
+		allow_nullfs="0";
+		mount_fstab="/usr/jails/jails-fstab/fstab.jail1";
+		arch="amd64";
+		mkhostsfile="1";
+		devfs_ruleset="4";
+		ver="10.0";
+		basename="";
+		slavenode="0";
+		baserw="0";
+		basename="";
+		mount_src="0";
+		mount_obj="";
+		mount_kernel="0";
+		mount_ports="1";
+		astart="1";
+		data="/usr/jails/jails-data/jail1-data";
+		vnet="0";
+		applytpl="1";
+		mdsize="0";
+		rcconf="/usr/jails/jails-rcconf/rc.conf_jail1";
+		floatresolv="1";
+		exec_start="/bin/sh /etc/rc";
+		exec_stop="/bin/sh /etc/rc.shutdown";
+
+		exec_poststart="0";
+		exec_poststop="0";
+		exec_prestart="0";
+		exec_prestop="0";
+
+		exec_master_poststart="0";
+		exec_master_poststop="0";
+		exec_master_prestart="0";
+		exec_master_prestop="0";
+		interface="auto";
+		jailskeldir="${sharedir}/jail-skel"
+		</pre>
+		<div class="warning">
+			<p>Обратите внимание на параметры <strong>arch</strong> и <strong>ver</strong>. Значения в них могут быть "i386", "amd64" для архитектуры и "9.2", "10.0", "10.1" "11" и тд , в зависимости от той версии базы, которую вы предпочтете для клеток. Значение <em>native</em> в этих параметрах заставляет <strong>CBSD</strong> брать всегда ту версию и архитектуру, на которой запущена нода, что делает версию плавающей. Так, если вы используйте темплейт с arch="native", ver="native" и перейдете с FreeBSD 10.2 на 11.0, то будет использоваться база 11.0. Если вы хотите зафиксировать конкретную версию - указывайте версию вместо <em>native</em>.</p>
+		</div>
+		<p>Если вы хотите, чтобы при создании клетки также устанавливался какие-то пакеты из <strong>pkg</strong> репозитория, в этой конфигурации должен присутствовать параметр <strong>pkglist</strong> указывающий на файл со списком пакетов, например:</p>
+		<pre class="brush:bash;ruler:true;">
+		pkglist="/tmp/newjail.txt";
+		</pre>
+		<p>Файл /tmp/newjail.txt может выглядеть так:</p>
+		<pre class="brush:bash;ruler:true;">
+		mc
+		lynx
+		nginx-devel
+		lsof
+		</pre>
+		<p>&nbsp;</p>
+		<p><strong>cbsd jcreate</strong> удаляет файл, указанный в <strong>pkglist</strong> после создания клетки</p>
+	</div>
+	<!--# include file="/ru/changeroot.html" -->
+	<div class="block">
+		<p>По-умолчанию, каталог указанный в <strong>jailskeldir</strong> будет использован как источник файлов, которые будут добавлены (или ими будут перезаписаны стандартные файлы) в клетку автоматически, при applytpl=1.</p>
+		<p>Соответственно, вы можете создавать любые шаблоны конфигураций и содержимое окружений, которые будут копироваться при создании новой клетки.</p>
+	</div>

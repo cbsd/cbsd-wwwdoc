@@ -1,0 +1,57 @@
+	<h1><span>Чекпоинты, спящий режим и паузы виртуальной машины</span></h1>
+	
+	<h2><a name="bcheckpoint_cmd">Команда bcheckpoint, bsuspend, bpause</a></h2>
+	<p>Реализацией данной особенности в <strong>bhyve</strong> мы благодарны Политехническому университету Бухареста и в частности: Elena Mihailescu и Mihai Carabaș</p>
+	<p>На момент опубликовании этой страницы, данный функционал отсутствовал в кодовой базе FreeBSD и получен со страницы проекта на <a href="https://github.com/FreeBSD-UPB">GitHub (FreeBSD-UPB)</a></p>
+	<p>Функционал чекпоинтов (checkpoint) и спящий режим (suspend) виртуальной машины - это заморозка виртуального окружения с сохранением всего состояния на диск, из которого вы можете вновь вернуть систему в прежнее состояние
+	без необходимости перезагрузки окружения</p>
+	<h2>Чекпоинты</h2>
+	<p>В <strong>CBSD</strong> для работы с чекпоинтами служит команда <strong>bcheckpoint</strong>, имеющая следующий синтаксис:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd bcheckpoint [jname=] [mode=] [name=] [poweroff=]
+	</pre>
+	<p>где:</p>
+	<p>
+	<ul>
+		<li>- <strong>jname</strong>: (обязательно) имя окружения, например: freebsd1</li>
+		<li>- <strong>mode</strong>: (обязательно) действие относительно окружения: create (создать чекпоинт), list (список созданных чекпоинтов), destroyall (уничтожить все чекпоинты)</li>
+		<li>- <strong>name</strong>: (опционально) указать альтернативное имя чекпоинту, по-умолчанию: checkpoint</li>
+		<li>- <strong>poweroff</strong>: (опционально). Если poweroff=1, <strong>CBSD</strong> автоматически выключит виртуальную машину моментально 
+		(через <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bstop_bstart_ssi.html">bstop</a> <strong>noacpi=1</strong>) по факту создания чекпоинта.</li>
+	</ul>
+	</p>
+	<p>
+	<pre class="cli;">
+		% cbsd bls
+		JNAME     JID    VM_RAM  VM_CURMEM  VM_CPUS  PCPU  VM_OS_TYPE  IP4_ADDR  STATUS  VNC_PORT
+		freebsd1  21923  1024    24         1        0     freebsd     DHCP      On      127.0.0.1:5900  
+		
+		% cbsd bcheckpoint mode=create jname=freebsd1
+		Waiting and sure that the info is written on the disk: 1/5
+		Waiting and sure that the info is written on the disk: 2/5
+		Waiting and sure that the info is written on the disk: 3/5
+		Waiting and sure that the info is written on the disk: 4/5
+		Waiting and sure that the info is written on the disk: 5/5
+		Checkpoint was created!: /usr/jails/jails-system/freebsd1/checkpoints/checkpoint.ckp
+		
+		% cbsd bcheckpoint mode=create jname=freebsd1 name=after_update
+		Waiting and sure that the info is written on the disk: 1/5
+		Waiting and sure that the info is written on the disk: 2/5
+		Waiting and sure that the info is written on the disk: 3/5
+		Waiting and sure that the info is written on the disk: 4/5
+		Waiting and sure that the info is written on the disk: 5/5
+		Checkpoint was created!: /usr/jails/jails-system/freebsd1/checkpoints/after_update.ckp
+		
+		% cbsd bcheckpoint mode=list jname=freebsd1
+		Created checkpoint for freebsd1:
+		after_update
+		checkpoint
+	</pre>
+	</p>
+	<p>Имея созданные чекпоинты, вы можете возвращаться в нужное состояние через команду <strong>bstart</strong> с аргументом <strong>checkpoint</strong></p>
+	<p>Небольшое демо на ранней стадии разработки на <a href="https://youtu.be/cyFDnmTKY_c" target="_blank">Youtube</a>
+	</p>
+	<h2>Спящий режим</h2>
+	<p>WIP</p>
+	<h2>Пауза виртуальной машины</h2>
+	<p>WIP</p>

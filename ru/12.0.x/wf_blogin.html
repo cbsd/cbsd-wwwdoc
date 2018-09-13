@@ -1,0 +1,30 @@
+	<h1><span>Подключение к терминалу виртуальной машины</span></h1>
+	
+	<h2><a name="blogin_cmd">Команда blogin</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd blogin
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Запускает <strong>tmux</strong> сессию, подключаясь к консольному выводу виртуальной машины</p>
+		<p>Для отключения от терминала (и выключения tmux сессии), нажмите комбинацию клавиш: <strong>Ctrl+b, d</strong> (удерживая Ctrl нажмите b, отпустите обе клавиши и нажмите d)</p>
+		<p><strong>Пример</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd blogin debian1
+		</pre>
+		<p>Начиная с версии CBSD 11.1.2, вы можете кастомизировать команду, переопределив действие на вам более подходящее</p>
+		<p>Достигается это через конфигурационный файл blogin.conf и параметр <strong>login_cmd</strong>.</p>
+		<p>Файл вы можете разместить как для индивидуального окружения в каталоге <em>$workdir/jails-system/$jname/etc</em>, так и глобально, перезаписав значение из <em>$workdir/etc/defaults/blogin.conf</em>. Для этого, создайте файл с вашей конфигурацией в каталоге
+		<em>$workdir/etc/</em></p>
+		<p>При кастомном вызове, вы можете использовать <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a> - переменные CBSD для того или иного окружения</p>
+		<p>Например, если вы хотите, чтобы вместо стандартного поведения, при blogin запустился VNC клиент, файл <em>$workdir/etc/blogin.conf</em> может выглядеть так:
+		<pre class="cli;">
+		login_cmd="su -m user -c \"vncviewer ${bhyve_vnc_tcp_ipconnect}:${vm_vnc_port}\""
+		</pre>
+		<p>Если вы хотите, чтобы происходило соединение по ssh, этот файл может выглядеть так:
+		<pre class="cli;">
+		login_cmd="/usr/bin/ssh your_user@${ipv4_first}"
+		</pre>
+		<p class="text-center"><img src="/img/blogin1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/blogin2.png" alt="" /></p>
+	</div>

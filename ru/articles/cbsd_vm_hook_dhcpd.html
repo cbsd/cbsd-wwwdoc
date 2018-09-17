@@ -33,11 +33,11 @@
 <p>Мы предполагаем, что <strong>CBSD</strong> у вас уже установлена и сконфигурирована, и ее версия не ниже <strong>11.0.10</strong></p>
 <p>1) Установим пакет <strong>isd-dhcpd</strong> через <a href="http://man.freebsd.org/pkg/8" target="_blank">pkg</a>:</p>
 <pre class="brush:bash;ruler:rule;">
-% pkg install net/isc-dhcp43-server
+% pkg install net/isc-dhcp44-server
 </pre>
 <p>или из портов:</p>
 <pre class="brush:bash;ruler:rule;">
-% env BATCH=no make -C /usr/ports/net/isc-dhcp43-server install
+% env BATCH=no make -C /usr/ports/net/isc-dhcp44-server install
 </pre>
 <p>2) Следующим шагом будет определение сети, которая будет использована в автоматической конфигурации и написании соответствующего блока конфигурационного
 файла для <strong>DHCP</strong>. Допустим, наша сеть будет <i>198.168.0.0/24</i>, DNS будем брать от <strong>Google</strong>, а шлюз по-умолчанию будет <strong>192.168.0.1</strong>:</p>

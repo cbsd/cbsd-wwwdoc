@@ -119,7 +119,8 @@ by default - creating a tap interface that will be bridged to the uplink interfa
 
 <pre class="brush:bash;ruler:rule;">
 % sysrc dhcpd_enable="YES"
-% sysrc dhcpd_flags="-c /root/etc/dhcpd.conf em0"
+% sysrc dhcpd_ifaces="em0"
+% sysrc dhcpd_conf="/root/etc/dhcpd.conf"
 </pre>
 
 <div class="warning">

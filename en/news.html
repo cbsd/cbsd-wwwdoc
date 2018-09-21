@@ -11,6 +11,11 @@
 		<li>bhyve: support for NVMe controller</li>
 		<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bmigration_ssi.html">live migration support</a>
 		<li>xen: sync code with bhyve, support for <strong>XEN 4.11</strong></li>
+		<li>jail: multiple ip adresses can be configured separately on interfaces without hosts config. Suggested by <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/306" target="_blank">Issue #306</a></li>
+		<li>[jb]import: support for multiple images specified in the command line</li>
+		<li>add <strong>create.d</strong> dir for post-creation action. Suggested by <strong>Annakan</strong>, <a href="https://github.com/cbsd/cbsd/issues/321" target="_blank">Issue #321</a></li>
+		<li>srcup.conf: split conf per-platform</li>
+		<li>imghelper: store flat_size in bytes in header (as result: jimport now knows the amount of unpacked environment before unpacking)</li>
 	</ul>
 	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
 	<ul>

@@ -8,7 +8,16 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li>bhyve: support for NVMe controller</li>
+	</ul>
+	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
+</div>
+<h2><a name="release">Releases</a></h2>
+<div class="block">
+	<p><strong>12.0.0</strong>&nbsp;&mdash; 2018-10-21</p>
+	<ul>
+		<li>tested on FreeBSD 12</li>
+		<li>tested with XEN 4.11</li>
+		<li>bhyve: initial support for NVMe controller (no boot order)</li>
 		<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bmigration_ssi.html">live migration support</a></li>
 		<li>xen: sync code with bhyve, support for <strong>XEN 4.11</strong></li>
 		<li>jail: multiple ip adresses can be configured separately on interfaces without hosts config. Suggested by <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/306" target="_blank">Issue #306</a></li>
@@ -16,12 +25,11 @@
 		<li>add <strong>create.d</strong> dir for post-creation action. Suggested by <strong>Annakan</strong>, <a href="https://github.com/cbsd/cbsd/issues/321" target="_blank">Issue #321</a></li>
 		<li>srcup.conf: split conf per-platform</li>
 		<li>imghelper: store flat_size in bytes in header (as result: jimport now knows the amount of unpacked environment before unpacking)</li>
+		<li>jails: add support for allow_read_msgbuf (<a href="https://svnweb.freebsd.org/base?view=revision&revision=r339409" target="_blank">r339409</a>)</li>
+		<li>bhyve: add bhyve_engine to run bhyve in gdb or lldb</li>
 	</ul>
 	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
-	<ul>
-	</ul>
 </div>
-<h2><a name="release">Releases</a></h2>
 <div class="block">
 	<p><strong>11.2.1</strong>&nbsp;&mdash; 2018-07-28</p>
 	<ul>

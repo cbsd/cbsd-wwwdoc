@@ -292,5 +292,33 @@
     <guid>CBSD 11.2.1 available</guid>
     <pubDate>Sat, 28 Jul 2018 05:14:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>bhyve live migration. Coming soon!</title>
+    <description>
+       - https://youtu.be/-IYNSBhtJqw&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD bhyve live migration</guid>
+    <pubDate>Thu, 06 Sep 2018 05:14:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.0.0 available</title>
+    <description>Relnotes&lt;br /&gt;
+      - tested on FreeBSD 12&lt;br /&gt;
+      - tested with XEN 4.11&lt;br /&gt;
+      - bhyve: initial support for NVMe controller (no boot order)&lt;br /&gt;
+      - bhyve: live migration support&lt;br /&gt;
+      - jail: multiple ip adresses can be configured separately on interfaces without hosts config. Suggested by ntinti, Issue #306&lt;br /&gt;
+      - [jb]import: support for multiple images specified in the command line&lt;br /&gt;
+      - add create.d dir for post-creation action. Suggested by Annakan, Issue #321&lt;br /&gt;
+      - srcup.conf: split conf per-platform&lt;br /&gt;
+      - imghelper: store flat_size in bytes in header (as result: jimport now knows the amount of unpacked environment before unpacking)&lt;br /&gt;
+      - jails: add support for allow_read_msgbuf (r339409)&lt;br /&gt;
+      - bhyve: add bhyve_engine to run bhyve in gdb or lldb&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.0 available</guid>
+    <pubDate>Sat, 27 Oct 2018 10:28:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

@@ -12,6 +12,15 @@
 </div>
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
+	<p><strong>12.0.1</strong>&nbsp;&mdash; 2018-11-17</p>
+	<ul>
+		<li>bugfix release</li>
+		<li>jail: elf_tables: check jail for minor version too. Reported by Пётр aka <strong>Peter2121</strong>, <a href="https://github.com/cbsd/cbsd/issues/351" target="_blank">Issue #351</a></li>
+		<li>bhyve: fix serial boot issue for UEFI GOP mode</li>
+		<li>bhyve: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_gdb_ssi.html">debug engine</a>: add alternative path for gdb</li>
+	</ul>
+</div>
+<div class="block">
 	<p><strong>12.0.0</strong>&nbsp;&mdash; 2018-10-21</p>
 	<ul>
 		<li>tested on FreeBSD 12</li>
@@ -25,7 +34,7 @@
 		<li>srcup.conf: split conf per-platform</li>
 		<li>imghelper: store flat_size in bytes in header (as result: jimport now knows the amount of unpacked environment before unpacking)</li>
 		<li>jails: add support for allow_read_msgbuf (<a href="https://svnweb.freebsd.org/base?view=revision&revision=r339409" target="_blank">r339409</a>)</li>
-		<li>bhyve: add bhyve_engine to run bhyve in gdb or lldb</li>
+		<li>bhyve: add <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_gdb_ssi.html">debug engine</a> to run bhyve in <strong>gdb</strong> or <strong>lldb</strong></li>
 	</ul>
 	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
 </div>

@@ -320,5 +320,16 @@
     <guid>CBSD 12.0.0 available</guid>
     <pubDate>Sat, 27 Oct 2018 10:28:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 12.0.1 available</title>
+    <description>Relnotes&lt;br /&gt;
+      - bugfix release&lt;br /&gt;
+      - jail: elf_tables: check jail for minor version too. Reported by Peter2121 (Issue #351)&lt;br /&gt;
+      - bhyve: fix serial boot issue for UEFI GOP mode&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.1 available</guid>
+    <pubDate>Sat, 17 Nov 2018 05:48:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

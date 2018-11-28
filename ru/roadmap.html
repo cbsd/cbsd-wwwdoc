@@ -1,25 +1,31 @@
 <!--# include file="_start.html" -->
+<!--# include file="/en/translate.html" -->
 <h1><span>Roadmap</span></h1>
 <div class="block">
 <p>The main roadmap, prospects and development vector for <strong>CBSD/ClonOS</strong> projects.</p>
 <ul>
-	<li>Syslog support: all <strong>CBSD/ClonOS</strong> events can be sent via syslog to external analyzers/event logs for auditing;</li>
-	<li>OVF format support;</li>
-	<li>CEPH/GlusterFS support out of the box (provisioning scripts);</li>
-	<li>iSCSI support for XEN and bhyve block devices;</li>
-	<li>bhyve checkpoint support;</li>
-	<li>XEN/bhyve live migration support;</li>
-	<li>Multiple $workdir environments on one host. The ability to separate independent environments on a single server for independent resource constraints and prioritization;</li>
-	<li>Clustering DRS: automatic balancing (migration) based on CPU and memory loads;</li>
-	<li>Safe automatic updating of nodes in a cluster (node maintenance mode with automatic domain migration);</li>
-	<li>Transparent distribution of cluster resources when creating a virtual machine;</li>
-	<li>Metrics for CPU, Memory, I/O: support for Prometheus/Gragana/Zabbix from the box;</li>
-	<li>High availability (HA-cluster);</li>
-	<li>Stretched virtual L2 network (vxlan, qinq) for mutliple DataCenter;</li>
-	<li>physical interfaces aggregation;</li>
-	<li>Roles, Integration with AD. RBAC and SSO;</li>
-	<li>RestAPI for <strong>CBSD</strong>;</li>
-	<li>Client-server architecture for <strong>CBSD</strong> commands;</li>
-	<li>Popular instances library;</li>
+	<table border=0>
+	<tr><td>&nbsp</td><td>&nbsp</td></tr>
+	<tr><td><li><strike>Syslog support: all <strong>CBSD/ClonOS</strong> events can be sent via syslog to external analyzers/event logs for auditing;</strike></li></td><td><strong><a href="/<!--#echo var="lang" -->/syslog.html">done</a></strong></td></tr>
+	<tr><td><li>OVF format support;</li></td><td>wip</td></tr>
+	<tr><td><li>CEPH/GlusterFS support out of the box (provisioning scripts);</li></td><td>wip</td></tr>
+	<tr><td><li>iSCSI support for XEN and bhyve block devices;</li></td><td>wip</td></tr>
+	<tr><td><li><strike>bhyve checkpoint support;</strike></li><td><strong><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">done</a></strong></td></tr>
+	<tr><td><li><strike>bhyve live migration support</strike></li></td><td><strong><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bmigration_ssi.html">done</a></strong>&nbsp</td></tr>
+	<tr><td><li>XEN live migration support;</li></td><td>wip</td></tr>
+	<tr><td><li>Multiple $workdir environments on one host. The ability to separate independent environments on a single server for independent resource constraints and prioritization;</li></td><td>wip</td></tr>
+	<tr><td><li>Clustering DRS: automatic balancing (migration) based on CPU and memory loads;</li></td><td>wip</td></tr>
+	<tr><td><li><strike>RACCT metric exported (hoster, jail, bhyve);</strike></li></td><td><strong><a href="/<!--#echo var="lang" -->/racct_exports.html">done</a></strong></td></tr>
+	<tr><td><li>Safe automatic updating of nodes in a cluster (node maintenance mode with automatic domain migration);</td><td>wip</td></tr>
+	<tr><td><li>Transparent distribution of cluster resources when creating a virtual machine;</li></td><td>wip</td></tr>
+	<tr><td><li>Metrics for CPU, Memory, I/O: support for Prometheus/Gragana/Zabbix from the box;</li></td><td>wip</td></tr>
+	<tr><td><li>High availability (HA-cluster);</li></td><td>wip</td></tr>
+	<tr><td><li>Stretched virtual L2 network (vxlan, qinq) for mutliple DataCenter;</li></td><td>wip</td></tr>
+	<tr><td><li>physical interfaces aggregation;</li></td><td>wip</td></tr>
+	<tr><td><li>Roles, Integration with AD. RBAC and SSO;</li></td><td>wip</td></tr>
+	<tr><td><li>RestAPI for <strong>CBSD</strong>;</li></td><td>wip (responded by @meka)</td></tr>
+	<tr><td><li>Client-server architecture for <strong>CBSD</strong> commands;</li></td><td>wip</td></tr>
+	<tr><td><li>Popular instances library;</li></td><td>wip</td></tr>
+	</table>
 </div>
 <!--# include file="_end.html" -->

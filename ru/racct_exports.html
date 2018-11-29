@@ -1,0 +1,70 @@
+<!--# include file="_start.html" -->
+<!--# include file="/en/translate.html" -->
+<!--# include file="currentver.html" -->
+<h1><span>CBSD: export RACCT metrics</span></h1>
+<h2><a name="intro"><span>Intro</span></a></h2>
+	<div class="block">
+			<p>wip/draft</p>
+			<p>Export metrics to beanstalk highly experimental and not enabled by default. So no, beanstalkd at the moment is optional ( and probably will remain so ). Another backend for metrics is SQLite3 (already done) and Prometheus ( still wip ).
+			<p>If you with to play with metrics enable cbsd racct services:</p>
+			<ul>
+				<li>
+					<p>for bhyve metrics:</p>
+					<p><pre class="cli;">sysrc cbsd_statsd_bhyve_enable=YES</pre></p>
+					<p><pre class="cli;">service cbsd-statsd-bhyve start</pre></p>
+				</li>
+				<li>
+					<p>for jail metics:</p>
+					<p><pre class="cli;">sysrc cbsd_statsd_jail_enable=YES</pre></p>
+					<p><pre class="cli;">service cbsd-statsd-jail start</pre></p>
+				</li>
+				<li>
+					<p>for hoster metics ( <strong>required by DRS</strong>):</p>
+					<p><pre class="cli;">sysrc cbsd_statsd_hoster_enable=YES</pre></p>
+					<p><pre class="cli;">service cbsd-statsd-hoster start</pre></p>
+				</li>
+			</ul>
+			<br>
+			<p>Also you need to enable/install beanstalkd:</p>
+			<p><pre class="cli;">pkg install -y net/beanstalkd</pre></p>
+			<p><pre class="cli;">sysrc beanstalkd_enable=YES</pre></p>
+			<p><pre class="cli;">sysrc beanstalkd_flags="-l 127.0.0.1 -p 11300"</pre></p>
+			<p><pre class="cli;">service beanstalkd start</pre></p>
+			<br>
+			<p>To receive real-time metrics use 'racct-jail' tube in beasntalkd to receive metrics for jail (in json), 'racct-bhyve' tube for bhyve and 'racct-system' for hoster metrics</p>
+			<p>update rate and other settings are in the corresponding configuration file in <em>~cbsd/etc/default</em> directory (<strong>racct-{jail,bhyve,hoster}-statsd.conf</strong>). Please use <em>~cbsd/etc</em> directory
+			for overwrite default settings.</p>
+			<p>E.g. simple python-based client:</p>
+			<pre class="cli;">pkg install -y net/py-beanstalkc   (install client)</pre>
+			<pre class="brush:bash;ruler:true;">
+#!/usr/bin/env python2.7
+
+import beanstalkc
+#import time
+import sys
+
+try:
+    bsk = beanstalkc.Connection(host='localhost', port=11300)
+    bsk.watch('racct-jail')
+    bsk.use('racct-jail')
+except:
+    print "cannot open connection"
+    sys.stdout.flush()
+    sys.exit(1)
+
+while 1:
+    #print time.strftime('%Y-%m-%d %X'), " waiting for work ..."
+    sys.stdout.flush()
+    job = bsk.reserve(timeout=60)
+    if job is not None:
+        # I had to delete it immediately
+        job.delete()
+        try:
+            sys.stdout.flush()
+            print(repr(job.body))
+        except:
+            print "bad things"
+            sys.stdout.flush()
+			</pre>
+	<div>
+<!--# include file="_end.html" -->

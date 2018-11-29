@@ -331,5 +331,17 @@
     <guid>CBSD 12.0.1 available</guid>
     <pubDate>Sat, 17 Nov 2018 05:48:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 12.0.2 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+      - bhyve: bump uefi firmware to 0.2&lt;br /&gt;
+      - cbsdd: cleanup logs for internal task&lt;br /&gt;
+      - racct-stats: split daemon into three independent parts ( racct-jail-stats, racct-bhyve-stats and racct-hoster-stats ). (not enabled by default)&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.1 available</guid>
+    <pubDate>Sat, 24 Nov 2018 03:48:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

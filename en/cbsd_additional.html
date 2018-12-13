@@ -175,7 +175,20 @@
     scripts after installing on a FreeBSD system.
     </p>
 </div>
-
+<h2><a name="jnameasmask">Multiple operation by jname as mask</a></h2>
+	<div class="block">
+		<p>Most of the <strong>CBSD</strong> commands are support jname as mask.</p>
+		<p>For example, if you want to perform a similar operation on a group of jails (e.g: jail1, jail2, jail3), you can use <strong>jname='jail*'</strong></p>
+		<p>Another example:</p>
+<pre>
+cbsd jset jname='*' ver=native
+cbsd jset jname='*' ver=native astart=0 devfs_ruleset=4   [..]
+cbsd jexec jname='jail*' file -s /bin/sh
+cbsd pkg jname='myja*l*' mode=install  ca_root_nss nss
+cbsd jstop jname='*'
+cbsd jstart jname='lala*'
+</pre>
+	</div>
 <h2><a name="hier">A brief summary of the filesystem hierarchy <strong>CBSD</strong></a></h2>
 	<div class="block">
 		<table class="images">

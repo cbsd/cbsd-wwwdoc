@@ -7,11 +7,22 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
+		<li>bhyve: jailed bhyve on FreeBSD 12.0+ (<a target="_blank" href="https://github.com/lattera/articles/blob/master/freebsd/2018-10-27_jailed_bhyve/article.md">articles</a> by <strong>lattera</strong>)</li>
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 </div>
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
+	<p><strong>12.0.3</strong>&nbsp;&mdash; 2018-12-04</p>
+	<ul>
+		<li>bugfix release</li>
+		<li>quick and dirty workaround of the CentOS 7.6 (and probably RedHat) boot problem:
+			<p>Failed to set MokListRT: Invalid Parameter</p>
+			<p>Something has gone seriously wrong: import_mok_state() failed</p>
+			<p>CentOS guest users: please update immediately!</p>
+		</li>
+	</ul>
+</div>
 <div class="block">
 	<p><strong>12.0.2</strong>&nbsp;&mdash; 2018-11-24</p>
 	<ul>
@@ -67,7 +78,7 @@
 <div class="block">
 	<p><strong>11.2.0</strong>&nbsp;&mdash; 2018-05-28</p>
 	<ul>
-        <li>Ready for FreeBSD 11.2</li>
+	<li>Ready for FreeBSD 11.2</li>
 		<li>jsnapshot: remove unnecessary exit from the cycle. Pointed via email by: <strong>Sean Greven</strong></li>
 		<li>started working on iSCSI support: iscsi-discovery script has been added to control iscsictl(8)</li>
 		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/modules/pkg.d_ssi.html">pkg</a>: partial support for multiple jname mask</li>
@@ -78,9 +89,9 @@
 <div class="block">
 	<p><strong>11.1.20</strong>&nbsp;&mdash; 2018-05-06</p>
 	<ul>
-        <li>bugfix release</li>
-        <li>jail: fix for broken jset. Reported by Egor Vershinin aka <strong>Dorlas</strong>, <a href="https://github.com/cbsd/cbsd/issues/290" target="_blank">Issue #290</a></li>
-        <li>jail: fix starting RC twice in vnet jails. Reported, debug and fixes by Gijs Peskens aka <strong>gizahNL</strong>, <a href="https://github.com/cbsd/cbsd/issues/291" target="_blank">Issue #291</a>
+	<li>bugfix release</li>
+	<li>jail: fix for broken jset. Reported by Egor Vershinin aka <strong>Dorlas</strong>, <a href="https://github.com/cbsd/cbsd/issues/290" target="_blank">Issue #290</a></li>
+	<li>jail: fix starting RC twice in vnet jails. Reported, debug and fixes by Gijs Peskens aka <strong>gizahNL</strong>, <a href="https://github.com/cbsd/cbsd/issues/291" target="_blank">Issue #291</a>
 	</ul>
 </div>
 <div class="block">

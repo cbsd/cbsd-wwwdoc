@@ -53,7 +53,23 @@
 		<p>Важными в плане безопасности, является каталоги <em>${workdir}/.rssh</em> и <em>${workdir}/.ssh</em>, в котором находятся приватные RSA ключи от пользователя <strong>CBSD</strong> с удаленных нодах и с локальной соответственно. Следите за тем, чтобы данные этих каталогов были недоступены для других пользователей системы. Кроме того, вам может быть интересна информация о <a href="/ru/cbsd_geli.html">GELI криптовании</a>. По-умолчанию, читать ключ может только системный пользователь <strong>CBSD</strong>.</p>
 		<p>И наконец в-третьих, обязательно ознакомьтесь с модификациями, которые производит <strong>CBSD</strong> в вашей конфигурации: <a href="custom_freecbsd.html">Модификации, которые выполняют скрипты <strong>CBSD</strong> в FreeBSD</a></p>
 	</div>
-	
+
+	<h2><a name="jnameasmask">Мульти-операции с использованием jname по маске</a></h2>
+        <div class="block">
+                <p>Большинство <strong>CBSD</strong> команд поддерживают форму записи jname= в виде маски.</p>
+                <p>Например, если вы хотите выполнить однотипную операцию на группе jail с именами jail1, jail2, jail3, вы можете использовать <strong>jname='jail*'</strong></p>
+                <p>Еще примеры:</p>
+<pre>
+cbsd jset jname='*' ver=native
+cbsd jset jname='*' ver=native astart=0 devfs_ruleset=4   [..]
+cbsd jexec jname='jail*' file -s /bin/sh
+cbsd pkg jname='myja*l*' mode=install  ca_root_nss nss
+cbsd jstop jname='*'
+cbsd jstart jname='lala*'
+</pre>
+        </div>
+
+
 	<h2><a name="hier">Иерархия <strong>CBSD</strong> каталога</a></h2>
 	<div class="block">
 		<table class="images">

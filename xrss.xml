@@ -340,8 +340,41 @@
       - racct-stats: split daemon into three independent parts ( racct-jail-stats, racct-bhyve-stats and racct-hoster-stats ). (not enabled by default)&lt;br /&gt;
     </description>
     <link>https://www.bsdstore.ru</link>
-    <guid>CBSD 12.0.1 available</guid>
+    <guid>CBSD 12.0.2 available</guid>
     <pubDate>Sat, 24 Nov 2018 03:48:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.0.3 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+      bugfix release:&lt;br /&gt;
+         - quick and dirty workaround of the CentOS 7.6 (and probably RedHat) boot problem:&lt;br /&gt;
+           Failed to set MokListRT: Invalid Parameter&lt;br /&gt;
+           Something has gone seriously wrong: import_mok_state() failed&lt;br /&gt;
+      CentOS guest users: please update immediately!&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.3 available</guid>
+    <pubDate>Tue, 04 Dec 2018 05:48:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>ClonOS 18.12 become to BETA</title>
+    <description>Development of the ClonOS is slowly but surely continuing&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      The latest build has the following changes:&lt;br /&gt;
+         - Cnage release model from rolling to fixed&lt;br /&gt;
+         - update PHP to 7.3-RC&lt;br /&gt;
+         - update CBSD to 12.0.2&lt;br /&gt;
+         - bhyve and jails got the real-time graph: https://clonos.tekroutine.com/images/clonos_graph1.png&lt;br /&gt;
+    &lt;br /&gt;
+      Instruction for installing ClonOS on stock FreeBSD has been updated: https://clonos.tekroutine.com/installation_on_freebsd.html&lt;br /&gt;
+    &lt;br /&gt;
+      Feedback is very welcome!&lt;br /&gt;
+    </description>
+    <link>https://clonos.tekroutine.com</link>
+    <guid>ClonOS become to BETA</guid>
+    <pubDate>Tue, 04 Dec 2018 06:48:00 +0000 </pubDate>
   </item>
 </channel>
 </rss>

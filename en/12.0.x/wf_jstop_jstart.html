@@ -47,6 +47,7 @@
 		<p>Additionally, when a shutdown command is running on the server with lots of jails/services that should be taken into consideration low timeout that defaults to perform rc.shutdown sequence. In this regard, the process <strong>init(8)</strong> can interrupt the rc-scripts on this timeout, resulting in abnormal shutdown jails. In this case, the database can lead to nonconservation or damage data. To avoid this, <strong>/etc/rc.conf</strong> master system should be adjusted parameter <strong>rcshutdown_timeout</strong> to a more reasonable value (default: 90 seconds)</p>
 		<p>In the absence of <strong>rcshutdown_timeout</strong> in the system <strong>/etc/rc.conf</strong>, <strong>cbsd initenv</strong> will put this option in its sole discretion automatically.</p>
 		<p>Also, keep in mind that when using the zfs features (<em>$workdir/nc.inventory</em>, the parameter <strong>zfsfeat=1</strong>), and the file system ZFS, at jstop, file system of jails will be unmounted and those catalog <em><strong>$workdir/</strong>jails-data/jail1-data</em> will be empty. If in such a case when jail data is requires without running it,  by the command <strong>zfs list</strong> You can see the name appropriate file system and run zfs mount <strong>fs</strong>.</p>
+		<p class="text-center"><img src="/gif/jstart.gif" alt="" /></p>
 	</div>
 	<h2><a name="jstart_cmd">Writing scripts executed on starting and stopping jail</a></h2>
 	<div class="block">

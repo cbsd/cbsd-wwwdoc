@@ -55,10 +55,10 @@
 	</div>
 
 	<h2><a name="jnameasmask">Мульти-операции с использованием jname по маске</a></h2>
-        <div class="block">
-                <p>Большинство <strong>CBSD</strong> команд поддерживают форму записи jname= в виде маски.</p>
-                <p>Например, если вы хотите выполнить однотипную операцию на группе jail с именами jail1, jail2, jail3, вы можете использовать <strong>jname='jail*'</strong></p>
-                <p>Еще примеры:</p>
+	<div class="block">
+		<p>Большинство <strong>CBSD</strong> команд поддерживают форму записи jname= в виде маски.</p>
+		<p>Например, если вы хотите выполнить однотипную операцию на группе jail с именами jail1, jail2, jail3, вы можете использовать <strong>jname='jail*'</strong></p>
+		<p>Еще примеры:</p>
 <pre>
 cbsd jset jname='*' ver=native
 cbsd jset jname='*' ver=native astart=0 devfs_ruleset=4   [..]
@@ -67,8 +67,8 @@ cbsd pkg jname='myja*l*' mode=install  ca_root_nss nss
 cbsd jstop jname='*'
 cbsd jstart jname='lala*'
 </pre>
-        </div>
-
+	<p><p class="text-center"><img src="/gif/jnamemask.gif" alt="" /></p>
+	</div>
 
 	<h2><a name="hier">Иерархия <strong>CBSD</strong> каталога</a></h2>
 	<div class="block">

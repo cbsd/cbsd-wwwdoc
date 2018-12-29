@@ -298,3 +298,10 @@ a[target="_blank"] {
 	padding-left: 20px;
 	background: transparent url(/img/iface/link_out.png) no-repeat 4px 2px;
 }
+
+.content ul {
+	padding:10px 10px 10px 40px;
+	line-height:20px;
+	list-style-type:disc;
+	list-style-position:outside;
+}

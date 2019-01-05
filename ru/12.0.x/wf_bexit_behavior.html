@@ -1,0 +1,33 @@
+	<h1><span>Настройка поведения завершения bhyve</span></h1>
+	<h2><a name="bconfig_cmd">Команда bconfig, bset, bconstruct-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bconfig
+			% cbsd bset
+			% cbsd bconstruct-tui
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Конфигурирование поведения виртуальной машины по exit codes</p>
+		<p>В CBSD начиная с версии 12.0.4 добавлен регулятор поведения, зависимый от кода завершения гипервизора виртуальной машины</p>
+		<p>Вы можете переназначить это поведение как через глобальный профиль (<em>bhyve-default-default.conf</em>), так и индивидуально для каждой виртуальной машины</p>
+		<p>Для редактирования, вы можете использовать bset или соответствующий пункт в меню bconstruct-tui или bconfig</p>
+		<p>Возможные exit codes, которые вы можете использовать:</p>
+		<ul>
+			<li><strong>on_poweroff</strong>: the content of this element specifies the action to take when the guest requests a poweroff</li>
+			<li><strong>on_reboot</strong>: the content of this element specifies the action to take when the guest requests a reboot</li>
+			<li><strong>on_crash</strong>: the content of this element specifies the action to take when the guest crashes</li>
+		</ul>
+		<p>Возможные поведения, которые вы можете переназначить для каждого кода:</p>
+		<ul>
+			<li><strong>destroy</strong>: the domain will be terminated completely and all resources released</li>
+			<li><strong>restart</strong>: the domain will be terminated and then restarted with the same configuration</li>
+			<li><strike><strong>preserve</strong>: the domain will be terminated and its resource preserved to allow analysis</strike> (<strong>WIP</strong>, at the moment: XEN only)</li>
+			<li><strike><strong>rename-restart</strong>: the domain will be terminated and then restarted with a new name</strike> (<strong>WIP</strong>, at the moment: XEN only)</li>
+		</ul>
+		<p class="text-center"><img src="/img/bhyve_exit_behavior1.png" alt="" /></p>
+		<br>
+		<p class="text-center"><img src="/img/bhyve_exit_behavior2.png" alt="" /></p>
+		<br>
+		<p class="text-center"><img src="/img/bhyve_exit_behavior3.png" alt="" /></p>
+		<br>
+	</div>

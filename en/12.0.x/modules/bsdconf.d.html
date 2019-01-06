@@ -22,16 +22,22 @@
 		<pre class="brush:bash;ruler:true;">
 			% cbsd sysrc jname=jail1 service -l
 		</pre>
-		<p><strong>Example3:</strong> Start sshd service in jail1:</p>
+		<p><strong>Example3:</strong> Enable sshd service in jail1:</p>
 		<pre class="brush:bash;ruler:true;">
-			% cbsd service jname=jail1 sshd start
+			% cbsd service mode=action jname=jail1 sshd enable
 		</pre>
-		<p><strong>Example4:</strong> Change password for root user in jail1:</p>
+		<p><strong>Example4:</strong> Start sshd service in all jails started with jail* jname :</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd service mode=action jname='jail*' sshd start
+			% cbsd service mode=action jname='jail*' sshd onestart
+			% cbsd service mode=action jname='jail*' sshd status
+		</pre>
+		<p><strong>Example5:</strong> Change password for root user in jail1:</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd passwd jname=jail1
 		</pre>
-		<p><strong>Example5:</strong> Change password for web user in jail1:</p>
+		<p><strong>Example6:</strong> Change password for web user in jail1:</p>
 		<pre class="brush:bash;ruler:true;">
-			% cbsd passwd jname=jail1 user=web
+			% cbsd passwd jname=jail1 login=web
 		</pre>
 	</div>

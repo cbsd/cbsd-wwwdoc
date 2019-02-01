@@ -78,7 +78,7 @@
 		<p> If you have the processing power available on the Internet (hosting, data center, etc.), you can create your own <strong> CBSD mirror </strong> and publish a link to your profiles in it
 		virtual machines. So, you become a participant in the <strong>CBSD</strong> project and help your region (country) get, perhaps, the best mirror for them. </p>
 		<p> In addition, for those who want to help the project with a local mirror in your resources, in the <strong>RO</strong> mode, an rsync server is open, from which you can initiate through <strong>cron</strong>
-		content synchronization. The URL of this property is <strong>rsync://cbsd.lifec0re.net:30873</strong>. If your mirror is accessible from the Internet, you can send <strong>pull-request</strong> to GitHub to the repository
+		content synchronization. The URL of this property is <strong>rsync://electro.bsdstore.ru/iso/</strong>. If your mirror is accessible from the Internet, you can send <strong>pull-request</strong> to GitHub to the repository
 		<a href="https://github.com/cbsd/cbsd-vmprofiles" target="_blank">https://github.com/cbsd/cbsd-vmprofiles</a> by adding your mirror to <strong>cbsd_iso_mirrors=</strong>. With the release of the new version of <strong>CBSD</strong>
 		your mirror will go to <strong>CBSD</strong>.
 		</p>
@@ -164,7 +164,7 @@
 		cat &gt; /etc/cron.d/cbsd_mirror &lt;&lt;EOF
 		SHELL=/bin/sh
 		PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a --delete rsync://cbsd.lifec0re.net:30873/iso/ /usr/local/www/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a --delete rsync://electro.bsdstore.ru/iso/ /usr/local/www/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
 		EOF
 		</pre>
 		<p>6) Start WEB service</p>

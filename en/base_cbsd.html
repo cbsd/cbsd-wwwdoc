@@ -40,6 +40,24 @@
 	<br>
 	<p>Described below are the steps needed to get the initial FreeBSD sources from the project's SVN repository (<a href="http://svn.freebsd.org/" target="_blank">http://svn.freebsd.org</a>), its compilation and installation in a separate  directory which will act as base. These actions are necessary, if you don't want to use pre compiled versions available on <a href="ftp://ftp.freebsd.org" target="_blank">ftp://ftp.freebsd.org</a> or <a href="http://www.bsdstore.ru" target="_blank">http://bsdstore.ru</a>,  which can be retrieved with the <strong>cbsd repo</strong> command. Also, by manually building becomes possible to not only get releases, but also individual branches.</p>
 	</div>
+	<h2><a name="base_obtain_source">Sources and configuration of receiving base</a></h2>
+	<div class="block">
+	<p>Starting with the <strong>CBSD</strong> 12.0.4, You can adjust the default base acquisition method and customize sources. The configuration file is responsible for this behavior: <em>~cbsd/etc/defaults/FreeBSD-bases.conf</em> (or ~cbsd/etc/default/HardenedBSD-bases.conf)</p>
+	<p>To make changes, copy this file to the directory <em>~cbsd/etc/</em></p>
+	<p>The configuration file supports $var and $arch variables; thus, you can more flexibly customize sources, for example:</p>
+	<pre class="brush:bash;rule:true">
+auto_baseupdate=0
+default_obtain_base_method="extract repo"
+default_obtain_base_extract_source="/nfs/bases/${platform}/base-${arch}-${ver}.txz"
+default_obtain_base_repo_sources="https://my.repo.local/bases/${platform}/${ver}/base-${arch}.txz https://mirror-service.local/base-${platform}-${ver}-${arch}.txz"
+	</pre>
+	<p>Set CBSD to choose the default method for retrieving the database from the local file system (extract). At the same time, the way in which it will perform the search and provided that CBSD is running on the FreeBSD platform and you are creating a container with the version of the base 12.1 and the architecture amd64, should look like this: <strong>/nfs/bases/FreeBSD/base-amd64-12.1.txz</strong></p>
+	<p>In the absence of this file, <strong>CBSD</strong> will attempt to get the archive from: https://my.repo.local/bases/FreeBSD/12.1/base-amd64.txz and https://mirror-service.local/base-FreeBSD-12.1-amd64.txz</p>
+	<p>This feature, together with the <strong>inter=0</strong> key (non-interactive execution of CBSD commands) allows you to automate the process of deploy of containers using its own infrastructure</p>
+	<p>The auto_baseupdate params adjusts the automatic update of the received base to the latest patch level ( FreeBSD 12.0-p1, FreeBSD 12.0-p2 ..) via freebsd-update (or hbsd-update for HardenedBSD platform) tools.</p>
+	<p>Please use auto_baseupdate=1, if you want to automatically accept patches when getting a base</p>
+	<p>As an example of use case, you can look at the integration of <strong>CBSD</strong> with the <a href="https://cirrus-ci.org/">Cirrus CI</a> service in <a href="https://github.com/cbsd/cbsd/issues/367">Issue #367</a></p>
+</div>
 	<h2><a name="general">Base obtaining</a></h2>
 	<div class="block">
 		<p>building or updating consists of the following three steps:</p>

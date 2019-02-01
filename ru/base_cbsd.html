@@ -36,6 +36,25 @@
 	<br>
 	<p>Ниже описаны шаги для получения исходных кодов FreeBSD из SVN репозитория проекта (<a href="http://svn.freebsd.org/" target="_blank">http://svn.freebsd.org</a>), его компиляция и инсталляция в отдельный каталог, который будет выступать базой. Данные действия могут быть востребованы, если вы не хотите пользоваться уже собранной версией, доступной на ресурсах <a href="ftp://ftp.freebsd.org" target="_blank">ftp://ftp.freebsd.org</a> и <a href="http://www.bsdstore.ru" target="_blank">http://bsdstore.ru</a> (например по причинам безопасности), которые можно получить через <strong>cbsd repo</strong>. Также, сборкой можно получить не только релизы, но и промежуточные варианты веток.</p>
 </div>
+<h2><a name="base_obtain_source">Источники и конфигурация получения базы</a></h2>
+<div class="block">
+	<p>Начиная с версии <strong>CBSD</strong> 12.0.4, вы можете регулировать метод получения базы по-умолчанию и настраивать источники. Конфигурационный файл отвечающий за это поведение: <em>~cbsd/etc/defaults/FreeBSD-bases.conf</em> (или ~cbsd/etc/default/HardenedBSD-bases.conf)</p>
+	<p>Чтобы произвести изменения, скопируйте этот файл в директорию <em>~cbsd/etc/</em></p>
+	<p>Конфигурационный файл поддерживает переменные $var и $arch, таким образом, вы можете более гибко настраивать источники, например:</p>
+	<pre class="brush:bash;rule:true">
+auto_baseupdate=0
+default_obtain_base_method="extract repo"
+default_obtain_base_extract_source="/nfs/bases/${platform}/base-${arch}-${ver}.txz"
+default_obtain_base_repo_sources="https://my.repo.local/bases/${platform}/${ver}/base-${arch}.txz https://mirror-service.local/base-${platform}-${ver}-${arch}.txz"
+	</pre>
+	<p>Заставит CBSD по-умолчанию предпочесть метод получения базы данных с локальной файловой системы (extract). При этом путь, по которому она будет производить поиск и при условии, что CBSD работает на
+	платформе FreeBSD и вы создаете контейнер с версией базы 12.1 и архитектуры amd64, должен выглядеть так: <strong>/nfs/bases/FreeBSD/base-amd64-12.1.txz</strong></p>
+	<p>В случае отсутствия этого файла, <strong>CBSD</strong> предпримет попытки получить архив через https://my.repo.local/bases/FreeBSD/12.1/base-amd64.txz и https://mirror-service.local/base-FreeBSD-12.1-amd64.txz</p>
+	<p>Данная возможность, совместно с ключем <strong>inter=0</strong> (не интерактивное выполнение CBSD команд) позволяет автоматизировать процесс разворачивания контейнеров с использованием своей собственной инфраструктуры</p>
+	<p>Параметр auto_baseupdate регулирует автоматическое обновление полученной базы до последнего актуального patch level ( FreeBSD 12.0-p1, FreeBSD 12.0-p2 ..) через утилиту freebsd-update (или hbsd-update для платформы HardenedBSD).</p>
+	<p>Используйте auto_baseupdate=1, если вы хотите автоматически принимать патчи при получении базы</p>
+	<p>В качестве примера использования, можете посмотреть на интеграцию <strong>CBSD</strong> с сервисом <a href="https://cirrus-ci.org/">Cirrus CI</a> в <a href="https://github.com/cbsd/cbsd/issues/367">Issue #367</a></p>
+</div>
 <h2><a name="obtain">Получение базы</a></h2>
 <div class="block">
 	<p>Сборка или обновление состоит из трех шагов:</p>

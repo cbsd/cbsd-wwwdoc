@@ -363,7 +363,7 @@
     &lt;br /&gt;
     &lt;br /&gt;
       The latest build has the following changes:&lt;br /&gt;
-         - Cnage release model from rolling to fixed&lt;br /&gt;
+         - Change release model from rolling to fixed&lt;br /&gt;
          - update PHP to 7.3-RC&lt;br /&gt;
          - update CBSD to 12.0.2&lt;br /&gt;
          - bhyve and jails got the real-time graph: https://clonos.tekroutine.com/images/clonos_graph1.png&lt;br /&gt;
@@ -375,6 +375,51 @@
     <link>https://clonos.tekroutine.com</link>
     <guid>ClonOS become to BETA</guid>
     <pubDate>Tue, 04 Dec 2018 06:48:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>ClonOS 19.01-RELEASE</title>
+    <description>first public ClonOS release!&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+         - fix memleak in RACCT stats&lt;br /&gt;
+         - update PHP to 7.3&lt;br /&gt;
+         - update CBSD to 12.0.4&lt;br /&gt;
+         - bhyve and jails got the real-time graph: https://clonos.tekroutine.com/images/clonos_graph1.png&lt;br /&gt;
+    &lt;br /&gt;
+      Instruction for installing ClonOS on stock FreeBSD has been updated: https://clonos.tekroutine.com/installation_on_freebsd.html&lt;br /&gt;
+    &lt;br /&gt;
+      Feedback is very welcome!&lt;br /&gt;
+    </description>
+    <link>https://clonos.tekroutine.com</link>
+    <guid>ClonOS 19.01-RELEASE</guid>
+    <pubDate>Thu, 24 Jan 2019 09:30:00 +0000 </pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.0.4 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      - xen: SPICE protocol for QEMU support (recent FreeBSD-13 (HEAD/CURRENT) only)&lt;br /&gt;
+      - bhyve: added custom behavior settings by exit codes&lt;br /&gt;
+      - CBSD WEB UI (aka ClonOS): got real-time graph and new dark themes&lt;br /&gt;
+      - bhyve: (highly experimental) jailed bhyve on FreeBSD 12.0+ (articles by lattera)&lt;br /&gt;
+      - jail: add support for allow_unprivileged_proc_debug settions (r341084)&lt;br /&gt;
+      - add global.conf settings. For example you can disable CBSD color output by conf in addition to NOCOLOR env(1) vars, suggested by Moviuro, Issue #364&lt;br /&gt;
+      - jail: sysrc: support for jname as mask&lt;br /&gt;
+      - jail: opportunity to manage sources and configuration of receiving base via config file. Suggested by Adeel Mujahid aka am11, Issue #367&lt;br /&gt;
+      - bhyve: storage controller management: now you can attach multiple vdisk to single AHCI controller&lt;br /&gt;
+      - initenv: test and configure kern.init_shutdown_timeout sysctl(8). Pointed out: Marko Turk aka marko-turk, Issue #374&lt;br /&gt;
+      - jail: split allow_sysvipc option. Pointed by ntinti, Issue #372&lt;br /&gt;
+      - jail/bhyve: by default run virtual environment with nice=1&lt;br /&gt;
+      - racct-*-stats: fix memleak with strsep&lt;br /&gt;
+      - register_base: added auto_baseupdate params to control base auto-update. Reported by Пётр aka Peter2121, Issue #363&lt;br /&gt;
+      - baseupdate: the ability to specify an individual base&lt;br /&gt;
+      - mountfstab/makejconf: fix grep conditions for zfs. Reported by xvfl8mzajp, Issue #382&lt;br /&gt;
+      - mountfstab: fix fstab parsing without CRLF. Reported by Peter2121, Issue #383&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.4 available</guid>
+    <pubDate>Sat, 16 Feb 2019 02:32:00 +0000</pubDate>
   </item>
 </channel>
 </rss>

@@ -1,0 +1,68 @@
+	<h1><span>bhyve с cloud-init через CBSD</span></h1>
+
+	<h2><a name="bcloud_initcmd">Команда bconfig, bconstruct-tui, cloudinit</a></h2>
+
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bconstruct-tui
+			% cbsd cloudinit
+		</pre>
+		<p><strong>Описание</strong>:</p>
+
+		<h2><a name="cloudinit_cmd">Команда bconfig, bconstruct-tui, cloudinit</a></h2>
+		<p>Использование <a target="_blank" href="https://cloud-init.io/">cloud-init</a> в настоящее время является методом де-факто по быстрому разворачиванию виртуальных инстансов 
+		в различных облачных окружениях (OpenNebula, OpenStack, Amazon AWS, Microsoft Azure, Digital Ocean ..)</p>
+		<p>Начиная с версии 12.0.6, <strong>CBSD</strong> поддерживает конфигурирование cloud-образов посредством функциональности cloud-init.</p>
+		<p>Как это работает:</p>
+		<p>На данный момент <strong>CBSD</strong> способна конфигурировать инстанс cloud-init методом <strong>NoCloud data source</strong>. Это означает, что виртуальная
+		машина получает все настройки через файловую систему fat32/msdos_fs или cd9660 подключенного локального носителя. Задача <strong>CBSD</strong> - сгенерировать и 
+		подключить образ к виртуальной машине в момент ее старта.</p>
+		<p>В качестве признака, что <strong>CBSD</strong> должна активировать функции cloud-init является факт наличия каталога cloud-init в системном каталоге
+		индивидуальной виртуальной машины: <em>${jailsysdir}/${jname}/cloud-init/</em>. Помимо признака активации cloud-init, этот каталог выступает хранилищем
+		конфигурации в формате и иерархии cloud-init, которое будет предоставлено виртуальной машине. Т.е, если рабочий каталог <strong>CBSD</strong> (cbsd_workdir) 
+		инициализирован в <strong>/usr/jails</strong> каталог, для виртуальной машины с именем <strong>vm1</strong> признак включения и настройки для конфигурирования
+		cloud-init должны быть расположены в каталоге <em>/usr/jails/jails-system/vm1/cloud-init</em>.</p>
+		<p>За форматом конфигурации и возможностями конфигуририрования cloud-init обратитесь к соответствующей <a target="_blank" href="https://cloudinit.readthedocs.io/en/latest/">официальной информацией</a> проекта.</p>
+		<p>Кроме этого, в дистрибутив <strong>CBSD</strong> входит пример простой конфигурации, которую вы можете посмотреть в каталоге 
+		<em>/usr/local/cbsd/share/examples/cloud-init</em> и использовать в качестве старта к построению своих облачных инсталляций.</p>
+		<div class="warning">
+			<p>Внимание! Несмотря на <a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">отсутствие привязки к ZFS</a>, для использования cloud-init
+			рекомендуется инсталляция с использованием файловой системы ZFS. В этом случае, <strong>CBSD</strong> использует технологию COW в виде zfs clone для создания виртуальной машины
+			на базе cloud образа. В противном случае, <strong>CBSD</strong>каждый раз будет вынуждена проводить длительную операцию по стандартному копированию
+			cloud образа в диск виртуальной машины. Впрочем, это все равно намного эффективнее установки через ISO с использованием инсталлятора каждый раз.</p>
+		</div>
+		<p><br></p>
+		<div class="warning">
+			<p>Внимание! В некоторых случаях вам может потребоваться runtime конфигурация, например при использовании network-config версии 1. В отличии от версии 2, где
+			в качестве сетевого интерфейса вы можете использовать параметр match и wildcard, первая версия требует указать строгое имя интерфейса. Которое может
+			изменяться в зависимости от нумерации PCI Bus. В этом случае, вам может понадобиться возможность
+			<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> в <strong>CBSD</strong>, которая
+			поможет вам создавать динамические конфигурации для cloud-init.</p>
+		</div>
+		<p>Дополнительно, в конфигуратор виртуальной машины <strong>CBSD</strong> через bconstruct-tui добавлен хелпер для cloud-init, реализующий конфигурирование минимально необходимой
+		конфигурации для получения рабочей виртуальной машины из cloud образа. Для этого, можете использовать несколько преднастроенных профилей с префиксом <strong>cloud-</strong></p>
+		<p>Их количество со временем будет увеличиваться. Кроме этого, вы можете самостоятельно собрать и выслать профиль через публичный GitHub репозиторий:
+		<a target="_blank" href="https://github.com/cbsd/cbsd-vmprofiles">https://github.com/cbsd/cbsd-vmprofile</a>. Это профили, которые использует <strong>CBSD</strong>.
+		<p>Кроме этого, если вы заметили что скорость получения образов медленная (<strong>CBSD</strong> использует свои собственные зеркала для дублирования образов, на которые
+		ссылаются профили <strong>CBSD</strong>) и вы имеете желание помочь проекту, ознакомьтесь с информацией как поднять свое собственное зеркало:
+		<a href="/<!--#echo var="lang" -->/cbsd_fetch.html#cbsd_partners">fetch_iso</a>. Вы можете прислать нам ссылку на ваше зеркало (или добавить его самостоятельно через
+		<a target="_blank" href="https://github.com/cbsd/cbsd-vmprofiles">https://github.com/cbsd/cbsd-vmprofile</a> и вы повысите качество для своего региона.</p>
+		<br>
+		<h2><a name="cloudinit_sample">Пример использования</a></h2>
+		<br>
+		<p>Профили cloud-образов находятся в меню vm_os_profile. Выберете этот пункт в основном меню:</p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit1.png" alt="" /></p>
+		<br>
+		<p>Внизу списка вы увидите область с Cloud images, если эти профили созданы в <strong>CBSD</strong> для выбранного семейства ОС:</p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit2.png" alt="" /></p>
+		<br>
+		<p>Далее, произведите настройку сетевых параметров, пользователя и публичного ключа гостевой машины:</p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit3.png" alt="" /></p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit4.png" alt="" /></p>
+		<br>
+		<p>Дальнейшая настройка и запуск cloud-based виртуальной машины ничем не отличается от основного метода. Желаем удачи!</p>
+	</div>

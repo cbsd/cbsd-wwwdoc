@@ -97,7 +97,7 @@
 		</pre>
 		<p>3) Создать каталог <em>/usr/local/www/cbsd-mirror</em> куда будем сохранять образы, создадим лог файл для rsync и выставим корректные права для пользователя <strong>www</strong>, от которого мы будем синхронизировать</p>
 		<pre class="brush:bash;ruler:true;">
-		mkdir -p /usr/local/www/cbsd-mirror/iso
+		mkdir -p /usr/local/www/cbsd-mirror/iso /usr/local/www/cbsd-mirror/cloud
 		touch /var/log/cbsd_mirror.log
 		chown -R www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log
 		</pre>
@@ -165,7 +165,8 @@
 		cat &gt; /etc/cron.d/cbsd_mirror &lt;&lt;EOF
 		SHELL=/bin/sh
 		PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://cbsd.lifec0re.net:30873/iso/ /svirt/web/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://electro.bsdstore.ru/iso/ /svirt/web/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror_cloud.lock /usr/local/bin/rsync -a rsync://electro.bsdstore.ru/cloud/ /svirt/web/cbsd-mirror/cloud/ > /var/log/cbsd_mirror_cloud.log 2>&1
 		EOF
 		</pre>
 		<p>6) Стартуем сервис</p>

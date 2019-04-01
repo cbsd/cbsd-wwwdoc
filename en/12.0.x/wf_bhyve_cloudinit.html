@@ -9,7 +9,8 @@
 		</pre>
 		<p><strong>Description</strong>:</p>
 
-		<h2><a name="cloudinit_cmd">Команда bconfig, bconstruct-tui, cloudinit</a></h2>
+		<p>FYI: Cloud-init demo was demonstrated in <a target="_blank" href="https://youtu.be/QK9eSxrs3eg">Bhyve unattended installation with CBSD: PXE and cloud-init</a></p>
+
 		<p>Currently, the use of <a target="_blank" href="https://cloud-init.io/">cloud-init</a> is a de facto method for rapidly deploying virtual instances in various
 		cloud environments (OpenNebula, OpenStack, Amazon AWS, Microsoft Azure, Digital Ocean ..)</p>
 		<p>Starting from version 12.0.6 <strong>CBSD</strong> supports the configuration of cloud images using the cloud-init function.</p>
@@ -54,6 +55,12 @@
 		and you have a desire to help the project, please read the information on how to raise your own mirror: <a href="/<!--#echo var="lang" -->/cbsd_fetch.html#cbsd_partners">fetch_iso</a>.
 		You can send us a link to your mirror (or add it yourself via <a target="_blank" href="https://github.com/cbsd/cbsd-vmprofiles">https://github.com/cbsd/cbsd-vmprofile</a>, 
 		and thereby improve the quality for your country/region.</p>
+		<br>
+		<p>Note: In <strong>CBSD</strong> version 12.0.8, parameter <strong>ci_user_pubkey_</strong>user can accept not only ssh pubkey itself, but also the path to authorized_keys.
+		In addition, if this parameter is set to <strong>.ssh/authorized_keys</strong> (value by default for 12.0.8+), this means that your node's ssh key will be used. ( ~cbsd/.ssh ).
+		Pay attention to how looks <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v12.0.8/etc/defaults/blogin.conf#L21">blogin.conf</a> in 12.0.8: if the virtual machine is created using cloud-init,
+		the "cbsd blogin" command will use the custom login command using the node key and the user specified by you as <strong>ci_user_add</strong>.Thus, by running a virtual machine from cloud-init,
+		you can immediately access it via ssh using the command: <strong>cbsd blogin</strong>.</p>
 		<br>
 		<h2><a name="cloudinit_sample">Usage example</a></h2>
 		<br>

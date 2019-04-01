@@ -456,5 +456,17 @@
     <guid>CBSD 12.0.7 bugfix release vailable</guid>
     <pubDate>Thu, 21 Mar 2019 01:33:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.0.8 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bugfix: bhyve cloud-init: fix zfs volume size for raw images&lt;br /&gt;
+      multiple cbsd_workdir support&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.8 bugfix release vailable</guid>
+    <pubDate>Tue, 02 Apr 2019 01:39:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

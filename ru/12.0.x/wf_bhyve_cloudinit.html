@@ -9,6 +9,8 @@
 		</pre>
 		<p><strong>Описание</strong>:</p>
 
+		<p>FYI: Cloud-init было продемонстрировано в демо <a target="_blank" href="https://youtu.be/QK9eSxrs3eg">Bhyve unattended installation with CBSD: PXE and cloud-init</a>
+
 		<h2><a name="cloudinit_cmd">Команда bconfig, bconstruct-tui, cloudinit</a></h2>
 		<p>Использование <a target="_blank" href="https://cloud-init.io/">cloud-init</a> в настоящее время является методом де-факто по быстрому разворачиванию виртуальных инстансов 
 		в различных облачных окружениях (OpenNebula, OpenStack, Amazon AWS, Microsoft Azure, Digital Ocean ..)</p>
@@ -47,6 +49,12 @@
 		ссылаются профили <strong>CBSD</strong>) и вы имеете желание помочь проекту, ознакомьтесь с информацией как поднять свое собственное зеркало:
 		<a href="/<!--#echo var="lang" -->/cbsd_fetch.html#cbsd_partners">fetch_iso</a>. Вы можете прислать нам ссылку на ваше зеркало (или добавить его самостоятельно через
 		<a target="_blank" href="https://github.com/cbsd/cbsd-vmprofiles">https://github.com/cbsd/cbsd-vmprofile</a> и вы повысите качество для своего региона.</p>
+		<br>
+		<p>Примечение: в <strong>CBSD</strong> версии 12.0.8, параметр <strong>ci_user_pubkey_</strong>user может принимать не только сам ssh pubkey, но и путь к authorized_keys.
+		Кроме этого, если он установлен в значение <strong>.ssh/authorized_keys</strong> (значение по-умолчанию с 12.0.8+), это означает что будет использоваться ssh ключ вашей ноды ( ~cbsd/.ssh ).
+		Обратите внимание на то, как выглядит <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v12.0.8/etc/defaults/blogin.conf#L21">blogin.conf</a>: если виртуальная машина
+		создана через cloud-init, при команде <strong>cbsd blogin</strong> будет использоваться кастомная команда с использованием ключа ноды и пользователя, который вы укажете в качестве ci_user_add.
+		Таким образом, запуская виртуальную машину из cloud-init, вы можете сразу же заходить в нее через ssh используя команду <strong>cbsd blogin</strong>.</p>
 		<br>
 		<h2><a name="cloudinit_sample">Пример использования</a></h2>
 		<br>

@@ -12,6 +12,18 @@
 </div>
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
+	<p><strong>12.0.9</strong>&nbsp;&mdash; 2019-04-19</p>
+	<ul>
+		<li>bhyve bcreate: mark the first disk bootable</li>
+		<li>ability to customize colors via color.conf config file</li>
+		<li>prepare CBSD code for RAFT/replication ( split cbsdsql to ro/rw call )</li>
+		<li>passwordless node connect. Suggested by: <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/377" target="_blank">Issue #377</a></li></li>
+		<li>fix help command ( reported by: many )</li>
+		<li>jail: extract_base from file</li>
+		<li>bhyve: update vm_pid when domain restarts. Reported by <strong>VVelox</strong>, <a href="https://github.com/cbsd/cbsd/issues/399" target="_blank">Issue #399</a></li></li>
+	</ul>
+</div>
+<div class="block">
 	<p><strong>12.0.8</strong>&nbsp;&mdash; 2019-04-02</p>
 	<ul>
 		<li>bhyve cloud-init: fix zfs volume size for raw images</li>

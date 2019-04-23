@@ -468,5 +468,24 @@
     <guid>CBSD 12.0.8 bugfix release vailable</guid>
     <pubDate>Tue, 02 Apr 2019 01:39:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.0.9 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve bcreate: mark the first disk bootable&lt;br /&gt;
+      ability to customize colors via color.conf&lt;br /&gt;
+      prepare CBSD code for RAFT/replication ( split cbsdsql to ro/rw call )&lt;br /&gt;
+      passwordless node connect ( Issue #377, suggested by: @ntinti )&lt;br /&gt;
+    &lt;br /&gt;
+      fixes:&lt;br /&gt;
+        fix help command ( reported by many )&lt;br /&gt;
+        jail: extract_base from file&lt;br /&gt;
+        bhyve: update vm_pid when domain restarts ( Issue #399, reported by @VVelox )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.9 bugfix release vailable</guid>
+    <pubDate>Fri, 19 Apr 2019 02:39:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

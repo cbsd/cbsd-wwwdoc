@@ -11,20 +11,32 @@
 		<p><strong>Описание</strong>:</p>
 		<p>Выполняет клонирование jail в новый. В качестве обязательных аргументов, указывается источник/оригинал клетки через <strong>old</strong>,новое имя через аргумент <strong>new</strong> и FQDN (hostname) через <strong>host_hostname</strong>. В качестве необязательного&nbsp;— новые ip адреса через <strong>ip4_addr</strong> (если IP несколько, адреса указываются через запятую без пробелов)</p>
 		<div class="warning">
-			<p><strong>Внимание:</strong> Начиная с версии 11.0.10, CBSD на ZFS системах применяет средства ZFS clone!</p>
+			<p><strong>Внимание:</strong> Если вы используете ZFS-based систему, <strong>CBSD</strong> будет использовать ZFS клонирование по-умолчанию!</p>
 		</div>
-		<p>ZFS клонирование, это мгновенная операция независимо от объемов (спасибо Copy-on-write), но накладывает некоторые ограничения - вы будете записимы от наличия родительского снапшота. Если вы попробуете удалить родительское окружение,, CBSD автоматически выполнит команду <strong>zfs promote</strong>,
-		однако если вы работаете со снапшотами независимо от CBSD - имейте это ввиду</p>
-		<p>Вы можете контроллировать это поведение через аргумент <strong>clone_method=</strong>. Либо можете выставить его глобально через <i>rclone.conf</i> и <i>bclone.conf</i>, переопределив настройку с 'auto' на 'rsync':
+		<p>ZFS клонирование - это мгновенная операция независимо от объемов (спасибо Copy-on-write), но накладывает некоторые ограничения - вы будете записимы от наличия родительского снапшота.</p>
+		<p>Если вы попробуете удалить родительское окружение,, <strong>CBSD</strong> автоматически выполнит команду <strong>zfs promote</strong></p>
+		<p>Вы можете контроллировать это поведение через аргумент <strong>clone_method=</strong>. Либо можете выставить его глобально через <i>rclone.conf</i> и <i>bclone.conf</i>, переопределив настройку с 'auto' на 'rsync':</p>
 		<pre class="brush:bash;ruler:true;">
 		% echo 'clone_method="rsync"' > ~cbsd/etc/rclone.conf
 		% echo 'clone_method="rsync"' > ~cbsd/etc/bclone.conf
-		<pre>
-		<p>Когда <i>~cbsd/etc/bclone.conf</i> (для bclone) и <i>~cbsd/etc/rclone.conf</i> содержат:
-		<pre>
-		clone_method="rsync"
 		</pre>
-		<p>клон не будет использовать zfs clone, даже если вы работаете на ZFS</p>
+		<h2><a name="clone-local.d hook: local/custom data clone">Кастомный метод клонирования данных jail</a></h2>
+		<p>Вы можете создать собственный метод клонирования данных через выполняемый скрипт(ы) в каталоге <em>$workdir/jail-system/$jname/clone-local.d</em>.</p>
+		<p>Например, создав к каталоге $workdir/jail-system/$jname/clone-local.d/ скрипт с именем <strong>myclone.sh</strong> и содержимым вида:<p>
+		<pre class="brush:bash;ruler:true;">
+			#!/bin/sh
+			echo "My custom clone for: $jname -> $newjname
+			echo "${data} -> ${newdata}"
+			/bin/cp -Ra ${data} ${newdata}
+		</pre>
+		<p>Вы заставите <strong>CBSD</strong> выполнять ваш скрипт в качестве метода клонирования данных</p>
+		<div class="warning">
+			<p><strong>Внимание:</strong> Этот скрипт должен завершаться с кодом 0 в случае успеха!</p>
+		</div>
+		<p>Обратите внимание, что в скрипте доступны стандартные переменные <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a>, в дополнение 
+		к которым экспортируется переменные: <strong>$newjname</strong>, <strong>$newdata</strong></p>
+		<p>Зачем это нужно: если в качестве storage вы используете NAS или NFS и имеете на нее доступ, вы можете выполнить клонирование данных средствами NAS или непосредственно на сервере NFS, что
+		значительно увеличит скорость клонирования и уменьшит ненужный трафик. См. <a target="_blank" href="https://github.com/cbsd/cbsd/issues/373">Issue #373</a></p>
 		<p><strong>Пример:</strong> клонирование клетки jail2 в jail3 со сменой имени хоста <strong>host_hostname</strong> и ip адреса <strong>ip4_addr</strong>:</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jclone old=jail2 new=jail3 host_hostname=jail3.my.domain ip4_addr=10.0.0.22/24

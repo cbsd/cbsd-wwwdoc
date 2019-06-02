@@ -11,20 +11,29 @@
 		<p><strong>Description</strong>:</p>
 		<p>Creates a clone of a given jail. The command requires the name of the original jail (passed with <strong>old</strong>) as well as a name for the clone, specified with <strong>new</strong> and a FQDN (hostname) with <strong>host_hostname</strong>. Optionally a new IP Address can be given with the  <strong>ip4_addr</strong> parameter (multiple IPs need to be separated by commas).</p>
 		<div class="warning">
-			<p><strong>Attention:</strong> Since 11.0.10 version, CBSD on ZFS-based hosters will be use ZFS clone features!</p>
+			<p><strong>Attention:</strong> when you are using a ZFS-based system, <strong>CBSD</strong> will use ZFS cloning by default!</p>
 		</div>
-		<p>ZFS clone features is ultra fast operation (thanks to Copy-on-write), but imposes some restrictions - you will be dependent on the parent snapshot. If you try to remove parent environment, CBSD automatically executes the <strong>zfs promote</strong> command,
-		but when you works with snapshot independently - just keep it in your mind</p>
+		<p>ZFS cloning features is ultra fast operation (thanks to Copy-on-write), but imposes some restrictions - you will be dependent on the parent snapshot.</p>
 		<p>You can control this behaviour via <strong>clone_method=</strong> argument or, to set it globally, use <i>rclone.conf</i> and <i>bclone.conf</i> to overwrite settings from 'auto' to 'rsync':
 		<pre class="brush:bash;ruler:true;">
 		% echo 'clone_method="rsync"' > ~cbsd/etc/rclone.conf
 		% echo 'clone_method="rsync"' > ~cbsd/etc/bclone.conf
-		<pre>
-		<p>When <i>~cbsd/etc/bclone.conf</i> (for bclone) and <i>~cbsd/etc/rclone.conf</i> contain:
-		<pre>
-		clone_method="rsync"
 		</pre>
-		<p>Clone will not use zfs clone even on ZFS filesystem and you will get full copy via rsync</p>
+		<h2><a name="clone-local.d hook: local/custom data clone">Custom data cloning jail method</a></h2>
+		<p>You can create your own data cloning method using script(s) in the directory <em>$workdir/jail-system/$jname/clone-local.d</em>.</p>
+		<p>For example, creating a script to the $workdir/jail-system/$jname/clone-local.d/ directory with the name <strong>myclone.sh</strong> and the contents of the form:
+		<pre class="brush:bash;ruler:true;">
+			#!/bin/sh
+			echo "My custom clone for: $jname -> $newjname
+			echo "${data} -> ${newdata}"
+			/bin/cp -Ra ${data} ${newdata}
+		</pre>
+		<p>You will force <strong>CBSD</strong> to execute your script as a data cloning method.</p>
+		<div class="warning">
+			<p><strong>Attention:</strong> The script must always end with 0 exit code when success</p>
+		</div>
+		<p>Please note that standard variables are available in the script <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a>. Additionally, these variables are exported: <strong>$newjname</strong>,<strong>$newdata</strong></p>
+		<p>Why it is needed: if you use NAS or NFS as a storage and have access there, you can clone the data using NAS or directly on the NFS server, which will significantly increase the cloning speed and reduce unnecessary traffic. See: <a target="_blank" href="https://github.com/cbsd/cbsd/issues/373">Issue #373</a></p>
 		<p><strong>Example:</strong></p>
 		<p>cloning jail jail2 to jail3 with changes ip address <strong>ip4_addr</strong> and name of hosts <strong>host_hostname</strong>:</p>
 		<pre class="brush:bash;ruler:true;">

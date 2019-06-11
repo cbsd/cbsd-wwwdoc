@@ -7,6 +7,23 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
+		<li>initenv: no longer suggest using port 22222 ssh port by default</li>
+		<li>initenv: make a hook for custom/user scripts during the initenv stage ( <a href="/<!--#echo var="lang" -->/installing_cbsd.html#initenv-hooks">initenv-hooks</a> )</li>
+		<li>repo: change source to get kernel.txt to official FreeBSD site</li>
+		<li>bhyve: manage sectorsize with dsk_sectorsize params via global conf and per-profile</li>
+		<li>bhyve: update uefi-edk2-bhyve firmware: g20190424</li>
+		<li>cloud-init herlper:  added ci_user_pw_user and ci_user_pw_root params</li>
+		<li>bhyve: one global dataset per vm (ZFS platform only)</li>
+		<li>bhyve: add 'persistent' flag for virtual nic: mark interface as unmanaged by <strong>CBSD</strong></li>
+		<li>jswmode: support <a href="/<!--#echo var="lang" -->/cbsd_additional.html#jnameasmask">jname as mask</a></li>
+		<li>jexport: show progress on ZFS platform + ranomize/round progress percent by step ~10</li>
+		<li>bhyve: bls: rename vnc_port column to "meta" field: vnc ( bhyve_vnc_tcp_bind:vnc_port )</li>
+		<li>add external_exec_local_script as hook for local scripts ( remove.d for [jbx]remove
+				rename.d for [jbx]rename
+				clone.d for [jbx]clone)
+				) Suggested by: <strong>haynesjustin</strong>, <a href="https://github.com/cbsd/cbsd/issues/373" target="_blank">Issue #373</a></li>
+		<li>bhyve: check that the bhyve_vnc_tcp_bind address is available for use (when not 127.0.0.1 or 0.0.0.0)</li>
+		<li>bhyve: <a target="_blank" href="https://cloudbase.it/cloudbase-init/">cloudbase</a> helper for Windows cloud image</li>
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 </div>
@@ -30,10 +47,10 @@
 		<li>bhyve bcreate: mark the first disk bootable</li>
 		<li>ability to customize colors via color.conf config file</li>
 		<li>prepare CBSD code for RAFT/replication ( split cbsdsql to ro/rw call )</li>
-		<li>passwordless node connect. Suggested by: <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/377" target="_blank">Issue #377</a></li></li>
+		<li>passwordless node connect. Suggested by: <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/377" target="_blank">Issue #377</a></li>
 		<li>fix help command ( reported by: many )</li>
 		<li>jail: extract_base from file</li>
-		<li>bhyve: update vm_pid when domain restarts. Reported by <strong>VVelox</strong>, <a href="https://github.com/cbsd/cbsd/issues/399" target="_blank">Issue #399</a></li></li>
+		<li>bhyve: update vm_pid when domain restarts. Reported by <strong>VVelox</strong>, <a href="https://github.com/cbsd/cbsd/issues/399" target="_blank">Issue #399</a></li>
 	</ul>
 </div>
 <div class="block">

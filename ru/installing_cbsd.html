@@ -82,9 +82,32 @@
 			<li><strong>Please fill fbsdrepo</strong>&nbsp;— Использовать ли официальный репозиторий FreeBSD для получения base. Ожидается ответ 1 или 2. Если на серверах FreeBSD базы не обнаружено&nbsp;— используется репозиторий cbsd. Например: 1.</li>
 			<li><strong>Please fill zfsfeat</strong>&nbsp;— Использовать ли возможности файловой системы ZFS (клоны, снапшоты). Ожидается ответ 1 или 2. Вопроса не будет, если система запущена не на ZFS.</li>
 			<li><strong>Configure NAT for RFC1918 Network?</strong>&nbsp;— Использовать ли трансляцию приватных адресов? Если клетки создаются в RFC1918 сетях, необходимо включить. Например: 1.</li>
-			<li><strong>Which one NAT framework should be use: [pf or ipfw]</strong>&nbsp;— Какой инструмент для NAT предпочесть. Рекомендуемый&nbsp;— pf. Например: 1</li>
+			<li><strong>Which one NAT framework should be use: [pf or ipfw]</strong>&nbsp;— Какой инструмент для NAT предпочесть. Рекомендуемый&nbsp;— pf. Например: pf</li>
 		</ul>
-	</div>
+		</div>
+		<h2><a name="initenv-preseed">initenv preseed</a></h2>
+		<div class="block">
+			<p>Вы можете использовать неинтерактивную инициализацию <strong>CBSD</strong> используя обычный ascii файл с заранее заготовленными ответами на вопросы.
+			Это может быть полезно, если вам приходится это делать часто, в больших количествах, или вы встраиваете <strong>CBSD</strong> в существующую инфраструктуру по
+			автоматическому развертыванию и конфигурируванию окружений. В качестве примера можете посмотреть на файл <em>/usr/local/cbsd/share/initenv.conf</em>.
+			Для инициализации, достаточно указать путь к файлу с ответами:
+			<pre class="brush:bash;ruler:true;">
+			/usr/local/cbsd/sudoexec/initenv /path/to/initenv.conf
+			</pre>
+			</p>
+		</div>
+		<h2><a name="initenv-hooks">initenv hooks</a></h2>
+		<div class="block">
+			<p>В момент выполнения initenv команды (необходимо выполнять ее каждый раз при обновлении <strong>CBSD</strong>), выполняются различные модификации и миграции.
+			Вы можете встроить в этот процесс собственные скрипты и сценарии, которые выполнятся <strong>до</strong> каких-то модификаций, так и <strong>после</strong>.
+			Это может быть удобно, например, для сценариев выполняющих резервное копирование (или эвакуацию окружений на соседнюю ноду) в качестве pre-хука и нотификацию
+			в мониторинг или другой канал связи об успешном обновлении в качестве post-хука.</p>
+			<p>Для этого, создайте в рабочем каталоге (workdir) каталог с именем <strong>upgrade</strong>:</p>
+			<pre class="brush:bash;ruler:true;">
+			mkdir -p ~cbsd/upgrade
+			</pre>
+			<p>Любые скрипты, имя которых начинается с <em>pre-initenv-</em> или <em>post-initenv-</em> и имеющие исполнимый флаг будут выполнены <u>до</u> модицикаций initenv или <u>послe</u> соответственно.</p>
+		</div>
 	<div class="warning">
 		<p><strong>Внимание:</strong> в дальнейшем, эти настройки можно изменить через команду <strong>cbsd initenv-tui</strong> или <strong>bsdconfig cbsd</strong>, либо в файле <em>${workdir}/var/db/local.sqlite</em>, являющейся SQLite3 базой.</p>
 	</div>

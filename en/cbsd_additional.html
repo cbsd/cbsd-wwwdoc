@@ -5,8 +5,7 @@
 	<div class="block">
     <p><strong>CBSD</strong> is an additional layer of abstraction for the 
     <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a>
-    framework, and provides additional functionality not currently available in
-    FreeBSD.
+    framework, <a href="http://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank">bhyve hypervisor</a>, <a href="http://www.xenproject.org/" target="_blank">XEN project hypervisor</a> and some components of <a target="_blank" href="https://www.freebsd.org/">FreeBSD OS</a>.
     </p>
     <p>The additional functionality <strong>CBSD</strong> provides uses the 
     following;
@@ -19,10 +18,16 @@
 			<li>pf/ipfw/ipfilter</li>
 			<li>carp</li>
 			<li>hastd</li>
-			<li>bhyve</li>
+			<li>vale</li>
+			<li>vxlan</li>
 		</ul>
+<p>Although <strong>CBSD</strong> aims to be the most user-friendly application (for example, using bsdconfig-style dialogs), 
+the platform is evolving as an embedded virtual environment management system that you can use at the lowest level to create your own cloud infrastructure.</p>
+<p>In other words, you can work directly with the <strong>CBSD</strong> as an end user interactively.
+Or, you can use the <strong>CBSD</strong> as an internal core, interacting with it through your own application of a higher level.</p>
+<p><strong>CBSD</strong> assumes the use of multiple servers (cluster), but it can work equally well in a standalone version on your laptop.</p>
     <p>While many of these subsystems are not directly related to 
-    <strong>jails</strong>, <strong>CBSD</strong> uses these components to 
+    <strong>jails</strong> or <strong>vm hypervisor</strong>, <strong>CBSD</strong> uses these components to 
     provide system administrators a more advanced, integrated system in which 
     to implement solutions for issues faced in today's envirnonment. 
     </br>
@@ -33,13 +38,16 @@
     the virtual environment.
     </p>
     <p>The information provided here assumes a basic understanding of jails, 
-    how they are used, and how they are managed in FreeBSD. The official 
+    how they are used, and how they are managed in FreeBSD. If you plan to work with containers, the official 
     documentation about jails is a highly recommended starting point, and can be 
     found in Chapter 14 of the FreeBSD Handbook: 
     <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/jails.html" target="_blank">Jails</a>.
     The <a href="http://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">jail(8)</a>
     manpage is also a great resource.
     </p>
+    <p>If you are working with bhyve or XEN, be sure to first try to read the official documentation:
+    <a href="https://www.freebsd.org/doc/handbook/virtualization-host-bhyve.html" target="_blank">Chapter 21. Virtualization: FreeBSD as a Host with bhyve</a> and 
+    <a href="http://www.xenproject.org/" target="_blank">XEN project hypervisor</a>.</p>
     <p>Before getting started, be aware of the following terminology, and how 
     it will be used;
     </p>
@@ -175,6 +183,26 @@
     scripts after installing on a FreeBSD system.
     </p>
 </div>
+
+       <h2><a name="modules">Modules</a></h2>
+        <div class="block">
+                <p>The functionality of <strong>CBSD</strong> can be extended by activating additional modules that anyone can write.</p>
+                <p>Each module is a directory located in the <em>/usr/local/cbsd/modules</em> path. To activate a module, you must add its name 
+                into the <em>~workdir/modules.conf</em> configuration file and re-initialize <strong>CBSD</strong> with: cbsd initenv</p>
+                <p>A good example of using additional modules is <a target="_blank" href="https://clonos.tekroutine.com">ClonOS project</a>, 
+                which, using modules, adds the VNC terminal to jail, add notifications via web socket transport, add helpers for deploying services in containers, etc.</p>
+        </div>
+
+        <h2><a name="cbsdconfig">Configurations and Settings</a></h2>
+        <div class="block">
+                <p><strong>CBSD</strong> is a highly configurable and customizable framework, which makes it an extremely flexible and versatile solution when used in a wide range of tasks.</p>
+                <p>Take a look at the contents of the <em>~workdir/etc/defaults/</em> directory. 
+                It contains global settings (for example: color scheme, logging setup)  and/or configuration files for single commands (for example: blogin, bstart, jclone, etc).</p>
+                <p>You can reassign these settings in the FreeBSD-way, by writing the changes in the file of the same name, but placing it a higher level in the directory <em>~workdir/etc/</em> directory</p>
+                <p>Similarly, as you do with the FreeBSD configuration and <em>/etc/defaults/</em> files</p>
+        </div>
+
+
 <h2><a name="jnameasmask">Multiple operation by jname as mask</a></h2>
 	<div class="block">
 		<p>Most of the <strong>CBSD</strong> commands are support jname as mask.</p>

@@ -510,5 +510,16 @@
     <guid>CBSD 12.0.11 bugfix release vailable</guid>
     <pubDate>Thu, 16 May 2019 02:59:00 +0000</pubDate>
   </item>
+  <item>
+    <title>NetBSD Cloud image for CBSD: done</title>
+    <description>&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      NetBSD cloud image demo: https://youtu.be/3F_lh8s51_4&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>NetBSD Cloud image for CBSD available</guid>
+    <pubDate>Wed, 19 Jun 2019 04:59:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

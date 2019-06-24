@@ -8,12 +8,17 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
+	</ul>
+	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
+</div>
+<h2><a name="release">Releases</a></h2>
+<div class="block">
+	<p><strong>12.0.12</strong>&nbsp;&mdash; 2019-06-22</p>
+	<ul>
 		<li>initenv: no longer suggest using port 22222 ssh port by default</li>
 		<li>initenv: make a hook for custom/user scripts during the initenv stage ( <a href="/<!--#echo var="lang" -->/installing_cbsd.html#initenv-hooks">initenv-hooks</a> )</li>
-		<li>repo: change source to get kernel.txt to official FreeBSD site</li>
 		<li>bhyve: manage sectorsize with dsk_sectorsize params via global conf and per-profile</li>
-		<li>bhyve: update uefi-edk2-bhyve firmware: g20190424</li>
-		<li>cloud-init herlper:  added ci_user_pw_user and ci_user_pw_root params</li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_cloudinit_ssi.html">cloud-init helper</a>:  added ci_user_pw_user and ci_user_pw_root params</li>
 		<li>bhyve: one global dataset per vm (ZFS platform only)</li>
 		<li>bhyve: add 'persistent' flag for virtual nic: mark interface as unmanaged by <strong>CBSD</strong></li>
 		<li>jswmode: support <a href="/<!--#echo var="lang" -->/cbsd_additional.html#jnameasmask">jname as mask</a></li>
@@ -24,13 +29,13 @@
 			clone.d for [jbx]clone)
 			) Suggested by: <strong>haynesjustin</strong>, <a href="https://github.com/cbsd/cbsd/issues/373" target="_blank">Issue #373</a></li>
 		<li>bhyve: check that the bhyve_vnc_tcp_bind address is available for use (when not 127.0.0.1 or 0.0.0.0)</li>
-		<li>bhyve: <a target="_blank" href="https://cloudbase.it/cloudbase-init/">cloudbase</a> helper for Windows cloud image</li>
+		<li>bhyve: <a target="_blank" href="https://cloudbase.it/cloudbase-init/">cloudbase</a> helper for Windows cloud image ( <a target="_blank" href="https://youtu.be/PDkxrHb5Xt8">demo</a> )</li>
+		<li>bhyve: NetBSD cloud profile ( <a target="_blank" href="https://youtu.be/3F_lh8s51_4">demo</a> )</li>
 		<li>fixes: segmentation fault when updating bhyve tables, Reported by <strong>goligo</strong>, <a href="https://github.com/cbsd/cbsd/issues/371" target="_blank">Issue #371</a></li>
 		<li>cloud-init:  use dedup by default for GOLD images on ZFS platform (regulated through the <strong>zfs.conf</strong> configuration file)</li>
+		<li>bhyve: sectorsize=4096 for disk by default!</li>
 	</ul>
-	<p><em>If&nbsp;you want to&nbsp;experiment with the next version of&nbsp;<strong>CBSD</strong>, use <strong>git clone https://github.com/cbsd/cbsd.git</strong> for <strong>/usr/local/cbsd</strong></em></p>
 </div>
-<h2><a name="release">Releases</a></h2>
 <div class="block">
 	<p><strong>12.0.11</strong>&nbsp;&mdash; 2019-05-16</p>
 	<ul>

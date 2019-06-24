@@ -521,5 +521,42 @@
     <guid>NetBSD Cloud image for CBSD available</guid>
     <pubDate>Wed, 19 Jun 2019 04:59:00 +0000</pubDate>
   </item>
+  <item>
+    <title>Windows Cloud image via cloudbase: now supported</title>
+    <description>&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      Windows server cloud image demo: https://youtu.be/PDkxrHb5Xt8&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>Windows cloud image supported by CBSD</guid>
+    <pubDate>Sat, 22 Jun 2019 03:48:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.0.12 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      initenv: no longer suggest using port 22222 ssh port by default&lt;br /&gt;
+      initenv: make a hook for custom/user scripts during the initenv stage ( initenv-hooks )&lt;br /&gt;
+      bhyve: manage sectorsize with dsk_sectorsize params via global conf and per-profile&lt;br /&gt;
+      cloud-init helper: added ci_user_pw_user and ci_user_pw_root params&lt;br /&gt;
+      bhyve: one global dataset per vm (ZFS platform only)&lt;br /&gt;
+      bhyve: add 'persistent' flag for virtual nic: mark interface as unmanaged by CBSD&lt;br /&gt;
+      jswmode: support jname as mask&lt;br /&gt;
+      jexport: show progress on ZFS platform + ranomize/round progress percent by step ~10&lt;br /&gt;
+      bhyve: bls: rename vnc_port column to "meta" field: vnc ( bhyve_vnc_tcp_bind:vnc_port )&lt;br /&gt;
+      add external_exec_local_script as hook for local scripts ( remove.d for [jbx]remove rename.d for [jbx]rename clone.d for [jbx]clone) ) Suggested by: haynesjustin, Issue #373&lt;br /&gt;
+      bhyve: check that the bhyve_vnc_tcp_bind address is available for use (when not 127.0.0.1 or 0.0.0.0)&lt;br /&gt;
+      bhyve: cloudbase helper for Windows cloud image ( demo )&lt;br /&gt;
+      bhyve: NetBSD cloud profile ( demo )&lt;br /&gt;
+      fixes: segmentation fault when updating bhyve tables, Reported by goligo, Issue #371&lt;br /&gt;
+      cloud-init: use dedup by default for GOLD images on ZFS platform (regulated through the zfs.conf configuration file)&lt;br /&gt;
+      bhyve: sectorsize=4096 for disk by default!&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.12 available</guid>
+    <pubDate>Sat, 22 Jun 2019 08:41:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

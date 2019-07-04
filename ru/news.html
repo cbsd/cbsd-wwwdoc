@@ -12,7 +12,16 @@
 </div>
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
-	<p><strong>12.0.11</strong>&nbsp;&mdash; 2019-05-16</p>
+	<p><strong>12.0.13</strong>&nbsp;&mdash; 2019-07-04</p>
+	<ul>
+		<li>bhyve: added hda emulation support ( FreeBSD 13-CURRENT, r349355+ );</li>
+		<li>fix bhyve export/import;</li>
+		<li>fix cbsdd status pid ( reported and fixed by: <strong>spagu</strong>, <a href="https://github.com/cbsd/cbsd/issues/417" target="_blank">Issue #471</a>);</li>
+		<li>jail: fix directory permission created by cbsd script inside basejail hier ( reported by: <strong>VincentBentley</strong>, <a href="https://github.com/cbsd/cbsd/issues/419" target="_blank">Issue #419</a>);</li>
+	</ul>
+</div>
+<div class="block">
+	<p><strong>12.0.12</strong>&nbsp;&mdash; 2019-06-22</p>
 	<ul>
 		<li>initenv: no longer suggest using port 22222 ssh port by default</li>
 		<li>initenv: make a hook for custom/user scripts during the initenv stage ( <a href="/<!--#echo var="lang" -->/installing_cbsd.html#initenv-hooks">initenv-hooks</a> )</li>

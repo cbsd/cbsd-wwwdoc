@@ -558,5 +558,19 @@
     <guid>CBSD 12.0.12 available</guid>
     <pubDate>Sat, 22 Jun 2019 08:41:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.0.13 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: added hda emulation support ( FreeBSD 13-CURRENT, r349355+ );&lt;br /&gt;
+      fix bhyve export/import;&lt;br /&gt;
+      fix cbsdd status pid ( reported and fixed by: spagu, Issue #417 );&lt;br /&gt;
+      jail: fix directory permission created by cbsd script inside basejail hier ( reported by: VincentBentley, Issue #419 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.13 available</guid>
+    <pubDate>Thu, 04 Jul 2019 09:05:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

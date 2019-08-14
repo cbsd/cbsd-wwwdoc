@@ -13,6 +13,17 @@
 </div>
 <h2><a name="release">Releases</a></h2>
 <div class="block">
+	<p><strong>12.0.14</strong>&nbsp;&mdash; 2019-08-16</p>
+	<ul>
+		<li>jail: fix jimport script ( the wrong structure was unpacked )</li>
+		<li>jail: jclone: re-initializate hwaddr for cloned vnet jail</li>
+		<li>jail: better basename management ( suggested by: <strong>ntinti</strong>, <a href="https://github.com/cbsd/cbsd/issues/327" target="_blank">Issue #327</a>)</li>
+		<li>xen: add disk management (sync code with bhyve )</li>
+		<li>xen: nested virtualization property added</li>
+		<li>cloud-init: switched to using own cloud images ( provided by CBSD/ClonOS Project )</li>
+	</ul>
+</div>
+<div class="block">
 	<p><strong>12.0.13</strong>&nbsp;&mdash; 2019-07-04</p>
 	<ul>
 		<li>bhyve: added hda emulation support ( FreeBSD 13-CURRENT, r349355+ );</li>

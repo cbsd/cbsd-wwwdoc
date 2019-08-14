@@ -572,5 +572,21 @@
     <guid>CBSD 12.0.13 available</guid>
     <pubDate>Thu, 04 Jul 2019 09:05:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.0.14 available</title>
+    <description>Relnotes:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: fix jimport script ( the wrong structure was unpacked )&lt;br /&gt;
+      jail: jclone: re-initializate hwaddr for cloned vnet jail&lt;br /&gt;
+      jail: better basename management ( suggested by: ntinti, Issue #327&lt;br /&gt;
+      xen: add disk management ( sync code with bhyve )&lt;br /&gt;
+      xen: nested virtualization property added&lt;br /&gt;
+      cloud-init: switched to using own cloud images ( provided by CBSD/ClonOS Project )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.0.14 available</guid>
+    <pubDate>Wed, 14 Aug 2019 09:02:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

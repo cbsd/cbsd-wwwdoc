@@ -1,40 +1,42 @@
-	<h1><span>История проекта</span></h1>
+	<h1><span>Project history</span></h1>
 
 	<div class="block">
 		<p>2013 should be considered the year of the emergence of <strong>CBSD</strong> as a project, when several sh-scripts written by 
 		<a target="_blank" href="https://github.com/olevole">olevole</a> and implementing the basic operations for working with the 
 		<a target="_blank" href="https://man.freebsd.org/jail/8">jail(8)</a> were combined and created into one. This package is called <strong>CBSD</strong> 
 		and has been <a target="_blank" href="https://svnweb.freebsd.org/ports?view=revision&revision=r318992">published</a> to the <a href="https://www.freebsd.org" target="_blank">FreeBSD</a> ports tree.</p>
-		<p>Эти скрипты автоматизировали ряд процессов по менеджменту jail в gamedev компании <a href="https://company.nevosoft.com" target="_blank">Невософт</a>, использовавшей FreeBSD в промышленной эксплуатации. Таким образом,
-		скрипты изначально использовались в production-окружении и вектор развития функциональности как в тот момент, так и в дальнейшем на протяжении всей жизни проекта 
-		задавался требованиям рынка при использовании в живых проектах.</p>
-		<p>На тот момент времени из jail management существовал и был достаточно популярен лишь проект ezjail, однако запланированный автором объем работ по кластеризации 
-		требовал отдельной кодовой базы, поскольку вектор развития был отличен от ezjail.<p>
-		<p>До 2018 года проект позиционировался как user-friendly продукт, поскольку основной упор был сделан на богатые возможности и гибкость при удобном
-		интерфейсе взаимодействия - проект <strong>CBSD</strong> - это единственный проект по управлению jail и виртуальными машинами на FreeBSD, предлагающий помимо стандартного CLI (и теперь уже WEB UI) интерфейса
-		также диалоговый интерфейс, являясь модулем утилиты <a target="_blank" href="https://man.freebsd.org/bsdconfig/8">bsdconfig(8)</a>.</p>
-		<p>В конце 2018 года цели проекта были подкорректированы с амбициозной идеей - превратить <strong>CBSD</strong> в некий фреймворк низкоуровневых команд по работе
-		с виртуальными окружениями и при этом не растерять свою user-frendly направленность, что позволит использовать <strong>CBSD</strong> тем, кто хочет создать свою собственную
-		облачную платформу в качестве основы.</p>
-		<p>В настоящее время <strong>CBSD</strong> является одним из самых зрелых и до сих пор активных проектов среди аналогов, код продолжает совершенствоваться
-		и развиваться самыми разными людьми из разных точек планеты, присылающих патчи по электронной почте и GitHub; код распространяется под лицензией BSD и полностью свободен, 
-		не принадлежит какой-либо компании, силами community из самых разных стран организованы <a href="mailto:cbsd+subscribe@lists.tilda.center">почтовые рассылки</a>, <a href="https://web.telegram.org/#/im?p=%40cbsdofficial" target="_blank">Telegram канал</a> и зеркала для хостинга ресурсов проекта.</p>
-		<p>Наиболее значимые даты в развитии проекта (полный список изменений <a href="/<!--#echo var="lang" -->/news.html">здесь</a> ):</p>
-		<p><strong>2013-02</strong>: первая версия опубликована в дереве портов FreeBSD;</p>
-		<p><strong>2014-02</strong>: добавлена поддержка не нативных архитектур jail через Qemu user mode, что несколько расширило ограничения налагаемые 'контейнеризацией' до
-		гибридного решения из jail-контейниризации и эмуляции;</p>
-		<p><strong>2014-04</strong>: добавлена поддержка <a target="_blank" href="https://man.freebsd.org/bhyve/8">bhyve(8)</a> в качестве гипервизора виртуальных машин и было принято решение развивать <strong>CBSD</strong>
-		не только как менеджмент контейнеров, но и в качестве инструмента по управлению виртуальными машинами, предоставляя пользователю единый и однообразный интерфейс. 
-		Позднее были попытки добавить поддержку <a target="_blank" href="https://www.virtualbox.org/">VirtualBox</a> и <a target="_blank" href="http://wiki.qemu.org/Main_Page">QEMU</a>, однако эти работы были свернуты ввиду отсутствия use-case автором (что вполне может быть продолжено, если
-		будут заинтересованные в этом участники);</p>
-		<p><strong>2016-03</strong>: была добавлена поддержка <a target="_blank" href="https://xenproject.org/">XEN</a>, значительно расширяя варианты по запуску виртуальных машин, которые не могут быть запущены в bhyve. В отличие от
-		попыток внедрения поддержки VirtualBox и Qemu, поддержка XEN остается на хорошем уровне благодаря принципу: "используй сам то что кодишь" - инсталляции 
-		виртуальных машин под управлением CBSD/XEN нашли и продолжают находить варианты применения у автора;</p>
-		<p><strong>2016-09</strong>: анонсирован WEB frontend, который также распространяется в виде отдельного дистрибутива под названием <a target="_blank" href="https://clonos.tekroutine.com">ClonOS</a>;</p>
-		<p><strong>2018-02</strong>: <strong>CBSD</strong> побывала на FOSDEM 2018, где Goran Mekić подготовил небольшой вводной доклад о проекте. В том же году Гораном был
-		анонсирован проект Reggae, оркестратор популярных DevOPS задач с использованием <strong>CBSD</strong>;
-		<p><strong>2019-01</strong>: первый эксперементальный релиз <strong>ClonOS</strong>;</p>
-		<p><strong>2019-03</strong>: добавлена поддержка <a target="_blank" href="https://launchpad.net/cloud-init">cloud-init</a> и <a target="_blank" href="https://cloudbase.it/">cloudbase</a> для виртуальных машин bhyve, что вывело инструмент <strong>CBSD</strong> на новый уровень при 
-		построении облачной платформы для хостинга виртуальных машин. Также, силами CBSD community была запущена сеть зеркал ISO и cloud-образов для пользователей <strong>CBSD</strong>;</p>
+		<p>These scripts automated a number of jail management processes in the <a href="https://company.nevosoft.com" target="_blank">Nevosoft</a> gamedev company, who used FreeBSD in production.
+		Thus, the scripts were initially used in the production environment, and the vector of the development of functionality both at that moment and later throughout the project life cycle was 
+		determined by the market requirements when used in live projects.</p>
+		<p>At that time, there was only the ezjail project, which was quite popular among jail administrators, but the amount of clustering work planned by the author 
+		required a separate code base, since the development vector was different from ezjail.</p>
+		<p>Until 2018, the project was positioned as a user-friendly product, since the main emphasis was on rich capabilities and flexibility 
+		with a convenient interaction interface - the <strong>CBSD</strong> project is the only jail and virtual machine management project 
+		on FreeBSD that offers in addition to the standard CLI (and now WEB UI) interface is also a dialog-based interface, being a module of the <a target="_blank" href="https://man.freebsd.org/bsdconfig/8">bsdconfig(8)</a>.</p>
+		<p>At the end of 2018, the goals of the project were adjusted by an ambitious idea - to turn <strong>CBSD</strong> into some kind of framework 
+		for working with virtual environments at a low level and at the same time not to lose user orientation, 
+		which will be interesting for those who want to create their own cloud platform based on <strong>CBSD</strong>.
+		<p>Currently, <strong>CBSD</strong> is one of the most mature and still active projects among analogues,
+		the code continues to be improved and developed by various people from different parts of the world who send corrections by email and through GitHub;
+		the code is distributed under the BSD license and is completely free, does not belong to any company.
+		With the help of a community from different countries, <a href="mailto:cbsd+subscribe@lists.tilda.center">mailing lists</a>, 
+		a <a href="https://web.telegram.org/#/im?p=%40cbsdofficial" target="_blank">Telegram channel</a> and mirrors were organized to host the project resources.
+		<p>The most significant dates in the development of the project (full list of changes <a href="/<!--#echo var="lang" -->/news.html">here</a> ):</p>
+		<p><strong>2013-02</strong>: first <strong>CBSD</strong> version released;</p>
+		<p><strong>2014-02</strong>: support for non-native jail architectures through the Qemu user mode was added, which somewhat expanded the restrictions imposed by containerization to a hybrid solution in the form of a jail container and emulation;</p>
+		<p><strong>2014-04</strong>: Added support for <a target="_blank" href="https://man.freebsd.org/bhyve/8">bhyve(8)</a> as a virtual machine hypervisor.
+		And it was decided to develop <strong>CBSD</strong> not only for container management, but also as a tool for managing virtual machines, providing the user with a single and unified interface.
+		Later there were attempts to add <a target="_blank" href="https://www.virtualbox.org/">VirtualBox</a> and <a target="_blank" href="http://wiki.qemu.org/Main_Page">QEMU</a> support,
+		however, these works were curtailed due to the author’s lack of a usage scenario (which could well be continued if there are interested participants in this);</p>
+		<p><strong>2016-03</strong>: Added support for <a target="_blank" href="https://xenproject.org/">XEN</a>, greatly expanding the ability to run virtual machines 
+		that cannot be run in bhyve. Unlike attempts to implement support for VirtualBox and Qemu, XEN support remains at a good level thanks to the principle: 
+		"use what you code yourself" - installations of virtual machines running CBSD / XEN are used by the author;</p>
+		<p><strong>2016-09</strong>: A web interface has been announced, which is also distributed as a separate distribution called <a target="_blank" href="https://clonos.tekroutine.com">ClonOS</a>;</p>
+		<p><strong>2018-02</strong>: <strong>CBSD</strong> visited FOSDEM 2018, where <a target="_blank" href="https://meka.rs/">Goran Mekic</a> prepared a small initial report on the project. In the same year, Goran announced the <a target="_blank" href="https://github.com/cbsd/reggae">Reggae project</a>, an orchestra of popular DevOPS tasks using <strong>CBSD</strong>;</p>
+		<p><strong>2019-01</strong>: <strong>ClonOS</strong> first experimental release;</p>
+		<p><strong>2019-03</strong>: added support for <a target="_blank" href="https://launchpad.net/cloud-init">cloud-init</a> and 
+		<a target="_blank" href="https://cloudbase.it/">cloudbase</a> for bhyve virtual machines, which took the <strong>CBSD</strong> tool to a new level 
+		when creating a cloud platform for hosting virtual machines. 
+		In addition, the <strong>CBSD</strong> community has launched a network of ISO mirrors and cloud images for <strong>CBSD</strong> users;</p>
 	</div>
 

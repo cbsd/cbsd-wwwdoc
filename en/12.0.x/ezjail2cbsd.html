@@ -1,25 +1,26 @@
 <h1><span>Migration jails from ezjail</span></h1>
 
-<p>Author: LordNicky aka <strong><a target="_blank" href="https://github.com/cbsd/cbsd/issues/412">ndruba</strong></a>
+<p>Author: Nikita Druba aka <strong><a target="_blank" href="https://github.com/cbsd/cbsd/issues/412">LordNicky</strong></a>
 <p>Original: via <a target="_blank" href="https://github.com/cbsd/cbsd/issues/412">Issue#412</a>
 <p>Notes: this is ZFS-only solution</p>
 <hr>
-<p>Now, i'm migrated from ezjail with basejail to cbsd with basejail and i want to tell to all about easy way:</p>
+<p>Migration from <strong>ezjail</strong> with basejail to <strong>CBSD</strong> with basejail can be doing at least by this easy way:</p>
 
 <ul>
-	<li>Install cbsd and do initial setup, like in manual;</li>
-	<li>Create empty jail with any name, for example: <strong>"jail1"</strong>;</li>
-	<li>Stop jail, that you want to migrate and do snapshot of it filesystem:
+	<li>Install <strong>CBSD</strong> and do an initial setup, like in the <a target="https://www.bsdstore.ru/en/installing_cbsd.html#initenv">manual</a></li>
+	<li>Create an empty jail with any name, for example: "jail1", make sure, that you uncheck "astart" option.; (https://www.bsdstore.ru/en/12.0.x/wf_jcreate_ssi.html;</li>
+	<li>Stop the jail from <strong>ezjail</strong>, that you want to migrate and do a snapshot of it filesystem:
 		<pre class="brush:bash;ruler:true;">ezjail stop MyJail</pre>
 		<pre class="brush:bash;ruler:true;">zfs snapshot mypool/path/to/ezjail/MyJail@migrating</pre></li>
-	<li>Create jail in cbsd by jconstruct-tui and put to "zfs_snapsrc" field path to snapshot of you jail:
+	<li>Create jail in <strong>CBSD</strong> by jconstruct-tui and put to "zfs_snapsrc" field path to snapshot of you jail:
 		<pre class="brush:bash;ruler:true;">mypool/path/to/ezjail/MyJail@migrating</pre></li>
-	<li>Check all other fields to set same ip, name and other settings.</li>
-	<li>Procced. If creation of jail was successfully, then -></li>
-	<li>Run <strong>cbsdmigrating_ezjail_cbsd.sh</strong> script from link (CAREFULLY enter paths, no confirmation, when links will deleting):
-	<li><a target="_blank" href="https://github.com/cbsd/cbsd_useful_stuff/tree/master/ezjail2cbsd">ezjail2cbsd/</a></li>
+	<li>Check all other fields to set same ip, name and other settings. For network you can use syntax of ezjail, but instead "|" you need to use "#".</li>
+	<li>Proceed you new jail. If creation of jail was successfully, then go to the next step</li>
+	<li>Run <strong>migrating_ezjail_cbsd.sh</strong> script from <a target="_blank" href="https://github.com/cbsd/cbsd_useful_stuff/tree/master/ezjail2cbsd">ezjail2cbsd/</a>. You can specify paths to directories of "migrating" and "example" jails in command:
+	<pre class="brush:bash;ruler:true;">migrating_ezjail_cbsd.sh path/to/cbsd/jail1 path/to/cbsd/MyJail</pre>
+	or use dialog interface and enter paths there.</li>
 	<li>Run you migrated jail by cbsd command and enjoy.</li>
-	<li>Before destroying old zfs filesystems you need to promote clones in cbsd dir:</li>
+	<li>Also you can be needed to destroy <strong>ezjail</strong> filesystems, but before destroying them you need to promote clones in <strong>CBSD</strong> directory:</li>
 		<pre class="brush:bash;ruler:true;">zfs promote mypool/path/to/cbsd/MyJail</pre>
 		<pre class="brush:bash;ruler:true;">zfs destroy -r mypool/path/to/ezjail/MyJail</pre> (Be carefully with [-R] parameter, you need [-r].)</li>
 </ul>

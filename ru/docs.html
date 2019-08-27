@@ -1,8 +1,13 @@
 <!--# include file="_start.html" -->
 	<h1><span>Документация</span></h1>
-	<h2><a name="docs">Общая информация</a></h2>
+<!--	<p><a href="/ru/cbsd_book.html">Одним файлом: CBSD Handbook</a></p> -->
+	<hr>
+	<h2><a name="docs">Общая информация о CBSD</a></h2>
 	<div class="block">
+<!--		<p><a href="/ru/workflow_cbsd.html">Одним файлом: Общая информация о CBSD</a></p> -->
 		<ul>
+			<li><a href="/<!--#echo var="lang" -->/cbsd_history_ssi.html">История проекта</a></li>
+			<li><a href="/<!--#echo var="lang" -->/cbsd_goals_ssi.html">Цели проекта</a></li>
 			<li><a href="cbsd_quickstart.html">CBSD Quick Start</a></li>
 			<li><a href="cbsd_additional.html">Что необходимо знать о CBSD</a></li>
 			<li><a href="cbsdweb.html">CBSD WEB интерфейс</a></li>
@@ -30,7 +35,7 @@
 	</div>
 	<h2><a name="jailsflow">Работа с jail</a></h2>
 	<div class="block">
-		<p><a href="/ru/workflow_cbsd.html">Одним файлом</a></p>
+		<p><a href="/ru/workflow_cbsd.html">Одним файлом: Работа с jail</a></p>
 		<ul>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_ssi.html">Создание jail через dialog меню</a> :: jcreate, jconstruct-tui</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_secondary_ssi.html">Другие методы создание jail</a> :: jcreate, jconstruct</li>
@@ -79,6 +84,7 @@
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_cloudinit_ssi.html">bhyve и cloud-init с CBSD</a> :: bconstruct-tui, cloudinit</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bconfig_ssi.html">Конфигурации VM</a> :: bconfig</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bexit_behavior_ssi.html">Настройка поведения exit codes</a> :: bconfig, bset, bconstruct-tui</li>
+			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bstorage_ssi.html">Работа с виртуальными дисками</a> :: bconfig, bset, bhyve-dsk</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcpu_topology_ssi.html">Bhyve топология CPU</a> :: cpu-topology, vm-cpu-topology, vm-cpu-topology-tui</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bstop_bstart_ssi.html">Запуск и останов VM</a> :: bstart, bstop</li>
 			<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html">Проброс PCI устройств в bhyve (PCI Passthrough) и SR-IOV</a> :: bhyve-ppt</li>

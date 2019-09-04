@@ -49,10 +49,11 @@
 		<h2><a name="bhyve-dsk-modify_mode">modification of properties of virtual disks</a></h2>
 		<p>To modify the parameters of virtual disks, use the command:</p>
 		<pre class="brush:bash;ruler:true;">
-		% cbsd bhyve-dsk mode=modify dsk_controller=XXX dsk_path_YYY [param=value]
+		% cbsd bhyve-dsk mode=modify jname=ZZZ dsk_controller=XXX dsk_path_YYY [param=value]
 		</pre>
 		<p>, where:</p>
 		<ul>
+			<li><strong>ZZZ</strong> - VM name</li>
 			<li><strong>XXX</strong> - The type of disk controller you are modify. Must match what you see through <strong>mode=list</strong></li>
 			<li><strong>YYY</strong> - The name of disk you are modify. Must match what you see through <strong>mode=list</strong></li>
 		</ul>

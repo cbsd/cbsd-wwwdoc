@@ -77,6 +77,7 @@
 		<p>Now start both agents with the configuration file via command line:</p>
 		<pre class="brush:bash;ruler:true;">
 		/usr/local/sbin/bs_router -config /usr/local/etc/pool1.json
+		/usr/local/sbin/bs_router -config /usr/local/etc/pool2.json
 		</pre>
 		<p>That's it, now everything that we will send to the beanstalk queue with the corresponding name and the corresponding payload in json format will be transmitted to <strong>CBSD</strong> and a response will be received.</p>
 		<p>As an example, we clone a client sample to our CBSD agent, which will connect to beanstalkd and send requests:</p>

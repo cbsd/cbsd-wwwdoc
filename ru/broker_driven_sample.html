@@ -75,6 +75,7 @@
 		<p>Запускаем оба агента с указанием конфигурационного файла:</p>
 		<pre class="brush:bash;ruler:true;">
 		/usr/local/sbin/bs_router -config /usr/local/etc/pool1.json
+		/usr/local/sbin/bs_router -config /usr/local/etc/pool2.json
 		</pre>
 		<p>Все, теперь все, что мы будем отправлять в beanstalk очередь с соответствующим именем и соответствующем payload в формате json, будет передано <strong>CBSD</strong> и получен ответ.</p>
 		<p>В качестве примера, склонируем семпл клиента к нашему агенту <strong>CBSD</strong>, который будет подключаться к beanstalkd и слать запросы:</p>

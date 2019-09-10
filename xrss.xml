@@ -588,5 +588,18 @@
     <guid>CBSD 12.0.14 available</guid>
     <pubDate>Wed, 14 Aug 2019 09:02:00 +0000</pubDate>
   </item>
+  <item>
+    <title>new article: broker driven CBSD cluster (sample)</title>
+    <description>new article: broker driven CBSD cluster (sample)&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      https://www.bsdstore.ru/en/broker_driven_sample_ssi.html&lt;br /&gt;
+      an example of asynchronous interaction/interface with CBSD&lt;br /&gt;
+       for building  jail/bhyve/XEN clusters;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru/en/broker_driven_sample_ssi.html</link>
+    <guid>new article: broker driven CBSD cluster sample</guid>
+    <pubDate>Wed, 11 Sep 2019 03:37:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

@@ -1,0 +1,21 @@
+	<h1><span>Удаление виртуальной машины</span></h1>
+	
+	<h2><a name="bremove_cmd">Команда bremove</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bremove jail1 jail2 ..
+		</pre>
+		<p><strong>Описание</strong>:</p>
+		<p>Удаление виртуальной машины затрагивает все файлы, так или иначе связанные с виртуальной машиной:</p>
+		<ul>
+			<li>a) каталог или ZFS файловую систему с образами виртуальной машины</li>
+			<li>b) статистику и описание виртуальной машины</li>
+			<li>c) снапшоты, если были</li>
+		</ul>
+		<p>В случае, если <strong>bremove</strong> запускается на работающую виртуальную машину, работа гостевой ОС будет автоматически прервана.</p>
+		<p>&nbsp;</p>
+		<p><strong>Пример</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bremove redhat1
+		</pre>
+	</div>

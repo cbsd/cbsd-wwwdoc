@@ -1,0 +1,22 @@
+	<h1><span>Jail removal:</span></h1>
+	
+	<h2><a name="jremove_cmd">jremove command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jremove
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>Removal of jail mentions all files anyway connected with a jail:</p>
+		<ul>
+			<li>a) fstab for current jail</li>
+			<li>b) data directory or ZFS filesystem with jail data</li>
+			<li>c) statistics and description for jail</li>
+			<li>d) snapshots</li>
+		</ul>
+		<p>in a case when <strong>jremove</strong> executed for jail in status On, it will be automatically stopped.</p>
+		<strong>Example</strong>:
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jremove jail1
+		</pre>
+		<p class="text-center"><img src="/img/jremove1.png" alt="" /></p>
+	</div>

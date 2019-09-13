@@ -1,0 +1,87 @@
+	<h1><span>bhyve virtual disk</span></h1>
+	<h2><a name="bhyve-dsk_cmd">Commands: bconfig, bset, bhyve-dsk</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bhyve-dsk mode=modify dsk_sectorsize=512/4096 jname='*'
+		</pre>
+		<p><strong>Description</strong>:</p>
+		<p>To work with bhyve virtual disks, use the <strong>cbsd bhyve-dsk</strong> command or the <strong>cbsd bconfig</strong> dialog with the <strong>bhyvedsk</strong> submenu.</p>
+		<h2><a name="bhyve-dsk-list_mode">list of disk</a></h2>
+		<p>To list virtual disks, use:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd bhyve-dsk mode=list
+		</pre>
+		<p class="text-center"><img src="/img/bhyve-dsk1.png" alt="" /></p>
+		<p>You can adjust the amount of information through arguments <strong>header=0</strong> и <strong>display=</strong></p>
+		<h2><a name="bhyve-dsk-attach_mode">adding drives</a></h2>
+		<p>To add a new virtual disk, use the command:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd bhyve-dsk mode=attach dsk_controller=XXX dsk_size=YYY
+		</pre>
+		<p>, where:</p>
+		<ul>
+			<li><strong>XXX</strong> - type of controller: virtio-blk or ahci-hd</li>
+			<li><strong>YYY</strong> - Desired disk space, for example: 10g. An example of a command that will create and connect a new virtual disk to the freebsd1 virtual machine:
+			<pre class="brush:bash;ruler:true;">
+				% cbsd bhyve-dsk mode=attach jname=freebsd1 dsk_controller=virtio-blk dsk_size=10g
+			</pre></li>
+		</ul>
+		<h2><a name="bhyve-dsk-detach_delete_mode">detaching and remove drives</a></h2>
+		<p>If you want to disconnect a virtual disk <strong>WITHOUT</strong> physically deleting the image, use:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd bhyve-dsk mode=detach dsk_controller=XXX dsk_path=YYY
+		</pre>
+		<p>, where:</p>
+		<ul>
+			<li><strong>XXX</strong> - The type of disk controller you are disconnecting. Must match what you see through <strong>mode=list</strong></li>
+			<li><strong>YYY</strong> - The name of disk you are disconecting. Must match what you see through <strong>mode=list</strong></li>
+		</ul>
+		<p>After disconnecting, do not lose sight of your drive, as it is no longer registered in <strong>CBSD</strong></p>
+		<p>If you want to disconnect and at the same time destroy the virtual disk, use the command:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd bhyve-dsk mode=remove dsk_controller=XXX dsk_path=YYY
+		</pre>
+		<p>, where:</p>
+		<ul>
+			<li><strong>XXX</strong> - The type of disk controller you are delete. Must match what you see through <strong>mode=list</strong></li>
+			<li><strong>YYY</strong> - The name of disk you are delete. Must match what you see through <strong>mode=list</strong></li>
+		</ul>
+		<h2><a name="bhyve-dsk-modify_mode">modification of properties of virtual disks</a></h2>
+		<p>To modify the parameters of virtual disks, use the command:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd bhyve-dsk mode=modify jname=ZZZ dsk_controller=XXX dsk_path_YYY [param=value]
+		</pre>
+		<p>, where:</p>
+		<ul>
+			<li><strong>ZZZ</strong> - VM name</li>
+			<li><strong>XXX</strong> - The type of disk controller you are modify. Must match what you see through <strong>mode=list</strong></li>
+			<li><strong>YYY</strong> - The name of disk you are modify. Must match what you see through <strong>mode=list</strong></li>
+		</ul>
+		<p>Depending on the version of <strong>CBSD</strong>, the type of installation and the file system used, the set of parameters with which you can operate may differ</p>
+		<p>Basic parameters that are available on any file system:</p>
+		<ul>
+			<li><strong>bootable</strong> - set disk as bootable, e.g: <strong>1</strong></li>
+			<li><strong>dsk_sectorsize</strong> - change disk sectorsize, e.g: <strong>512</strong>,<strong>512/4096</strong>,<strong>4096</strong> [*]</li>
+			<li><strong>dsk_size</strong> - increase the volume size of a virtual disk, for example: <strong>30g</strong> (set size to 30Гб ),<strong>+10g</strong> (increase existing disk capacity by 10 GB) [**]</li>
+		</ul>
+		<p>___</p>
+		<p>[<strong>*</strong>]<br>
+		     - choose the correct sectorsize before formatting the disk, because the data recorded with one value of sectorsize will not be available with another.<br>
+		     - when you specify a value through '/', the number on the left means logical sectorsize, the value on the right means physical sectors. Most preferred value: 512/4096 or 4096.<br>
+		     - you can reassign the default value in <strong>CBSD</strong> globally via bhyve-default-default.conf or in an individual virtual machine profile.</p>
+		<p>[<strong>**</strong>]<br>
+		     - virtual machines using cloud-init will resize/expand the guest disk automatically.
+		     If you do not use cloud-init, in addition to increasing the physical medium, you will need to expand the guest file system yourself through the appropriate utilities.
+		<h2><a name="bhyve-dsk-zvol-prop">customization ZFS/zvol properties</a></h2>
+		<p>The ZFS file system has a rich selection of settings and optimizations. 
+		Since <strong>CBSD</strong> works intensively with the automatic creation of large numbers of ZFS file systems and ZVOL volumes and various settings, 
+		you can change the settings that <strong>CBSD</strong> will use in these operations.</p>
+		<p>You can change the default settings for ZFS datasets and ZVOL volumes through the zfs.conf configuration file. 
+		For example, you can enable compression for GOLD images of cloud-init, change recordsize, volblockmodesize, etc.</p>
+		<br>
+		<p class="text-center"><img src="/img/bhyve-dsk2.png" alt="" /></p>
+		<br>
+		<p class="text-center"><img src="/img/bhyve-dsk3.png" alt="" /></p>
+		<br>
+		<p class="text-center"><img src="/img/bhyve-dsk4.png" alt="" /></p>
+	</div>

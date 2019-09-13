@@ -1,0 +1,83 @@
+	<h1><span>Как работает хелпер для <strong>CBSD</strong> образа</span></h1>
+	
+	<h2><a name="jdescr_cmd">Команда imghelper</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd imghelper
+		</pre>
+		<strong>Описание</strong>:
+		<p>Предварительно подготовленные образы для <strong>CBSD</strong> представляют из себя архив клетки и некоторую последовательность сценария, по которой будут сформированы те или иные конфигурации получаемого из имиджа окружения</p>
+		<p>Поскольку большая часть модификаций связана с персональными данными ( пароли, имена пользователей или доменов, название баз и тд ), до отработки сценария должны быть получены все необходимые для работы параметры</p>
+		<p>Начиная с версии <strong>CBSD</strong> 10.1.0, диалог ввода настроек выполняет скрипт <em>imghelper</em>, который берет параметры для построения форм из SQLite3 базы, идущей вместе с клеткой</p>
+		<p>В данном документе рассмотрим построение классического dialog-based меню</p>
+		<p>Схема SQL файла форм следующая (описываемый формат используется для отработки <strong>CBSD</strong> updatesql:</p>
+		<pre class="cli">
+CREATE TABLE forms (  idx INTEGER PRIMARY KEY AUTOINCREMENT, param TEXT DEFAULT NULL UNIQUE, \
+desc TEXT DEFAULT NULL, defaults TEXT DEFAULT NULL, mandatory INTEGER DEFAULT 0, \
+attr TEXT DEFAULT NULL, xattr TEXT DEFAULT NULL  );
+		</pre>
+		<p>Где:</p>
+		<ul>
+			<li><strong>forms</strong> - это константа, имя таблицы, которое imghelper будет искать при открытии файла форм</li>
+			<li><strong>idx</strong> - индекс таблицы. При построении форм не используется</li>
+			<li><strong>param</strong> - Произвольное имя аргумента (обычно - одно слово), параметра, значение которого мы должны получить</li>
+			<li><strong>desc</strong> - Произвольное описание для аргумента</li>
+			<li><strong>defaults</strong> - Предлагаемое значение по-умолчанию. Может быть пустым.</li>
+			<li><strong>mandatory</strong> - boolean (0,1), признак обязательности. Если параметр обязательный, запуск сценария будет невозможен при пустом значении аргумента</li>
+			<li><strong>attr</strong> - Системное поле для различных атрибутов, в данной версии/документации его использовать не будем</li>
+			<li><strong>xattr</strong> - Системное поле для различных атрибутов при построении WEB/HTML форм, в данной версии/документации его использовать не будем</li>
+		</ul>
+		<p>Например, для wordpress из <strong>CBSD</strong> repo генерация базы происходит так: <a href="https://github.com/olevole/cbsd-scenes/blob/master/img/wordpress/wordpress/bin/initforms.sh">initforms.sh</a></p>
+		<p>При запуске <strong>cbsd imghelper</strong> указывается путь к файлу (при получении имиджа через cbsd repo, данная операция происходит автоматически).</p>
+		<p>Существует три способа ввода необходимых параметров <strong>cbsd imghelper</strong> перед тем, как она запустит сценарий установки:</p>
+		<ul>
+			<li>Интерактивный режим: используется dialog для отрисовки UI, параметров и полей для ввода. По заполнению которых, кнопка "COMMIT" инициализирует установочный сценарий</li>
+			<li>Интерактивный и не интерактивный, способ 1: указать значения параметров в командной строчке: cbsd imghelper param1=val1 param2="this is arg for param2" ... В этом случае, если все поля имеют значения, сценарий запустится автоматически</li>
+			<li>Интерактивный и не интерактивный, спобоб 2: указывать значения параметров через переменную окружения вида H_param. Данный способ также может кобминироваться с интерактивным режимом, когда переменные окружения будут выступать в качестве "перезаписываемых" или значений по-умолчанию в диалоге, позволяя тем самым строить частично заполненные формы</li>
+		</ul>
+		<p>Не интерактивные режимы полезны для инсталляции клетки в автоматическом режиме, без прерывания на ввод</p>
+		<p>Практический пример</p>
+		<p>Создадим файл с формой для ввода 4-х параметров: <em>username, password, dns1, dns2</em>. Для этого, создадим пустую таблицу в файле /tmp/forms.sqlite:</p>
+		<pre class="cli;">
+% sqlite3 /tmp/forms.sqlite
+sqlite> CREATE TABLE forms (  idx INTEGER PRIMARY KEY AUTOINCREMENT, \
+param TEXT DEFAULT NULL UNIQUE, desc TEXT DEFAULT NULL, defaults TEXT DEFAULT NULL, \
+mandatory INTEGER DEFAULT 0, attr TEXT DEFAULT NULL, xattr TEXT DEFAULT NULL  );
+sqlite> ^D
+		</pre>
+		<p>Заполним таблицу необходимыми нам параметрами</p>
+		<pre class="brush:bash;ruler:true;">
+% sqlite3 /tmp/forms.sqlite << EOF
+INSERT INTO forms ( param,desc,defaults,mandatory,attr ) VALUES ( "username","Please enter user name","oleg",1, "maxlen=10" );
+INSERT INTO forms ( param,desc,defaults,mandatory,attr ) VALUES ( "password","Please enter password","",1, "maxlen=15" );
+INSERT INTO forms ( param,desc,defaults,mandatory,attr ) VALUES ( "dns1","Please enter DNS1","8.8.8.8",1, "maxlen=15" );
+INSERT INTO forms ( param,desc,defaults,mandatory,attr ) VALUES ( "dsn2","Please enter DNS2","",1, "maxlen=15" );
+EOF
+		</pre>
+		<p>Как видим, все поля являются обязательными. При этом, значение параметров <em>username</em> и <em>dns1</em> по-умолчанию предопределено и предлагается равным <em>oleg</em> и <em>8.8.8.8</em> соответственно</p>
+		<p>Запускаем imghelper и видим наши поля:</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper /tmp/forms.sqlite
+		</pre>
+		<p class="text-center"><img src="/img/imghelper1.png" alt="" /></p>
+		<p>Также, мы можем заранее определить параметры через командную строчку (предварительно получив имена переменных через --help):</p>
+		<pre class="brush:bash;ruler:true;">
+% cbsd imghelper /tmp/forms.sqlite --help
+[sys] Ncurses-based jail image boostrap helper
+require: formfile
+opt:  username password dns1 dsn2
+External help: /usr/local/share/doc/cbsd/wf_imghelper.html
+		% cbsd imghelper /tmp/forms.sqlite username=gelo dns1="1.2.3.4"
+		</pre>
+		<p class="text-center"><img src="/img/imghelper2.png" alt="" /></p>
+		<p>И наконец, можем просто использовать переменные окружения:</p>
+		<pre class="brush:bash;ruler:true;">
+% setenv H_username root
+% setenv H_password strong_plain_text_password
+% setenv H_dns1 192.168.1.1
+% setenv H_dsn2 10.0.0.1
+% cbsd imghelper /tmp/forms.sqlite
+		</pre>
+		<p class="text-center"><img src="/img/imghelper3.png" alt="" /></p>
+	</div>
+

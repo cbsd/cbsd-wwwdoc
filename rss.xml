@@ -613,5 +613,17 @@
     <guid>CBSD 12.1.0 available</guid>
     <pubDate>Wed, 11 Sep 2019 09:45:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.1 available</title>
+    <description>bugfix release. fixes for:&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      initenv failed if tmux is missing (reported by KS Leung, Issue #431)&lt;br /&gt;
+      jail: floatresolv  always worked even if the value set to 0 (disabled) (reported by Ivan Safonov via Telegram)&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.1 available</guid>
+    <pubDate>Fri, 13 Sep 2019 09:41:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

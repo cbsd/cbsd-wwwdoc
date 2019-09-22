@@ -625,5 +625,23 @@
     <guid>CBSD 12.1.1 available</guid>
     <pubDate>Fri, 13 Sep 2019 09:41:00 +0000</pubDate>
   </item>
+  <item>
+    <title>ClonOS 19.09-RELEASE</title>
+    <description>ClonOS 19.09-RELEASE!&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      FreeBSD 13.0-CURRENT (r352386)&lt;br /&gt;
+      cloud-init support (see errata)&lt;br /&gt;
+      fixed fbbuf/vesa video issue with some recent Linux distros ( Kali Linux, Parrot, etc..)&lt;br /&gt;
+      p9fs support (*)&lt;br /&gt;
+      CBSD updated to 12.1.1&lt;br /&gt;
+      fixed known SQL injection vulnerabilities&lt;br /&gt;
+      &lt;br /&gt;
+      Feedback is very welcome!&lt;br /&gt;
+    </description>
+    <link>https://clonos.tekroutine.com/download.html</link>
+    <guid>ClonOS 19.09-RELEASE</guid>
+    <pubDate>Sun, 22 Sep 2019 09:34:00 +0000 </pubDate>
+  </item>
 </channel>
 </rss>

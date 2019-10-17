@@ -6,6 +6,7 @@
 		<pre class="brush:bash;ruler:true;">
 			% cbsd bconstruct-tui
 			% cbsd cloudinit
+                        % cbsd bcreate
 		</pre>
 		<p><strong>Description</strong>:</p>
 
@@ -66,6 +67,17 @@
 		Pay attention to how looks <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v12.0.8/etc/defaults/blogin.conf#L21">blogin.conf</a> in 12.0.8: if the virtual machine is created using cloud-init,
 		the "cbsd blogin" command will use the custom login command using the node key and the user specified by you as <strong>ci_user_add</strong>.Thus, by running a virtual machine from cloud-init,
 		you can immediately access it via ssh using the command: <strong>cbsd blogin</strong>.</p>
+		<br>
+		<h2><a name="cloudinit_fromargs">bcreate from args</a></h2>
+		<p>If you don’t like the dialog boxes, you can start the virtual machine from the cloud image as quickly as possible using bcreate by specifying the appropriate configuration parameters, for example:</p>
+		<pre class="brush:bash;ruler:true;">
+		cbsd bcreate jname=centos1 imgsize=20g vm_cpus=1 vm_ram=4g vm_os_type=linux vm_os_profile=cloud-CentOS-7-x86_64 ci_jname=centos1 ci_fqdn=centos1.my.domain ci_ip4_addr=DHCP ci_g
+w4=10.0.0.1 runasap=1
+
+		cbsd bcreate jname=centos2 imgsize=40g vm_cpus=4 vm_ram=8g vm_os_type=linux vm_os_profile=cloud-CentOS-8-x86_64 ci_jname=centos2 ci_fqdn=centos2.my.domain ci_ip4_addr=192.168.0
+.10/24 ci_gw4=192.168.0.1 runasap=1
+		</pre>
+		<p>pay attention to <strong>ci_ip4_addr</strong> and <strong>ci_gw4</strong> - when using the DHCP value, make sure that you select the correct nodeippool range of addresses, and also that ci_gw4 points to the working IP of the gateway in this subnet.</p>
 		<br>
 		<h2><a name="cloudinit_sample">Usage example</a></h2>
 		<br>

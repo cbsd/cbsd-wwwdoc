@@ -1,11 +1,10 @@
 	<h1><span>bhyve с cloud-init через CBSD</span></h1>
 
-	<h2><a name="bcloud_initcmd">Команда bconfig, bconstruct-tui, cloudinit</a></h2>
-
 	<div class="block">
 		<pre class="brush:bash;ruler:true;">
 			% cbsd bconstruct-tui
 			% cbsd cloudinit
+			% cbsd bcreate
 		</pre>
 		<p><strong>Описание</strong>:</p>
 
@@ -61,6 +60,16 @@
 		Обратите внимание на то, как выглядит <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v12.0.8/etc/defaults/blogin.conf#L21">blogin.conf</a>: если виртуальная машина
 		создана через cloud-init, при команде <strong>cbsd blogin</strong> будет использоваться кастомная команда с использованием ключа ноды и пользователя, который вы укажете в качестве ci_user_add.
 		Таким образом, запуская виртуальную машину из cloud-init, вы можете сразу же заходить в нее через ssh используя команду <strong>cbsd blogin</strong>.</p>
+		<br>
+		<h2><a name="cloudinit_fromargs">bcreate from args</a></h2>
+		<p>Если вы не любите диалоговые окна, запустить виртуальную машину из cloud-образа можно максимально быстрым способом через bcreate, указав соответствующие параметры конфигурации, например:</p>
+		<pre class="brush:bash;ruler:true;">
+		cbsd bcreate jname=centos1 imgsize=20g vm_cpus=1 vm_ram=4g vm_os_type=linux vm_os_profile=cloud-CentOS-7-x86_64 ci_jname=centos1 ci_fqdn=centos1.my.domain ci_ip4_addr=DHCP ci_gw4=10.0.0.1 runasap=1
+
+		cbsd bcreate jname=centos2 imgsize=40g vm_cpus=4 vm_ram=8g vm_os_type=linux vm_os_profile=cloud-CentOS-8-x86_64 ci_jname=centos2 ci_fqdn=centos2.my.domain ci_ip4_addr=192.168.0.10/24 ci_gw4=192.168.0.1 runasap=1
+		</pre>
+		<p>обратите внимание на <strong>ci_ip4_addr</strong> и <strong>ci_gw4</strong> - при использовании значения DHCP, убедитесь что вы выбрали корректный nodeippool диапазон адресов, а также что ci_gw4 
+		указывает на рабочий IP шлюза в этой подсети.</p>
 		<br>
 		<h2><a name="cloudinit_sample">Пример использования</a></h2>
 		<br>

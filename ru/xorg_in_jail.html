@@ -215,7 +215,7 @@
 	</pre>
 	<p>10) Только для NVIDIA пользователей: Устанавливаем драйвер NVIDIA из портов</p>
 	<pre class="brush:bash;ruler:true;">
-	env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+	env BATCH=yes make -C /usr/ports/x11/nvidia-driver install
 	</pre>
 	<p>11) Только для NVIDIA пользователей: Прописываем модуль <strong>nvidia.ko</strong> в автозагрузку, увеличиваем <strong>ipc.shmall</strong> как советует порт:
 	<pre class="brush:bash;ruler:true;">
@@ -244,7 +244,7 @@
 <pre class="brush:bash;ruler:true;">
 % pkg install x11/glproto x11/nvidia-driver 
 % pkg remove nvidia-driver
-% env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+% env BATCH=yes make -C /usr/ports/x11/nvidia-driver install
 </pre>
 	<p>15) Если не все еще умеете писать рабочий <strong>xorg.conf</strong> с нуля, лучше сгенерировать его через <strong>nvidia-xconfig</strong>:</p>
 	<pre class="brush:bash;ruler:true;">

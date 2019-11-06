@@ -134,7 +134,7 @@
 	</pre>
 	<p>10) Only for NVIDIA users: Install the NVIDIA driver from ports:</p>
 	<pre class="brush:bash;ruler:true;">
-	env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+	env BATCH=yes make -C /usr/ports/x11/nvidia-driver install
 	</pre>
 	<p>11) Only for NVIDIA users: prescribes module <strong>nvidia.ko</strong> in autoload, increase <strong>ipc.shmall</strong> as advised by the port:
 	<pre class="brush:bash;ruler:true;">
@@ -163,7 +163,7 @@
 <pre class="brush:bash;ruler:true;">
 % pkg install x11/glproto x11/nvidia-driver 
 % pkg remove nvidia-driver
-% env BATCH=no make -C /usr/ports/x11/nvidia-driver install
+% env BATCH=yes make -C /usr/ports/x11/nvidia-driver install
 </pre>
 	<p>15) If you do not know how to write still working <strong>xorg.conf</strong> from scrath, better to generate it via <strong>nvidia-xconfig</strong>:</p>
 	<pre class="brush:bash;ruler:true;">

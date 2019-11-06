@@ -37,7 +37,7 @@
 </pre>
 <p>или из портов:</p>
 <pre class="brush:bash;ruler:rule;">
-% env BATCH=no make -C /usr/ports/net/isc-dhcp44-server install
+% env BATCH=yes make -C /usr/ports/net/isc-dhcp44-server install
 </pre>
 <p>2) Следующим шагом будет определение сети, которая будет использована в автоматической конфигурации и написании соответствующего блока конфигурационного
 файла для <strong>DHCP</strong>. Допустим, наша сеть будет <i>198.168.0.0/24</i>, DNS будем брать от <strong>Google</strong>, а шлюз по-умолчанию будет <strong>192.168.0.1</strong>:</p>

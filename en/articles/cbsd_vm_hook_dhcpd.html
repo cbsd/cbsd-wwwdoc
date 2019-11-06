@@ -39,7 +39,7 @@ we'll point to <strong> CBSD </strong> for the MAC address that the virtual envi
 </pre>
 <p>or from the ports:</p>
 <pre class="brush:bash;ruler:rule;">
-% env BATCH=no make -C /usr/ports/net/isc-dhcp44-server
+% env BATCH=yes make -C /usr/ports/net/isc-dhcp44-server
 </pre>
 <p>2) The next step is to define the network that will be used in the automatic configuration and writing the corresponding configuration block
 file for <strong>DHCP</strong>. Let's say our network will be <i>198.168.0.0/24</i>, DNS take from <strong>Google</strong>, and default gateway is <strong>192.168.0.1</strong>:</p>

@@ -656,5 +656,45 @@
     <guid>CentOS 8.0 cloud image for CBSD</guid>
     <pubDate>Wed, 25 Sep 2019 02:34:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.2 available</title>
+    <description>CBSD 12.1.2 available&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      FreeBSD 12.1 cloud image ready&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.2 available</guid>
+    <pubDate>Tue, 05 Nov 2019 09:21:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>FreeBSD XEN live migration: FreeBSD guest (via CBSD)</title>
+    <description>FreeBSD XEN live migration: FreeBSD guest (via CBSD)&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      demo: https://youtu.be/6vURTjVRsAY&lt;br /&gt;
+    </description>
+    <link>https://youtu.be/6vURTjVRsAY</link>
+    <guid>FreeBSD XEN live migration: FreeBSD guest (via CBSD)</guid>
+    <pubDate>Tue, 31 Dec 2019 09:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.1.3 available</title>
+    <description>CBSD 12.1.3 available&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: bconstruct-tui: ability to revert/reset GIT updates for profile&lt;br /&gt;
+      bhyve: added master_reboot hook for reboot bhyve vm custom action&lt;br /&gt;
+      ssh keygen: ED25519 by default instead of RSA&lt;br /&gt;
+      bhyve: IPv6 support for UEFI GOP bhyve VNC tcp bind&lt;br /&gt;
+      xen: vm save/restore support ( xcheckpoint )&lt;br /&gt;
+      xen: live migration support ( xmigrate, demo: https://youtu.be/6vURTjVRsAY )&lt;br /&gt;
+      jail pkg module: several improvements: retry, exit code behavior, configuration file ( sample: /usr/local/cbsd/modules/pkg.d/etc-sample/pkg.conf )&lt;br /&gt;
+      repo: fixes for action=get source=src - fetch source tree from official FreeBSD resources.&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.3 available</guid>
+    <pubDate>Sat, 04 Jan 2020 03:31:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

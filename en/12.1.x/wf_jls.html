@@ -5,17 +5,24 @@
 			% cbsd jls
 		</pre>
 		<strong>Description</strong>:
-		<p>Show the list of jails on a local node or for all added nodes. Through argument <strong>display</strong> you can specify the fields for output data. If <strong>display</strong> is not specified, the value takes from <em>$workdir/etc/defaults/jls.conf</em> file, which you can change at its discretion via <em>$workdir/etc/jls.conf</em></p>
+		<p>Show the lists of environment on a local node or for all nodes. You can adjust the displayed fields through the argument <strong>display</strong>.
+		If <strong>display</strong> is not specified, the value takes from <em>$workdir/etc/defaults/jls.conf</em> file, which you can change at its discretion via <em>$workdir/etc/jls.conf</em>.
+		To hide the header, use the argument <strong>header=0</strong>.</p>
 		<p>All possible options for the sample described in the <em>$workdir/share/jail-arg</em> file</p>
+		<p>In addition to the basic CBSD values, you can add your own fields and values for output with the jls command. More on this:</p>
 		<ul>
-			<li><strong>JID</strong> — Jail ID</li>
-			<li><strong>JNAME</strong> — jail name</li>
-			<li><strong>IP4_ADDR</strong> — list of assigned IP addresses (IPv4,IPv6)</li>
-			<li><strong>HOST_HOSTNAME</strong> — FQDN jail</li>
-			<li><strong>PATH</strong> — root filesystem for jail</li>
-			<li><strong>STATUS</strong> — On (running), Off (stoped), Unregister (jail has its rc.conf (old format) but not in the SQL database)</li>
+			<table class="images">
+			<tr><td class="bg-gray"><strong>JID</strong></td><td>Jail ID</td></tr>
+			<tr><td class="bg-gray"><strong>JNAME</strong></td><td>environment name</td></tr>
+			<tr><td class="bg-gray"><strong>IP4_ADDR</strong></td><td>list of assigned IP addresses (IPv4,IPv6)</td></tr>
+			<tr><td class="bg-gray"><strong>HOST_HOSTNAME</strong></td><td>environment FQDN</td></tr>
+			<tr><td class="bg-gray"><strong>PATH</strong></td><td>root filesystem for jail</td></tr>
+			<tr><td class="bg-gray"><strong>STATUS</strong></td><td>On (running), Off (stoped), Unregister (missing in the SQL database)</td></tr>
+			</table>
 		</ul>
-		<p>Note: Jail in the unregister status may be insert to SQL database via command: <strong>cbsd jregister</strong>. Also, they are automatically converted on <em>Upgrading</em> stage of <strong>cbsd initenv</strong> command. In a case when to the local server are added a key of remote of nodes, it is possible to receive  the list of all jails in a farm via</p>
+		<p>For <strong>vnet</strong>-based environments with a virtual stack, the <strong>REAL_IP4</strong> field for displaying the actual IP addresses inside the environment may also be useful to you.</p>
+		<p>Note: Jail in the unregister status may be insert to SQL database via command: <strong>cbsd jregister</strong>.
+		If remote nodes are added to the local server, you can display all env in the farm through:</p>
 		<pre class="brush:bash;ruler:true;">
 			cbsd jls alljails=1
 		</pre>
@@ -24,12 +31,12 @@
 			cbsd jls alljails=1 shownode=1
 		</pre>
 		<p>for output with node name where jail are hosted. In the output from cbsd jls alljails, it is possible to see only active jails (in status On)</p>
-		<p><strong>Example</strong>:</p>
+		<p><strong>Another example:</strong>:</p>
 		<pre class="brush:bash;ruler:true;">
-			% cbsd jls
+			% cbsd jls display=jname,ip4_addr,vnet,real_ip4,astart
+			% cbsd jls header=0 display=jname,mycustom1,mycustom2,status
 		</pre>
 		<p class="text-center"><img src="/img/jls1.png" alt="" /></p>
-		<p>Conclusion customized data (Attention, dashes fields may mean that version of <strong>CBSD</strong> on the remote node is older. Respectively, SQL query in its database does not find relevant records)</p>
 		<p class="text-center"><img src="/img/jls2.png" alt="" /></p>
 	</div>
 

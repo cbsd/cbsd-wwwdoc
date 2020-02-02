@@ -1,0 +1,133 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>Deploy Kubernetes cluster on FreeBSD/bhyve (<strong>CBSD</strong>)</span></h1>
+<h2><a name="k8s_part1_intro">Introduction</a></h2>
+<div class="block">
+<p>Recently, at my new job, my colleagues and I noted a non-standard success story - in our company we completely got rid of the docker (more than two hundred containers - a little, but there was something).
+Yes! yes! Although this trend has been going on for ten years, the de-dockerization process has brought a lot of joy and relief. Although temporarily ;-)</p>
+<p>I will not talk about the pros and cons of docker - I will only remind the well-known truth - there is nothing perfect,
+and not always the tool or implementation of the solution is most suitable for you. In addition, in the field of IT there is no single right way - there are always options, so our area is fascinating.
+At some point, inside our company, it came to an understanding that the docker is being used incorrectly and brings more problems than it solves them.
+To fix this, the IT department received the task of transferring all business processes to the rails of microservice architecture.
+For this, developers must take into account the specifics and characteristics of the container approach. These questions are beyond the scope of the article, 
+but I can only say that the new concept and the steps taken imply for us the use of containers on an even larger scale (when our applications are really ready for this), 
+in connection with this, the question was raised regarding orchestration by a large number of containers</p>
+<p>There are quite a few solutions for container orchestration, but the most popular (or the most famous and highly advertised, is probably, a <a target="_blank" href="https://kubernetes.io/">Kubernetes</a>)
+Since I plan to conduct many experiments with installing and configuring k8s, I need a laboratory in which I can quickly and easily deploy a cluster in any quantities for myself.
+In my work and everyday life I use two OS very tightly - <a target="_blank" href="https://www.kernel.org/">Linux</a> and <a target="_blank" href="https://www.freebsd.org">FreeBSD OS</a>.
+Kubernetes and docker are Linux-centric projects, and at first glance, you should not expect any useful participation and help from FreeBSD here.
+As the saying goes, an elephant can be made out of a fly, but it will no longer fly. However, two tempting things come to mind - this is very good integration and work in the FreeBSD ZFS file system,
+from which it would be nice to use the snapshot mechanism, COW and reliability.
+And the second is the <a target="_blank" href="http://bhyve.org/">bhyve hypervisor</a>, because we still need the docker and k8s loader in the form of the Linux kernel.
+Thus, we need to connect a certain number of actions in various ways, most of which are related to starting and pre-configuring virtual machines.
+This is typical of both a Linux-based server and FreeBSD. What exactly will work under the hood to run virtual machines does not play a big role. And if so - let's take a FreeBSD here!</p>
+<p>In my free time, I am a member of <strong>CBSD</strong>, a project that can provide end users with a more user-friendly interface for managing containers and virtual machines on the FreeBSD platform.
+Another part of users knows that <strong>CBSD</strong> is a framework that, thanks to the API, <a href="/<!--#echo var="lang" -->/broker_driven_sample_ssi.html">integrates very easily</a> into any of your 
+own scripts to automatically manage the virtual infrastructure, realizing most of the operations at a low level when working with virtual machines.
+Thus, our task is to build some kind of bridge between operations on the k8s cluster and tasks related to deploying virtual machines.
+This work took me about 4 hours and turned into a working k8s CBSD module, which is publicly available (starting with the next CBSD version 12.1.5), like everything else related to the <a target="_blank" href="https://github.com/cbsd/">CBSD project</a>.</p>
+<p>So let's see what we got!</p>
+<p><em>Spoiler: if you prefer to watch the video, a small demo on YouTube (subtitles for English): <a target="_blank" href="https://youtu.be/ADBuUCtOF1w">https://youtu.be/ADBuUCtOF1w</a></em></p>
+</div>
+<h2><a name="k8s_part1_at_the_beggining">What we have</a></h2>
+<div class="block">
+<p>My goal is to create a small local laboratory with a working k8s cluster, and I have a server at my disposal with the following characteristics:</p>
+<ul>
+	<li>1x3 TB hard drive with FreeBSD 13-CURRENT ( ZFS-on-root )</li>
+	<li>RAM: 256 GB</li>
+	<li>CPU: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz (56 core)</li>
+</ul>
+<p>In other words, we have no shortage of resources. Using the Ubuntu 18 cloud image, I generated a kubernetes cloud image, which differs from the Ubuntu image only in that it is connected to the kubernetes repository,
+and the <strong>apt install kubeadm</strong> command was executed, so when deploying the image, you can immediately start working with the kubectl utility.</p>
+<p>I uploaded the experimental k8s image to the mirrors of the <strong>CBSD</strong> project. You can start the virtual machine from this image through the standard <strong>CBSD</strong> dialog and the bconstruct-tui command:
+<p class="text-center"><img src="/img/k8s_boot1.png" alt="" /></p>
+<p>First of all, we need to choose the type of guest - in the case of k8s, our guest is Linux:</p>
+<p class="text-center"><img src="/img/k8s_boot2.png" alt="" /></p>
+<p>Next, select the name containing kubernetes, in the list of ready-made Linux profiles - this is a cloud image, so look for it at the bottom of the list:</p>
+<p class="text-center"><img src="/img/k8s_boot3.png" alt="" /></p>
+<p>Edit the remaining parameters, if necessary:</p>
+<p class="text-center"><img src="/img/k8s_boot4.png" alt="" /></p>
+<p>For example, we can change the network settings for the cloud-init helper:</p>
+<p class="text-center"><img src="/img/k8s_boot5.png" alt="" /></p>
+<p>After editing the parameters, we create a virtual machine:</p>
+<p class="text-center"><img src="/img/k8s_boot6.png" alt="" /></p>
+
+<p>As a result, we got a working virtual machine in which kubernetes is already installed, but this is where the main features of <strong>CBSD</strong> for kubernetes end - it focuses on other tasks.</p>
+
+<p class="text-center"><img src="/img/k8s_boot7.png" alt="" /></p>
+
+<p>However, this is already good - thanks to cloud-init, you do not need to install the OS every time using the installer,
+and you do not need to install kubernetes every time after installing the OS - you just need to start the VM from the gold image.
+If you like to do manual work in some cases - 20 seconds of starting the virtual machine - and you can continue.</p>
+
+<p class="text-center"><img src="/img/k8s_boot8.png" alt="" /></p>
+
+<p>Since creating and configuring k8s is also not a trivial task (primarily because it is a lot of monotonous monkey work in the form of repeating a large number of identical commands),
+I placed these commands in separate scripts and these scripts have received the status k8s module for CBSD, where all operations of which begin with a prefix with the same name <strong>k8s</strong>.
+All <strong>CBSD</strong> commands display information about their required or not-so arguments with a brief description through the <strong>--help</strong> argument.
+The module offers a small number of operations, including bootstrap, join, configuring and receiving a Kubernetes token.
+You can start these operations in strict order one after another, or you can specify all the necessary arguments one time - the module itself will figure out when and what to do.
+For example, when you execute this command:
+
+<pre class="brush:bash;ruler:rule;">
+cbsd k8s bootstrap=1 join=1 token=1 setup="master node"
+</pre>
+
+we ask the module to complete the entire cycle of initializing one cluster, with the export of the token for working with kubectl using the CLI through a remote machine:</p>
+
+<p class="text-center"><img src="/img/k8s_boot9.png" alt="" /></p>
+
+<p>The <strong>CBSD</strong> module performs its work in various places - in parallel, in some - sequentially.</p>
+<p>For example, each script is executed in parallel, but before the module can proceed to the next step, 
+it needs to make sure that the most recent or slowest node has completed the configuration and is ready for the next step. 
+Thus, the final step of each individual scenario is expectation. 
+For example, we can observe the fact of parallelization and the progress of internal tasks in the output of <strong>cbsd taskls</strong>:</p>
+<p class="text-center"><img src="/img/k8s_boot11.png" alt="" /></p>
+
+<p>Sooner or later (in my case - within 20 seconds), the module switched from the initial boot to the configuration phase,
+when one node is assigned the 'master' role, all the others become 'worker. 
+The purpose of k8s bootstrap is to start a virtual machine with kubernetes from a golden image - 
+which we did above through <strong>cbsd bconstruct-tui</strong> by starting one virtual machine from the dialog interface. 
+Thus, within 20 seconds we started 10 virtual machines, and now we can observe them through the output of <strong>cbsd bls</strong>:
+
+<p class="text-center"><img src="/img/k8s_boot10.png" alt="" /></p>
+
+<p>I must say that the role of <strong>CBSD</strong> here is not only launching virtual machines and working with cloud-init,
+but also automatically searching for free names for new containers (in this case, the kube mask is used as the beginning of the container name) 
+and searching and automatically assigning free IPs addresses that the system takes from the <strong>CBSD</strong> node ip pool settings.
+The screenshot shows that the IP addresses 10.0.0.XX that are issued to virtual machines do not always go sequentially - some of them are already on the network.</p>
+
+<p>The configuration stage for master/worker is the longest and takes 3 minutes:</p>
+<p class="text-center"><img src="/img/k8s_boot12.png" alt="" /></p>
+
+<p>Then comes the join stage, which takes 42 seconds of our life. Finally, the script, exporting the token, succeeds:</p>
+
+<p class="text-center"><img src="/img/k8s_boot13.png" alt="" /></p>
+
+<p>Since we exported (token=1) the token for working with k8s to the local machine, 
+we can work with the cluster directly from the FreeBSD host.
+We can immediately execute the 'kubectl get nodes' command and make sure everything is in place.</p>
+
+<p class="text-center"><img src="/img/k8s_boot14.png" alt="" /></p>
+
+<p>So, the cluster is ready to go. To test, you can apply the sample from the official k8s documentation and run your first container in a new cluster:</p>
+<p class="text-center"><img src="/img/k8s_boot15.png" alt="" /></p>
+
+<p>To delete cluster, there is an destroy=1 argument (either delete with the standard <strong>cbsd bremove</strong> command).
+Also, you can reset cluster settings without destroying virtual machines (reset=1). <strong>Enjoy!</strong></p>
+
+<p><em>A small podcast with demos of this article on Youtube:</em> <a target="_blank" href="https://youtu.be/ADBuUCtOF1w">https://youtu.be/ADBuUCtOF1w</a> </p>
+<br>
+<h2><a name="k8s_part1_whatnext">Conclusions and Future Plans</a></h2>
+<p>In the context of a dynamically developing IT industry, it is extremely important to automate all possible operations and get the result as soon as possible 
+- to value your time and nerves. And use these limited and most valuable resources to accomplish your own tasks. 
+This article demonstrates the collaboration of a number of technologies: FreeBSD. Linux, ZFS, cloud-init, bhyve, CBSD which were used for one thing - 
+to raise a ready-to-use Kubernetes cluster of any configuration as quickly as possible.</p>
+<p>Obviously, the longest step (configure/setup) can also be optimized here, since this step performs various actions that work with remote resources (wget .yaml configurations for calico, etc.) 
+- this can also be included in the cloud image of kubernetes in the future.</p>
+<p>Also, it seems like an interesting idea to be able to combine several physical servers with FreeBSD/CBSD via VXLAN, creating a single L2 segment for all containers.
+Using the <strong>p9fs</strong>, <strong>Ceph, NFS or S3 object storage</strong> here also has the right to exist for organizing a single disk space for containers on different physical nodes.</p>
+Also, with proper refinement, we can get a FreeBSD and ZFS-based, some fault tolerance and scalable Kubernetes cluster in the form of a black box, where black box - does not mean 'closed'.
+Here, we mean as a result a framework that does not require an IT specialist to immerse in FreeBSD, bhyve and CBSD technologies, but we get a universal API for controlling and managing K8S clusters, as a final product.</p>
+<p>Anyone who is interested in FreeBSD / bhyve + kubernetes and wants to run their own SaaS K8S service on their resources using CBSD - write ideas and comments.
+It would be interesting to provide the public with a simple and cheap way for these operations.</p>

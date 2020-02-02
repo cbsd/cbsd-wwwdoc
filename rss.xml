@@ -707,5 +707,16 @@
     <guid>CBSD 12.1.4 available</guid>
     <pubDate>Sun, 05 Jan 2020 03:31:00 +0000</pubDate>
   </item>
+  <item>
+    <title>Deploying Kubernetes with CBSD</title>
+    <description>Deploying Kubernetes with CBSD&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      https://www.bsdstore.ru/en/articles/cbsd_k8s_part1.html&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru/en/articles/cbsd_k8s_part1.html</link>
+    <guid>Deploying Kubernetes with CBSD</guid>
+    <pubDate>Mon, 27 Jan 2020 09:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

@@ -1,0 +1,30 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>CBSD: custom environment facts</span></h1>
+<div class="block">
+	<p>When working with command like this: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jls_ssi.html">jls</a>,
+	<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jget_ssi.html">jget</a>,
+	<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bls_ssi.html">bls</a>,
+	<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bget_ssi.html">bget</a>,
+	<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_xls_ssi.html">xls</a>,
+	<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_xget_ssi.html">xget</a>, you see the values of the underlying <strong>CBSD</strong>.
+	However, you can supplement and create your own informative fields for your environments, thereby expanding the output of <strong>CBSD</strong>.</p>
+	<p>For these purposes, a <em>${workdir}/jails-system/${jname}/facts.d</em> a directory is used, into which you can save an executable file under an arbitrary name.
+	The name of this file is your custom field and the information that your script will output will be available for the above scripts
+	will be available for the above scripts.
+	The value in the output should be in the format of one word (digits).</p>
+	<p>At the same time, inside your scripts, you will be available to the internal facts of environments from <strong>CBSD</strong>: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a>.</p>
+	<p>For example:</p>
+	<pre class="brush:bash;ruler:true;">
+		% cat &gt; /usr/jails/jails-system/jail1/facts.d/mycustom1 &lt;&lt;EOF
+#!/bin/sh
+echo "MYCUSTOM1"
+EOF
+
+		% chmod +x /usr/jails/jails-system/jail1/facts.d/mycustom1
+		% cbsd jls display=jname,mycustom1
+		% cbsd jget jname=jail1 mycustom1
+	</pre>
+	<p class="text-center"><img src="/img/custom_facts1.png" alt="" /></p>
+<!--# include file="_end.html" -->

@@ -9,7 +9,7 @@
 		If <strong>display</strong> is not specified, the value takes from <em>$workdir/etc/defaults/jls.conf</em> file, which you can change at its discretion via <em>$workdir/etc/jls.conf</em>.
 		To hide the header, use the argument <strong>header=0</strong>.</p>
 		<p>All possible options for the sample described in the <em>$workdir/share/jail-arg</em> file</p>
-		<p>In addition to the basic CBSD values, you can add your own fields and values for output with the jls command. More on this:</p>
+		<p>In addition to the basic CBSD values, you can add your own fields and values for output with the jls command. More on this: <a href="/<!--#echo var="lang" -->/custom_facts.html">environment custom facts</a></p>
 		<ul>
 			<table class="images">
 			<tr><td class="bg-gray"><strong>JID</strong></td><td>Jail ID</td></tr>
@@ -31,7 +31,7 @@
 			cbsd jls alljails=1 shownode=1
 		</pre>
 		<p>for output with node name where jail are hosted. In the output from cbsd jls alljails, it is possible to see only active jails (in status On)</p>
-		<p><strong>Another example:</strong>:</p>
+		<p><strong>Another example:</strong></p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jls display=jname,ip4_addr,vnet,real_ip4,astart
 			% cbsd jls header=0 display=jname,mycustom1,mycustom2,status

@@ -13,7 +13,7 @@
 	<p>При этом, внутри ваших скриптов, вам будут доступны внутренние факты окружений от <strong>CBSD</strong>: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">Переменные CBSD</a>.</p>
 	<p>Например:</p>
 	<pre class="brush:bash;ruler:true;">
-		% cat &gt; /usr/jails/jails-system/jail1/facts.d/mycustom1 &lt;&lt;EOF
+		% cat &gt; ~cbsd/jails-system/jail1/facts.d/mycustom1 &lt;&lt;EOF
 #!/bin/sh
 echo "MYCUSTOM1"
 EOF

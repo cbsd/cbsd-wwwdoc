@@ -17,7 +17,7 @@
 	<p>At the same time, inside your scripts, you will be available to the internal facts of environments from <strong>CBSD</strong>: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_cbsd_variables_ssi.html">CBSD variables</a>.</p>
 	<p>For example:</p>
 	<pre class="brush:bash;ruler:true;">
-		% cat &gt; /usr/jails/jails-system/jail1/facts.d/mycustom1 &lt;&lt;EOF
+		% cat &gt; ~cbsd/jails-system/jail1/facts.d/mycustom1 &lt;&lt;EOF
 #!/bin/sh
 echo "MYCUSTOM1"
 EOF

@@ -104,62 +104,85 @@ jail1 могут находится на одном DFS сервере, а jail2
 
 <h2><a name="dfs_nfs">CBSD и NFSv4</a></h2>
 
-<p>Использование <strong>CBSD</strong> с NFS ( вариант, когда в качестве NFS выступает не выделенный NAS, а одна из трех <strong>CBSD</strong> нод )</p>
-
-<p>Через различные механизмы отказоустойчивости, такие как  <a href="http://man.freebsd.org/carp/4" target="_blank">carp(4)</a>, <strong>pacemaker/corosync</strong>, 
-<strong>keepalive</strong>, <strong>sentinel/consul</strong>, вы можете создать полностью автоматический фейловер, когда при выходе NFS-сервера,
-в качестве хранилища выбирается любая другая нода, а остальные переконфигурируются на нее. Однако подобные настройки выходят за рамки данной статьи, призванной дать поверхносные данные о DFS.</p>
-
-<p>Итак, на первом из трех сервере, выбранным нами в качестве NFS-сервера, настроем файл <em>>/etc/exports</em>, перечисляя IP или подсети NFS-слиентов.
-Мы предполагаем, что сервера полностью под нашим контролем и находятся под полным доверием, поскольку будем давать экспортировать все каталоги.</p>
-
-<p>Например, наши три <strong>CBSD</strong> ноды имеют адреса: <strong>192.168.10.201 192.168.10.202 192.168.10.203</strong> и рабочий каталог <strong>workdir</strong> везде проинициализирован в <em>/usr/jails</em>.</p>
-<p>Добавим в <em>/etc/exports</em> соответствующую NFSv4 строчку:</p>
+<p>Использование <strong>CBSD</strong> и jail на NFSv4</p>
+<p>У нас есть отдельный NFS сервер на базе FreeBSD и есть отдельный сервер с <strong>CBSD</strong>, который будет хранить jail на NFS сервере.</p>
+<p>IPv4 адрес NFS сервера: 172.16.0.1, IPv4 адрес сервера <strong>CBSD</strong>: 172.16.0.100</p>
+<p>Данные jail на NFS сервере будут располагаться в каталоге <strong>/nfs</strong></p>
+<p>Сконфигурируем NFSv4 сервер:</p>
+<p>В <em>/etc/exports</em> опишем пути для экспорта:</p>
 <pre class="cli">
-V4: / 192.168.10.201 192.168.10.202 192.168.10.203
+/nfs -alldirs -maproot=root 172.16.0.100
+V4: / 172.16.0.100
 </pre>
-
-<p>Если ваши сервера проинсталлированы на ZFS файловой системе, не забудьте включить sharenfs опцию на необходимых или на корневом датасете на NFS-сервере. Например, если корневая система ZFS это zroot/ROOT/default, то экспорт NFS включается через следующую команду:</p>
+<p>Если NFS сервер использует ZFS, не забудьте включить sharenfs опцию на необходимом пуле. Например, если корневая система ZFS это zroot/ROOT/default, то экспорт NFS включается через следующую команду:</p>
 <pre class="brush:bash;ruler:rule;">
 % zfs set sharenfs=on zroot/ROOT/default
 </pre>
 
 <p>В <em>/etc/rc.conf</em> добавим необходимые для запуска NFS-сервера службы, выполнив команды:</p>
 
-<pre class="brush:bash;ruler:rule;">
-sysrc -q nfs_client_enable="YES"
-sysrc -q nfs_server_enable="YES"
+<pre class="cli">
 sysrc -q nfsv4_server_enable="YES"
 sysrc -q nfscbd_enable="YES"
 sysrc -q nfsuserd_enable="YES"
-sysrc -q rpcbind_enable="YES"
 sysrc -q mountd_enable="YES"
 sysrc -q nfsuserd_enable="YES"
 sysrc -q rpc_lockd_enable="YES"
 </pre>
 
-<p>Если вы планируете делать фейловер и таким образом, NFS-сервером может стать любой элемент кластера, поэтому продублируем эти параметры на все остальные <strong>CBSD</strong> ноды, тем более, что часть из них необходима для NFS клиента.
-После перезагрузки серверов или служб, NFS готова к работе.</p>
+<p>Создадим пустые каталоги для jail1, который будет на NFS:</p>
+<pre class="cli">
+mkdir -p /nfs/data/jail1 /nfs/fstab/jail1 /nfs/rcconf/jail1 /nfs/system/jail1
+</pre>
+<p>После перезагрузки NFS сервера или служб, NFSv4 сервер готов к работе.</p>
 
-<p>Конфигурирование клиентов. В нашем случае, NFS-сервер имеет IP адрес 192.168.10.201, соотв. замените этот адрес на тот, который соответствует вашему серверу.
-Подмонтировать в ручном режиме каталоги можно через команды:</p>
+<p>Со стороны <strong>CBSD</strong>, нам необходимо монтировать данные контейнера через следующие команды:</p>
 
-<pre>
-% mount_nfs -o vers=4 192.168.10.201:/usr/jails/jails-data /usr/jails/jails-data
-% mount_nfs -o vers=4 192.168.10.201:/usr/jails/jails-system /usr/jails/jails-system
-% mount_nfs -o vers=4 192.168.10.201:/usr/jails/jails-rcconf /usr/jails/jails-rcconf
+<pre class="cli">
+% mount_nfs -o vers=4 172.16.0.1:/nfs/data/jail1 /usr/jails/jails-data/jail1-data
+% mount_nfs -o vers=4 172.16.0.1:/nfs/fstab/jail1 /usr/jails/jails-fstab/jail1
+% mount_nfs -o vers=4 172.16.0.1:/nfs/rcconf/jail1 /usr/jails/jails-rcconf/jail1
+% mount_nfs -o vers=4 172.16.0.1:/nfs/system/jail1 /usr/jails/jails-system/jail1
 </pre>
 
 <p>Вы можете использовать файл <em>/etc/fstab</em> с опцией 'late' для монтирования каталогов при старте ноды, либо использовать automount  ( <a href="http://man.freebsd.org/autofs/5" target="_blank">autofs(5)</a> )</p>
-<p>Теперь вы можете создавать ваши контейнера на любой из нод и через миграцию или последовательность команд:</p>
+<p>Однако в этом примере мы продемонстрируем работу опции <strong>mnt_start</strong> с внешним кастомным скриптом для монтирования файловых систем. Скрипт присутствует как рабочий пример и лежит в каталоге
+<em>/usr/local/cbsd/share/examples/env_start/nfsv4</em>. Он довольно <a target="_blank" href="https://github.com/cbsd/cbsd/blob/develop/share/examples/env_start/nfsv4/env_start_nfs.sh">прост</a>. А также
+использует конфигурационный файл, в котором вы можете отредактировать динамические настройки под ваше окружение.</p>
+<p>Скопируем конфигурационный файл и поправим IP адреса:</p>
+<pre class="cli">
+% cp -a /usr/local/cbsd/share/examples/env_start/nfsv4/env_start_nfs.conf ~cbsd/etc/
+% vi ~cbsd/etc/env_start_nfs.conf
+</pre>
+<p>В нашем примере файл будет выглядеть следующим образом:</p>
+<pre class="cli">
+NFS_SERVER="172.16.0.1"
+NFS_SERVER_ROOT_DIR="/nfs"
+MOUNT_RCCONF=0
+MOUNT_FSTAB=1
+MOUNT_NFS_OPT="-orw -overs=4 -ointr -orsize=32768 -owsize=32768 -oacregmax=3 -oacdirmin=3 -oacdirmax=3 -ohard -oproto=tcp -otimeout=300"
+</pre>
+
+<p>Создаем jail через cbsd jconstruct-tui:</p>
+
+<p>Не забываем, что мы создаем контейнер с именем jail1, укажем его в качестве jname.
+<p class="text-center"><img src="/img/cbsd_dfs_nfs1.png" alt="" /></p>
+<p>Поскольку скрипт для параметра <strong>mnt_start</strong> мы будем использовать без модификации, укажем
+его непосредственно в /usr/local/cbsd/share/examples/env_start/nfsv4/env_start_nfs.sh:
+</p>
+<p class="text-center"><img src="/img/cbsd_dfs_nfs2.png" alt="" /></p>
+
+<p>Теперь, при операциях, требующих наличия данных контейнера (например jstart, jcreate), <strong>CBSD</strong> будет вызывать этот скрипт.</p>
+
+<p>Если вы используете несколько <strong>CBSD</strong> серверов, вы можете легко выполнять перерегистрацию контейнера с одного физического сервера
+на другой через junregister команду на одном сервере и jregister на другом:</p>
 
 <pre>
 node1 % cbsd junregister jname='jail*'     // на ноде, где зарегистрированы jail
 node2 % cbsd jregister jname='jail*'       // на другой ноде
 </pre>
 
-<p>И мигрировать ваши окружения, распределяя и маcштабируя нагрузку на ваш кластер более ровно.</p>
-
+<p>И мигрировать таким образом ваши окружения, распределяя и маcштабируя нагрузку на ваш кластер более ровно.</p>
 
 <h2><a name="dfs_glusterfs">CBSD и GlusterFS</a></h2>
 

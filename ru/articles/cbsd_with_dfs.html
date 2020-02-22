@@ -174,6 +174,8 @@ MOUNT_NFS_OPT="-orw -overs=4 -ointr -orsize=32768 -owsize=32768 -oacregmax=3 -oa
 
 <p>Теперь, при операциях, требующих наличия данных контейнера (например jstart, jcreate), <strong>CBSD</strong> будет вызывать этот скрипт.</p>
 
+<p class="text-center"><img src="/img/cbsd_dfs_nfs3.png" alt="" /></p>
+
 <p>Если вы используете несколько <strong>CBSD</strong> серверов, вы можете легко выполнять перерегистрацию контейнера с одного физического сервера
 на другой через junregister команду на одном сервере и jregister на другом:</p>
 

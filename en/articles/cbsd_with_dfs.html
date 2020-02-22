@@ -1,5 +1,5 @@
 <!--# include file="/ru/_start.html" -->
-<h1><span>An example of using <strong>CBSD</strong> with DFS (Distributed File System)</span></h1>
+<h1><span>Use of <strong>CBSD</strong> together with DFS (Distributed File System)</span></h1>
 <div class="block">
 
 <h2><a name="dfs_generic">General information</a></h2>
@@ -8,7 +8,7 @@
 which leads to a certain overhead in terms of code when you use only ZFS, but makes <strong>CBSD</strong> a more versatile tool that you can use in more general situations. </p>
 <p>One such situation is the use of various embedded platforms with very few resources where the ZFS file system is redundant and voracious,
 which makes it ineffective on various Raspberry PI and similar solutions. On the opposite side of the minimalism are large and large-scale hyperconvergent installations using NAS/SAN
-and distributed storage systems, using external storage that is connected as a shared storage via NFS or distributed storage systems like ClusterFS and Ceph.</p>
+and distributed storage systems, using external storage that is connected via NFS/iSCSI protocol or distributed storage systems like ClusterFS and Ceph.</p>
 
 <p>This will highlight the use of <strong>CBSD</strong> in these installations and describe the Howto-style application notes.</p>
 
@@ -19,6 +19,7 @@ and the need to bring the following directories to the shared store:</p>
 	<li>~cbsd/jails-data: directory with container or virtual machine data</li>
 	<li>~cbsd/jails-system: system directory with additional system information related to the container or virtual machine</li>
 	<li>~cbsd/jails-rcconf: the directory is used when the environment switches to unregister mode</li>
+	<li>~cbsd/jails-fstab: the directory for fstab files</li>
 </ul>
 
 <p>If the working directory  (<strong>workdir</strong>) is initialized in <em>/usr/jails</em> this is, respectively, the directories:</p>
@@ -27,9 +28,25 @@ and the need to bring the following directories to the shared store:</p>
 /usr/jails/jails-data
 /usr/jails/jails-system
 /usr/jails/jails-rcconf
+/usr/jails/jails-fstab
 </pre>
 
-<p>That's all. Other directories, such as bases, you can also put on a shared volume to save space.
+<p>You can transfer the indicated locations to DFS and mount all the environments at one place, however, the authors recommend dividing the resources into individual environments.
+For example, for container jail1, export and mount directly jail1 data, separate from others:
+
+<pre class="cli">
+/usr/jails/jails-data/jail1-data
+/usr/jails/jails-system/jail1
+/usr/jails/jails-fstab/jail1
+</pre>
+
+<p>This will allow you to optimize the operation of file systems between environments and reduce the potential impact of one environment on another -
+ for example, if jail1 very aggressively uses file system locks, it will also affect jail2 when mounting /usr/jails/jails-data, whereas different sessions and mounts 
+ for /usr/jails/jails-data/jail1-data and /usr/jails/jails-data/jail2-data will be independent. 
+ In addition, in this case, you can use different mount sources - jail1 resources can be located on one DFS server, and jail2 on another. 
+ For this, <strong>CBSD</strong> has a mechanism for mounting and dismounting, as described below.</p>
+
+Other directories, such as bases, you can also put on a shared volume to save space.
 However, it is much more efficient to store the base container files locally, which with the <strong>baserw=0</strong> parameter guarantees the operation of the basic utilities and libraries
 with the speed of the local disk and the absence of possible network problems.</p>
 
@@ -49,14 +66,42 @@ with the speed of the local disk and the absence of possible network problems.</
 
 <p>Known issues.</p>
 
-<p>Some DFS, such as NFS and GlusterFS, require additional configuration in pkg.conf for correct locking:</p>
+<p>Some DFS, such as NFSv3 and GlusterFS, require additional configuration in pkg.conf for correct locking:</p>
 
 <pre class="brush:bash;ruler:rule;">
 % echo "NFS_WITH_PROPER_LOCKING = true;" >> /usr/local/etc/pkg.conf
 </pre>
 
+<h2><a name="dfs_cbsd_hooks"><strong>CBSD</strong> hooks for DFS</a></h2>
 
-<h2><a name="dfs_nfs">CBSD with NFS</a></h2>
+<p>If you go beyond the case when all the environment data is located in the local ZFS/UFS file system, you will come across the issue of pre-mounting a resource containing the environment data.
+To do this, the <strong>CBSD</strong> uses the <strong>mnt_start</strong> and <strong>mnt_stop</strong> parameters, in which you specify user scripts that work at startup and when the environment stops.
+It can be any executable script, for successful work with <strong>CBSD</strong> of which it is necessary to follow several rules:
+	<ul>
+		<li>Your script must be resilient to secondary mounting. For example, you started the environment, then stopped and started again.
+		Your script should not be mounted on top of the previous mount - this check and this behavior is on the conscience of your script - check the fact of mounting;</li>
+		<li>Your script should exit with code 0 on success or non-zero code on fatal problems;</li>
+		<li>Your hook's run time is unlimited - avoid situations where your script may hang forever;</li>
+		<li><strong>CBSD</strong> runs a script with certain arguments to convey some useful information. Your script must process the parameters via getopt in order to accept them. These are the following keys:
+		<table class="images">
+			<tr><td><strong>-d</strong></td><td>data - path to the environment data directory;</td></tr>
+			<tr><td><strong>-f</strong></td><td>fstab - path to the fstab directory (relevant mainly for jail);</td></tr>
+			<tr><td><strong>-j</strong></td><td>jname - directly the name of your environment;</td></tr>
+			<tr><td><strong>-r</strong></td><td>rcconf - rcconf directory path;</td></tr>
+			<tr><td><strong>-s</strong></td><td>sysdata - sysdata directory path;</td></tr>
+		</table>
+		</li>
+	</ul>
+
+	<p>As you can see, using these parameters with the ability to create custom scripts for connecting external storage gives you the opportunity to use scripts that no white people have heard of, for example: iSCSI, Infiniband, GELI, HASTD, etc.</p>
+
+	<p>As a working example, look at the script for working with NFSv4 in the next paragraph.</p>
+
+	<p>In addition, it may be useful for you to find out about the possibility of custom cloning operations - for example, 
+	if you manage your external storage and it can perform data copying operations on storage side, you can avoid high network load during normal data copying, 
+	and make an instant clone with using an external drive. See <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jclone_ssi.html#clone-local.d%20hook:%20local/custom%20data%20clone">here</a> and <a target="_blank" href="https://github.com/cbsd/cbsd/issues/373">here</a> for details.</p>
+
+<h2><a name="dfs_nfs">CBSD with NFSv4</a></h2>
 
 <p>Using <strong>CBSD</strong> with NFS (option when NFS is not a dedicated NAS, but one of three <strong>CBSD</strong> nodes)</p>
 

@@ -743,5 +743,23 @@
     <guid>OpenBSD 6.6 cloud image for CBSD</guid>
     <pubDate>Sat, 14 Mar 2020 02:37:00 +0000 </pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.6 available</title>
+    <description>CBSD 12.1.6 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      *ls, *get: custom facts&lt;br /&gt;
+      support for DHCPv6 in ip4_addr ( automatic IPv6 assignment from node pool )&lt;br /&gt;
+      bugfix: bhyve: bclone fixes&lt;br /&gt;
+      bugfix: jail: jclone: fixes for fstab dir location&lt;br /&gt;
+      bugfix: jail: j2prepare: fixes for fstab dir location&lt;br /&gt;
+      bugfix: jail: j2prepare: check for remote CBSD version&lt;br /&gt;
+      bugfix: jail: jrename: fixes for fstab dir location&lt;br /&gt;
+      bhyve: OpenBSD 6.6 cloud image&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.6 available</guid>
+    <pubDate>Sun, 15 Mar 2020 03:49:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

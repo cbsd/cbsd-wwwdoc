@@ -31,15 +31,18 @@
 		<p>Это все! Теперь мы можем запускать <strong>cbsd jconstruct-tui</strong>, где вам нужно делать еще меньше настроек для создания окружения!</p>
 		<br>
 		<p>Возможно, вы захотите создать несколько собственных профилей. Для этого, также создавайте файлы в каталоге <i>~cbsd/etc/</i> используя префикс в имени файла <i>jail-freebsd-<strong>YOUR_PROFILE</strong>.conf</i></p>
-		<p>При этом в качестве _обязательного_ параметра внутри каждого профиля, должно быть имя этого профиля в переменной <i>jail_profile="default"</i>. Например, создадим два профиля: <strong>baserw</strong> и <strong>lo0</strong>:</p>
+		<p>При этом в качестве <strong>_обязательного_</strong> параметра внутри каждого профиля, должно быть имя этого профиля в переменной <i>jail_profile="default"</i> и <strong>jail_active</strong> установленный в 1 (активный профиль).
+		Например, создадим два профиля: <strong>baserw</strong> и <strong>lo0</strong>:</p>
 		<li><br>
 		<pre class="brush:bash;ruler:true;">
 		% echo 'jail_profile="baserw"' > ~cbsd/etc/jail-freebsd-baserw.conf
+		% echo 'jail_active="1"' >> ~cbsd/etc/jail-freebsd-baserw.conf
 		% echo 'baserw="1"' >> ~cbsd/etc/jail-freebsd-default.conf
 		</pre>
 		<li><br>
 		<pre class="brush:bash;ruler:true;">
 		% echo 'jail_profile="lo"' > ~cbsd/etc/jail-freebsd-lo0.conf
+		% echo 'jail_active="1"' >> ~cbsd/etc/jail-freebsd-lo0.conf
 		% echo 'interface="lo0"' >> ~cbsd/etc/jail-freebsd-lo0.conf
 		</pre>
 		<p>Теперь вы увидите профили в выборе возможных вариантов меню 'profile' при запуске <strong>cbsd jconstruct-tui</strong></p>

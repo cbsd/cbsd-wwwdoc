@@ -775,5 +775,17 @@
     <guid>CBSD 12.1.7 available</guid>
     <pubDate>Wed, 25 Mar 2020 03:49:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.8 available</title>
+    <description>CBSD 12.1.8 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fixes: fix regression in jexec introduced in 12.1.7&lt;br /&gt;
+      fixes: fix bimport script ( missing macro), #482&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.8 available</guid>
+    <pubDate>Sun, 05 Apr 2020 11:49:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

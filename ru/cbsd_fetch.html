@@ -98,8 +98,8 @@
 		<p>3) Создать каталог <em>/usr/local/www/cbsd-mirror</em> куда будем сохранять образы, создадим лог файл для rsync и выставим корректные права для пользователя <strong>www</strong>, от которого мы будем синхронизировать</p>
 		<pre class="brush:bash;ruler:true;">
 		mkdir -p /usr/local/www/cbsd-mirror/iso /usr/local/www/cbsd-mirror/cloud
-		touch /var/log/cbsd_mirror.log
-		chown -R www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log
+		touch /var/log/cbsd_mirror.log /var/log/cbsd_mirror_cloud.log
+		chown -R www:www /usr/local/www/cbsd-mirror /var/log/cbsd_mirror.log /var/log/cbsd_mirror_cloud.log
 		</pre>
 		<p>4) Откорректируем <strong>nginx.conf</strong>, указав в качестве <strong>server_name</strong> корректное имя сервера (в данном примере: <strong>electrode.bsdstore.ru</strong>) и путь к корневому каталогу:</p>
 		<pre class="cli;">

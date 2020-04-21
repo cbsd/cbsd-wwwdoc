@@ -1,0 +1,95 @@
+<h1><span>Обновление клеток: etcupdate</span></h1>
+
+<h2><a name="etcupdate_cmd">Команда etcupdate</a></h2>
+<div class="block">
+<pre class="brush:bash;ruler:true;">
+	% cbsd etcupdate
+</pre>
+<strong>Описание</strong>:
+<p>
+Для решения проблемы синхронизации <em>distribution</em>-файлов (в основном это содержимое каталога <em>/etc</em>) при смене версий базовой системы,
+FreeBSD предлагает две утилиты:  <a href="http://man.freebsd.org/mergemaster/8" target="_blank">mergemaster(8)</a>
+ и  <a href="http://man.freebsd.org/etcupdate/8" target="_blank">etcupdate(8)</a>.
+<strong>CBSD</strong> содержит скрипт для работы с etcupdate под одноименным именем.
+По-умолчанию, <strong>CBSD</strong> создает иерархию каталогов для работы etcupdate в системном каталоге базы и каждого jail.
+Вы можете выключить это, переопределив значение параметра etcupdate_init на '0' (disabled) в профиле вашего контейнера или глобально 
+через jail-freebsd-default.conf конфигурационный файл в каталоге <em>~cbsd/etc/</em>
+</p>
+
+<p>Что <strong>CBSD</strong> etcupdate не делает:</p>
+ <ul>
+   <li><strong>CBSD</strong> не производит автоматический запуск обновлений файлов,
+   поскольку эти операции могут приводить к нарушению в работе сервисов или неожиданным для вас изменениям в файлах.
+   Некоторые попытки автоматических операций слияния могут вызывать конфликт. В этих случаях, требуется вмешательство оператора.</li>
+ </ul>
+<p>Что <strong>CBSD</strong> etcupdate делает:</p>
+  <ul>
+    <li><strong>CBSD</strong> автоматически создает build/extract файлы для корректной работы etcupdate для каждой версии FreeBSD base.
+    <strong>CBSD</strong> отслеживает версии ваших контейнеров и соответствие distribution файлов, делая проверку и выдавая
+    при запуске контейнера соответствующее сообщение о необходимости синхронизации.</li>
+  </ul>
+<p>
+<strong>CBSD</strong> etcupdate враппер позволяет вам происходить следующие операции, повторяя ключи оригинальной etcupdate(8) утилиты:
+<strong>*</strong> выполнить операцию etcupdate для контейнера XXXX, со старой версии контейнера XX на новую YY. Поскольку <strong>CBSD</strong>
+владеет информацией о том, какая версия была и какая версия сейчас, параметры from= и to= могут быть опущены:
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=update jname=XXXX [from=XX to=YY]
+</pre>
+<strong>*</strong> запустить extract инициализацию для базы FreeBSD версии XX.YY (см man etcupdate):
+(<strong>CBSD</strong> с версии 11.1.9 выполняет эту операцию автоматически при получении bases)
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=extract ver=XX.YY [force=1]
+</pre>
+<strong>*</strong> запустить build инициализацию для версии XX.YY (см man etcupdate):
+(<strong>CBSD</strong> с версии 11.1.9 выполняет эту операцию автоматически при получении bases)
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=build ver=YY.YY [force=1]
+</pre>
+<strong>*</strong> запустить ручное исправление конфликтов при их налиии для контейнера XXX.
+Используйте переменную значения EDITOR для использования своего любимого редактора (см man etcupdate):
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=resolve jname=XXX
+</pre>
+<strong>*</strong> очистить рабочий каталог jail от etcupdate файлов ( предшествует операциям mode=extract и mode=build ):
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=purge
+</pre>
+</p>
+
+<h2><a name="jupgrade_cmd">FreeBSD-way config files best practices</a></h2>
+
+<p>Для того, чтобы минимизировать возможность конфликтных ситуаций и тем самым облегчить процедуры синхронизации конфигурационные файлов, старайтесь избегать
+редактирования базовых системных файлов, таких как /etc/inetd.conf, /etc/syslog.conf, /etc/ssh/sshd_config, /etc/newsyslog.conf и тд. и тп. Вместо этого,
+пользуйтесь системами конфигураций, такими как Chef, Salt, Puppet которые менеджерят необходимые конфигурации. Либо, используйте аргументы _flags в стандартном
+/etc/rc.conf файле для переопределения ваших конфигурационных файлов. Например, вместо редактирования /etc/sshd/sshd_config, вы можете переопределить sshd параметры в
+/etc/rc.conf следующим образом:
+
+<pre class="cli">
+ sshd_flags="-oUseDNS=no -oPort=22222 -oPermitRootLogin=no -oUseBlacklist=yes"
+</pre>
+</p>
+
+<p>Если флаги не позволяют вам провести необходимую настройку в полной мере, скопируйте  конфигурационный файл сервиса в другое место и переопределите к нему путь через _flags.
+Например. Создадим каталог <em>/root/etc</em>, в котором будут расположены ваши конфигурационные файлы для inetd, blacklistd, syslogd, newsyslog:
+
+<pre class="brush:bash;ruler:true;">
+ mkdir /root/etc
+ cp -a /etc/inetd.conf /root/etc
+ cp -a /etc/syslog.conf /root/etc
+ cp -a /etc/blacklistd.conf /root/etc
+ cp -a /etc/newsyslog.conf /root/etc
+</pre>
+</p>
+
+<p>Переопределим пользуясь ключами, путь конфигураций для вышеупомянутых утилит:
+
+<pre class="brush:bash;ruler:true;">
+ sysrc inetd_flags="-wW -C 60 /root/etc/inetd.conf"
+ sysrc syslogd_flags="-ss -f /root/etc/syslog.conf"
+ sysrc blacklistd_flags="-c /root/etc/blacklistd.conf"
+ sysrc newsyslog_flags="-CN -f /root/etc/newsyslog.conf"
+</pre>
+
+и тд. Ряд утилит также поддерживают вынос кастомных конфигураций в соответствующие app.d-каталоги.
+Пользуйтесь этими трюками и ваши операции по обновлению будут проходить очень легко.
+</p>

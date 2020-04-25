@@ -462,8 +462,8 @@
 	<p><strong>11.1.4</strong>&nbsp;&mdash; 2017-09-07</p>
 	<ul>
 		<li>jexec now support execution command in multiple jail (in parallel mode)</li>
-		<li>support for jname as mask for [jb]stop/[jb]start/junregister/jregister/[jb]remove/[jb]export/[jb]import</li>
-		<li>><em>(bugfix)</em> allow.reserved_ports still not available in FreeBSD 11-RELENG, only -CURRENT</li>
+		<li>support for jname as mask for [jb]stop,[jb]start,junregister,jregister,[jb]remove,[jb]export,[jb]import</li>
+		<li><em>(bugfix)</em> allow.reserved_ports still not available in FreeBSD 11-RELENG, only -CURRENT</li>
 	</ul>
 </div>
 <div class="block">
@@ -471,7 +471,7 @@
 	<ul>
 		<li>add ${bhyve_vnc_tcp_ipconnect} variable for external hooks</li>
 		<li>add Makefile for update vm-profiles regardless of CBSD releases, from GitHub</li>
-		<li>><em>(bugfix)</em> bhyve: dont use iso_args when vm_iso_path is empty (Reported by <strong>Alexsander Povolotsky (aka tarkhil)</strong> via Telegram</li>
+		<li><em>(bugfix)</em> bhyve: dont use iso_args when vm_iso_path is empty (Reported by <strong>Alexsander Povolotsky (aka tarkhil)</strong> via Telegram</li>
 	</ul>
 </div>
 <div class="block">
@@ -486,6 +486,7 @@
 		<li>add zfs-migrator: ZFS-based cloning instances between ZFS nodes,
 		at the moment without integration with jcoldmigrate and work only
 		via root ssh connection. <a href="https://github.com/cbsd/cbsd/issues/118" target="_blank">Issue #118</a> also participates here</li>
+	</ul>
 </div>
 <div class="block">
 	<p><strong>11.1.1</strong>&nbsp;&mdash; 2017-08-05</p>
@@ -557,7 +558,7 @@
 	<p><strong>11.0.9</strong>&nbsp;&mdash; 2017-02-19</p>
 	<ul>
 		<li>fix for running i386 jail on amd64 hoster</li>
-		<li>add compress level control for export operation. <a href="https://github.com/cbsd/cbsd/issues/131" target="_blank">Issue #131</a> </li>
+		<li>add compress level control for export operation. <a href="https://github.com/cbsd/cbsd/issues/131" target="_blank">Issue #131</a></li>
 	</ul>
 </div>
 <div class="block">
@@ -645,7 +646,7 @@
 		<li>We are prepared <a href="https://github.com/cbsd/puppet-cbsd">Puppet CBSD</a> module for Puppet</a></li>
 		<li>We are launched the official forum for the users <strong>CBSD</strong>: <a href="https://forums.bsdstore.ru" target="_blank">https://forums.bsdstore.ru/</a></li>
 		<li>Project CBSD WEB closed (without starting). Instead, <a href="https://clonos.tekroutine.com/">ClonOS</a> project has been founded in the form of an independent distribution: <a href="https://forums.bsdstore.ru/viewtopic.php?f=1&t=4">Announcement on the forums</a>.</li>
-        </ul>
+	</ul>
 </div>
 <div class="block">
         <hr>
@@ -715,6 +716,8 @@
 		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jorder_ssi.html">jorder</a>: restore functional</li>
 		<li><strong>Krzysztof Antczak</strong> <a href="https://github.com/tradero/vac" target="_blank">share examples</a> automation for deployment CBSD node through Vagrant + Ansible</li>
 	</ul>
+</div>
+<div class="block">
 	<p>bugfix release</p>
 	<p><strong>10.1.3</strong>&nbsp;&mdash; 2015-01-07</p>
 	<ul>
@@ -722,6 +725,8 @@
 		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_ssi.html">jconstruct-tui</a>: choice for startup services in the created jail</li>
 		<li>Opportunity to build and run <strong>CBSD</strong> on <a href="http://www.dragonflybsd.org/" target="_blank">DragonFlyBSD</a> platform. (Nevertheless, while in DF have the old jail framework, <strong>CBSD</strong> unusable there)</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.1.2</strong>&nbsp;&mdash; 2014-12-21</p>
 	<ul>
 		<li><strong>mountfstab</strong>: check for mount points duplicate in system and local jail fstab file. When duplicate - fstab.local content wins</li>
@@ -737,6 +742,8 @@
 		<li><em>(bugfix)</em> Fixes for jexport/jimport with newjname args; wrong mounting for /usr/compat. <a href="https://github.com/cbsd/cbsd/issues/35" target="_blank">issue 35</a> (Reported and tested by: <strong>Krzysztof Antczak</strong>)</li>
 		<li><em>(bugfix)</em> Correction to determine the type of IPv4: must contain only numbers. <a href="https://github.com/cbsd/cbsd/issues/32" target="_blank">issue 32</a> (Reported by: <strong>Alexander Samodelkin</strong>)</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.1.1</strong>&nbsp;&mdash; 2014-10-02</p>
 	<p>bugfix release</p>
 	<ul>
@@ -744,6 +751,8 @@
 		<li>rename svnup to svnup. Leave svnup for compatible a while</li>
 		<li>apply workaround for environments who have different version from node. See: grep -A28 ^20140930: /usr/ports/CHANGES</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.1.0</strong>&nbsp;&mdash; 2014-09-27</p>
 	<ul>
 		<li>Tested for FreeBSD 10.1-RELEASE compatible</li>
@@ -764,6 +773,8 @@
 		<li><em>(bugfix)</em> bhyve: do not test hard drive for empty when booting from CD</li>
 		<li><em>(bugfix)</em> Fix order of epair number and a/b side <a href="https://github.com/cbsd/cbsd/issues/25" target="_blank">issues 25</a>(reported and fixed by: <strong>kev009</strong>)</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.7</strong>&nbsp;&mdash; 2014-08-15</p>
 	<ul>
 		<li>fixes for incorrect ZFS fs name in jcoldmigrate (reported by: <em>Alexey Shubnikov)</em></li>
@@ -773,6 +784,8 @@
 		<li>bstop/bstart/jstop/jstart/bconfig/jconfig: when executed without arguments, will show the list of jails for interactive selection</li>
 		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jls_ssi.html">jls</a>, <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_list_ssi.html">node</a>, <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrctl_ssi.html">jrctl</a> and <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jail2iso_ssi.html">jail2iso</a> now have corresponding <em>.conf</em> files</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.6</strong>&nbsp;&mdash; 2014-07-12</p>
 	<ul>
 		<li>cbsd  <a href="/en/cbsd_taskd.html">taskd</a>: daemon for internal tasks</li>
@@ -781,6 +794,8 @@
 		<li>bhyve: implement other method for POPCNT checking</li>
 		<li>repo: newjname as argument for alternative name of stored jail</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.5</strong>&nbsp;&mdash; 2014-05-02</p>
 	<ul>
 		<li>Profiles for <strong>jconstruct\*</strong> (<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jcreate_ssi.html">jail create via dialog menu </a>)</li>
@@ -788,6 +803,8 @@
 		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jlogin_ssi.html">nlogin</a> without arguments now lists nodes for selection</li>
 		<li><em>/usr/local/bin/cbsd</em> now with 0500 perms and <em>cbsd</em> owner, due to use <strong>sudo</strong> for some of its scripts</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.4</strong>&nbsp;&mdash; 2014-04-16</p>
 	<ul>
 		<li>Modulization</li>
@@ -797,12 +814,16 @@
 		<li>support for <strong>allow.kmem</strong>, which is&nbsp;allows to&nbsp;run Xorg server in&nbsp;the jail (FreeBSD 11&nbsp;aka HEAD only)</li>
 		<li>Support for <a href="/en/bhyve.html">bhyve</a></li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.3</strong>&nbsp;&mdash; 2014-02-18</p>
 	<ul>
 		<li><em>(bugfix)</em> Fixed path to&nbsp;pkg(7) in&nbsp;<strong>pkgbrowser</strong>, thanks to&nbsp;Anton Iutin.</li>
 		<li><strong>jsnapshot</strong> now only works with snapshots created by&nbsp;<em>cbsd</em>, improving output for snapshot list (<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jsnapshot_ssi.html">jail snapshot (zfs-only)</a>)</li>
 		<li><strong>history</strong> for output last <strong>CBSD</strong> commands ((<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_history_ssi.html">cbsd history</a>)</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.2</strong>&nbsp;&mdash; 2014-02-01</p>
 	<ul>
 		<li>Improving output for <strong>--help</strong>&nbsp;&mdash; external link to&nbsp;documentation(<a href="/en/cmdsyntax_cbsd.html">cbsd syntax</a>)</li>
@@ -814,48 +835,61 @@
 		<li>cbsdsar script has been removed, this functionality was included/enabled by&nbsp;mistake from development version</li>
 		<li>system <strong>CBSD</strong> account now created by&nbsp;ports framework (or&nbsp;manually).</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.1</strong>&nbsp;&mdash; 2013-12-28</p>
 	<ul>
 		<li>uzip in&nbsp;jail2iso</li>
 		<li>Remove auto pkg repository to&nbsp;<strong>http://dl.bsdstore.ru</strong> due to&nbsp;official FreeBSD repository is&nbsp;back. To&nbsp;use an&nbsp;alternate repository create a&nbsp;file $workdir/etc/pkg.conf with relevant content.</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>10.0.0</strong>&nbsp;&mdash; 2013-12-15</p>
 	<ul>
 		<li>Support for VIMAGE/vnet</li>
 		<li>Support zfs jail, delegating ZFS file systems in&nbsp;a&nbsp;jail via jail&rsquo;s fstab</li>
 		<li>Support for cpuset</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>9.2.5</strong>&nbsp;&mdash; 2013-11-7</p>
 	<ul>
 		<li>bugfixes: jclone check for zfs unmount, fixes for warning in&nbsp;jrename on&nbsp;zfs, jconfig allow edit devfs ruleset</li>
 		<li>jupgrade for upgrading jail in&nbsp;baserw=1</li>
 		<li>jconfig/jset can change ip&nbsp;address of&nbsp;the jail on-the-fly.</li>
 	</ul>
+</div>
+<div class="block">
 	<p><strong>9.2.4</strong>&nbsp;&mdash; 2013-10-31</p>
 	<ul>
 		<li>Partial migration of&nbsp;settings data to&nbsp;SQLite (inventory, jail rc.conf)</li>
 		<li>move users file mounts to&nbsp;fstab.local</li>
 		<li>switch between rw&nbsp;and ro&nbsp;bases in&nbsp;jail with the appropriate disposal or&nbsp;filling bases</li>
 	</ul>
+</div>
+<div class="block">
 	<p>For users who upgrading from 9.2.{0,1}:</p>
 	<ul>
 		<li>a) If&nbsp;you edited the fstab for the jail, these records should be&nbsp;transferred to&nbsp;fstab.local file manually</li>
 		<li>b) Files rc.conf for the jails in&nbsp;the jails-rcconf is&nbsp;obsolete and all setings in&nbsp;SQLite3 database now (the old copy of&nbsp;the file is&nbsp;saved in&nbsp;the jails-system/jailname)</li>
 		<li>Please refer to&nbsp;<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html">jail config</a> pages for details.</li>
 	</ul>
-
+</div>
+<div class="block">
 	<hr>
 	<p><strong><font style="color:RED">Warning</font></strong>&nbsp;&mdash; 2013-09-04</p>
 	<p>In&nbsp;connection with <a href="http://lists.freebsd.org/pipermail/freebsd-doc/2013-September/022544.html" target="_blank">this issue</a> and nullfs-based jails, be&nbsp;careful when deploying public hosting and follow this <a href="http://www.freebsd.org/security/advisories/FreeBSD-SA-13:13.nullfs.asc" target="_blank">Security Advisories</a> instructions.</p>
 	<hr>
-
+</div>
+<div class="block">
 	<p><strong>9.2.1</strong>&nbsp;&mdash; 2013-08-02</p>
 	<ul>
 		<li>Partial migration of&nbsp;settings data to&nbsp;SQLite</li>
 		<li>cpr script to&nbsp;build the repository</li>
 		<li>to&nbsp;choose and install software from the repository during the creation of&nbsp;jail (<strong>pkgbrowser</strong>)</li>
 	</ul>
-
+</div>
+<div class="block">
 	<p><strong>9.2.0</strong>&nbsp;&mdash; 2013-02-25</p>
 	<ul>
 		<li>Testing an&nbsp;experimental version, not for production. Implementing basic commands for working with jails and nodes.</li>

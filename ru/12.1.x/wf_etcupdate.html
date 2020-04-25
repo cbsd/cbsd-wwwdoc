@@ -30,6 +30,7 @@ FreeBSD предлагает две утилиты:  <a href="http://man.freebsd
   </ul>
 <p>
 <strong>CBSD</strong> etcupdate враппер позволяет вам происходить следующие операции, повторяя ключи оригинальной etcupdate(8) утилиты:
+<br>
 <strong>*</strong> выполнить операцию etcupdate для контейнера XXXX, со старой версии контейнера XX на новую YY. Поскольку <strong>CBSD</strong>
 владеет информацией о том, какая версия была и какая версия сейчас, параметры from= и to= могут быть опущены:
 <pre class="brush:bash;ruler:true;">
@@ -54,9 +55,12 @@ FreeBSD предлагает две утилиты:  <a href="http://man.freebsd
 <pre class="brush:bash;ruler:true;">
   cbsd etcupdate mode=purge
 </pre>
+<p>В дополнение к этому, <strong>CBSD</strong> создает резервную копию distribution файлов перед выполнением операции
+update, а также регулирует ротацию архивов в системном каталоге контейнера ( ~cbsd/jails-system/XXX/etcupdate )
+Вы можете регулировать это поведение параметром etcupdate_create_backup= в конфигурационном файле etcupdate.conf.
 </p>
 
-<h2><a name="jupgrade_cmd">FreeBSD-way config files best practices</a></h2>
+<h2><a name="etcupdate_best_practices">FreeBSD-way config files best practices</a></h2>
 
 <p>Для того, чтобы минимизировать возможность конфликтных ситуаций и тем самым облегчить процедуры синхронизации конфигурационные файлов, старайтесь избегать
 редактирования базовых системных файлов, таких как /etc/inetd.conf, /etc/syslog.conf, /etc/ssh/sshd_config, /etc/newsyslog.conf и тд. и тп. Вместо этого,
@@ -93,3 +97,53 @@ FreeBSD предлагает две утилиты:  <a href="http://man.freebsd
 и тд. Ряд утилит также поддерживают вынос кастомных конфигураций в соответствующие app.d-каталоги.
 Пользуйтесь этими трюками и ваши операции по обновлению будут проходить очень легко.
 </p>
+
+<h2><a name="etcupdate_sample">Пример работы с etcupdate</a></h2>
+
+<p>Создадим jail с версией базы 11.3:
+
+<pre class="brush:bash;ruler:true;">
+cbsd jcreate jname=jail4 ip4_addr=DHCP ver=11.3
+</pre>
+
+Изменим версию базы контейнера, произведя тем самым переход на более старшую версию, например на 12.1:
+
+<pre class="brush:bash;ruler:true;">
+ cbsd jset jname=jail4 ver=12.1
+</pre>
+
+Используя команду jls, вы можете посмотреть текущую версию базы контейнера и версию distribtion ( etcver ):
+
+<pre class="brush:bash;ruler:true;">
+ cbsd jls display=jname,ver,etcver
+</pre>
+
+При старте контейнера, вы можете увидеть сообщение от <strong>CBSD</strong> о несоответствии файлов с актуальной базой
+и предложение воспользоваться командой для обновления. Запустим ее:
+
+<pre class="brush:bash;ruler:true;">
+ cbsd etcupdate jname=jail4 mode=update
+</pre>
+
+Команда обновит файлы, которые синхронизируются в автоматическом режиме и выведет сообщение о необходимости
+ручного разрешения конфликтов, если автоматический режим столкнулся с трудностями. Запустив resolve, мы
+можем исправить конфликты в ручном режиме, приведя файл к желаемому виду:
+
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate jname=jail4 mode=resolve
+</pre>
+</p>
+
+<p class="text-center"><img src="/img/etcupdate1.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate2.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate3.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate4.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate5.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate6.png" alt="" /></p>
+<p><center>Держите ваши системы в обновленном состоянии!</center></p>
+<br>

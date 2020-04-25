@@ -787,5 +787,21 @@
     <guid>CBSD 12.1.8 available</guid>
     <pubDate>Sun, 05 Apr 2020 11:49:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.9 available</title>
+    <description>CBSD 12.1.9 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: Ubuntu 20.04 LTS cloud image&lt;br /&gt;
+      bhyve: add hdd_boot_firmware for alternative boot firmware for hdd&lt;br /&gt;
+      jail: qemu-usermode: qemu-ppc64-static jail option (however, it does not seem to work correctly)&lt;br /&gt;
+      jls: extra column etcver for etcupdate version&lt;br /&gt;
+      jail: etcupdate helper&lt;br /&gt;
+      dhcpdv4: can use range in the last octet, e.g: 10.0.0.10-16&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.9 available</guid>
+    <pubDate>Fri, 24 Apr 2020 11:29:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

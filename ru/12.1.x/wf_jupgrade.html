@@ -86,9 +86,10 @@ cbsd jupgrade jname=XXXX
 		<p>Аналогичные правила характеры также для клеток с baserw=1, необходимо лишь не забывать после обновления баз в <strong>CBSD</strong> запустить процедуру обновления файлов в конкретном jail через <strong>cbsd jupgrade</strong>.  Кроме этого, при условии что у вас в системе есть база соответствующей версии (или вы мигрировали клетку на другой сервер где есть база новее), при запуске клетки baserw,  <strong>CBSD</strong> способна автоматически проверить наличие более свежих файлов для этой версии и выдать соответствующее информационное сообщение "You have a more recent version of the base in &hellip;":</p>
 		<p class="text-center"><img src="/img/jupgrade3.png" alt="" /></p>
 	</div>
-	
+
 	<h2><a name="jail_etcupdate">Обновление конфигурационных файлов клеток, etcupdate/mergemaster</a></h2>
 	<div class="block">
-				<p>// to be continued</p>
+		<p>Обновление бинарных файлов - это лишь пол беды) Вы также должны синхронизировать конфигурационые файлы. Смотрите здесь, чем <strong>CBSD</strong> может быть вам полезна в этом:
+		<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_etcupdate_ssi.html">etcupdate</a> helper</li>
 	</div>
 

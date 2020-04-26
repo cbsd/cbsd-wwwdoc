@@ -137,12 +137,21 @@
 		virt-manager and other: What the hell is so many projects, what is the difference between all of them? Any comparison?</p>
 		<ul>
 			<li>
-				<p>Most of them were born and already died. Comparison with <strong>CBSD</strong> is <a target="_blank" href="https://github.com/cbsd/cbsd/issues/224">quite difficult</a>. Short answer: each project has a very special developmental vector and goals in comparison with other tools; You have a choice between several different implementation options.
+				<p>Most of them were born and already died. Some projects are born because of NIH syndrome. Some die for lack of long-term goals and support.
+				Comparison with <strong>CBSD</strong> is <a target="_blank" href="https://github.com/cbsd/cbsd/issues/224">quite difficult</a>. Short answer: each project has a very special developmental vector and goals in comparison with other tools; You have a choice between several different implementation options.
 				The main difference between CBSD and others is that CBSD is positioned as a complete solution with as simple (where is possible) management interface.
 				CBSD for this reason is much larger and bigger and not all of this is suitable. But we have different goals in comparison with others and focused on complex cluster solutions.
 				</p>
 			</li>
 		</ul>
+
+		<p><strong>Q:</strong> Any child project?
+		<ul>
+			<p>Some people save their time and use <strong>CBSD</strong> to solve more complex tasks, some of them:</p>
+			<li><a target="_blank" href="https://github.com/cbsd/reggae">Reggae: DevOps tool for CBSD</a></li>
+			<li><a target="_blank" href="http://bitbsd.org/">BITBSD</a> and <a target="_blank" href="https://bitclouds.sh/">BitCloud.sh</a>: <strong>CBSD</strong>-based programmable VPS platform for blockchain</li>
+		</ul>
+		</p>
 
 		<p><strong>Q:</strong> jail, bhyve, xen... What about <strong>Docker</strong>, any plan to support Docker in CBSD?</p>
 		<ul>
@@ -150,7 +159,7 @@
 				<p>No. We focus on large production-ready <strong><u>and</u></strong> <strong>FreeBSD-based</strong> installations.
 				Docker is great, but it does not have official FreeBSD support, so it makes no sense to use inappropriate tools in the serious work.</p>
 				<p>You can use the Docker as it is in MacOS or FreeNAS - through an intermediate layer with [x/b]hyve hypervisor. But it suits more for fun and games than for serious
-				application in the production infrastructure. But if you really want, all this <a href="/<!--#echo var="lang" -->/articles/docker_on_freebsd.html">easy to make by yourself</a> without CBSD.</p>
+				application in the production infrastructure. But if you really want, all this: <a href="/<!--#echo var="lang" -->/articles/docker_on_freebsd.html">Docker with FreeBSD</a> or <a href="/<!--#echo var="lang" -->/articles/cbsd_k8s_part1.html">Kubernetes with FreeBSD</a> easy to make by yourself without CBSD ;-)</p>
 			</li>
 		</ul>
 	</div>

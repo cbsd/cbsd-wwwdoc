@@ -1,0 +1,290 @@
+<!--# include file="/en/_start.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span>FreeBSD clustering: VPC with <strong>CBSD</strong></span></h1>
+<h2><a name="vpc_init_intro">Introduction</a></h2>
+<div class="block">
+<p>The <strong>CBSD</strong> project is an attempt to combine the most diverse technologies available in the 
+<a target="_blank" href="https://www.freebsd.org">FreeBSD</a> OS in the field of virtualization and containerization,
+to create a hybrid platform for running isolated environments (in other words: create your own self-hosted AWS without resorting to Amazon ;-).
+We have already demonstrated FreeBSD technologies such as jail, XEN and bhyve hypervisors. <strong>CBSD</strong> associates them with components such as
+ <a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">RACCT</a>, 
+<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jrctl_ssi.html">RCTL</a>, 
+the ability to use network file systems <a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">NFSv4/GlusterFS</a> and
+<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_p9_ssi.html">P9</a>,
+<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html#sriov">SR-IOV</a>,
+<a target="_blank" href="https://www.youtube.com/watch?v=OOqMI4-qMg8">CARP</a>, 
+<a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">PXE Boot</a>,
+<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_cloudinit_ssi.html">cloud-init support</a>, 
+<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_etcupdate_ssi.html">etcupdate</a>, 
+<a href="http://man.freebsd.org/vale/4" target="_blank">vale(4)</a> virtual switches and so on.
+<p>The project develops not only user-frendly UI in the form of bsdconfig/dialog-based interfaces and command line, but also
+ <a target="_blank" href="https://clonos.tekroutine.com">WEB interface</a> and 
+ <a href="/<!--#echo var="lang" -->/broker_driven_sample_ssi.html">API</a>. 
+ All these volumes of work, in turn, help other people save time and quickly implement various projects, such as
+ <a target="_blank" href="http://bitbsd.org/">BITBSD</a> and <a target="_blank" href="https://bitclouds.sh/">BitCloud.sh</a>: programmable VPS platform for blockchain.
+Starting as classic wrapper scripts for creating primitive container actions, <strong>CBSD</strong> eventually got more and more layers of abstractions and expanded its capabilities.
+</p>
+
+<p>This article will focus on the next big layer in <strong>CBSD</strong>, 
+which combines the creation of private networks using 
+<a target="_blank" href="https://en.wikipedia.org/wiki/Virtual_Extensible_LAN">vxlan</a> technology 
+to create a full-mesh <a target="_blank" href="https://en.wikipedia.org/wiki/Network_topology">full-mesh</a>
+network between multiple physical hosts in different parts of the globe.
+
+This is one of the biggest challenges in our ambitious 
+<a href="/<!--#echo var="lang" -->/roadmap.html">RoadMap</a> called 
+Stretched virtual L2 network (vxlan, qinq) for mutliple DataCenter. 
+
+In turn, this step opens the door to solving the following large tasks as a distributed VALE switch/MAC learning
+ (<a target="_blank" href="https://en.wikipedia.org/wiki/Software-defined_networking">SDN</a> components),
+ shared-nothing clusters and the implementation of full-fledged DRS/HA, bringing users close to
+ <a target="_blank" href="https://en.wikipedia.org/wiki/Software-defined_data_center">SDDC</a>.
+We'll talk about this later, starting a series of articles on FreeBSD clustering.
+</p>
+<p>So, a stretched L2 between different hosts helps you organize interconnected virtual networks over classic Ethernet.
+Having several independent server connections in different parts of the world and with different providers,
+ you can place virtual environments with direct access in them, which will allow you to solve various interesting problems, 
+ such as lack of resources at one point or organization of fault tolerance at the DataCenter level.
+</p>
+The Virtual eXtensible Local Area Network (<a target="_blank" href="https://wiki.freebsd.org/vxlan">VXLAN</a>) implementation 
+was added to FreeBSD over 6 years ago (at the time of this writing) and has been available since version 8-CURRENT.
+
+Using this technology, you can create a large number (16 million) of virtual Ethernet segments via UDP/IP transport or multicast. 
+In point-to-point mode, the setup and operation of the system resembles 
+<a href="http://man.freebsd.org/gif/4">gif/<a href="http://man.freebsd.org/gre/4">gre</a> tunnels.
+</p>
+
+<h2><a name="vpc_init_build_net">Build the VXLAN network</a></h2>
+
+<!-- <em>Смотрите <a href="_blank" target="https://youtu.be/_hTAQxxaP8g">эту ссылку на youtube</a>, где демонстрируется настрока из этого примера (english subtitles)</em> -->
+
+<p>In our example, we have three servers with direct access to each other via the Internet. 
+This number of servers is only a limitation of the author of the article. 
+Each server has only one external IP address. 
+Our task is to combine all three servers into one cluster, 
+inside which we can create isolated virtual networks and environments inside.
+</p>
+<p>In the foreseeable future and with the further spread of IPv6 over the last miles, 
+the implementation of such SDN-based solutions for the needs of small hosting will appear more and more often when you just need to combine your home computer with, 
+say, a friend's home computer in another part of the world and by doing this, 
+both of you will receive fault-tolerant cheap hosting without resorting to the services of data centers.</p>
+
+<p>In the first VPC implementation (v12.1.10), <strong>CBSD</strong> can only use VXLAN-based network virtualization technology, 
+but in the future we plan to expand the number of such technologies. 
+We will leave an example of vxlan multicast for another more suitable article, 
+in which we will demonstrate a more complex implementation, 
+since in our case the nodes are initially located in different data centers from each other and, 
+in essence, they will create a full-mesh network, network topology, when each node connects to all at the same time.
+</p>
+<p>
+The hosts in our example and their addresses (IPv4 should also work):
+<ul>
+	<li>jhoster1 ( IPv6: 2a05:3580:d800:20f7::1, SkyNET ISP )</li>
+	<li>gold-hoster-01 ( 2a01:4f8:241:500c::1, Hetzner DC )</li>
+	<li>gold-hoster-02 ( 2a01:4f8:241:500b::1, Hetzner DC )</li>
+</ul>
+<p class="text-center"><img src="/img/vpc_init1.png" alt="" /></p>
+We can create named isolated <strong>VPC</strong> sections (virtual private/private cloud/container), 
+each of which will have its own independent network, 
+its own quota for the number of containers or virtual machines or for the number of cores, RAM or allowed disk space.
+</p>
+<p>
+Let's create a VPC in it with the name <strong>vpc1</strong> and a working network 10.10.11.0/24 (you can use any). 
+This network of your virtual environments. 
+To build VXLAN tunnels, we also need a separate private network to establish peer-to-peer connections, 
+virtual tunnel endpoint (VTEPs). <strong>CBSD</strong> can control the initialization and assignment of these addresses automatically. 
+As nodes are added or removed, tunnels will be established or removed dynamically.
+</p>
+<p>
+Creating a cluster in <strong>CBSD</strong> begins by adding and exchanging SSH keys between all participants.
+ Prior to the initialization of a multi-node cluster, each node sees only its local environment. 
+ Reset the cbsd user password - we need to know it to initialize the cluster. 
+ After adding all nodes, the password can be changed or locked - this will not affect the cluster, 
+ since further operations will be performed on the remote nodes using the generated ED25519 SSH key.
+</p>
+
+<p>Run the cbsd node mode=add command on each node, adding the cluster members:</p>
+<p>
+jhoster1:
+<pre class="cli">
+% cbsd node mode=add node=2a01:4f8:241:500c::1
+% cbsd node mode=add node=2a01:4f8:241:500b::1
+</pre>
+</p>
+
+<p>
+gold-hoster1:
+<pre class="cli">
+% cbsd node mode=add node=2a05:3580:d800:20f7::1
+% cbsd node mode=add node=2a01:4f8:241:500b::1
+</pre>
+</p>
+
+<p>
+gold-hoster:
+<pre class="cli">
+% cbsd node mode=add node=2a01:4f8:241:500c::1
+% cbsd node mode=add node=2a05:3580:d800:20f7::1
+</pre>
+</p>
+
+<p>At this point, <strong>CBSD</strong> uses ssh to set up a peer-to-peer network in which teams on the same 
+host can control the environment of neighboring nodes, so be careful with the remove command.</p>
+
+<p>You can initialize VPC for the entire cluster using the vpc mode=deploy command, 
+however we will perform all the composite operations sequentially on each node so 
+that you have an idea of what is going on. 
+The only exception is the mode=sync command, which massively synchronizes VPC settings on nodes.
+</p>
+
+<p>Creating a VPC begins by inventing a name, for example, let it be called <strong>vpc1</strong>. 
+In addition to the name, for initialization we need to specify a peer-to-peer network, 
+as well as identify the participants in the VPC. 
+The list of nodes can be specified with a comma in the argument node_member=.
+If VPC needs to be initialized on all <strong>CBSD</strong> hosts in the cluster, 
+you can use the reserved “all” value as node_member. Let's do it on all three nodes:
+</p>
+<p>
+jhoster1:
+<pre class="cli">
+% cbsd vpc mode=init node_member=all peer_network=10.100.0.0/24 vpc_name=vpc1
+</pre>
+</p>
+
+<p>
+gold-hoster1:
+<pre class="cli">
+% cbsd vpc mode=init node_member=all peer_network=10.100.0.0/24 vpc_name=vpc1
+</pre>
+</p>
+
+<p>
+gold-hoster:
+<pre class="cli">
+% cbsd vpc mode=init node_member=all peer_network=10.100.0.0/24 vpc_name=vpc1
+</pre>
+</p>
+
+<p>The following mode=init_peers command initializes the configuration and selects the tunnel IP address (VTEPs) 
+for each peer in sequence. This initialization needs to be performed on only one node, 
+after which you can use the cbsd vpc mode=sync command to transfer the initialization result to the rest of the cluster:
+</p>
+<p>
+jhoster1:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_peers
+% cbsd vpc vpc_name=vpc1 mode=sync
+</pre>
+</p>
+<p class="text-center"><img src="/img/vpc_init2.png" alt="" /></p>
+
+<p>In the output of cbsd vpc mode=init_peers, we see a preliminary map of the distribution of IP addresses between peers. 
+It is this map that we should see in a few seconds in the form of initialized vxlan interfaces with the ifconfig command.
+</p>
+
+<p>The following command applies the configuration, creating on the node where it is executed, 
+creating and configuring vxlan interfaces:
+</p>
+<p>
+jhoster1:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_vxlan
+</pre>
+</p>
+<p>
+gold-hoster1:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_vxlan
+</pre>
+</p>
+
+<p>
+gold-hoster:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_vxlan
+</pre>
+</p>
+
+<p>Run the ifconfig command and make sure that on each server we have N-1 number of tunnels 
+and the remote hosts respond to us by running the ping command:</p>
+
+<p class="text-center"><img src="/img/vpc_init3.png" alt="" /></p>
+
+<p>In the output, we see a lower MTU on the vxlan interface - encapsulation adds 50 bytes to each packet. 
+Information about where this tunnel leads to is stored in the description field of each interface. 
+And finally, after vxlan initialization, we can immediately begin to exchange traffic with a remote point.
+</p>
+
+<p>The last brick in building our isolated network is the creation and integration into it of a VPC-bridge from the created vxlan tunnels.</p>
+<p>
+jhoster1:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_bridge
+</pre>
+</p>
+<p>
+gold-hoster1:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_bridge
+</pre>
+</p>
+
+<p>
+gold-hoster:
+<pre class="cli">
+% cbsd vpc vpc_name=vpc1 mode=init_bridge
+</pre>
+</p>
+
+<p>It's all! Now <strong>vpc1</strong> with the same settings exists and is available for use as the parent 
+interface for vnet/VIMAGE-based containers and/or virtual network cards for bhyve virtual machines. We just have to check it out:</p>
+
+<pre class="cli">
+% cbsd jcreate jname=jail1 ip4_addr=0 interface=vpc1 vnet=1 runasap=1
+</pre>
+<br>
+or using <strong>cbsd bsdconfig-tui</strong>:
+<br>
+</p>
+<p class="text-center"><img src="/img/vpc_init4.png" alt="" /></p>
+
+<p>In the menu we need an element to indicate the name of the container, 
+also set <strong>ip4_addr</strong> to <strong>0</strong>, activate <strong>vnet</strong> (virtualized stack) and select <strong>vpc1</strong>
+ as the interface for <a href="http://man.freebsd.org/epair/4" target="_blank">epair(4)</a>:</p>
+<p class="text-center"><img src="/img/vpc_init5.png" alt="" /></p>
+
+<p class="text-center"><img src="/img/vpc_init6.png" alt="" /></p>
+
+<p class="text-center"><img src="/img/vpc_init7.png" alt="" /></p>
+
+<p>When containers start, we can see the initialization of the epair(4) interfaces and their assignment to our <strong>vpc1</strong>. 
+From this moment they are isolated in the network segment from any other devices and networks.
+</p>
+
+<p class="text-center"><img src="/img/vpc_init8.png" alt="" /></p>
+
+<p>Currently, we have created one container for each of the three physical servers, 
+you can use the jwhereis and jls commands to localize the placement of containers:</p>
+
+<p class="text-center"><img src="/img/vpc_init9.png" alt="" /></p>
+
+<p>Now initialize the IP addresses inside each container in the classic way via ifconfig. 
+Since the containers are combined into one L2 network, we can assign any network. 
+In this example, we use the network 10.10.11.0/24. We can make sure that all containers see each other:
+</p>
+
+<p class="text-center"><img src="/img/vpc_init10.png" alt="" /></p>
+
+<p>Using a distributed L2 network between independent data centers and servers, opens up new possibilities for creating distributed, 
+scalable and fault-tolerant services at the data center and region level. 
+If a failure occurs in one region for various reasons, thanks to a single network, 
+you can deploy services anywhere else without worrying about changing addresses, 
+the internal network, and changing application endpoints. 
+In a virtual network, you can have not only a vnet-based container, but virtual machines with any OS supported by bhyve.
+</p>
+<p>
+See this youtube link for a VPC with jail and bhyve on a practical example.
+See <a href="_blank" target="https://youtu.be/_hTAQxxaP8g">this youtube link</a>, which demonstrates VPC with jail and bhyve on a practical example.
+</p>
+</div>
+<!--# include file="/en/_end.html" -->

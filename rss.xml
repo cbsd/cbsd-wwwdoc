@@ -803,5 +803,17 @@
     <guid>CBSD 12.1.9 available</guid>
     <pubDate>Fri, 24 Apr 2020 11:29:00 +0000</pubDate>
   </item>
+  <item>
+    <title>new article: FreeBSD clustering: VPC with CBSD</title>
+    <description>new article: FreeBSD clustering: VPC with CBSD&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      https://www.bsdstore.ru/en/articles/cbsd_vpc_init.html&lt;br /&gt;
+      build your virtual networks with vxlan(4) and CBSD&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru/en/articles/cbsd_vpc_init.html</link>
+    <guid>new article: FreeBSD clustering: VPC with CBSD</guid>
+    <pubDate>Sun, 03 May 2020 03:37:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

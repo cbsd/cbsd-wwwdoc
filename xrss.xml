@@ -815,5 +815,17 @@
     <guid>new article: FreeBSD clustering: VPC with CBSD</guid>
     <pubDate>Sun, 03 May 2020 03:37:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.10 available</title>
+    <description>CBSD 12.1.10 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: add missing allow_lin{proc,sys}fs params&lt;br /&gt;
+      bhyve: manage UUID&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.10 available</guid>
+    <pubDate>Wed, 06 May 2020 11:13:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

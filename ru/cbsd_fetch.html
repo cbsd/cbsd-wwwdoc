@@ -165,8 +165,8 @@
 		cat &gt; /etc/cron.d/cbsd_mirror &lt;&lt;EOF
 		SHELL=/bin/sh
 		PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://electro.bsdstore.ru/iso/ /svirt/web/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
-		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror_cloud.lock /usr/local/bin/rsync -a rsync://electro.bsdstore.ru/cloud/ /svirt/web/cbsd-mirror/cloud/ > /var/log/cbsd_mirror_cloud.log 2>&1
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror.lock /usr/local/bin/rsync -a rsync://electro.bsdstore.ru/iso/ /usr/local/www/cbsd-mirror/iso/ > /var/log/cbsd_mirror.log 2>&1
+		*/15    *       *       *       *       www /usr/bin/lockf -s -t0 /tmp/cbsd_mirror_cloud.lock /usr/local/bin/rsync -a rsync://electro.bsdstore.ru/cloud/ /usr/local/www/cbsd-mirror/cloud/ > /var/log/cbsd_mirror_cloud.log 2>&1
 		EOF
 		</pre>
 		<p>6) Стартуем сервис</p>

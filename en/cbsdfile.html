@@ -1,0 +1,54 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<h2><a name="cmdfile">Using CBSDfile</a></h2>
+<div class="block">
+	<p>You can use CBSDFile to create and destroy <strong>CBSD</strong> environments with a single command. If you are looking for Vagrant for jail or bhyve, you might like the native FreeBSD/CBSD mechanism.</p>
+	<p>We did not begin to reinvent the wheel regarding the CBSDFile format and use a shell script-stype that is familiar to most people: describe your environment configuration in a function named jail_XXX or bhyve_YYY.
+	One function - one environment. You can use any parameters from jcreate/jconstruct-tui/jconfig and bcreate/bconstruct-tui/bconfig commands.</p>
+	<p>If you need to perform a series of actions when creating an environment, use the functions called postcreate_XXX.</p>
+</div>
+<h2><a name="cmdfile_sample">Example</a></h2>
+<div class="block">
+	<p>Example for jail. Create a requirents.txt file in the directory - it will contain a list of pip modules for python, with the follow contents:</p>
+	<pre>
+	requests
+	</pre>
+	<p>Create a CBSDfile with the contents:</p>
+	<pre>
+	jail_pyjail1()
+	{
+		ip4_addr="DHCP"
+		host_hostname="${jname}.example.com"
+		pkg_bootstrap="1"
+		pkglist="www/nginx python37 security/sudo security/ca_root_nss devel/py-pip devel/py-websockets"
+	}
+
+	postcreate_pyjail1()
+	{
+		jscp ${CBSD_PWD}/requirements.txt ${jname}:/tmp/requirements.txt
+		jexec jname=${jname} pip install -r /tmp/requirements.txt
+		jexec jname=${jname} rm /tmp/requirements.txt
+	}
+	</pre>
+
+	<p>Lets create pyjail1:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd up
+	</pre>
+	<p>or:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd up pyjail1
+	</pre>
+	<p>For destroy pyjail1:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd destory
+	</pre>
+	<p>or:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd destroy pyjail1
+	</pre>
+	<p>Another sample of <a target="_blank" href=https://github.com/cbsd/cbsd/blob/develop/share/examples/cbsdfile/CBSDfile">CBSDfile</a></p>
+	<p>See a demo of how this might look for hybrid environments with jail and bhyve being created at the same time.</p>
+	<p class="text-center"><a target="_blank" href="/gif/cbsdfile.gif"><img src="/gif/cbsdfile.gif"  alt="" width="800" height="600"/></a></p>
+</div>
+<!--# include file="_end.html" -->

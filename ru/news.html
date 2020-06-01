@@ -7,11 +7,19 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li>CBSDfile - vagrant-like file for 'cbsd up' and 'cbsd destroy' command</li>
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 </div>
 <h2><a name="release">Релизы</a></h2>
+<div class="block">
+	<p><strong>12.1.12</strong>&nbsp;&mdash; 2020-06-01</p>
+	<ul>
+		<li>bugfix: VALE: changed port names: ID instead of $jname (due to the VALE port name length limit)</li>
+		<li>bhyve: manage MTU for virtio ( <a target="_blank" href="https://svnweb.freebsd.org/base?view=revision&revision=r359704">r359704</a> ) and cloud-init</li>
+		<li>bhyve: NetBSD 9.0 cloud image</li>
+		<li><a href="/<!--#echo var="lang" -->/cbsdfile.html">CBSDfile</a>: check the postcreate error code and destroy the environment if it fails</li>
+	<ul>
+</div>
 <div class="block">
 	<p><strong>12.1.11</strong>&nbsp;&mdash; 2020-05-15</p>
 	<ul>

@@ -839,5 +839,19 @@
     <guid>CBSD 12.1.11 available</guid>
     <pubDate>Fri, 15 May 2020 11:50:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.12 available</title>
+    <description>CBSD 12.1.12 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bugfix: VALE: changed port names: ID instead of $jname (due to the VALE port name length limit)&lt;br /&gt;
+      bhyve: manage MTU for virtio ( r359704 ) and cloud-init&lt;br /&gt;
+      bhyve: NetBSD 9.0 cloud image&lt;br /&gt;
+      CBSDfile: check the postcreate error code and destroy the environment if it fails&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.12 available</guid>
+    <pubDate>Mon, 01 Jun 2020 11:22:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

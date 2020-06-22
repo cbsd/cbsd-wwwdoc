@@ -1,2 +1,4 @@
  arch | name | arch | ver | description | md5sum | flatsize |
 amd64_12.0|aurora|amd64|12.0|Cross-platform beanstalkd queue server admin console. https://xuri.me/aurora|9125c7cba3e6fcfda18032be5cbe2544|85319680|
+amd64_12.1|pgadmin4|amd64|12.1|pgadmin4 UI|73e6cf91102c03ee9738dbdfec4278e1|564133888|
+amd64_12.1|rtorrent|amd64|12.1|rtorrent UI|c956bb4ea25283bb86dcedd681030985|1155717120|

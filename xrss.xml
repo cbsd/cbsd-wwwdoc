@@ -853,5 +853,17 @@
     <guid>CBSD 12.1.12 available</guid>
     <pubDate>Mon, 01 Jun 2020 11:22:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.13 available</title>
+    <description>CBSD 12.1.13 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: fix $jailsysdir directory when no mnt_start and no ZFS&lt;br /&gt;
+      bhyve: cloud-init: use "gpart commit" to confirm changes when cloning from a gold volume&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.13 available</guid>
+    <pubDate>Mon, 22 Jun 2020 11:21:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

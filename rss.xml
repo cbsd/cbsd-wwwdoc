@@ -853,5 +853,53 @@
     <guid>CBSD 12.1.12 available</guid>
     <pubDate>Mon, 01 Jun 2020 11:22:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.1.13 available</title>
+    <description>CBSD 12.1.13 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: fix $jailsysdir directory when no mnt_start and no ZFS&lt;br /&gt;
+      bhyve: cloud-init: use "gpart commit" to confirm changes when cloning from a gold volume&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.13 available</guid>
+    <pubDate>Mon, 22 Jun 2020 11:21:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.1.14 available</title>
+    <description>CBSD 12.1.14 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fix build on FreeBSD 13-CURRENT&lt;br /&gt;
+      fix brename, Issue #510&lt;br /&gt;
+      checkip: also check ip on local ifaces&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.14 available</guid>
+    <pubDate>Mon, 22 Aug 2020 12:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.1.15 available</title>
+    <description>CBSD 12.1.15 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      cbsdsh: fix crash: exited on signal 6&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.15 available</guid>
+    <pubDate>Mon, 31 Aug 2020 11:02:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.1.16 available</title>
+    <description>CBSD 12.1.16 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: bhyverun_wrapper: alternative/custom bhyve start script, Issue #476&lt;br /&gt;
+      bhyve: get_next_vale: add exclude list to skip already used VALE port when vm off&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.1.16 available</guid>
+    <pubDate>Sat, 26 Sep 2020 11:02:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

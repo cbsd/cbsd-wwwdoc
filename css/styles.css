@@ -234,6 +234,16 @@ table.images tr:last-child td {
 .red-text {
 	color:red;
 }
+.info {
+        border:1px solid #9cea9c;
+        margin:0 20px 30px 20px;
+        padding:6px 20px;
+        color:#ffffff;
+        background-color:#3fb618;
+        border-radius:6px;
+        box-shadow:4px 4px 4px rgba(0,0,0,0.1);
+        font-weight: bold;
+}
 .attention {
 	border:1px solid red;
 	margin:0 20px 30px 20px;

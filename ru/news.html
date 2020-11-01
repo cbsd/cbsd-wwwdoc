@@ -7,12 +7,20 @@
 <div class="block">
 	<p><strong>Unknown</strong>&nbsp;&mdash; Unknown</p>
 	<ul>
-		<li>bhyve: bhyverun_wrapper: alternative/custom bhyve start script, <a href="https://github.com/cbsd/cbsd/issues/476" target="_blank">Issue #476</a></li>
-		<li>bhyve: get_next_vale: add exclude list to skip already used VALE port when vm off</li>
 	</ul>
 	<p><em>Если вы&nbsp;хотите поэкспериментировать со&nbsp;следующей версией <strong>CBSD</strong>, используйте <strong>git clone https://github.com/cbsd/cbsd.git</strong> для <strong>/usr/local/cbsd</strong></em></p>
 </div>
 <h2><a name="release">Релизы</a></h2>
+<div class="block">
+	<p><strong>12.2.0</strong>&nbsp;&mdash; 2020-10-29</p>
+	<ul>
+		<li>tested with FreeBSD 12.2-RELEASE</li>
+		<li>added Bash autocompletion file for most common used commands: <em>/usr/local/cbsd/share/autocompletion/bash</em> (thanks to <strong>kr0mBagheera</strong>)</li>
+		<li>dhcpd, get-next-tcp-port script: add lock wrapper to avoid collisions when running simultaneously</li>
+		<li>up/destroy: added pre/post hooks per environment</li>
+		<li>FreeBSD 12.2 cloud image ready</li>
+	<ul>
+</div>
 <div class="block">
 	<p><strong>12.1.16</strong>&nbsp;&mdash; 2020-09-26</p>
 	<ul>

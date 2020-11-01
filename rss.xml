@@ -901,5 +901,50 @@
     <guid>CBSD 12.1.16 available</guid>
     <pubDate>Sat, 26 Sep 2020 11:02:00 +0000</pubDate>
   </item>
+  <item>
+    <title>New CBSD sub-project has beed started: k8s-bhyve</title>
+    <description>New CBSD sub-project has been started: k8s-bhyve&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      As before, we are focused on the development and distribution of FreeBSD as a platform&lt;br /&gt;
+      for hosting useful services. Today kubernetes is a very popular rail for quickly deploying containers.&lt;br /&gt;
+      We will show you soon how FreeBSD can be useful for a Linux-only solution like a K8S.&lt;br /&gt;
+      Please meet: https://k8s-bhyve.convectix.com&lt;br /&gt;
+      As usual - it's free, open and BSD-licensed&lt;br /&gt;
+      Open task/looking for support: https://www.reddit.com/r/freebsd/comments/jgtbng/k8sbhyve_project_looking_for_free_testing/&lt;br /&gt;
+    </description>
+    <link>https://k8s-bhyve.convectix.com</link>
+    <guid>New CBSD sub-project has beed started: k8s-bhyve</guid>
+    <pubDate>Sun, 25 Oct 2020 12:02:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>Thank you for support: new server for ClonOS/CBSD development was rented!</title>
+    <description>Thank you for support: new server for ClonOS/CBSD development was rented!&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      With the help of donors, we raised a sufficient amount to rent a server in Hetzner DC (Germany)&lt;br /&gt;
+      for the infrastructure of the CBSD and ClonOS project.&lt;br /&gt;
+      Finally, project development has moved from a local laptop to a stable powerfull server.&lt;br /&gt;
+      We thank you for your support!&lt;br /&gt;
+    </description>
+    <link>https://www.patreon.com/clonos</link>
+    <guid>Thank you for support: new server for ClonOS/CBSD development was rented!</guid>
+    <pubDate>Sun, 25 Oct 2020 13:02:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.2.0 available</title>
+    <description>CBSD 12.2.0 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      tested with FreeBSD 12.2-RELEASE&lt;br /&gt;
+      added Bash autocompletion file for most common used commands: (thanks to kr0mBagheera)&lt;br /&gt;
+      dhcpd, get-next-tcp-port script: add lock wrapper to avoid collisions when running simultaneously&lt;br /&gt;
+      up/destroy: added pre/post hooks per environment&lt;br /&gt;
+      FreeBSD 12.2 cloud image ready&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.2.0 available</guid>
+    <pubDate>Thu, 29 Oct 2020 11:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

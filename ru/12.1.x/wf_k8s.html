@@ -1,0 +1,50 @@
+<h1><span>CBSD модуль k8s: разворачиваем kubernetes кластер</span></h1>
+<h2><a name="k8s_cmd">Команда k8s</a></h2>
+<p>Модуль состоит из двух компонент - образа виртуальной машины на базе Linux с <a target="_blank" href="https://kubernetes.io">kubernetes</a>, подготовленый в рамках проекта <a target="_blank" href="k8s-bhyve.convectix.com/">k8s-bhyve</a> и скриптов, 
+которые производят настройку и запуск кластера.</p>
+<p>Для инициализации нового кластера используйте команду cbsd mode=init:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd k8s mode=init k8s_name=k1
+</pre>
+<p>где <strong>k1</strong> - имя кластера.</p>
+<p>Количество master и worker нод регулируется через количество IP адресов, которые вы назначаете через параметры <strong>init_masters_ips</strong> и <strong>init_nodes_ips</strong></p>
+<p>Кроме этого,1 IP адрес отводится в качестве API endpoint, через параметр <strong>vip=</strong>, virtual IP</p>
+<p>Мы можете назначать фиксированные адреса для мастеров и воркеров, либо получить их автоматически из CBSD пула, выставив DHCP в качестве адресов, например:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd k8s mode=init k8s_name=k1 init_masters_ips="DHCP DHCP DHCP" init_nodes_ips="DHCP DHCP DHCP" vip=DHCP cluster=k8s-bhyve.io
+</pre>
+<p>В результате этой команды вы получите кластер с именем k8s-bhyve.io, состоящим из 3 master и 3 worker, получив IP адреса автоматически</p>
+<p>Остальные аргументы и их описание</p>
+<table class="images">
+<tr><td class="bg-gray">опция</td><td>описание</td></tr>
+<tr><td>k8s_name</td><td>имя профиля кластера, короткий уникальный ID, например: k1</td></tr>
+<tr><td>vpc</td><td>использовать CBSD VPC, в котором разворачивать кластер</td></tr>
+<tr><td>cluster</td><td>имя kubernetes кластера, по-умолчанию: k8s-bhyve.io</td></tr>
+<tr><td>master_hostname</td><td>имя host</td></tr>
+<tr><td>k8s_ver</td><td>какую версию K8S использовать</td></tr>
+<tr><td>etcd_ver</td><td>какую версию ETCD использовать</td></tr>
+<tr><td>flannel_ver</td><td>какую версию flannel использовать</td></tr>
+<tr><td>init_masters_ips</td><td>список IP адресов для master нод. Количество IP определяет количество мастеров</td></tr>
+<tr><td>init_nodes_ips</td><td>списов IP адресов для worker нод. Количество IP определяет количество нод</td></tr>
+<tr><td>vip</td><td>IP адрес для VRRP, служащий API Endpoint-ом кластера</td></tr>
+<tr><td>dns_ip</td><td>IP адрес для внутреннего DNS сервера из kuberenetes сети</td></tr>
+<tr><td>coredns_enable</td><td>инсталлировать CoreDNS сервис?</td></tr>
+<tr><td>ingress_host</td><td>имя для Ingress сервиса</td></tr>
+<tr><td>kubelet_master</td><td>Регулирует, может ли master нода выполнять также функции worker и запускать контейнера, по-умолчанию - да: 1</td></tr>
+<tr><td>pv_enable</td><td>Использовать PV ? По-умолчнию - да</td></tr>
+<tr><td>pv_nfs_manage_hoster</td><td>&nbsp</td></tr>
+<tr><td>pv_metadata_name</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_capacity_storage</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_volumemode</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_accessmodes</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_storageclassname</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_mountoptions</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_nfs_path</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_server</td><td>&nbsp</td></tr>
+<tr><td>master_vm_ram</td><td>Конфигурация мастер нод, количество RAM. По-умолчанию: 2g</td></tr>
+<tr><td>master_vm_cpus</td><td>Конфигурация мастер нод, количество ядер. По-умолчанию: 1</td></tr>
+<tr><td>master_imgsize</td><td>Конфигурация мастер нод, объем жесткого диска. По-умолчанию: 20g</td></tr>
+<tr><td>worker_vm_ram</td><td>Конфигурация worker нод, количество RAM. По-умолчанию: 2g</td></tr>
+<tr><td>worker_vm_cpus</td><td>Конфигурация worker нод, количество ядер. По-умолчанию: 1</td></tr>
+<tr><td>worker_imgsize</td><td>Конфигурация worker нод, объем жесткого диска. По-умолчанию: 20g</td></tr>
+</table>

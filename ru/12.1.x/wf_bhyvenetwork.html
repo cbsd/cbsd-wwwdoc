@@ -45,7 +45,7 @@ You must initialize and configure the bridge interface yourself, regardless of <
 <ul>
 <li>bhyvenic -> nicX -> nic_parent -> (select your bridge in the list)</li>
 </ul>
-<h2><a name="bhyvenetwork_opt3">Options 2: Point-to-point network from bhyve to hoster</a></h2>
+<h2><a name="bhyvenetwork_opt3">Options 3: Point-to-point network from bhyve to hoster</a></h2>
 <p>
 Direct network between bhyve and hoster. In this case, in order to give the
 network in the bhyve, it is necessary to enable routing of packets between
@@ -86,7 +86,7 @@ Also, bhyve with 192.168.1.1 available from hoster via 'ssh 192.168.1.2'<br>
 </li>
 </ul>
 
-<h2><a name="bhyvenetwork_opt4">Options 3: VALE switch</a></h2>
+<h2><a name="bhyvenetwork_opt4">Options 4: VALE switch</a></h2>
 <p>
 We can create any number of virtual private switch via VALE.
 Bhyve which are commutated for example in 'vswitch1' can
@@ -143,4 +143,38 @@ schematically it might look like this:
 <p class="text-center"><img src="/img/cbsd_netopt2.png" alt="" /></p>
 <br>
 <p class="text-center"><img src="/img/cbsd_netopt3.png" alt="" /></p>
+<h2><a name="bhyvenetwork_opt4_sample">Options 4: VALE switch + external route via vether(4)</a></h2>
+<p>
+<p>You may want to route internal VALE traffic to external network. You can use the epair(4) or vether(4) interface ( or a GW instance (e.g: OPNSense, pfSense)-based with two interfaces ) for these purposes.</p>
+<p>Full example:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd valecfg-tui
+</pre>
+<p>Create vale switch <strong>vale1</strong> named</p>
+<pre class="brush:bash;ruler:true;">
+pkg install -y net/vether-kmod
+/sbin/kldload if_vether
+/sbin/ifconfig vether1 create
+/sbin/ifconfig vether1 10.0.0.1/24 up
+/usr/local/cbsd/tools/vale-ctl -h vale1:vether1
+</pre>
+<p><strong>Hint:</strong> modern versions of FreeBSD have valectl in base: <em>/usr/sbin/valectl</em></p>
+<p>Now you have gateway from external network stack inside VALE switch.</p>
+<p>now we will create several VMs in the vale1 VALE switch:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd bcreate jname=cent1 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-8.2-x86_64" ci_ip4_addr="10.0.0.100" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
+cbsd bcreate jname=cent2 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-8.2-x86_64" ci_ip4_addr="10.0.0.101" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
+ping -c2 10.0.0.100
+ping -c2 10.0.0.101
+</pre>
+<p><strong>Hint</strong>: you may want to override the parameters to use the VALE switch by default:<p>
+<pre>
+cat &gt;&gt; ~cbsd/etc/bhyve-default-default.conf  &lt;&lt;EOF
+create_cbsdsystem_tap=0
+interface="cbsdvale_vale1"
+ci_gw4="10.0.0.1"
+EOF
+</pre>
+<br>
+<p class="text-center"><img src="/img/cbsd_vale_vether1.png" alt="" /></p>
 </div>

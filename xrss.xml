@@ -946,5 +946,20 @@
     <guid>CBSD 12.2.0 available</guid>
     <pubDate>Thu, 29 Oct 2020 11:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.2.1 available</title>
+    <description>CBSD 12.2.1 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jails: improve qemu-based jails (mirror for base.txz was restored), repo script fixes&lt;br /&gt;
+      jails: qemu-based RISCV64 arch has been added ( Thanks to: Loïc Bartoletti )&lt;br /&gt;
+      freejname script: fix collisions when running simultaneously&lt;br /&gt;
+      bhyve imgsize params: allow float value, e.g: 1.5g, 0.5t&lt;br /&gt;
+      bhyve: NetBSD 9.1 cloud profile&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.2.1 available</guid>
+    <pubDate>Tue, 10 Nov 2020 10:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

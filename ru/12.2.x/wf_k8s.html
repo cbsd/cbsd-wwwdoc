@@ -68,7 +68,7 @@ cbsd k8s mode=init k8s_name=k1 init_masters_ips="DHCP DHCP DHCP" init_nodes_ips=
 <tr><td>worker_vm_imgsize</td><td>Конфигурация worker нод, объем жесткого диска. По-умолчанию: 20g</td></tr>
 </table>
 <h2><a name="k8s_init_upfile">Инициализация CBSDfile</a></h2>
-<p>Когда k8s кластер инициализирован, вы должны сформировать CBSDfile для старта и останова кластера. Для этого, используйте команду: <strong>k8s mode=init_upfile</strong>:</p>
+<p>Когда k8s кластер инициализирован, вы должны сформировать CBSDfile для старта и остановки кластера. Для этого, используйте команду: <strong>k8s mode=init_upfile</strong>:</p>
 <p>В текущем рабочем каталоге будут сформированы два файла - CBSDfile и bootstrap.config. Это все, что вам необходимо для запуска кластера.</p>
 <pre class="brush:bash;ruler:true;">
 cbsd k8s mode=init_upfile k8s_name=k1

@@ -961,5 +961,18 @@
     <guid>CBSD 12.2.1 available</guid>
     <pubDate>Tue, 10 Nov 2020 10:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.2.2 available</title>
+    <description>CBSD 12.2.2 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      added 'module' command to manage CBSD modules&lt;br /&gt;
+      added K8S module: deploy kubernetes cluster with CBSD: https://www.bsdstore.ru/en/12.x/wf_k8s_ssi.html&lt;br /&gt;
+      up script: randomize delayed before start when multiple env&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.2.2 available</guid>
+    <pubDate>Mon, 16 Nov 2020 11:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

@@ -93,7 +93,7 @@ cbsd destroy
   <p><strong>Внимание:</strong> текущая версия автоматически сконфигурирует NFS сервер, что влечет за собой полную генерацию /etc/exports и модификацю /etc/rc.conf файлов, с последующим запуском соответствующих сервисов.</p>
 </div>
 <ul>
-  <li>Убедитесь, что <strong>pv_spec_nfs_path</strong> указывает на существующий каталог и он имеет разрешение на NFS. Например, для использования путя по-умолчанию ( <strong>/nfs</strong> ), необходимо выполнить:</p>
+  <li>Убедитесь, что <strong>pv_spec_nfs_path</strong> указывает на существующий каталог и он имеет разрешение на NFS. Например, для использования пути по-умолчанию ( <strong>/nfs</strong> ), необходимо выполнить:</p>
 <pre class="brush:bash;ruler:true;">
  zfs create zroot/nfs
  zfs set mountpoint=/nfs zroot/nfs

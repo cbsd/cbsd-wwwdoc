@@ -78,7 +78,7 @@ cbsd k8s mode=init_upfile k8s_name=k1
 <pre class="brush:bash;ruler:true;">
 cbsd up
 </pre>
-<p>Upon completion of initialization, the system will import <strnog>kubeconfig</strong> into ~/root/.kube/</p>
+<p>Upon completion of initialization, the system will import <strnog>kubeconfig</strong> into working directory.</p>
 <p>You can copy it to another host or manage the cluster via kube and helm commands from your host system.</p>
 <h2><a name="k8s_up">Destroying of the K8S cluster</a></h2>
 <p>Once in the directory where CBSDfile and bootstrap.config are generated, run the command: <strong>cbsd destroy</strong>:</p>

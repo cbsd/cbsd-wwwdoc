@@ -974,5 +974,42 @@
     <guid>CBSD 12.2.2 available</guid>
     <pubDate>Mon, 16 Nov 2020 11:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.2.3 available</title>
+    <description>CBSD 12.2.3 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+    fix target_arch: this fixes repo script for non-x86 arch&lt;br /&gt;
+    fix build on non-x86 arch&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.2.3 available</guid>
+    <pubDate>Fri, 20 Nov 2020 11:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 12.2.4 available</title>
+    <description>CBSD 12.2.4 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail2iso script: remove boot1.efifat (deprecated for FreeBSD 13)&lt;br /&gt;
+      remove ping6 from code for FreeBSD 13 (deprecated for FreeBSD 13)&lt;br /&gt;
+      cbsd --help: fix warning&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.2.4 available</guid>
+    <pubDate>Mon, 21 Dec 2020 12:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>podcast: k8s-bhyve FreeBSD internal settings (ru)</title>
+    <description>podcast: k8s-bhyve FreeBSD internal settings (ru)&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      ..talking about those settings that are applied in the k8s-bhyve image&lt;br /&gt;
+      url: https://youtu.be/VUKLwsOGGAY&lt;br /&gt;
+    </description>
+    <link>https://youtu.be/VUKLwsOGGAY</link>
+    <guid>podcast: k8s-bhyve FreeBSD internal settings (ru)</guid>
+    <pubDate>Mon, 22 Dec 2020 12:02:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

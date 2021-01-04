@@ -5,23 +5,28 @@
 		</span>
 	</h1>
 	<div class="block">
-		<p><strong><a target="_blank" href="https://github.com/cbsd/cbsd">CBSD</a></strong>
+		<p>
+			<strong>
+				<a target="_blank" href="https://github.com/cbsd/cbsd">
+CBSD
+				</a>
+			</strong>
  wurde für
-		<a href="http://www.freebsd.org" target="_blank">
+			<a href="http://www.freebsd.org" target="_blank">
 FreeBSD
-		</a>
+			</a>
  als Ebene für die Verwaltung von 
-		<a href="https://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">
+			<a href="https://www.freebsd.org/cgi/man.cgi?query=jail&amp;sektion=8" target="_blank">
 jail(8)
-		</a>
+			</a>
 , 
-		<a href="https://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank">
+			<a href="https://www.freebsd.org/cgi/man.cgi?query=bhyve&amp;sektion=8" target="_blank">
 bhyve
-		</a>
+			</a>
  und 
-		<a href="https://www.xenproject.org/">
+			<a href="https://www.xenproject.org/">
 Xen
-		</a>
+			</a>
  geschrieben.
  Angesiedelt ist das Projekt als alleinstehendes integriertes Werkzeug für eine umfassende Lösung zum schnellen Herstellen und Bereitstellen von virtuellen Umgebungen mit vorgefertigten Festlegungen der Software mit minimaler Konfiguration.
 		</p>
@@ -30,13 +35,27 @@ Es wurden jetzt dadurch keine zusätzlichen Funktionalitäten des Betriebssystem
 			<strong>
 CBSD
 			</strong>
- kann, könnte auch erreicht werden, indem zehn oder hunderte Befehle manuell in der Kommandozeile für die Verwendung der darunterliegenden Werkzeuge laufen gelassen werden. (Aber nicht, dass das wer wollen würde.)
-			<!--
-			---- KISS
-			---- WIP
-			Zum Betriebssystem FreeBSD werden keine besonderen zusätzlichen Funktionalitäten hinzugefügt. Das Betriebssystem wird dadurch nicht verändert. Alles was <strong>CBSD</strong>  Es wurde bis jetzt keine Funktionalität des Betriebssystems beeinflusst und alles was <strong>CBSD</strong> kann, …
-			!-->
+ kann, könnte auch erreicht werden, indem zehn oder hunderte Befehle manuell in der Kommandozeile für die Verwendung der darunterliegenden Werkzeuge laufen gelassen werden. (Aber nicht, dass das wer wollen würde.)<!--	---- KISS	---- WIP	Zum Betriebssystem FreeBSD werden keine besonderen zusätzlichen Funktionalitäten hinzugefügt. Das Betriebssystem wird dadurch nicht verändert. Alles was <strong>CBSD</strong>  Es wurde bis jetzt keine Funktionalität des Betriebssystems beeinflusst und alles was <strong>CBSD</strong> kann, …	!-->
 		</p>
+<br>
+<center>
+		<div class="block">
+			<ul class="screenshots">
+				<li>
+Demo jail
+<br>
+<img src="/gif/jdemo.gif">
+				</li>
+				<li>
+&nbsp;
+				</li>
+				<li>
+Demo bhyve
+<br>
+<img src="/gif/bdemo.gif">
+				</li>
+			</ul>
+		</div>
 	</div>
 	<h2>
 		<a name="features">
@@ -46,8 +65,14 @@ Funktionalitäten&hellip;
 	<div class="block">
 		<ul>
 			<li>
-				<a href="/<!--#echo var="lang" ->/cbsd_quickstart.html">
+				<a href="/<!--#echo var="lang" -->/cbsd_quickstart.html">
 Einfach zum Anfangen
+				</a>
+			</li>
+			<li>
+Es machen wie im Stil von Vagrant style? 
+				<a href="/<!--#echo var="lang" -->/cbsdfile.html">
+Kein Problem!
 				</a>
 			</li>
 			<li>
@@ -77,7 +102,8 @@ GlusterFS
 				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">
 pre/post start/stop hooks
 				</a>
- für die Integration mit externen Sachen für DevOPS (DDNS, DNSmasq, Consul, usw. &hellip;)</li>
+ für die Integration mit externen Sachen für DevOPS (DDNS, DNSmasq, Consul, usw. &hellip;)
+			</li>
 			<li>
 Exportieren der Metriken für die Benutzung von Ressourcen für jail und bhyve 
 				<a href="/<!--#echo var="lang" -->/articles/cbsd_with_grafana.html">
@@ -94,7 +120,7 @@ modulare Struktur - Jede Kommando ist eine eigenständige Datei und das macht ei
 schnelle Erstellung der Bereitstellung von virtuellen Umgebungen von Grund aus mit einer Datei für das Manifest;
 			</li>
 			<li>
-				<a href="/<!--#echo var="lang" -->/<!-#echo var="version" ->/wf_profiles_ssi.html">
+				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">
 Profile
 				</a>
  für die Erstellung von einer for Jail
@@ -127,33 +153,67 @@ für die Verwendung fertige Quelle mit Vorlage der Umgebung
 Unterstützung von Puppet und ein Modul für CBSD für Puppet für 
 				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_puppet_ssi.html">
 massenhafte Verwaltung
-				</a>;
+				</a>
+;
+			</li>
+			<li>
+bhyve: 
+				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_cloudinit_ssi.html">
+Unterstützung cloud-init
+				</a>
+. Gesamte Bandbreite moderner Betriebssysteme: (
+				<a target="_blank" href="https://youtu.be/PDkxrHb5Xt8">
+Windows
+				</a>
+, 
+				<a target="_blank" href="https://youtu.be/BPLp36haac0">
+CentOS
+				</a>
+, 
+				<a target="_blank" href="https://youtu.be/3F_lh8s51_4">
+NetBSD
+				</a>
+, 
+				<a target="_blank" href="https://youtu.be/UOysrdvDYUQ">
+OpenBSD
+				</a>
+, 
+				<a target="_blank" href="https://youtu.be/QK9eSxrs3eg">
+Debian, Ubuntu and FreeBSD
+				</a>
+)
 			</li>
 			<li>
 bhyve: Unterstützung für 
 				<a href="https://youtu.be/-IYNSBhtJqw">
 live migration
 				</a>
+;
+			</li>
+			<li>
+bhyve: Unterstützung als "gejailtes" bhyve;
 			</li>
 			<li>
 bhyve: Unterstützung für ZVOL und Backend für MD<!-- MD? -->;
 			</li>
 			<li>
 bhyve: 
-				<a href="/<!--#echo var="lang" -->/<!-#echo var="version" ->/wf_bvnc_ssi.html">
+				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bvnc_ssi.html">
 Unterstützung für VNC
 				</a>
 			</li>
 			<li>
 bhyve: 
-				<a href="/<!--#echo var="lang" -->/<!-#echo var="version" ->/wf_bhyveppt_ssi.html">
+				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html">
 PCI Passthrough und SR-IOV
 				</a>
 			</li>
 			<li>
 bhyve: 
-			<a href="/<!--#echo var="lang" -->/<!-#echo var="version" ->/wf_bhyve_p9_ssi.html">
-geteilte Ordner für eine virtuelle Maschine mit bhyve</a> (durch virtio-p9)
+				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyve_p9_ssi.html">
+geteilte Ordner für eine virtuelle Maschine mit bhyve
+				</a>
+ (durch virtio-p9)
 			</li>
 			<li>
 bhyve: Unterstützung von 
@@ -166,7 +226,11 @@ UEFI PXE boot
 bhyve: Verwaltung virtueller Platten;
 			</li>
 			<li>
-bhyve: Unterstützung von VALE: Der virtuelle Switch;
+bhyve: 
+				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyvenetwork_ssi.html#bhyvenetwork_opt4_sample">
+Unterstützung von VALE
+				</a>
+: Der schnelle auf NETMAP basierende virtuelle Switch;
 			</li>
 			<li>
 jail: Parallele Ausführung eines massenhaften/mehrfachen Kommandos: 
@@ -190,9 +254,9 @@ jail: Unterstützung für eine nicht native Architektur durch den Modus zur Benu
 			<li>
 jail: eine für die Verwendung fertige Quelle für Kernel and Welt, die nicht 
 				<strong>
-buildworld/installworld;
+buildworld/installworld
 				</strong>
- benötigt
+ benötigt;
 			</li>
 			<li>
 Katalog kann auf Platten für Speicher, RAM oder auf tmpfs mit einer nur lesbar eingehängten Basis abgelegt werden;
@@ -228,7 +292,7 @@ jail: Unterstützung von VNC für eine Jail;
 	</div>
 	<h2>
 		<a name="goals">
-			Ziele
+Ziele
 		</a>
 	</h2>
 	<div class="block">
@@ -252,7 +316,7 @@ Bibliothek an Umgebungen für zügige Provisionierung;
 &hellip;
 			</li>
 			<li>
-				<a href="/<!-#echo var="lang" ->/roadmap.html">
+				<a href="/<!--#echo var="lang" -->/roadmap.html">
 Roadmap
 				</a>
 			</li>
@@ -260,7 +324,7 @@ Roadmap
 	</div>
 	<h2>
 		<a name="why">
-Warum&hellip;
+FAQ (Häufig gestellte Fragen)
 		</a>
 	</h2>
 	<div class="block">
@@ -305,7 +369,8 @@ CBSD
 			<strong>
 sh
 			</strong>
- geschrieben:</p>
+ geschrieben:
+		</p>
 		<ul>
 			<li>
 				<p>
@@ -344,35 +409,36 @@ CBSD
 		</p>
 		<ul>
 			<li>
-			<p>
+				<p>
 In den meinsten Fällen wird Protieren gleichwertig mit von Grund auf Schreiben sein, seither das Projekt auf Funktionalitäten nur für FreeBSD basiert. Wir sind an der Portierung zu Plattformen interessiert, die sich von FreeBSD abgeleitet sind. Zum Beispiel unterstützen wir die Plattform HardenedBSD.
-			</p>
-			<p>
+				</p>
+				<p>
 Eine andere fantastische Idee ist das Portieren von 
-				<strong>
-CBSD
-				</strong>
- zu 
-				<a href="https://www.dragonflybsd.org/">
-DragonFly&nbsp;BSD
-				</a>
-. Wenn die Entwicklerinnen und Entwickler von 
-				<strong>
-DFLYBSD
-				</strong>
- das Gerüst für jail (libjail) syncronisieren können und 
-				<a href="https://www.dragonflybsd.org/docs/developer/gsocprojectspage/">
-in der Lage sind 
 					<strong>
-bhyve
+CBSD
 					</strong>
-				</a> 
-zu portieren (siehe: 
-				<em>
+ zu 
+					<a href="https://www.dragonflybsd.org/">
+DragonFly&nbsp;BSD
+					</a>
+. Wenn die Entwicklerinnen und Entwickler von 
+					<strong>
+DFLYBSD
+					</strong>
+ das Gerüst für jail (libjail) syncronisieren können und 
+					<a href="https://www.dragonflybsd.org/docs/developer/gsocprojectspage/">
+in der Lage sind 
+						<strong>
+bhyve
+						</strong>
+					</a> 
+ zu portieren (siehe: 
+					<em>
 Port bhyve - The BSD Hypervisor
-				</em>
+					</em>
 ), wäre CBSD zu verschieben eine einfache AUfgabe und wir könnten einen unglaublichen Verbund von DFLY / HammerFS / jail / bhyve / CBSD bekommen.
-			</p>
+				</p>
+			</li>
 		</ul>
 		<p>
 			<strong>
@@ -387,7 +453,7 @@ CBSD
 		<ul>
 			<li>
 				<p>
- Das hängt an der Person und ihrer Anforderungen.
+Das hängt an der Person und ihren Anforderungen.
  CBSD existiert seit 2013 und ist im Moment eines der ältesten Systeme für das Verwalten von virtuellen Umgebungen auf FreeBSD, während es im aktuellen Zustand ist und fortschreitet sich zu verbessern.
  Eine gewisse Anzahl von Benutzerinnen und Benutzern verwenden CBSD in großen Installationen im produktiven Betrieb.
 				</p>
@@ -404,17 +470,182 @@ erstellt haben, wo wir Artikel und Rezensionen von verschiedenen Benutzerinnen u
 			<strong>
 F:
 			</strong>
- ezjail, qjail, zjail, warden, iocage, bsdploy, jailctl, and other: Was zur Hölle sind soviele Projekte und was ist der Unterschied zwischen all diesen?
+ 
+			<a target="_blank" href="https://bastillebsd.org">
+bastillebsd
+			</a>
+, 
+			<a target="_blank" href="https://bsdploy.readthedocs.io/en/latest/">
+bsdploy
+			</a>
+, 
+			<a target="_blank" href="https://github.com/bigdragonsoft/bvm">
+bvm
+			</a>
+, 
+			<a target="_blank" href="http://chyves.org">
+chyves
+			</a>
+, 
+			<a target="_blank" href="http://erdgeist.org/arts/software/ezjail/">
+ezjail
+			</a>
+, 
+			<a target="_blank" href="https://dreamcat4.github.io/finch/jails-how-to/">
+finch
+			</a>
+, 
+			<a target="_blank" href="https://github.com/sadaszewski/focker/">
+focker
+			</a>
+, 
+			<a target="_blank" href="https://github.com/bsdci/ioc">
+ioc
+			</a>
+, iocage: (
+			<a target="_blank" href="https://github.com/iocage/iocage_legacy">
+in shell
+			</a>
+, 
+			<a target="_blank" href="https://github.com/iocage/iocage">
+in python
+			</a>
+), 
+			<a target="_blank" href="https://github.com/bartekrutkowski/iocell">
+iocell
+			</a>
+, 
+			<a target="_blank" href="https://github.com/pr1ntf/iohyve">
+iohyve
+			</a>
+, 
+			<a target="_blank" href="https://github.com/NikolayDachev/jadm">
+jadm
+			</a>
+, 
+			<a target="_blank" href="http://jail-primer.sourceforge.net/">
+jail-primer
+			</a>
+, 
+			<a target="_blank" href="https://BSDforge.com/projects/sysutils/jailadmin/">
+jailadmin
+			</a>
+, 
+			<a target="_blank" href="http://anduin.net/jailctl/">
+jailctl
+			</a>
+, 
+			<a target="_blank" href="http://thewalter.net/stef/freebsd/jails/jailutils/">
+jailutils
+			</a>
+, 
+			<a target="_blank" href="https://github.com/pizzamig/pot/">
+pot
+			</a>
+, 
+			<a target="_blank" href="https://git.kevans.dev/kevans/quickjail">
+quickjail
+			</a>
+, 
+			<a target="_blank" href="http://erdgeist.org/posts/2017/dont-piss-in-my-beer.html">
+qjail
+			</a>
+, 
+			<a target="_blank" href="https://blog.project-fifo.net/rvmadm-managing-freebsd-jails/">
+rvmadm
+			</a>
+, 
+			<a target="_blank" href="https://forums.freebsd.org/threads/introducing-tredly-containers-for-unix-freebsd.56016/">
+tredly
+			</a>
+, 
+			<a target="_blank" href="https://libvirt.org/drvbhyve.html">
+virt-manager
+			</a>
+			<a target="_blank" href="https://github.com/churchers/vm-bhyve">
+vm-bhyve
+			</a>
+, 
+			<a target="_blank" href="https://www.ixsystems.com/community/threads/warden-eol-and-iocage-jails-are-now-useless-what-do-we-do.70461/">
+warden
+			</a>
+, zjail, und andere:
+ Was zur Hölle sind soviele Projekte und was ist der Unterschied zwischen all diesen? Irgendein Vergleich?
 		</p>
 		<ul>
 			<li>
 				<p>
-Kurze Antwort: Jedes Projekt hat einen sehr speziellen Vektor der Herstellung und Ziele im Vergleich zu anderen Werkzeugen;
+Die meisten von ihnen wurden geboren und bereits gestorben.
+ Einige Projekte sind wegen dem NIH-Syndrom geboren.
+ Einige starben wegen dem Mangel an langfristigen Zielen und Unterstützung.
+ Im Vergleich mit 
+					<strong>
+CBSD
+					</strong>
+ is 
+					<a target="_blank" href="https://github.com/cbsd/cbsd/issues/224">
+arg schwierig
+					</a>
+.
+ Kurze Antwort:
+ Jedes Projekt hat einen sehr speziellen Vektor der Herstellung und Ziele im Vergleich zu anderen Werkzeugen;
  Die Wahl liegt zwischen einzelnen unterschiedlichen Möglichkeiten der Implemtierungen.
  Der hauptsächliche Unterschied zwischen CBSD und anderen ist, dass CBSD als eine komplette Lösung mit einer einfach (wo es möglich ist) Schnittstelle für die Verwaltung angesiedelt ist.
  CBSD ist aus diesem Grund auch viel breiter und größer und nicht all das ist anwendbar.
  Aber wir haben anderen Ziele im Vergleich zu anderen und fokusieren uns auf komplexe Lösungen für Cluster.
 				</p>
+			</li>
+		</ul>
+		<p>
+			<strong>
+Q:
+			</strong>
+ Irgendwelche Töchterprojekte?
+		</p>
+		<ul>
+			<p>
+Einige Leute habe sich ihre Zeit gespart und benutzen 
+				<strong>
+CBSD
+				</strong>
+ um komplexere Aufgaben zu lösen. Einige davon:
+			</p>
+			<li>
+				<a target="_blank" href="https://github.com/cbsd/reggae">
+Reggae: Werkzeug für DevOps für CBSD
+				</a>
+			</li>
+			<li>
+				<a target="_blank" href="http://bitbsd.org/">
+BITBSD
+				</a>
+ und 
+				<a target="_blank" href="https://bitclouds.sh/">
+BitCloud.sh
+				</a>
+: Auf 
+				<strong>
+CBSD
+				</strong>
+ basierende programmierbare Plattfotrm zu VPS für Blockchain
+			</li>
+			<li>
+				<a target="_blank" href="https://clonos.tekroutine.com">
+ClonOS
+				</a>
+: Auf FreeBSD basierende Distribution als Plattform für das virtuelle Hosting und Appliance
+			</li>
+			<li>
+				<a target="_blank" href="https://bhyve.cloud/">
+bhyve cloud
+				</a>
+: Bhyve cloud
+			</li>
+			<li>
+				<a target="_blank" href="https://k8s-bhyve.convectix.com">
+Projekt k8s-bhyve
+				</a>
+: Auf FreeBSD/bhyve basierend Cluster für K8S
 			</li>
 		</ul>
 		<p>
@@ -441,17 +672,20 @@ und
 auf FreeBSD basierende
 					</strong>
  Installationen.
- Docker ist großartig, aber es hat keine offizielle Unterstützung von FreeBSD, 
- daher ergibt es keinen Sinn unsachgemäße Werkzeuge in der seriös Arbeit zu verwenden.
+ Docker ist großartig, aber es hat keine offizielle Unterstützung von FreeBSD, daher ergibt es keinen Sinn unsachgemäße Werkzeuge in der seriös Arbeit zu verwenden.
 				</p>
 				<p>
 Docker kann wie es ist in MacOS oder FreeNAS - durch eine dazwischende Schicht mit dem Hypervisor [x/b]hyve - verwendet werden.
  Aber es passt mehr für Spaß und und Spiele, als als seriöse Anwendung in einer Infrastruktur im produktiven Betrieb.
- Aber wer das wirklich haben will, kann das alles 
-					<a href="/<!-#echo var="lang" ->/articles/docker_on_freebsd.html">
-einfach sich selbst machen
+ Aber wer das wirklich haben will: 
+					<a href="/<!--#echo var="lang" -->/articles/docker_on_freebsd.html">
+Docker mit FreeBSD
 					</a>
- ohne CBSD.
+  oder 
+					<a href="/<!--#echo var="lang" -->/articles/cbsd_k8s_part1.html">
+Kubernetes mit FreeBSD
+					</a>
+ für dich selbst einfach zu machen ohne CBSD. ;-)
 				</p>
 			</li>
 		</ul>
@@ -472,13 +706,12 @@ Telegram
  für die Diskussion über das Benutzen und die Entwicklung von CBSD.
 		</p>
 		<p>
-			Bitte treten Sie uns bei 
+Bitte treten Sie uns bei 
 			<a href="https://web.telegram.org/#/im?p=%40cbsdofficial" target="_blank">
 @cbsdofficial
 			</a>
  bei. (nur in englischer Sprache)
-	</div>
-	<div class="block">
+		</p>
 		<p>
 Unser offizieller Mail-Verteiler wird von 
 			<a href="https://tilda.center/">
@@ -500,34 +733,19 @@ Unterstützen Sie das Projekt!
 	</h2>
 	<div class="block">
 		<p>
-Die Arbeit am 
-			<strong>
-CBSD Projekt 
-			</strong>
- hängt weitgehend von folgenden Faktoren ab:
-		</p>
-		<ul>
-			<li>
-Die Verfügbarkeit von Freizeit außerhalb der täglichen Arbeit (Das Projekt ist kein kommerzielles.): Zum Arbeiten an CBSD, opfern wir deren Zeit um auszuspannen und mit der Familie sowie Freundinnen und Freunden zu kommunizieren;
-			</li>
-			<li>
-Auf Abruf für das Projekt;
-			</li>
-			<li>
-Von den Angeboten zum benutzten Teil von CBSD oder die Entwicklung und Anpassung von Komponenten von CBSD für reale / kommerzielle Projekte;
-			</li>
-		</ul>
-		<p>
 Wenn Sie dem Projekt helfen möchten, mache Sie Spenden oder kaufe den Entwicklerinnen und Entwicklern Bier indem Sie die unten stehende Schaltfläche benutzen:
 		</p>
 		<p>
-PayPal: 
-			<a href="https://www.paypal.me/cbsd" target="_blank">
-CBSD spenden
+			<a href="/<!--#echo var="lang" -->/donate.html">
+Spenden an das Projekt CBSD/ClonOS
 			</a>
 		</p>
 		<p>
-Darüber hinaus können Sie Informationen über das Projekt verbreiten oder einen Artikel als Anleitung zur Benutzung schreiben. Nebenbei können Sie das Projekt durch das Drücken vom Stern bei 
+Darüber hinaus können Sie Informationen über das Projekt verbreiten oder einen Artikel als Anleitung zur Benutzung schreiben. Nebenbei können Sie das Projekt durch das Drücken vom
+			<strong>
+Stern
+			</strong>
+bei 
 			<a href="https://github.com/cbsd/cbsd">
 Github CBSD
 			</a>

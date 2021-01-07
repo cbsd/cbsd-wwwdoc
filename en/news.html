@@ -13,6 +13,31 @@
 </div>
 <h2><a name="release">Releases</a></h2>
 <div class="block">
+	<p><strong>12.2.5</strong>&nbsp;&mdash; 2021-01-07</p>
+	<ul>
+		<li>srcup script: migrate to FreeBSD git instead of SVN</li>
+		<li>bhyve: OpenBSD 6.8 cloud image</li>
+		<li>bhyve: fix OpenBSD ISO image: UEFI file now has .img an extension, not .fs</li>
+		<li>rename [bjx]remove -> [bjx]destroy commands, suggested by <strong>Michael Osipov</strong> via #537</li>
+		<li>fixes: replacewdir script: fix RJAILRCCONF var</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>12.2.4</strong>&nbsp;&mdash; 2020-12-21</p>
+	<ul>
+		<li>jail2iso script: remove boot1.efifat (deprecated for FreeBSD 13)</li>
+		<li>remove ping6 from code for FreeBSD 13 (deprecated for FreeBSD 13)</li>
+		<li>cbsd --help: fix warning</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>12.2.3</strong>&nbsp;&mdash; 2020-11-20</p>
+	<ul>
+		<li>fix target_arch: this fixes repo script for non-x86 arch</li>
+		<li>fix build on non-x86 arch</li>
+	<ul>
+</div>
+<div class="block">
 	<p><strong>12.2.2</strong>&nbsp;&mdash; 2020-11-16</p>
 	<ul>
 		<li>added 'module' command to manage CBSD modules</li>

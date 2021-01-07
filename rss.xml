@@ -1011,5 +1011,20 @@
     <guid>podcast: k8s-bhyve FreeBSD internal settings (ru)</guid>
     <pubDate>Mon, 22 Dec 2020 12:02:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 12.2.5 available</title>
+    <description>CBSD 12.2.5 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      srcup script: migrate to FreeBSD git instead of SVN&lt;br /&gt;
+      bhyve: OpenBSD 6.8 cloud image&lt;br /&gt;
+      bhyve: fix OpenBSD ISO image: UEFI file now has .img an extension, not .fs&lt;br /&gt;
+      rename [bjx]remove -> [bjx]destroy commands, suggested by Michael Osipov via #537&lt;br /&gt;
+      fixes: replacewdir script: fix RJAILRCCONF var&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 12.2.5 available</guid>
+    <pubDate>Thu, 07 Jan 2021 11:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

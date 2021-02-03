@@ -1,0 +1,19 @@
+	<h1><span>Virtual Machine Import</span></h1>
+	
+	<h2><a name="jimport_cmd">command: bimport</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bimport
+		</pre>
+		<strong>Description</strong>:
+		<p>Import from image (* .img) virtual machine. The argument <strong>jname</strong> the full path to the file or the name of the image (without extension .<strong>img</strong>), which must be located in the appropriate directory (<em>$workdir/import</em>). <strong>img</strong>-file after the import is still in place. Additionally, you can import a virtual machine from an image in the alternate name (for example, you want to deploy the image of the debian1 from debian1.img, however, your system already has a VM with the same name). In this case, use the argument <strong>newjname</strong></p>
+		<p><strong>Example:</strong></p>
+		<p>Import virtual machine from the file <em>/tmp/debian1.img</em>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bimport jname=/tmp/debian1.img
+		</pre>
+		<p>Import debian2.img placed in <em>$workdir/import</em> under new name <strong>debian5</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bimport jname=debian2 newjname=debian5 
+		</pre>
+	</div>

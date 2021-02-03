@@ -1,0 +1,14 @@
+	<h1><span>Removal nodes</span></h1>
+	
+	<h2><a name="noderemove_cmd">node mode=remove command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=remove
+		</pre>
+		<p>The commands <strong>cbsd node mode=remove node=nodename</strong> delete private key and records for this node from the <em>$workdir/.rssh</em> directory. The name specified in node= should coincide with that writing which is output on <strong>cbsd node mode=list</strong></p>
+		<p>Example:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=remove node=backup1.mydomain.ru
+		</pre>
+	</div>
+

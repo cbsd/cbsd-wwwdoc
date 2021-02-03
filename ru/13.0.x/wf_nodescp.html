@@ -1,0 +1,16 @@
+	<h1><span>Копирование файлов с/на ноды</span></h1>
+	
+	<h2><a name="nodescp_cmd">Команда nodescp</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% node1:remotefile1 localfile1 [ localfile2 node2@:remotefile2 ]
+		</pre>
+		<p>Команда <strong>cbsd nodescp</strong> позволяет копировать (при наличие id_rsa ключей) файлы на/с удаленных нод. Синтаксис аргументов аналогичен команде <a href="http://man.freebsd.org/scp/1" target="_blank">scp(1)</a></p>
+		<p>При наличие <strong>rootkeyfile</strong> для ноды, соединение для пользователя <strong>root</strong> будет предпочитаться пользователю <strong>cbsd</strong>, что позволит вам записывать файлы на удаленной ноде не только в каталогах, владелец которых <strong>cbsd</strong></p>
+		<p><strong>Пример:</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=list
+		</pre>
+		<p class="text-center"><img src="/img/nodescp1.png" alt="" /></p>
+	</div>
+

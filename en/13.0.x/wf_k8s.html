@@ -1,0 +1,115 @@
+<h1><span>CBSD k8s module: deploying a kubernetes cluster</span></h1>
+<h2><a name="k8s_desc">Description</a></h2>
+<p>The module consists of two components - an image of a Linux-based virtual machine with <a target="_blank" href="https://kubernetes.io">kubernetes</a>, prepared as part of the <a target="_blank" href="https://k8s-bhyve.convectix.com/">k8s-bhyve</a> prject and scripts, 
+ that configure and launch the cluster</p>
+<h2><a name="k8s_install">Installing K8S module</a></h2>
+<p>Installation of the module is done by the regular <strong>module</strong> script from the GitHub repository of the <a target="_blank" href="https://github.com/cbsd/modules-k8s">project</a>:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd module mode=install k8s
+</pre>
+<p>The module uses a pre-formed image, which must first be obtained:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd fetch_iso name=cloud-kubernetes-20 dstdir=default cloud=1 conv2zvol=1
+</pre>
+<p>Activate the module through the config file and re-initialize <strong>CBSD</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+echo 'k8s.d' >> ~cbsd/etc/modules.conf
+cbsd initenv
+</pre>
+<p>If the <strong>cbsd k8s</strong> command exists, then the module is ready to work.</p>
+<h2><a name="k8s_init">K8S cluster initialization</a></h2>
+<p>To initialize a new K8S cluster, use the command: <strong>cbsd k8s mode=init</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd k8s mode=init k8s_name=k1
+</pre>
+<p>where <strong>k1</strong> - name of the cluster profile.</p>
+<p>The number of master and worker nodes is regulated by the number of IP addresses that you assign through the <strong>init_masters_ips</strong> and <strong>init_nodes_ips</strong> parameters</p>
+<p>In addition, 1 IP address is assigned as an API endpoint, via the <strong>vip=</strong>, virtual IP parameter</p>
+<p>You can assign fixed addresses for masters and workers, or get them automatically from the <strong>CBSD</strong> pool by setting DHCP as addresses, for example</p>
+<pre class="brush:bash;ruler:true;">
+cbsd k8s mode=init k8s_name=k1 init_masters_ips="DHCP DHCP DHCP" init_nodes_ips="DHCP DHCP DHCP" vip=DHCP cluster=k8s-bhyve.io
+</pre>
+<p>As a result of this command, you will get a cluster named k8s-bhyve.io, consisting of 3 masters and 3 workers with automatically assigned IP addresses.</p>
+<p>Other possible arguments and their description:</p>
+<table class="images">
+<tr><td class="bg-gray">options</td><td>desc</td></tr>
+<tr><td>k8s_name</td><td>profile name, short unique ID, for example: k1</td></tr>
+<tr><td>vpc</td><td>use CBSD VPC in which to deploy the cluster</td></tr>
+<tr><td>cluster</td><td>name of Kubernetes cluster, by default: k8s-bhyve.io</td></tr>
+<tr><td>master_hostname</td><td>hostname for master node</td></tr>
+<tr><td>k8s_ver</td><td>which version of K8S to use</td></tr>
+<tr><td>etcd_ver</td><td>which version of ETCD to use</td></tr>
+<tr><td>flannel_ver</td><td>which version of flannel to use</td></tr>
+<tr><td>init_masters_ips</td><td>list of IP addresses for master nodes. The number of IP determines the number of masters</td></tr>
+<tr><td>init_nodes_ips</td><td>list of IP addresses for worker nodes. The number of IP determines the number of worker</td></tr>
+<tr><td>vip</td><td>IP of VRRP, for cluster API Endpoint</td></tr>
+<tr><td>ip4_gw</td><td>IP address, used by VM as default gateway, by default: 10.0.0.1</td></tr>
+<tr><td>dns_ip</td><td>IP address for the internal DNS server in the kuberenetes network</td></tr>
+<tr><td>coredns_enable</td><td>install CoreDNS service?</td></tr>
+<tr><td>ingress_host</td><td>hostname of the Ingress service</td></tr>
+<tr><td>kubelet_master</td><td>It controls whether the master node can also execute worker functions and run containers, by default - yes: 1</td></tr>
+<tr><td>pv_enable</td><td>Use PV ? By default: 0</td></tr>
+<tr><td>pv_nfs_manage_hoster</td><td>&nbsp</td></tr>
+<tr><td>pv_metadata_name</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_capacity_storage</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_volumemode</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_accessmodes</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_storageclassname</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_mountoptions</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_nfs_path</td><td>&nbsp</td></tr>
+<tr><td>pv_spec_server</td><td>&nbsp</td></tr>
+<tr><td>master_interface</td><td>specify an alternative uplink interface of the VM master nodes. default: auto</td></tr>
+<tr><td>worker_interface</td><td>specify an alternative uplink interface of the VM worker nodes. default: auto</tr></tr>
+<tr><td>master_vm_ram</td><td>Master node configuration, amount of RAM. By default: 2g</td></tr>
+<tr><td>master_vm_cpus</td><td>Master node configuration, amount of vCPU. By default: 1</td></tr>
+<tr><td>master_vm_imgsize</td><td>Master node configuration, disk space. By default: 20g</td></tr>
+<tr><td>worker_vm_ram</td><td>Worker node configuration, amount of RAM.. By default: 2g</td></tr>
+<tr><td>worker_vm_cpus</td><td>Worker node configuration, amount of vCPU. By default: 1</td></tr>
+<tr><td>worker_vm_imgsize</td><td>Worker node configuration, disk space. By default: 20g</td></tr>
+</table>
+<h2><a name="k8s_init_upfile">Initializing CBSDfile</a></h2>
+<p>When the k8s cluster is initialized, you must generate a CBSDfile to start and stop the cluster. To do this, use the command: <strong>k8s mode=init_upfile</strong>:</p>
+<p>Two files will be generated in the current working directory - CBSDfile and bootstrap.config. This is all you need to start the cluster.</p>
+<pre class="brush:bash;ruler:true;">
+cbsd k8s mode=init_upfile k8s_name=k1
+</pre>
+<h2><a name="k8s_up">K8S cluster launch</a></h2>
+<p>Once in the directory where CBSDfile and bootstrap.config are generated, run the command: <strong>cbsd up</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd up
+</pre>
+<p>Upon completion of initialization, the system will import <strnog>kubeconfig</strong> into working directory.</p>
+<p>You can copy it to another host or manage the cluster via kube and helm commands from your host system.</p>
+<h2><a name="k8s_up">Destroying of the K8S cluster</a></h2>
+<p>Once in the directory where CBSDfile and bootstrap.config are generated, run the command: <strong>cbsd destroy</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd destroy
+</pre>
+<h2><a name="k8s_up">PV</a></h2>
+<p>PV is configured with the pv_enable=1 option and the corresponding pv_spec-* parameters.</p>
+<div class="warning">
+  <p><strong>Attention:</strong> The current version will automatically configure the NFS server, which entails a complete generation of /etc/exports and modification of /etc/rc.conf files, followed by the launch of the appropriate services.</p>
+</div>
+<ul>
+  <li>Make sure <strong>pv_spec_nfs_path</strong> points to an existing directory and has NFS permission. For example, to use the default path ( <strong>/nfs</strong>), you must run:</p>
+<pre class="brush:bash;ruler:true;">
+ zfs create zroot/nfs
+ zfs set mountpoint=/nfs zroot/nfs
+ zfs set sharenfs=on zroot/nfs
+ zfs mount zroot/nfs
+</pre>
+  </li>
+  <li>Make sure that your services are configured to bind/listen only the required IP address, for example via the flags in /etc/rc.conf:
+<pre class="brush:bash;ruler:true;">
+ nfs_server_flags="-u -t -h 10.0.0.1"
+ mountd_flags="-r -S -h 10.0.0.1"
+ rpcbind_flags="-h 10.0.0.1"
+</pre>
+  </li>
+</ul>
+<br>
+<p class="text-center"><img src="/img/cbsd_k8s.png" alt="" /></p>
+<br>
+<p>Creation of two independent K8S clusters of different configurations with PV-NFS on single host<p>
+<center><script id="asciicast-Pkzh3MspPxndAlDmuc6A9Y619" src="https://asciinema.org/a/Pkzh3MspPxndAlDmuc6A9Y619.js" async></script></center>
+<br>

@@ -1,0 +1,155 @@
+<h1><span>jail upgrade: etcupdate</span></h1>
+
+<h2><a name="etcupdate_cmd">command: etcupdate</a></h2>
+<div class="block">
+<pre class="brush:bash;ruler:true;">
+	% cbsd etcupdate
+</pre>
+<strong>Description</strong>:
+<p>
+To solve the <em>distribution</em> file synchronization problem (this is basically the contents of the <em>/etc</em> directory) when changing versions of the base system,
+ FreeBSD offers two utilities: <a href="http://man.freebsd.org/mergemaster/8" target="_blank">mergemaster(8)</a>
+ and  <a href="http://man.freebsd.org/etcupdate/8" target="_blank">etcupdate(8)</a>.
+<strong>CBSD</strong> has a script for working with etcupdate under the same name.
+By default <strong>CBSD</strong> creates a directory hierarchy for working etcupdate in the system directory of the database and each jail.
+You can turn this off by overriding the etcupdate_init parameter value to '0' (disabled) in the profile of your container or 
+globally via jail-freebsd-default.conf the configuration file in the <em>~cbsd/etc/</em> directory.
+</p>
+
+<p>What <strong>CBSD</strong> etcupdate does NOT:</p>
+ <ul>
+   <li><strong>CBSD</strong> does not automatically launch file updates, as these operations may lead 
+   to disruption of the services or unexpected changes in the files for you.
+   Some attempts at automatic merge operations may cause a conflict. In these cases, operator intervention is required.
+   </li>
+ </ul>
+<p>What <strong>CBSD</strong> etcupdate does:</p>
+  <ul>
+    <li><strong>CBSD</strong> automatically creates build/extract files for etcupdate to work correctly for each version 
+    of the FreeBSD base. <strong>CBSD</strong> keeps track of the versions of your containers and the conformity of 
+    distribution files, checking and displaying a corresponding message when the container starts up about the need for synchronization.
+    </li>
+  </ul>
+<p>
+<strong>CBSD</strong> etcupdate wrapper allows you to do the following operations by repeating the keys of the original etcupdate(8)utility:
+<br>
+<strong>*</strong> perform the etcupdate operation for container XXXX, from the old version of container XX to the new YY. 
+Since <strong>CBSD</strong> owns information about which version was and which version is now, the from = and to = parameters can be omitted:
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=update jname=XXXX [from=XX to=YY]
+</pre>
+<strong>*</strong> run extract initialization for the FreeBSD database version XX.YY (see man etcupdate):
+ (<strong>CBSD</strong> from version 11.1.9 performs this operation automatically when receiving bases)
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=extract ver=XX.YY [force=1]
+</pre>
+<strong>*</strong> run build initialization for version XX.YY (see man etcupdate): 
+  (<strong>CBSD</strong> from version 11.1.9 performs this operation automatically when receiving bases)
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=build ver=YY.YY [force=1]
+</pre>
+<strong>*</strong> start manual correction of conflicts when they are available for container XXX. 
+Use the EDITOR value variable to use your favorite editor (see man etcupdate):
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=resolve jname=XXX
+</pre>
+<strong>*</strong> clean jail working directory from etcupdate files 
+(precedes mode = extract and mode = build operations):
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate mode=purge
+</pre>
+</p>
+<p> In addition to this, <strong>CBSD</strong> backs up distribution files before performing the operation
+update, and also regulates the rotation of archives in the container's system directory (~cbsd/jails-system/XXX/etcupdate).
+You can control this behavior with the parameter etcupdate_create_backup= in the etcupdate.conf configuration file.
+</p>
+
+<h2><a name="etcupdate_best_practices">FreeBSD-way config files best practices</a></h2>
+
+<p>
+In order to minimize the possibility of conflicts and thereby facilitate the synchronization of configuration files,
+try to avoid editing basic system files such as /etc/inetd.conf, /etc/syslog.conf, /etc/ssh/sshd_config, 
+/etc/newsyslog.conf and so on. etc. Instead, use configuration systems such as Chef, Salt, Puppet that manage the necessary configurations. 
+Alternatively, use the _flags arguments in the standard /etc/rc.conf file to override your configuration files.
+For example, instead of editing /etc/sshd/sshd_config, you can override sshd options in /etc/rc.conf as follows:
+
+<pre class="cli">
+ sshd_flags="-oUseDNS=no -oPort=22222 -oPermitRootLogin=no -oUseBlacklist=yes"
+</pre>
+</p>
+
+<p>If the flags do not allow you to make the necessary settings in full, 
+copy the service configuration file to another location and redefine the path to it via _flags. 
+For example, create the directory <em>/root/etc</em>, where your configuration files for inetd, blacklistd, syslogd, newsyslog will be located:
+
+<pre class="brush:bash;ruler:true;">
+ mkdir /root/etc
+ cp -a /etc/inetd.conf /root/etc
+ cp -a /etc/syslog.conf /root/etc
+ cp -a /etc/blacklistd.conf /root/etc
+ cp -a /etc/newsyslog.conf /root/etc
+</pre>
+</p>
+
+<p>Using keys/args, we redefine the configuration path for the above utilities:
+
+<pre class="brush:bash;ruler:true;">
+ sysrc inetd_flags="-wW -C 60 /root/etc/inetd.conf"
+ sysrc syslogd_flags="-ss -f /root/etc/syslog.conf"
+ sysrc blacklistd_flags="-c /root/etc/blacklistd.conf"
+ sysrc newsyslog_flags="-CN -f /root/etc/newsyslog.conf"
+</pre>
+
+etc so on. A number of utilities also support the export of custom configurations to the 
+corresponding app.d directories. Use these tricks and your upgrade operations will be very easy.
+</p>
+
+<h2><a name="etcupdate_sample">etcupdate examples</a></h2>
+
+<p>Let's create jail with the 11.3 base version:
+
+<pre class="brush:bash;ruler:true;">
+cbsd jcreate jname=jail4 ip4_addr=DHCP ver=11.3
+</pre>
+
+Change the version of the container base, thereby switching to an older version, for example to 12.1:
+
+<pre class="brush:bash;ruler:true;">
+ cbsd jset jname=jail4 ver=12.1
+</pre>
+
+Using the jls command, you can see the current version of the container base and the version of distribtion (etcver):
+
+<pre class="brush:bash;ruler:true;">
+ cbsd jls display=jname,ver,etcver
+</pre>
+
+When you start the container, you can see a message from <strong>CBSD</strong> about the discrepancy 
+between the files and the current database and an offer to use the command to update. Run it:
+
+<pre class="brush:bash;ruler:true;">
+ cbsd etcupdate jname=jail4 mode=update
+</pre>
+
+The command will update the files that are synchronized in automatic mode and will display a message about the 
+need to manually resolve conflicts if automatic mode has encountered difficulties. 
+By running resolve, we can fix the conflicts manually, bringing the file to the desired form:
+
+<pre class="brush:bash;ruler:true;">
+  cbsd etcupdate jname=jail4 mode=resolve
+</pre>
+</p>
+
+<p class="text-center"><img src="/img/etcupdate1.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate2.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate3.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate4.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate5.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/etcupdate6.png" alt="" /></p>
+<p><center>Keep your systems up to date!</center></p>
+<br>

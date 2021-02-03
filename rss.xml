@@ -1026,5 +1026,20 @@
     <guid>CBSD 12.2.5 available</guid>
     <pubDate>Thu, 07 Jan 2021 11:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.0 available</title>
+    <description>CBSD 13.0.0 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      tested with FreeBSD 13.0-alpha3&lt;br /&gt;
+      new cloud-init profile: OPNsense 21, CentOS 8 stream&lt;br /&gt;
+      jail: jails-fstab: external script for external mount&lt;br /&gt;
+      jail: CBSDfile: fix pkglist regression&lt;br /&gt;
+      jail: makeresolv: dont set NS for non-working protocol (IPv4/IPv6?)&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.0 available</guid>
+    <pubDate>Wed, 03 Feb 2021 12:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

@@ -1,0 +1,16 @@
+	<h1><span>What nodes is meant</span></h1>
+	
+	<h2><a name="node_cmd">node command</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node
+		</pre>
+		<p>"Node addition" is meant RSA key exchange for system user <strong>CBSD</strong> between two and more hosts. Having at itself RSA a key of the individual server, the some command has an opportunity  to work with it through OpenSSH connection, carrying out such actions as:</p>
+		<ul>
+			<li>executable remote <strong>CBSD</strong> (get jail list, login into jail) or unprivileged OS command (some commands, nevertheless, demand existence of the rights of the superuser. Such command are started  through the scripts being in catalogs <strong>$workdir/sudoexec</strong> and <strong>$prefix/cbsd/*ver*/sudoexec/</strong>  (distrib directory)&nbsp;— look at <em>/usr/local/etc/sudoers.d/cbsd_sudoers</em>.</li>
+			<li>copying/creation of configuration files for jails, replication and synchronization of data.</li>
+		</ul>
+		<p>Nodes can be united in any called logic group over which it is possible to carry out mass actions</p>
+	</div>
+
+

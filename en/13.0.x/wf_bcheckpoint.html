@@ -1,0 +1,56 @@
+	<h1><span>Checkpoints, hibernation and pauses of the bhyve virtual machine</span></h1>
+	
+	<h2><a name="bcheckpoint_cmd">Commands bcheckpoint, bsuspend, bpause</a></h2>
+	<p>The implementation of this feature in <strong>bhyve</strong> is grateful to the Politehnica University of Bucharest and in particular: Elena Mihailescu and Mihai Carabaș</p>
+	<p>At the time this page was published, this functionality was not available in the FreeBSD codebase and was obtained from the project page on <a href="https://github.com/FreeBSD-UPB">GitHub (FreeBSD-UPB)</a></p>
+	<p>The functionality of checkpoints and suspend of a virtual machine is the freezing of the virtual environment, saving the entire state to disk, from which you can return the system to its previous state without having to reboot the environment<p>
+	<h2>Checkpoints</h2>
+	<p>In <strong>CBSD</strong> to work with checkpoints use the <strong>bcheckpoint</strong> command, which has the following syntax:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd bcheckpoint [jname=] [mode=] [name=] [poweroff=]
+	</pre>
+	<p>where:</p>
+	<p>
+	<ul>
+		<li>- <strong>jname</strong>: (required) the name of the environment, for example: freebsd1</li>
+		<li>- <strong>mode</strong>: (required) action relative to the environment: create (create checkpoint), list (list of checkpoints created), destroyall (destroy all checkpoints)</li>
+		<li>- <strong>name</strong>: (optional) specify an alternate checkpoint name, by default: checkpoint</li>
+		<li>- <strong>poweroff</strong>: (optional). When poweroff=1, <strong>CBSD</strong> will automatically shut down the virtual machine instantly
+		(via <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bstop_bstart_ssi.html">bstop</a> <strong>noacpi=1</strong>) on the fact of checkpoint creation.</li>
+	</ul>
+	</p>
+	<p>
+	<pre class="cli;">
+		% cbsd bls
+		JNAME     JID    VM_RAM  VM_CURMEM  VM_CPUS  PCPU  VM_OS_TYPE  IP4_ADDR  STATUS  VNC_PORT
+		freebsd1  21923  1024    24         1        0     freebsd     DHCP      On      127.0.0.1:5900  
+		
+		% cbsd bcheckpoint mode=create jname=freebsd1
+		Waiting and sure that the info is written on the disk: 1/5
+		Waiting and sure that the info is written on the disk: 2/5
+		Waiting and sure that the info is written on the disk: 3/5
+		Waiting and sure that the info is written on the disk: 4/5
+		Waiting and sure that the info is written on the disk: 5/5
+		Checkpoint was created!: /usr/jails/jails-system/freebsd1/checkpoints/checkpoint.ckp
+		
+		% cbsd bcheckpoint mode=create jname=freebsd1 name=after_update
+		Waiting and sure that the info is written on the disk: 1/5
+		Waiting and sure that the info is written on the disk: 2/5
+		Waiting and sure that the info is written on the disk: 3/5
+		Waiting and sure that the info is written on the disk: 4/5
+		Waiting and sure that the info is written on the disk: 5/5
+		Checkpoint was created!: /usr/jails/jails-system/freebsd1/checkpoints/after_update.ckp
+		
+		% cbsd bcheckpoint mode=list jname=freebsd1
+		Created checkpoint for freebsd1:
+		after_update
+		checkpoint
+	</pre>
+	</p>
+	<p>Having created checkpoints, you can return to the desired state via the command <strong>bstart</strong> with <strong>checkpoint</strong> args</p>
+	<p>A short demo at an early stage of development on <a href="https://youtu.be/cyFDnmTKY_c" target="_blank">Youtube</a>
+	</p>
+	<h2>Suspend mode</h2>
+	<p>WIP</p>
+	<h2>VM Pauses</h2>
+	<p>WIP</p>

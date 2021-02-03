@@ -1,0 +1,24 @@
+	<h1><span>Bhyve Live migration</span></h1>
+	
+	<h2><a name="bmigration_cmd">command: bmigrate</a></h2>
+	<p>The implementation of this feature in <strong>bhyve</strong> is grateful to the Politehnica University of Bucharest and in particular: <strong>Elena Mihailescu</strong> and <strong>Mihai Carabaș</strong>.</p>
+	<p>At the time this page was published, this functionality was not available in the FreeBSD codebase and was obtained from the project page on <a href="https://github.com/FreeBSD-UPB">GitHub (FreeBSD-UPB)</a></p>
+	<p>This functional is a continuation of the <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">checkpoints</a> functional</p>
+	<br>
+	<p>Primary requirements:</p>
+	<br>
+	<p>At the moment, the necessary condition is the presence of DFS, which in the case of <strong>CBSD</strong> should not be a problem ( more: <a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">lack of binding to ZFS</a>). At the moment, the work tested on <strong>NFSv3,v4</strong> and <strong>GlusterFS</strong> ( <strong>Ceph</strong> in the testing process )</p>
+	<p>For a successful bhyve live migration procedure, you also need to have servers that are closest to the technical specifications (architecture, CPU). Currently, the bhyve hypervisor does not support alignment of CPU instructions (editing and customization of CPUID) in the presence of different processors (different generation/models)</p>
+	<p>Besides <strong>CBSD</strong> nodes, which are exchanged virtual machines, must be added to the <strong>CBSD</strong> cluster via the <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_add_ssi.html">node</a> command.</p>
+	<p>In the process of live migration, the node-source uses the functionality to create a deferred task on the node-destionation through <strong>cbsd task</strong>, so make sure that you have a running process 'cbsdd' ( is controlled by the  <strong>cbsdd_enable=YES</strong> parameter in the <em>/etc/rc.conf</em> config file)</p>
+	<br>
+	<p>To migrate, use the command <strong>bmigrate</strong>, which has two arguments - the name (<strong>jname</strong>) a moving virtual machine and the destination node (<strong>node</strong>)</p>
+	<p class="text-center"><img src="/img/bmigration1.png" alt="" /></p>
+	<p>During the migration, the script performs a preliminary check for the compatibility of the nodes, including the presence of common/shared directories (this is <strong>jails-data, jails-rcconf, jails-system</strong> directories in the <strong>CBSD</strong> working environment)</p>
+	<p class="text-center"><img src="/img/bmigration2.png" alt="" /></p>
+    <br>
+    <p>A small demo at an early stage of development: <a href="https://youtu.be/-IYNSBhtJqw" target="_blank">Youtube::FreeBSD bhyve live migration, first overview</a>
+    <p>A small demo at an early stage of development: <a href="https://youtu.be/EyEtw8vEcxE" target="_blank">Youtube::FreeBSD bhyve live migration: FreeBSD guest + networking (no sound)</a>
+    <p>A small demo at an early stage of development: <a href="https://youtu.be/q94ZaP2Nqvo" target="_blank">Youtube::FreeBSD bhyve live migration: Linux Debian guest + networking (no sound)</a>
+    <br>
+    <p>See also: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">checkpoints</a>, <a href="/ru/cbsd_taskd.html">taskd</a>,  <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcpu_topology_ssi.html">CPU topology</a></p>

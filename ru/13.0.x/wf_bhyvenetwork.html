@@ -1,0 +1,180 @@
+	<h1><span>CBSD Bhyve network options</span></h1>
+
+	<div class="block">
+		<p>So, there are the following network options:</p>
+<ul>
+<li>1) Bridge network: e1000, virtio  ( + NAT )</li>
+<li>2) Point-to-point network from bhyve to hoster via tap: e1000, virtio</li>
+<li>3) Private virtual switch via VALE: only virtio</li>
+<li>4) Pass-thru and SR-IOV ( ppt device )</li>
+</ul>
+
+<p>Options 1 by default:</p>
+<h2><a name="bhyvenetwork_opt1">Options 1: Bridge network (auto)</a></h2>
+<p>When interface in bhyve settings sets to 'auto', CBSD try to:</p>
+<p>
+<ul>
+<li>a) determine default interface uplink via: 'route -n get 0.0.0.0'</li>
+<li>b) create tap interface for bhyve</li>
+<li>c) create bridge interface</li>
+<li>d) add into bridge interface tap interface from bhyve and uplink interface</li>
+</ul>
+<p>
+So, networking similar to vnet/jail - each devices on L2 can exchange with
+bhyve direcrly and bhyve in the same L2 network as uplink interface
+</p>
+<p>When interface in bhyve settings sets to any inteface behavior the same except
+(a) - interface already know
+</p>
+<p>How to:</p>
+<ul>
+<li>1) cbsd bconstruct-tui -> choose os_profile + jname -> [GO] (proceed)</li>
+<li>2) cbsd bstart</li>
+</ul>
+
+<h2><a name="bhyvenetwork_opt2">Options 2: Bridge network (manual)</a></h2>
+<p>If you want to control bridge/uplink by yourself this is method for you.
+You must initialize and configure the bridge interface yourself, regardless of <strong>CBSD></strong> and select this <em>bridgeX</em> as VM interface</p>
+<p>When interface of VM = bridge*, the <strong>CBSD</strong> will not configure and delete selected bridge when the virtual machine starts and stops.
+<p>How to:</p>
+<ul>
+<li>1) cbsd bconstruct-tui -> choose os_profile + jname -> interface (select your bridge in the list) -> [GO] (proceed)</li>
+<li>2) cbsd bstart</li>
+</ul>
+<p>Or via bconfig (choose vm):</p>
+<ul>
+<li>bhyvenic -> nicX -> nic_parent -> (select your bridge in the list)</li>
+</ul>
+<h2><a name="bhyvenetwork_opt3">Options 3: Point-to-point network from bhyve to hoster</a></h2>
+<p>
+Direct network between bhyve and hoster. In this case, in order to give the
+network in the bhyve, it is necessary to enable routing of packets between
+bhyve and hoster tap networks.  As a rule in this case, the default gateway
+for the bhyve instance is the host on which it is launched. No bridge, only
+tap.
+</p>
+<p>How to:</p>
+<ul>
+<li>1) cbsd bconstruct-tui -> choose os_profile + jname -> [GO] (proceed)</li>
+<li>2) cbsd bconfig (choose vm)</li>
+<li>3) (in bconfig):<br>
+    bhyvenic -> nic1 -> nic_parent -> [choose 'disabled']</li>
+<li>4) cbsd bstart</li>
+<li>5) (on hoster):<br>
+    find tap interface for bhyve (by description), e.g: tap2<br>
+    choose network for interconnect between hoster and bhyve, e.g:<br>
+    192.168.1.0/24<br>
+    set's one IP from this network in the hoster side:<br>
+    <br>
+    ifconfig tap2 192.168.1.1/24<br>
+    </li>
+
+<li>6) via VNC enter into bhyve instance and sets second IP from this network:<br>
+<br>
+  ifconfig vtnet0 up<br>
+  ifconfig vtnet0 192.168.1.2/24<br>
+<br>
+Now, bhyve can ping hoster via:<br>
+<br>
+  ping 192.168.1.1<br>
+<br>
+And you can set default route to hoster and route traffic as usual:<br>
+ (on bhyve):<br>
+  route add default 192.168.1.1<br>
+<br>
+Also, bhyve with 192.168.1.1 available from hoster via 'ssh 192.168.1.2'<br>
+</li>
+</ul>
+
+<h2><a name="bhyvenetwork_opt4">Options 4: VALE switch</a></h2>
+<p>
+We can create any number of virtual private switch via VALE.
+Bhyve which are commutated for example in 'vswitch1' can
+ping only each other VM in vswitch1, but nothing else.
+</p>
+<p>For example:</p>
+<br>
+[sw1]<br>
+|  &nbsp;     \<br>
+b1 &nbsp;  b2<br>
+<br>
+<br>
+[sw2]<br>
+|  &nbsp;     \<br>
+b3 &nbsp;    b4<br>
+<br>
+<p>bhyve (b1) can ping  (b2), and (b3) can ping (b4), but  other host is
+unavailable.</p>
+<p>Howto:</p>
+<ul>
+<li>1) create virtual switch:<br>
+cbsd valecfg-tui  -> add name (e.g sw1)<br>
+</li>
+<li>2) cbsd bconstruct-tui -> choose os_profile + jname -> [GO] (proceed)</li>
+<li>3) cbsd bconfig (choose vm)</li>
+<li>3) (in bconfig):<br>
+    bhyvenic -> nic1 -> nic_parent -> [choose 'vale:sw1']<br>
+</li>
+<li>4) cbsd bstart</li>
+</ul>
+<p>In this case, you can assign into bhyve any network/IPs - this is not
+available from any places.</p>
+<p>
+If create second virtual machine and also attach to vale:sw1, this host can
+each other in VALE switch.
+</p>
+<p>
+This options usefull for hosting and customer:
+</p>
+<p>
+Each client receives personal private switch and  its virtual machines are
+only connected to this switch. No collision between same network with other
+client! And to get internet access, client must install 'Gateway/Internet
+appliance' - small virtual machine like in Amazon AWS with two interfaces -
+one of them is connected to client's private switch (so that other machines
+can use it as a gateway) and second interface - connected to bridge on the
+hoster.
+</p>
+<p>
+schematically it might look like this:
+</p>
+<p class="text-center"><img src="/img/cbsd_netopt1.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/cbsd_netopt2.png" alt="" /></p>
+<br>
+<p class="text-center"><img src="/img/cbsd_netopt3.png" alt="" /></p>
+<h2><a name="bhyvenetwork_opt4_sample">Options 4: VALE switch + external route via vether(4)</a></h2>
+<p>
+<p>You may want to route internal VALE traffic to external network. You can use the epair(4) or vether(4) interface ( or a GW instance (e.g: OPNSense, pfSense)-based with two interfaces ) for these purposes.</p>
+<p>Full example:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd valecfg-tui
+</pre>
+<p>Create vale switch <strong>vale1</strong> named</p>
+<pre class="brush:bash;ruler:true;">
+pkg install -y net/vether-kmod
+/sbin/kldload if_vether
+/sbin/ifconfig vether1 create
+/sbin/ifconfig vether1 10.0.0.1/24 up
+/usr/local/cbsd/tools/vale-ctl -h vale1:vether1
+</pre>
+<p><strong>Hint:</strong> modern versions of FreeBSD have valectl in base: <em>/usr/sbin/valectl</em></p>
+<p>Now you have gateway from external network stack inside VALE switch.</p>
+<p>now we will create several VMs in the vale1 VALE switch:</p>
+<pre class="brush:bash;ruler:true;">
+cbsd bcreate jname=cent1 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-8.2-x86_64" ci_ip4_addr="10.0.0.100" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
+cbsd bcreate jname=cent2 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-8.2-x86_64" ci_ip4_addr="10.0.0.101" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
+ping -c2 10.0.0.100
+ping -c2 10.0.0.101
+</pre>
+<p><strong>Hint</strong>: you may want to override the parameters to use the VALE switch by default:<p>
+<pre>
+cat &gt;&gt; ~cbsd/etc/bhyve-default-default.conf  &lt;&lt;EOF
+create_cbsdsystem_tap=0
+interface="cbsdvale_vale1"
+ci_gw4="10.0.0.1"
+EOF
+</pre>
+<br>
+<p class="text-center"><img src="/img/cbsd_vale_vether1.png" alt="" /></p>
+</div>

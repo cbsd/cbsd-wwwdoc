@@ -1,0 +1,43 @@
+	<h1><span>Bhyve CPU topology</span></h1>
+	<h2><a name="bcpu_topology_cmd">Commands: cpu-topology vm-cpu-topology vm-cpu-topology-tui</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd cpu-topology
+			% cbsd vm-cpu-topology vm-cpu-topology-tui
+			% cbsd vm-cpu-topology-tui
+		</pre>
+		<div class="block red-text attention">
+			<p>Attention! CBSD works with the bhyve topology in a new method/way. Make sure you have <a href="http://reviews.freebsd.org/D9930">D9930</a></p>
+		</div>
+		<p><strong>Description</strong>:</p>
+		<p>Configuring and viewing the CPU topology of the bhyve virtual machine.</p>
+		<br>
+		<p>Adjustment of the CPU topology of virtual machines can be performed to improve the performance and optimization of computational operations, and in various tasks related to testing.</p>
+		<p>When virtual machines executing, it is important to understand that from the point of view of the hoster: the virtual processors of the virtual machine are the usual processes (in the case of bhyve, a separate vcpu is a thread in the hoster system).</p>
+		<p>It is assumed that the user has a minimal understanding of the work of CPU, memory and NUMA-domains. In addition, for effective configuration it is important to understand the type of activity and services of the OS of a particular guest. The most important is understanding the work of L1, L2 and L3 caches and the work of the processor with certain memory blocks.</p>
+		<p>Recall that L1, L2 cache is a cache for one core, whereas L3 and higher is a cache for the entire processor (socket).</p>
+		<p>By changing the topology of the guest operating system, you can define the various virtual processor configurations as the number of sockets, the number of cores per socket and their location, and the presence of hyper-threading.</p>
+		<p>For example, having 8 cores, you can configure them as:</p>
+		<ul>
+			<li>1 socket (virtual processor) with 8 core, without hyper-threading ( FreeBSD/SMP: <strong>1</strong> package(s) x <strong>8</strong> core(s) )</li>
+			<li>1 socket with 4 core, with HT ( FreeBSD/SMP: <strong>1</strong> package(s) x <strong>4</strong> core(s) x <strong>2</strong> hardware threads)</li></li>
+			<li>2 sockets with 2 core and HT ( FreeBSD/SMP: <strong>2</strong> package(s) x <strong>2</strong> core(s) x <strong>2</strong> hardware threads)</li>
+			<li>4 sockets with 2 core each ( FreeBSD/SMP: <strong>4</strong> package(s) x <strong>2</strong> core(s) )</li>
+			<li>etc..</li>
+		</ul>
+		<p>As such, the configuration of the virtual machine topology does not affect the speed of the virtual machine itself:</p>
+		<p class="text-center"><img src="/img/cpu_topology_intro.png" alt="" /></p>
+		<p>The configuration data becomes important, in conjunction with the settings for binding the virtual machine cores to a particular group of physical server cores (set_affinity, cpu-pinning), as will be discussed separately. The aim of this article is to consider
+		bhyve possibilities and work with its configuration through <strong>CBSD</strong>.</p>
+		<p>To view the current topology on the host side, use the command <strong>cbsd cpu-topology</strong>. In addition to information about the current system, you can see a schematic representation of the sockets and cores that serve virtual environments</p>
+		<p>If the virtual machine is bound to a particular core of the physical machine, you will see its name opposite the given kernel of a specific socket. If there are no bindings/pinning, all virtual environments will be opposite each core - since they do not have restrictions on
+		the use of certain kernels and they can migrate than are required by the OS OS master:</p>
+		<p class="text-center"><img src="/img/cbsd_cpu_topology1.png" alt="" /></p>
+		<p>A socket is directly a physical processor (package) on your motherboard. If the processor supports hyper-threading (and it is enabled), the virtual cores will be marked as <em>THR</em></p>
+		<p>You can create any number of profiles for the topology. You can view their list using vm-cpu-topology:</p>
+		<p class="text-center"><img src="/img/cbsd_cpu_topology3.png" alt="" /></p>
+		<p>You can delete or add new ones through the TUI command interface vm-cpu-topology-tui</p>
+		<p class="text-center"><img src="/img/cbsd_cpu_topology2.png" alt="" /></p>
+		<p>Profile names must be unique and the application of this or that topology is performed through the command bset, bconfig. And also, the choice of topologies will be available when creating a virtual machine in bconstruct-tui:</p>
+		<p class="text-center"><img src="/img/cbsd_cpu_topology4.png" alt="" /></p>
+	</div>

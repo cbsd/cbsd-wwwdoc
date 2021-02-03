@@ -1,0 +1,100 @@
+	<h1><span>bhyve and cloud-init with CBSD</span></h1>
+
+	<h2><a name="bcloud_init_cmd">Commands: bconfig, bconstruct-tui, cloudinit</a></h2>
+
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd bconstruct-tui
+			% cbsd cloudinit
+                        % cbsd bcreate
+		</pre>
+		<p><strong>Description</strong>:</p>
+
+		<p>FYI: Cloud-init demo was demonstrated in:
+		<ul>
+			<li><a target="_blank" href="https://youtu.be/QK9eSxrs3eg">Bhyve unattended installation with CBSD: PXE and cloud-init</a></li>
+			<li><a target="_blank" href="https://youtu.be/3F_lh8s51_4">NetBSD cloud image for bhyve demo</a></li>
+			<li><a target="_blank" href="https://youtu.be/PDkxrHb5Xt8">Microsoft Windows Server 2016 cloud image via CBSD/cloudbase demo</a></li>
+		</ul>
+		</p>
+		<p>Currently, the use of <a target="_blank" href="https://cloud-init.io/">cloud-init</a> is a de facto method for rapidly deploying virtual instances in various
+		cloud environments (OpenNebula, OpenStack, Amazon AWS, Microsoft Azure, Digital Ocean ..)</p>
+		<p>Starting from version 12.0.6 <strong>CBSD</strong> supports the configuration of cloud images using the cloud-init function.</p>
+		<p>How it works:</p>
+		<p>Currently, <strong>CBSD</strong> is able to configure the instans of cloud-init using the <strong>NoCloud data source method</strong>.
+		This means that the virtual machine receives all the settings through the file system fat32/msdos_fs or cd9660 of the connected local media.
+		The task of <strong>CBSD</strong> is to generate and connect the image to the virtual machine at the time of its launch.</p>
+
+		<p>As a sign that <strong>CBSD</strong> should activate cloud-init functions, is the fact that there is a cloud-init directory in the 
+		system directory of a individual virtual machine: <em>${jailsysdir}/${jname}/cloud-init/</em>.
+		In addition to the sign of activation of cloud-init, this directory acts as a repository of configuration in the format and hierarchy of cloud-init,
+		which will be provided to the virtual machine. That is, if the <strong>CBSD</strong> working directory (cbsd_workdir) is initialized in the
+		<em>/usr/jails</em> directory, for the virtual machine named <strong>vm1</strong> the enable flag and parameters for configuring cloud-init should be 
+		in <em>/usr/jails/jails-system/vm1/cloud-init</em> directory.</p>
+		<p>For configuration format and configuration options for cloud-init, refer to the relevant <a target="_blank" href="https://cloudinit.readthedocs.io/en/latest/">official project</a> information.</p>
+
+		<p>In addition, the <strong>CBSD</strong> distribution includes an example of a simple configuration that you can view in the
+		<em>/usr/local/cbsd/share/examples/cloud-init</em> directory and use as a starting point for creating your own cloud installations.</p>
+
+		<div class="warning">
+			<p>Attention! Despite the <a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">lack of binding to ZFS</a>,
+			installation using ZFS is recommended for use with cloud-init. In this case, <strong>CBSD</strong> uses COW technology in the form of a 
+			zfs clone to create a virtual machine based on the cloud image. Otherwise, <strong>CBSD</strong> each time will be forced to perform a lengthy operation with a 
+			standard copy of the cloud image on the virtual machine disk.
+			However, it is still much more efficient than installing via ISO using the installer every time.</p>
+		</div>
+		<p><br></p>
+		<div class="warning">
+			<p>Attention! In some cases, you may need a runtime configuration, for example, when using network-config version 1.
+			Unlike version 2, where you can use the match parameter with wildcard as the network interface name, the first version requires a strong interface name.
+			Which may vary depending on the numbering of the PCI bus. In this case, you may need the opportunity
+			<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript">pre/post start/stop hooks</a> in <strong>CBSD</strong>,
+			which helps you create dynamic configurations for cloud-init.</p>
+		</div>
+		<p>In addition, an assistant for cloud-init was added to the <strong>CBSD</strong> virtual machines configurator via bconstruct-tui, 
+		which implements the minimum required configuration to get a running virtual machine from the cloud image.
+		For this you can use several pre-configured profiles with the <strong>cloud-</strong> prefix.</p>
+		<p>The number of profiles will increase over time. In addition, you can independently create and send a profile through a public GitHub repository:
+		<a target="_blank" href="https://github.com/cbsd/cbsd-vmprofiles">https://github.com/cbsd/cbsd-vmprofile</a>. 
+		These are the profiles that the <strong>CBSD</strong> uses.
+		<p>In addition, if you notice that image acquisition speed is low (<strong>CBSD</strong> uses its own mirrors to duplicate images referenced by <strong>CBSD</strong> profiles), 
+		and you have a desire to help the project, please read the information on how to raise your own mirror: <a href="/<!--#echo var="lang" -->/cbsd_fetch.html#cbsd_partners">fetch_iso</a>.
+		You can send us a link to your mirror (or add it yourself via <a target="_blank" href="https://github.com/cbsd/cbsd-vmprofiles">https://github.com/cbsd/cbsd-vmprofile</a>, 
+		and thereby improve the quality for your country/region.</p>
+		<br>
+		<p>Note: In <strong>CBSD</strong> version 12.0.8, parameter <strong>ci_user_pubkey_</strong>user can accept not only ssh pubkey itself, but also the path to authorized_keys.
+		In addition, if this parameter is set to <strong>.ssh/authorized_keys</strong> (value by default for 12.0.8+), this means that your node's ssh key will be used. ( ~cbsd/.ssh ).
+		Pay attention to how looks <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v12.0.8/etc/defaults/blogin.conf#L21">blogin.conf</a> in 12.0.8: if the virtual machine is created using cloud-init,
+		the "cbsd blogin" command will use the custom login command using the node key and the user specified by you as <strong>ci_user_add</strong>.Thus, by running a virtual machine from cloud-init,
+		you can immediately access it via ssh using the command: <strong>cbsd blogin</strong>.</p>
+		<br>
+		<h2><a name="cloudinit_fromargs">bcreate from args</a></h2>
+		<p>If you don’t like the dialog boxes, you can start the virtual machine from the cloud image as quickly as possible using bcreate by specifying the appropriate configuration parameters, for example:</p>
+		<pre class="brush:bash;ruler:true;">
+		cbsd bcreate jname=centos1 imgsize=20g vm_cpus=1 vm_ram=4g vm_os_type=linux vm_os_profile=cloud-CentOS-7-x86_64 ci_jname=centos1 ci_fqdn=centos1.my.domain ci_ip4_addr=DHCP ci_g
+w4=10.0.0.1 runasap=1
+
+		cbsd bcreate jname=centos2 imgsize=40g vm_cpus=4 vm_ram=8g vm_os_type=linux vm_os_profile=cloud-CentOS-8-x86_64 ci_jname=centos2 ci_fqdn=centos2.my.domain ci_ip4_addr=192.168.0
+.10/24 ci_gw4=192.168.0.1 runasap=1
+		</pre>
+		<p>pay attention to <strong>ci_ip4_addr</strong> and <strong>ci_gw4</strong> - when using the DHCP value, make sure that you select the correct nodeippool range of addresses, and also that ci_gw4 points to the working IP of the gateway in this subnet.</p>
+		<br>
+		<h2><a name="cloudinit_sample">Usage example</a></h2>
+		<br>
+		<p>Profiles of cloud images are in the vm_os_profile menu. Select this item in the main menu:</p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit1.png" alt="" /></p>
+		<br>
+		<p>At the bottom of the list, you will see an area with Cloud images,
+		if these profiles are created in <strong>CBSD</strong> for the selected OS family:</p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit2.png" alt="" /></p>
+		<br>
+		<p>Next, configure the network settings, user and public key of the guest machine:</p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit3.png" alt="" /></p>
+		<br>
+		<p class="text-center"><img src="/img/cloudinit4.png" alt="" /></p>
+		<br>
+		<p>Further configuration and launch of a cloud-based virtual machine is no different from the main method. Good luck!</p>
+	</div>

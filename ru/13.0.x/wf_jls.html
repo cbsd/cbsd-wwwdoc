@@ -1,0 +1,40 @@
+	<h1><span>Список клеток</span></h1>
+	<h2><a name="jls_cmd">Команда jls</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls
+		</pre>
+		<strong>Описание</strong>:
+		<p>Выводит список окружений на локальной ноде или всех добавленных нодах. Вы можете регулировать выводимые поля через аргумент <strong>display</strong>.
+		Если <strong>display</strong> не указан, используется значение, заданное в файле <em>$workdir/etc/defaults/jls.conf</em>, которое вы можете изменить на свое усмотрение через <em>$workdir/etc/jls.conf</em>.
+		Для скрытия заголовка, используйте аргумент header=0.</p>
+		<p>Все возможные параметры для выборок описаны в файле <em>$workdir/share/jail-arg</em></p>
+		<p>Помимо базовых <strong>CBSD</strong> значений, вы можете добавлять собственные поля и значения для вывода при команде jls. Подробнее об этом: <a href="/<!--#echo var="lang" -->/custom_facts.html">кастомные факты окружений</a></p>
+		<ul>
+			<table class="images">
+			<tr><td class="bg-gray"><strong>JID</strong></td><td>Jail ID</td></tr>
+			<tr><td class="bg-gray"><strong>JNAME</strong></td><td>имя окружения</td></tr>
+			<tr><td class="bg-gray"><strong>IP4_ADDR</strong></td><td>список привязанных к Jail IP адресов (IPv4,IPv6)</td></tr>
+			<tr><td class="bg-gray"><strong>HOST_HOSTNAME</strong></td><td>FQDN окружения</td></tr>
+			<tr><td class="bg-gray"><strong>PATH</strong></td><td>корень файловой системы окружения</td></tr>
+			<tr><td class="bg-gray"><strong>STATUS</strong></td><td>On (запущена), Off (остановлена), Unregister (разрегистрирована из SQL базы)</td></tr>
+			</table>
+		</ul>
+		<p>Для <strong>vnet</strong>-based окружений с виртуальным стеком, вам также может быть полезно поле <strong>REAL_IP4</strong> для вывода фактических IP адресов внутри окружения</p>
+		<p>Прим: окружения  в статусе Unregister могут быть зарегистрированы через команду <strong>cbsd jregister</strong>. В случае, если к локальному серверу добавлены удаленные ноды, можно вывести все клетки в ферме через:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls alljails=1
+		</pre>
+		<p>или</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls alljails=1 shownode=1
+		</pre>
+		<p>для вывода имени ноды, где размещается данная клетка.</p>
+		<p><strong>Другие примеры</strong>:</p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd jls display=jname,ip4_addr,vnet,real_ip4,astart
+			% cbsd jls header=0 display=jname,mycustom1,mycustom2,status
+		</pre>
+		<p class="text-center"><img src="/img/jls1.png" alt="" /></p>
+		<p class="text-center"><img src="/img/jls2.png" alt="" /></p>
+	</div>

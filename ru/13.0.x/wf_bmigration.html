@@ -1,0 +1,24 @@
+	<h1><span>Живая миграция виртуальной машины bhyve</span></h1>
+	
+	<h2><a name="bmigration_cmd">Команда bmigrate</a></h2>
+	<p>Реализацией данной особенности в <strong>bhyve</strong> мы благодарны Политехническому университету Бухареста и в частности: <strong>Elena Mihailescu</strong> and <strong>Mihai Carabaș</strong>.</p>
+	<p>На момент опубликовании этой страницы, данный функционал отсутствовал в кодовой базе FreeBSD и получен со страницы проекта на <a href="https://github.com/FreeBSD-UPB">GitHub (FreeBSD-UPB)</a></p>
+	<p>Данный функционал является продолжением функционала <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">checkpoints</a></p>
+	<br>
+	<p>Основные требования:</p>
+	<br>
+	<p>Необходимым условием является наличие DFS, что в случае с <strong>CBSD</strong> не должно являться проблемой (подробнее: <a href="/<!--#echo var="lang" -->/articles/cbsd_with_dfs.html">отсутствие привязки к ZFS</a>). В данный момент протестирована работа на <strong>NFSv3,v4</strong> и <strong>GlusterFS</strong> ( <strong>Ceph</strong> в процессе тестирования )</p>
+	<p>Для успешной процедуры живой миграции, вам также необходимо иметь максимально близкие по техническим характеристикам сервера (архитектура, CPU). В текущий момент bhyve гипервизор не поддерживает выравнивание инструкций CPU (редактирование и кастомизация CPUID) при наличии разных процессоров (разных поколений, моделей)</p>
+	<p>Кроме этого <strong>CBSD</strong> ноды, которые обмениваются между собой виртуальными машинами, должны быть добавлены в кластер через команду <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_node_add_ssi.html">node</a></p>
+	<p>В процессе живой миграции, нода-источник задействует функционал по созданию отложенной задачи на ноде-приемнике через <strong>cbsd task</strong>, поэтому убедитесь, что вы имеете запущенным процесс 'cbsdd' ( регулируется параметром <strong>cbsdd_enable=YES</strong> в файле <em>/etc/rc.conf</em>)</p>
+	<br>
+	<p>Для миграции служит команда <strong>bmigrate</strong>, имеющая два аргумента - непосредственно имя (<strong>jname</strong>) переезжаемой виртуальной машины и имя ноды приемника (<strong>node</strong>)</p>
+	<p class="text-center"><img src="/img/bmigration1.png" alt="" /></p>
+	<p>В процессе миграции скрипт выполняет предварительную проверку на совместимость нод, в том числе на наличие общих каталогов ( это каталоги <strong>jails-data, jails-rcconf, jails-system</strong> в рабочем окружении <strong>CBSD</strong>)</p>
+	<p class="text-center"><img src="/img/bmigration2.png" alt="" /></p>
+    <br>
+    <p>Небольшое демо на ранней стадии разработки: <a href="https://youtu.be/-IYNSBhtJqw" target="_blank">Youtube::FreeBSD bhyve live migration, first overview</a>
+    <p>Небольшое демо на ранней стадии разработки: <a href="https://youtu.be/EyEtw8vEcxE" target="_blank">Youtube::FreeBSD bhyve live migration: FreeBSD guest + networking (no sound)</a>
+    <p>Небольшое демо на ранней стадии разработки: <a href="https://youtu.be/q94ZaP2Nqvo" target="_blank">Youtube::FreeBSD bhyve live migration: Linux Debian guest + networking (no sound)</a>
+    <br>
+    <p>Смотрите также: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcheckpoint_ssi.html">checkpoints</a>, <a href="/ru/cbsd_taskd.html">taskd</a>,  <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bcpu_topology_ssi.html">CPU topology</a></p>

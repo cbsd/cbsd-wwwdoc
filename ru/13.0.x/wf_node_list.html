@@ -1,0 +1,16 @@
+	<h1><span>Список нод</span></h1>
+	
+	<h2><a name="nodelist_cmd">Команда node mode=list</a></h2>
+	<div class="block">
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=list
+		</pre>
+		<p>Команда <strong>cbsd node mode=list</strong> выведет имена тех нод, RSA ключи которых были получены через  <strong>cbsd node add</strong>. Тоже самое можно получить, просмотрев каталог <em>$workdir/.rssh</em>, в котором находятся ключи. Выведенный список не означает, что имеющийся ключ актуален.</p>
+		<p>Через аргумент <strong>display</strong> можно указать конкретные поля для выборки данных. Если <strong>display</strong> не указан, используется значение, заданное в файле <em>$workdir/etc/defaults/node.conf</em>, которое вы можете изменить на свое усмотрение через <em>$workdir/etc/node.conf</em></p>
+		<p><strong>Пример:</strong></p>
+		<pre class="brush:bash;ruler:true;">
+			% cbsd node mode=list
+		</pre>
+		<p class="text-center"><img src="/img/nodelist1.png" alt="" /></p>
+	</div>
+

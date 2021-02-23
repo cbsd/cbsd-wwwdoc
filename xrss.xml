@@ -1041,5 +1041,33 @@
     <guid>CBSD 13.0.0 available</guid>
     <pubDate>Wed, 03 Feb 2021 12:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD FOSDEM 2021 material available</title>
+    <description>CBSD FOSDEM 2021 material available&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      The video and slides are available on&lt;br /&gt;
+      https://fosdem.org/2021/schedule/event/cbsd_ecosystem/&lt;br /&gt;
+      Bravo, Goran!&lt;br /&gt;
+    </description>
+    <link>https://fosdem.org/2021/schedule/event/cbsd_ecosystem/</link>
+    <guid>CBSD FOSDEM 2021 material available</guid>
+    <pubDate>Wed, 13 Feb 2021 11:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.1 available</title>
+    <description>CBSD 13.0.1 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: update uefi-edk2-bhyve firmware to g20210214&lt;br /&gt;
+      (highly experimental) up/destroy/exec/login: support for API via CBSDfile&lt;br /&gt;
+      jail: jcreate: add ci_user_pubkey as root user pubkey&lt;br /&gt;
+      jail jcreate: pass fsquota as ZFS quota&lt;br /&gt;
+      initenv/cmdboot: fix several chicken-egg&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.1 available</guid>
+    <pubDate>Wed, 24 Feb 2021 00:12:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

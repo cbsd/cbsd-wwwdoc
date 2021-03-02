@@ -7,6 +7,15 @@
 	Одна функция - одно окружение. Вы можете использовать любые параметры из команд jcreate/jconstruct-tui/jconfig и bcreate/bconstruct-tui/bconfig.</p>
 	<p>Если вам необходимо выполнить ряд действий при создании окружения, используйте функции postcreate_XXX.</p>
 </div>
+<h2><a name="cmdfile">CBSDfile + API (private cloud)</a></h2>
+<div class="block">
+<p>
+<strong>CBSDfile</strong> файл может работать не только локально. 
+Добавив в файл всего два параметра ( CLOUD_URL + CLOUD_KEY ), вы заставите CBSDfile работать с вашим API сервисом,
+деплоя ваши окружения в собственное честное облако!
+Пожалуйста, прочтите для подробностей: <a href="/<!--#echo var="lang" -->/cbsd_api_ssi.html">API module: частное облако через API</a>
+</p>
+</div>
 <h2><a name="cmdfile_sample">Примеры</a></h2>
 <div class="block">
 	<p>Пример для jail. Создайте в каталоге файл requirents.txt - он будет содержать список pip модулей для python, с содержимым:</p>

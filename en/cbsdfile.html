@@ -7,6 +7,15 @@
 	One function - one environment. You can use any parameters from jcreate/jconstruct-tui/jconfig and bcreate/bconstruct-tui/bconfig commands.</p>
 	<p>If you need to perform a series of actions when creating an environment, use the functions called postcreate_XXX.</p>
 </div>
+<h2><a name="cmdfile">CBSDfile + API (private cloud)</a></h2>
+<div class="block">
+<p>
+The <strong>CBSDfile</strong> can work not only locally.
+By adding two parameters ( CLOUD_URL + CLOUD_KEY ) to your file and configuring the api service,
+you automatically get the environment deployed to your private cloud!
+please read for details: <a href="/<!--#echo var="lang" -->/cbsd_api_ssi.html">API module: private cloud via API</a>
+</p>
+</div>
 <h2><a name="cmdfile_sample">Example</a></h2>
 <div class="block">
 	<p>Example for jail. Create a requirents.txt file in the directory - it will contain a list of pip modules for python, with the follow contents:</p>

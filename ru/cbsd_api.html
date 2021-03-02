@@ -1,0 +1,333 @@
+	<h1><span>CBSD API модуль</span></h1>
+	<h2><a name="intro"><span>Введение</span></a></h2>
+	<div class="block">
+<p><strong>CBSD</strong> позволяет пользователю создавать окружения на разных уровнях абстрации, 
+предоставляя большое количество методов по созданию окружений - <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>, команды [jb]create, 
+которые работают как по конфигурационному файлу, так и через аргументы командной строчки. 
+Наконец, вы можете использовать интерактивные диалоговые меню ([jb]construct-tui). Несмотря на разнообразность, 
+все эти варианты требуют заходить на сервер каждый раз через ssh и вводить соответствующие команды.
+RestAPI сервис добавляет для вас еще одну опцию по управления окружениями, позволяя отказаться от необходимости использовать ssh, где 
+вы взаимодействуете с CBSD фреймворком через HTTP/RestAPI запросы.
+</p>
+<p>
+Архитектура API сервиса поддерживает работу как на одной ноде, так и позволяет охватывать несколько нод, 
+предоставляя вам возможность легким образом построить частное программируемое облако для запуска виртуальных окружений,
+что выводит <strong>CBSD</strong> на новый уровень управления окружениями.
+Помимо классического запроса через HTTP (например через утилиту curl), API поддерживается файлом <strong>CBSDfile</strong>, 
+что дает очень мощный и в некоторых случаях, еще более комфортный деплой сервисов в частном облаке. Но об этом ниже.
+</p>
+<p>
+Давайте зафиксируем терминологию, которая будет использована в этой статье.
+<p>
+<ul>
+	<li>
+		<strong>CBSD</strong> - набор скриптов, реализующий управление виртуальными машинами на самом низком уровне.
+		Вам потребуется <strong>CBSD</strong> не ниже 13.0.1. Если версия ниже, пожалуйста, обновитесь перед тем как вы начнете.
+	</li>
+	<li>
+		<strong>ZPOOL</strong> - ZFS пул, в котором проинициализировано рабочее окружение <strong>CBSD</strong>. 
+		По-умолчанию, рабочий каталог <strong>CBSD</strong> инициализируется в <em>/usr/jails</em>.
+	</li>
+	<li>
+		<strong>Broker</strong> - основная шина данных общения между сервисом cbsd-mq-api (один) и cbsd-mq-router (может быть в любых количествах).
+		В текущей статье роль брокера выполняет <a target="_blank" href="http://xph.us/software/beanstalkd/">beanstalkd</a>.
+	</li>
+	<li>
+		<strong>Tube</strong> - труба (в терминологии beanstald) - FIFO-очередь в брокере, в которую пишет (publish) cbsd-mq-api, а cbsd-mq-router - читает (subscribe).
+	</li>
+	<li>
+		<strong>Hypervisor</strong> (не путать с bhyve hypervisor) - физическая нода под управлением FreeBSD OS. 
+		Количество нод неограничено. Каждый гипервизор имеет как минимум 1 ZPOOL. Каждый пул обслуживается процессом cbsd-mq-router, 
+		подписывающийся на персональную pool-очередь для обработки инструкций <strong>CBSD</strong>.
+	</li>
+	<li>
+		<strong>API</strong> - сервис (public), предоставляющий RestAPI или json-rpc для взаимоимодействия конечных пользвателей ( curl/UI frontend ).
+		В нашем случае простейшей реализацией будет сервис cbsd-mq-api.
+	</li>
+</ul>
+
+	<p>Начнем с рассмотрения самой простой однонодовой инсталляции.</p>
+	</div>
+	<h2><a name="intro"><span>Standalone API</span></a></h2>
+	<div class="block">
+
+	<p>Установка и настройка <strong>CBSD</strong> API в режиме standalone.</p>
+<p>В этом примере, все операции выполняются на одном гипервизоре, который будет выступать одновременно и API и брокером и <strong>CBSD</strong> хостером, где будут запускаться рабочие окружения.</p>
+
+<p>1) Установим брокер сообщений</p>
+<pre class="brush:bash;ruler:true;">
+pkg install -y beanstalkd
+</pre>
+<p>Укажите через флаг в rc.conf, на каком адресе будет ожидать подключения beanstalkd.
+Поскольку у нас все-в-одном, все подключения не будут выходить за границу localhost, поэтому указываем 127.0.0.1
+в качестве адреса для прослушивания:
+</p>
+<pre class="brush:bash;ruler:true;">
+sysrc beanstalkd_flags="-l 172.16.0.5 -p 11300"
+</pre>
+<p>
+Запускаем сервис:
+</p>
+<pre class="brush:bash;ruler:true;">
+service beanstalkd enable
+service beanstalkd start
+</pre>
+<p>
+2) На момент публикации статьи, cbsd-mq-api не присутствует в системе портов FreeBSD и его нет в pkg репозитории. 
+Получим сервис через исходные коды. Для этого нам потребуется установить пакет git (достаточно git-lite) и go:
+</p>
+<p>
+Либо из GitHub:
+</p>
+<pre class="brush:bash;ruler:true;">
+pkg install -y git-lite go
+</pre>
+<p>Склонируем репозиторий, соберем и проинсталлируем сервис:
+</p>
+<pre class="brush:bash;ruler:true;">
+git clone https://github.com/cbsd/cbsd-mq-api.git /root/cbsd-mq-api
+/root/cbsd-mq-api/build.sh
+cp -a /root/cbsd-mq-api/cbsd-mq-api /usr/local/bin
+cp -a /root/cbsd-mq-api/etc/cbsd-mq-api.json /usr/local/etc/
+cp -a /root/cbsd-mq-api/rc.d/cbsd-mq-api /usr/local/etc/rc.d/
+</pre>
+<p>
+3) Установим дополнительные файлы в <strong>CBSD</strong> через модуль api:
+</p>
+<pre class="brush:bash;ruler:true;">
+cbsd module mode=install api
+echo 'api.d' >> ~cbsd/etc/modules.conf
+cbsd initenv
+</pre>
+<p>
+4) Выполняем настройку API:
+</p>
+<p>
+Создадим необходимую структуру каталогов для API:
+</p>
+<pre class="brush:bash;ruler:true;">
+mkdir -p /var/db/cbsd-api ~cbsd/var/db/api/map
+chown -R cbsd:cbsd /var/db/cbsd-api ~cbsd/var/db/api/map
+</pre>
+<p>
+Отредактируйте конфигурационный файл <em>/usr/local/etc/cbsd-mq-api.json</em>:
+</p>
+<p>
+a) Параметр server_url должнен указывать на имя или IP адрес вашего API сервиса, доступный для внешних подключений.
+Этот URL as-is будет подставляться в качестве рабочего endpoint. В нашем случае, в окружении рабочий внешний IP адрес - 172.16.0.5,
+поэтому полная строка настройки будет выглядеть так:
+</p>
+<pre class="brush:bash;ruler:true;">
+"server_url": "http://172.16.0.5:65531",
+</pre>
+<p>
+Запускаем сервис:
+</p>
+<pre class="brush:bash;ruler:true;">
+service cbsd-mq-api enable
+service cbsd-mq-api start
+</pre>
+<p>
+Скопируйте конфигурационный файл для сервиса и укажите хотя бы один <strong>CBSD</strong> хостер в параметре server_list=
+</p>
+<pre class="brush:bash;ruler:true;">
+cp -a /usr/local/cbsd/modules/api.d/etc/api.conf ~cbsd/etc/
+vi ~cbsd/etc/api.conf
+</pre>
+<p>
+Параметр server_list должен содержать участников кластера (обычно это имена хостов), разделенные пробелом.
+Сервис использует эти имена в качестве адресатов для рассылки задач через beanstalkd.
+</p>
+<p>
+Например, в нашем случае имя ноды с <strong>CBSD</strong> - cloud1.my.domain, поэтому api.conf будет содержать строку:
+</p>
+<pre class="brush:bash;ruler:true;">
+server_list="cloud1.my.domain"
+</pre>
+<p>
+Вы можете проверить корректность отработки выдачи рекомендаций хоста, на котором запускать новое окружение, 
+запустив скрипт /usr/local/cbsd/modules/api.d/misc/recomendation.sh: он должен вернуть имя сервера.
+</p>
+
+<p>5) Настройка cbsd-mq-router.
+</p>
+<p>Установите сервис:
+</p>
+<pre class="brush:bash;ruler:true;">
+pkg install -y cbsd-mq-router
+</pre>
+<p>
+Или из портов:
+</p>
+<pre class="brush:bash;ruler:true;">
+env BATCH=no make -C /usr/ports/sysutils/cbsd-mq-router install
+</pre>
+<p>
+Отредактируем файл /usr/local/etc/cbsd-mq-router.json, указав корректный адрес нашего beanstalkd брокера в параметре "uri" в секции beanstalkd, в нашем случае это:
+</p>
+<pre class="brush:bash;ruler:true;">
+    "uri": "127.0.0.1:11300",
+</pre>
+<p>
+Нам также необходимо зафиксировать имя трубы в брокере, на которую будет подписан сервис cbsd-mq-router настраевомого хоста.
+Для этого, измените параметры <strong>tube</strong> и <strong>reply_tube_prefix</strong> в cbsd_<имя_сервера> и cbsd_<имя_сервера>_result_id соответственно, где
+в имени сервера символы '-' и '.' преобразуются в '_'.
+</p>
+<p>
+Так, имея <strong>CBSD</strong> хост с именем cloud1.my.domain, в файле /usr/local/etc/cbsd-mq-router.json должны быть записи:
+</p>
+<pre class="brush:bash;ruler:true;">
+      "tube": "cbsd_cloud1_my_domain",
+      "reply_tube_prefix": "cbsd_cloud1_my_domain_result_id",
+
+</pre>
+<p>Если ваше рабочее окружение <strong>CBSD</strong> имеет отличное от стандартного /usr/jails, откорректируйте путь в параметре <strong>cbsdenv</strong>.
+</p>
+<p>
+Запускаем сервисы:
+</p>
+<pre class="brush:bash;ruler:true;">
+service cbsd-mq-router enable
+service cbsd-mq-router start
+</pre>
+<p>
+Ваш первый standalone кластер готов вас обслуживать!
+</p>
+	</div>
+	<h2><a name="intro"><span>API: jail</span></a></h2>
+	<div class="block">
+
+<h3>Работа с JAIL через API</h3>
+
+<p>Создадим простейший payload для создания контейнера, например файл jail.json
+</p>
+<p>jail.json:</p>
+<pre class="brush:bash;ruler:true;">
+
+{
+  "type": "jail",
+  "imgsize": "10g",
+  "pubkey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdzM3pm65J28zNt/YcRWSw4NXa8PKU8MhrbA/CShuEm olevole@jhoster1.olevole.ru"
+}
+</pre>
+<p>
+Разумеется, в качестве pubkey подставив свой публичный ключ.
+Отправим его в endpoint по созданию контейнера, где /jail в конце означает имя окружения (произвольное)
+</p>
+<pre class="brush:bash;ruler:true;">
+curl -X POST -H "Content-Type: application/json" -d @jail.json http://172.16.0.5:65531/api/v1/create/jail
+</pre>
+<p>
+При этом API подсчитает md5 хеш от вашего pubkey и результат чек-суммы автоматичеки станет вашим токеном, который вы можете использовать для контроля
+окружений и одновременно будет неким namespace-ом в кластере, в котором вы будете видеть все ресурсы, создававемые с вашим публичным ключем.  
+</p>
+<p>
+Так, если потребуется уничтожить окружение, используйте GET запрос на ендпоинт /destroy, используя ваш хеш.
+Получите md5 сумму вашего ключа, если вы его все еще не знаете ;)
+</p>
+<pre class="brush:bash;ruler:true;">
+md5 -qs "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdzM3pm65J28zNt/YcRWSw4NXa8PKU8MhrbA/CShuEm olevole@jhoster1.olevole.ru"
+</pre>
+<p>
+используйте его в запросе:
+</p>
+<pre class="brush:bash;ruler:true;">
+curl -H "cid:678851e352136726da5e6c52126eb906" http://172.16.0.5:65531/api/v1/destroy/jail
+</pre>
+<p>
+Разумеется, подобный механизм подходящий только для частного облака. Если вы планируете поднимать сервис для внешних пользователей с подобной схемой, используйте для подтверждения опасных операций более строгие методы валидации, 
+например <a target="_blank" href="https://en.wikipedia.org/wiki/Time-based_One-Time_Password">TOTP</a>.
+</p>
+Еще пара слов о конфигурации API для jail. Скрипт работающий с jail через API может использовать конфигурационный файл с именем jail-api.conf, который должен быть расположен в каталоге ~cbsd/etc.
+Пример этого файла вы можете посмотреть здесь: <em>/usr/local/cbsd/modules/api.d/etc/jail-api.conf</em>
+</p>
+<p>
+На данный момент файл регулирует, позволять ли пользователю указывать в payload версию FreeBSD базы для контейнера, пул IP адресов и внешний IP адрес для доступа в контейнер, выдаваемый пользователю. 
+По-умолчанию версию FreeBSD base для контейнера не пропускаем, какое бы значение не прислал пользователь: API будет создавать контейнер под версию вашего гипервизора ( ver=native ).
+Поскольку на выдачу адресов пользователь облака не влияет и этим занимается <strong>CBSD</strong>, вы можете назначать любой пул,как внешних адресов, так и частных.
+</p>
+	</div>
+	<h2><a name="intro"><span>API: bhyve</span></a></h2>
+	<div class="block">
+<h3>Работа с виртуальными машинами bhyve через API</h3>
+<p>
+Работа с виртуальными машинами имеет аналогичный интерфейс и endpoint, как и в случае с jail, но имеет немного другой payload для создания окружения. Кроме этого, вы должны провести настройку по соответствию
+имени запрашиваемого образа с профилем <strong>CBSD</strong>. Как и у скрипта для jail, скрипт работающий с bhyve также имеет конфигурационный файл. Скопируйте пример конфигурационного файла:
+</p>
+<pre class="brush:bash;ruler:true;">
+cp -a /usr/local/cbsd/modules/api.d/etc/bhyve-api.conf ~cbsd/etc/
+</pre>
+<p>
+Как и в случае с jail, вы также можете регулировать правила выдачи IP адресов виртуальным машинам. И вы можете регулировать, какой IP адрес будет выдан пользователю для доступа SSH на создаваемый ресурс -
+либо будет отдан прямой IP адрес виртуальной машины, либо <strong>CBSD</strong> создаст expose правило для SSH на любом свободном порту. В этом случае, пользователь получит IP адрес гипервизора и порт, который будет форвардить запросы на 22/ssh порт виртуальной машины.
+</p>
+<p>
+Пример payload, например centos7.json:
+</p>
+<pre class="brush:bash;ruler:true;">
+{
+  "type": "bhyve",
+  "imgsize": "10g",
+  "ram": "1g",
+  "cpus": "2",
+  "img": "centos7",
+  "pubkey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdzM3pm65J28zNt/YcRWSw4NXa8PKU8MhrbA/CShuEm olevole@jhoster1.olevole.ru"
+}
+</pre>
+<p>
+И создается аналогичным запросом что и jail:
+</p>
+<pre class="brush:bash;ruler:true;">
+curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.0.5:65531/api/v1/create/cent7
+</pre>
+
+	</div>
+	<h2><a name="intro"><span><strong>CBSDfile</strong> + API</span></a></h2>
+	<div class="block">
+
+<strong>CBSD</strong>file + API
+
+<p>И на закуску, в качестве ягодки на торте</p>
+<p>
+В некоторых случаях curl и RestAPI - намного удобнее ssh + `cbsd bcreate/bconstruct-tui`. Если вам приходится много и часто деплоить виртуальные окружения, вам не избежать необходимость изучить и использовать какой-нибудь язык
+высокого уровня. В качестве промежуточного варианта, существует еще один гибридный и неявный вариант использования API - через <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>.
+Если вы не знакомы с этой возможностью <strong>CBSD</strong> - непременно ознакомьтесь. Для того, чтобы использовать <strong>CBSDfile</strong> в вашем частном облаке, вам достаточно добавить в начало <strong>CBSDfile</strong>
+всего два параметра - это Endpoint вашего API и ключ. Наличие этих двух параметров заставит <strong>CBSD</strong> переключиться при создании с локальной инсталляции <strong>CBSD</strong> на облако.
+А это может предоставлять уже совершенно <a target="_blank" href="">нового уровня возможности</a> (пример взаимодействия с multi-node кластером)!
+</p>
+	</div>
+
+	<h2><a name="intro"><span>Multinode API</span></a></h2>
+	<div class="block">
+
+<h3>Мультинодовый API/<strong>CBSD</strong> кластер</h3>
+<p>
+Как уже писалось ранее, текущая архитектура способна обслуживать более одного гипервизора. Что, при интенсивном деплое виртуальных окружений в большом количестве, может значительно увеличить КПД и эффективность
+ресурсов вашего облака.
+</p>
+<p>Наш простенький API сервис имеет возможность использовать два внешних скрипта, реализующие логику для двух действий:
+</p>
+<ul>
+	<li>a) предложить следующее свободное имя для виртуального окружения. С учетом нескольких нод, это решает проблему возможных коллизий имен, поскольку регулируется в одной точке</li>
+	<li>b) получить рекомендации, на каком именно хосте запрашиваемое виртуальное окружение стоит разместить.</li>
+</ul>
+<p>Здесь дается любой полет фантазии для имплементации логики на любом удобном для вас языке программирования и использования любых алгоритмов. Так, например, если часть ваших серверов имеет высокопроизводительные но небольшого объема NVME диски и часть серверов - емкие, но медленные hdd, вы можете легким образом реализовать простую логику вида
+</p>
+<p>
+Если запрашивается виртуальная машина с объемом диска > 500GB - выбирать из списка серверов с hdd.
+</p>
+<p>
+Вместе с модулем API поставляются два скрипта на sh, которые в качестве примеров дают уникальный ID в качестве имени виртуальной машины и выдающий сервера по алгоритму round-robin. Что должно хватать для запуска полноценного мультинодового кластера за 10 минут. Давайте сделаем это.
+</p>
+<p>
+Для простоты и максимальной свободы от зависимостей, мы не будем использовать дополнительные сервисы или базы данных, обойдемся обычными файлами и синхронизацией каталога по rsync протоколу.
+</p>
+<p>Начнем с настройки API сервиса. По отношению к standalone конфигурации, в файле ~cbsd/etc/api.conf мы расширяем список на необходимое количество участников в кластере, напрмер:
+<pre class="brush:bash;ruler:true;">
+server_list="srv-01.olevole.ru srv-02.olevole.ru srv-03.olevole.ru bob.your-server.de"
+</pre>
+<p>Вы можете проверить, что скрипт рекомендаций ( /usr/local/cbsd/modules/api.d/misc/recomendation.sh )по-умолчанию предлагает хосты в round-robin:</p>
+<img src="/img/cbsd_api1.png" alt="" />
+</p>
+<strong>WIP...</strong>
+	</div>

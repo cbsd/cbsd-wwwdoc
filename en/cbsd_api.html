@@ -9,6 +9,10 @@ all of these options require you to log into the server each time via ssh and en
 The RestAPI service adds another option for managing environments for you, eliminating the need to use ssh, 
 where you interact with the CBSD framework via HTTP / RestAPI requests.
 </p>
+<center><br>
+<strong>private FreeBSD multi-node bhyve/jail cloud via API demo:</strong><br>
+<iframe width="1280" height="720" src="https://www.youtube.com/embed/lLdwzlCQaWY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</center>
 <p>
 The service API architecture supports single-site and multi-site coverage, 
 giving you the ability to easily create a private, programmable cloud to run virtualized environments, 
@@ -49,7 +53,7 @@ Let's fix the terminology that will be used in this article.
 
 	<p>Let's start by looking at the simplest single-mode installation.</p>
 	</div>
-	<h2><a name="intro"><span>Standalone API</span></a></h2>
+	<h2><a name="sapi"><span>Standalone API</span></a></h2>
 	<div class="block">
 
 	<p>Installing and configuring the <strong>CBSD</strong> API in standalone mode.</p>
@@ -196,7 +200,7 @@ service cbsd-mq-router start
 Your first standalone private cluster is ready to serve you!
 </p>
 	</div>
-	<h2><a name="intro"><span>API: jail</span></a></h2>
+	<h2><a name="apij"><span>API: jail</span></a></h2>
 	<div class="block">
 
 <h3>Working with JAIL via the API</h3>
@@ -255,7 +259,7 @@ does not influence the issuance of addresses, and <strong>CBSD</strong> does thi
 you can assign any pool, both external addresses and private ones.
 </p>
 	</div>
-	<h2><a name="intro"><span>API: bhyve</span></a></h2>
+	<h2><a name="apib"><span>API: bhyve</span></a></h2>
 	<div class="block">
 <h3>Working with virtual machines bhyve via API</h3>
 <p>
@@ -296,7 +300,7 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.
 </pre>
 
 	</div>
-	<h2><a name="intro"><span><strong>CBSDfile</strong> + API</span></a></h2>
+	<h2><a name="cbsdfile"><span><strong>CBSDfile</strong> + API</span></a></h2>
 	<div class="block">
 
 <h3><strong>CBSDfile</strong> + API</h3>
@@ -310,11 +314,11 @@ If you are not familiar with this <strong>CBSD</strong> feature, be sure to chec
 In order to use the <strong>CBSDfile</strong> in your private cloud, you just need to add only two parameters to the beginning of the 
 <strong>CBSDfile</strong> - this is the Endpoint of your API and the key. 
 Having these two options will cause CBSD to switch from a local <strong>CBSD</strong> installation to the cloud when building. 
-And this can provide a completely <a target="_blank" href="">new level of capabilities</a> (an example of interaction with a multi-node cluster)!
+And this can provide a completely <a target="_blank" href="https://youtu.be/lLdwzlCQaWY">new level of capabilities</a> (an example of interaction with a multi-node cluster)!
 </p>
 	</div>
 
-	<h2><a name="intro"><span>Multinode API</span></a></h2>
+	<h2><a name="mapi"><span>Multinode API</span></a></h2>
 	<div class="block">
 
 <h3>Multinode API/<strong>CBSD</strong> cluster</h3>

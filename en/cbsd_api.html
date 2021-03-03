@@ -136,6 +136,7 @@ Copy the configuration file for the service and specify at least one <strong>CBS
 </p>
 <pre class="brush:bash;ruler:true;">
 cp -a /usr/local/cbsd/modules/api.d/etc/api.conf ~cbsd/etc/
+chown cbsd:cbsd ~cbsd/etc/api.conf
 vi ~cbsd/etc/api.conf
 </pre>
 <p>
@@ -270,6 +271,7 @@ Like the jail script, the bhyve script also has a configuration file. Copy the e
 </p>
 <pre class="brush:bash;ruler:true;">
 cp -a /usr/local/cbsd/modules/api.d/etc/bhyve-api.conf ~cbsd/etc/
+chown cbsd:cbsd ~cbsd/etc/bhyve-api.conf
 </pre>
 <p>
 As in the case of jail, you can also regulate the rules for issuing IP addresses to virtual machines. 

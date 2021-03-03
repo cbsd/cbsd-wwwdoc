@@ -1069,5 +1069,18 @@
     <guid>CBSD 13.0.1 available</guid>
     <pubDate>Wed, 24 Feb 2021 00:12:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD API module: private cloud via API: ready for test</title>
+    <description>CBSD API module: private cloud via API: ready for test&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      CBSD jail/bhyve API (+ CBSDfile integration) available for testing! feedback is appreciated.&lt;br /&gt;
+      Post on reddit: https://www.reddit.com/r/freebsd/comments/lwficg/cbsd_api_module_private_cloud_via_api/&lt;br /&gt;
+      Please share if you are interested ;-)&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD API module: private cloud via API: ready for test</guid>
+    <pubDate>Wed, 03 Mar 2021 00:11:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

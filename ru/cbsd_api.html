@@ -16,6 +16,10 @@ RestAPI сервис добавляет для вас еще одну опцию
 Помимо классического запроса через HTTP (например через утилиту curl), API поддерживается файлом <strong>CBSDfile</strong>, 
 что дает очень мощный и в некоторых случаях, еще более комфортный деплой сервисов в частном облаке. Но об этом ниже.
 </p>
+<center><br>
+<strong>private FreeBSD multi-node bhyve/jail cloud via API demo:</strong><br>
+<iframe width="1280" height="720" src="https://www.youtube.com/embed/lLdwzlCQaWY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</center>
 <p>
 Давайте зафиксируем терминологию, которая будет использована в этой статье.
 <p>
@@ -132,6 +136,7 @@ service cbsd-mq-api start
 </p>
 <pre class="brush:bash;ruler:true;">
 cp -a /usr/local/cbsd/modules/api.d/etc/api.conf ~cbsd/etc/
+chown cbsd:cbsd ~cbsd/etc/api.conf
 vi ~cbsd/etc/api.conf
 </pre>
 <p>
@@ -256,6 +261,7 @@ curl -H "cid:678851e352136726da5e6c52126eb906" http://172.16.0.5:65531/api/v1/de
 </p>
 <pre class="brush:bash;ruler:true;">
 cp -a /usr/local/cbsd/modules/api.d/etc/bhyve-api.conf ~cbsd/etc/
+chown cbsd:cbsd ~cbsd/etc/bhyve-api.conf
 </pre>
 <p>
 Как и в случае с jail, вы также можете регулировать правила выдачи IP адресов виртуальным машинам. И вы можете регулировать, какой IP адрес будет выдан пользователю для доступа SSH на создаваемый ресурс -
@@ -293,7 +299,7 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.
 высокого уровня. В качестве промежуточного варианта, существует еще один гибридный и неявный вариант использования API - через <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>.
 Если вы не знакомы с этой возможностью <strong>CBSD</strong> - непременно ознакомьтесь. Для того, чтобы использовать <strong>CBSDfile</strong> в вашем частном облаке, вам достаточно добавить в начало <strong>CBSDfile</strong>
 всего два параметра - это Endpoint вашего API и ключ. Наличие этих двух параметров заставит <strong>CBSD</strong> переключиться при создании с локальной инсталляции <strong>CBSD</strong> на облако.
-А это может предоставлять уже совершенно <a target="_blank" href="">нового уровня возможности</a> (пример взаимодействия с multi-node кластером)!
+А это может предоставлять уже совершенно <a target="_blank" href="https://youtu.be/lLdwzlCQaWY">нового уровня возможности</a> (пример взаимодействия с multi-node кластером)!
 </p>
 	</div>
 

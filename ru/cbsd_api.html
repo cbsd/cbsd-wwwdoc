@@ -52,7 +52,7 @@ RestAPI сервис добавляет для вас еще одну опцию
 
 	<p>Начнем с рассмотрения самой простой однонодовой инсталляции.</p>
 	</div>
-	<h2><a name="intro"><span>Standalone API</span></a></h2>
+	<h2><a name="sapi"><span>Standalone API</span></a></h2>
 	<div class="block">
 
 	<p>Установка и настройка <strong>CBSD</strong> API в режиме standalone.</p>
@@ -199,7 +199,7 @@ service cbsd-mq-router start
 Ваш первый standalone кластер готов вас обслуживать!
 </p>
 	</div>
-	<h2><a name="intro"><span>API: jail</span></a></h2>
+	<h2><a name="japi"><span>API: jail</span></a></h2>
 	<div class="block">
 
 <h3>Работа с JAIL через API</h3>
@@ -252,7 +252,7 @@ curl -H "cid:678851e352136726da5e6c52126eb906" http://172.16.0.5:65531/api/v1/de
 Поскольку на выдачу адресов пользователь облака не влияет и этим занимается <strong>CBSD</strong>, вы можете назначать любой пул,как внешних адресов, так и частных.
 </p>
 	</div>
-	<h2><a name="intro"><span>API: bhyve</span></a></h2>
+	<h2><a name="bapi"><span>API: bhyve</span></a></h2>
 	<div class="block">
 <h3>Работа с виртуальными машинами bhyve через API</h3>
 <p>
@@ -288,7 +288,7 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.
 </pre>
 
 	</div>
-	<h2><a name="intro"><span><strong>CBSDfile</strong> + API</span></a></h2>
+	<h2><a name="cbsdfileapi"><span><strong>CBSDfile</strong> + API</span></a></h2>
 	<div class="block">
 
 <strong>CBSD</strong>file + API
@@ -303,7 +303,7 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.
 </p>
 	</div>
 
-	<h2><a name="intro"><span>Multinode API</span></a></h2>
+	<h2><a name="multiapi"><span>Multinode API</span></a></h2>
 	<div class="block">
 
 <h3>Мультинодовый API/<strong>CBSD</strong> кластер</h3>

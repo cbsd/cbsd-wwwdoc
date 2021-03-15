@@ -1082,5 +1082,17 @@
     <guid>CBSD API module: private cloud via API: ready for test</guid>
     <pubDate>Wed, 03 Mar 2021 00:11:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.2 release</title>
+    <description>CBSD 13.0.2 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      [jb]scp/[jb]exec/[jb]login,service,sysrc,pkg: support for CBSDfile/API&lt;br /&gt;
+      see: https://www.bsdstore.ru/en/cbsd_api_ssi.html#cbsdfile&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.2 available</guid>
+    <pubDate>Mon, 15 Mar 2021 00:09:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

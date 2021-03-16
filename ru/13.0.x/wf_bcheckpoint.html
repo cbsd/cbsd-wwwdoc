@@ -1,9 +1,20 @@
 	<h1><span>Чекпоинты, спящий режим и паузы виртуальной машины</span></h1>
-	
 	<h2><a name="bcheckpoint_cmd">Команда bcheckpoint, bsuspend, bpause</a></h2>
-	<p>Реализацией данной особенности в <strong>bhyve</strong> мы благодарны Политехническому университету Бухареста и в частности: Elena Mihailescu и Mihai Carabaș</p>
-	<p>На момент опубликовании этой страницы, данный функционал отсутствовал в кодовой базе FreeBSD и получен со страницы проекта на <a href="https://github.com/FreeBSD-UPB">GitHub (FreeBSD-UPB)</a></p>
-	<p>Функционал чекпоинтов (checkpoint) и спящий режим (suspend) виртуальной машины - это заморозка виртуального окружения с сохранением всего состояния на диск, из которого вы можете вновь вернуть систему в прежнее состояние
+
+	<div class="block">
+	<p>Для использования этой особенности, bhyve и bhyvectl утилиты должны быть пересобраны с флагом MK_BHYVE_SNAPSHOT=yes:</p>
+	<pre class="brush:bash;ruler:true;">
+cd /usr/src/usr.sbin/bhyve
+make clean
+env MK_BHYVE_SNAPSHOT=yes make
+env MK_BHYVE_SNAPSHOT=yes make install
+env MK_BHYVE_SNAPSHOT=yes clean
+cd /usr/src/usr.sbin/bhyvectl
+env MK_BHYVE_SNAPSHOT=yes make
+env MK_BHYVE_SNAPSHOT=yes make install
+env MK_BHYVE_SNAPSHOT=yes clean
+	</pre>
+	<p>Функциональность чекпоинтов (checkpoint) и спящий режим (suspend) виртуальной машины - это заморозка виртуального окружения с сохранением всего состояния на диск, из которого вы можете вновь вернуть систему в прежнее состояние
 	без необходимости перезагрузки окружения</p>
 	<h2>Чекпоинты</h2>
 	<p>В <strong>CBSD</strong> для работы с чекпоинтами служит команда <strong>bcheckpoint</strong>, имеющая следующий синтаксис:</p>
@@ -55,3 +66,4 @@
 	<p>WIP</p>
 	<h2>Пауза виртуальной машины</h2>
 	<p>WIP</p>
+	</div>

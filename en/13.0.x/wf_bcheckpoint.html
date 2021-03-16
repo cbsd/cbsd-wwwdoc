@@ -1,8 +1,18 @@
 	<h1><span>Checkpoints, hibernation and pauses of the bhyve virtual machine</span></h1>
-	
 	<h2><a name="bcheckpoint_cmd">Commands bcheckpoint, bsuspend, bpause</a></h2>
-	<p>The implementation of this feature in <strong>bhyve</strong> is grateful to the Politehnica University of Bucharest and in particular: Elena Mihailescu and Mihai Carabaș</p>
-	<p>At the time this page was published, this functionality was not available in the FreeBSD codebase and was obtained from the project page on <a href="https://github.com/FreeBSD-UPB">GitHub (FreeBSD-UPB)</a></p>
+	<div class="block">
+	<p>To use this feature, bhyve and bhyvectl utilities must be compiled with the MK_BHYVE_SNAPSHOT=YES flag:</p>
+	<pre class="brush:bash;ruler:true;">
+cd /usr/src/usr.sbin/bhyve
+make clean
+env MK_BHYVE_SNAPSHOT=yes make
+env MK_BHYVE_SNAPSHOT=yes make install
+env MK_BHYVE_SNAPSHOT=yes clean
+cd /usr/src/usr.sbin/bhyvectl
+env MK_BHYVE_SNAPSHOT=yes make
+env MK_BHYVE_SNAPSHOT=yes make install
+env MK_BHYVE_SNAPSHOT=yes clean
+	</pre>
 	<p>The functionality of checkpoints and suspend of a virtual machine is the freezing of the virtual environment, saving the entire state to disk, from which you can return the system to its previous state without having to reboot the environment<p>
 	<h2>Checkpoints</h2>
 	<p>In <strong>CBSD</strong> to work with checkpoints use the <strong>bcheckpoint</strong> command, which has the following syntax:</p>
@@ -54,3 +64,4 @@
 	<p>WIP</p>
 	<h2>VM Pauses</h2>
 	<p>WIP</p>
+	</div>

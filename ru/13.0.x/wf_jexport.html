@@ -1,5 +1,4 @@
 	<h1><span>Экспорт jail</span></h1>
-	
 	<h2><a name="jexport_cmd">Команда jexport</a></h2>
 	<div class="block">
 		<pre class="brush:bash;ruler:true;">
@@ -16,6 +15,21 @@
 		<p><strong>Пример</strong> (экспортировать клетку mysqljail в $workdir/export/mysqljail.img):</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jexport jname=mysqljail
+		</pre>
+	</div>
+	<h2><a name="jexport_exclude"><span>Исключения для jexport</span></a></h2>
+	<div class="block">
+		<p>Бывают ситуации, когда в экспортированный образ вы не хотите включать ту или иную информацию из контейнера. Например, если вы делаете экспорт работающего контейнера, имеющего смонтированное дерево портов в /usr/ports.</p>
+		<p>В этом случае, вам может помочь параметр <strong>jexport_exclude</strong>, который можно указать глобально на уровне конфигурационного файла jexport.conf (скопируйте его из <em>/usr/local/cbsd/etc/defaults</em> в каталог <em>~cbsd/etc/</em>) и откорректируйте значение <strong>jexport_exclude=</strong></p>
+		<p>Если требуется указать альтернативные исключения для конкретного jail, скопируйте этот файл в каталог <em>~cbsd/jails-system/<strong>$jname</strong>/etc/</em>. В этом случае, исключения при команде jexport будут работать только для контейнера <strong>$jname</strong></p>
+		<p>Наконец, вы можете обходится без конфигурационного файла вовсе, перечислив все исключения через пробел в качестве параметра <strong>jexport_exclude=""</strong> при вызове утилиты jexport, например:</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsd jexport jname=jail1 jexport_exclude="/var/run/* /usr/ports"
+		</pre>
+		<p>Данные исключения не будут копировать дерево портов, поскольку этот каталог мы всегда можем смонтировать с хоста. А также, исключит наличие мертвых <strong>.pid</strong> файлов, которые могут повлиять на корректность запуска контейнера после импортирования.</p>
+		<p>Пути исключений указываются относительно корневого каталога контейнера. Так, если вы хотите мигрировать на другой сервер настройки контейнера jail1 используя jexport/jimport и при этом не хотите копировать какие-либо его данные, просто укажите <strong>/</strong> в качестве исключения:</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsd jexport jname=jail1 jexport_exclude="/"
 		</pre>
 		<p class="text-center"><img src="/img/jexport1.png" alt="" /></p>
 	</div>

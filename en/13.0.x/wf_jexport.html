@@ -1,5 +1,4 @@
 	<h1><span>Jail export</span></h1>
-	
 	<h2><a name="jexport_cmd">jexport command</a></h2>
 	<div class="block">
 		<pre class="brush:bash;ruler:true;">
@@ -16,6 +15,26 @@
 		<p><strong>Example</strong> (export mysqljail jail to  $workdir/export/mysqljail.img):</p>
 		<pre class="brush:bash;ruler:true;">
 			% cbsd jexport jname=mysqljail
+		</pre>
+	</div>
+	<h2><a name="jexport_exclude"><span>Exceptions for jexport</span></a></h2>
+	<div class="block">
+		<p>There are situations where you do not want to include one or another information from the container in the exported image. 
+		For example, if you are exporting a working container having a mounted port of ports in /usr/ports.</p>
+		<p>In this case, you can help the <strong>jexport_exclude</strong> parameter, which can be specified globally in the jexport.conf configuration file 
+		(just copy default jexport.conf from <em>/usr/local/cbsd/etc/defaults/</em>  to <em>~cbsd/etc/</em> and adjust the value for <strong>jexport_exclude</strong></p>
+		<p>If you want to specify alternative exclude for a specific Jail, copy this file to the <em>~cbsd/jails-system/<strong>$jname</strong>/etc</em> / directory. 
+		In this case, when you make an <strong>jexport</strong> call, these exceptions will be applied for <strong>$jname</strong> container only.</p>
+		<p>Finally, you can do exclude without a configuration file at all, just listing all exceptions (space separated) as the <strong>jexport_exclude=</strong> parameter when calling the <strong>jexport</strong> script, for example:</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsd jexport jname=jail1 jexport_exclude="/var/run/* /usr/ports"
+		</pre>
+		<p>In this example, ports tree  directory will not copy to image: since this data can always be mounted from the host.
+		And also, eliminates the presence of dead <strong>.pid</strong> files that can affect the correctness of the launch of the container's services after importing.</p>
+		<p>Exceptions are indicated relative to the root directory of the container. 
+		So, if you want to migrate to another host <strong>jail1</strong> container configuration using jexport/jimport and do not want to copy any of its data, simply specify <strong>/</strong> as an exception:</p>
+		<pre class="brush:bash;ruler:true;">
+			cbsd jexport jname=jail1 jexport_exclude="/"
 		</pre>
 		<p class="text-center"><img src="/img/jexport1.png" alt="" /></p>
 	</div>

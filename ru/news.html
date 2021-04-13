@@ -12,6 +12,24 @@
 </div>
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
+	<p><strong>13.0.4</strong>&nbsp;&mdash; 2021-04-13</p>
+	<ul>
+		<li>Tested with FreeBSD 13.0-RELEASE</li>
+		<li>bhyve: FreeBSD 13.0-RELEASE cloud images (UFS and ZFS)</li>
+		<li>jail: jexec: add dir= args to change current/work dir inside jail, suggested by <strong>Peter2121</strong> via #564</li>
+		<li>Linux jail profiles (centos, debia, ubuntu.</li>
+		<li>jail: vnet: manage IP address/defaultrouter in vnet-based jail</li>
+		<li>portsup: switch to git by default</li>
+		<li>dhcpd: ability to use external 'dhcpd' script, via dhcpd.conf</li>
+		<li>vpc: abitity to install rc.d script for init VPC upon host boot</li>
+		<li>(bugfix) jget asks always for jname even it is right</li>
+		<li>(bugfix) elf_tables: fix segfault when no elf file</li>
+		<li>(bugfix) cfetch: fix of long hanging process (fetching ISO/bases could stalled).</li>
+		<li>(bugfix) bhyve: proceed create.d hooks.</li>
+		<li>(bugfix) fix mount fstab for baserw=1.</li>
+	<ul>
+</div>
+<div class="block">
 	<p><strong>13.0.3 bugfix</strong>&nbsp;&mdash; 2021-03-22</p>
 	<ul>
 		<li>(bugfix) local-jails: forget to add tags (introduced in 13.0.2)</li>

@@ -1107,5 +1107,28 @@
     <guid>CBSD 13.0.3 available</guid>
     <pubDate>Mon, 22 Mar 2021 00:08:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.4 release</title>
+    <description>CBSD 13.0.4 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      tested with FreeBSD 13.0-RELEASE;&lt;br /&gt;
+      bhyve: FreeBSD 13.0-RELEASE cloud images (UFS and ZFS);&lt;br /&gt;
+      jail: jexec: add dir= args to change current/work dir inside jail, suggested by Peter2121 via #564;&lt;br /&gt;
+      Linux jail profiles (centos, debia, ubuntu);&lt;br /&gt;
+      jail: vnet: manage IP address/defaultrouter in vnet-based jail;&lt;br /&gt;
+      portsup: switch to git by default;&lt;br /&gt;
+      dhcpd: ability to use external 'dhcpd' script, via dhcpd.conf;&lt;br /&gt;
+      vpc: abitity to install rc.d script for init VPC upon host boot;&lt;br /&gt;
+      (bugfix) jget asks always for jname even it is right;&lt;br /&gt;
+      (bugfix) elf_tables: fix segfault when no elf file;&lt;br /&gt;
+      (bugfix) cfetch: fix of long hanging process (fetching ISO/bases could stalled);&lt;br /&gt;
+      (bugfix) bhyve: proceed create.d hooks;&lt;br /&gt;
+      (bugfix) fix mount fstab for baserw=1;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.4 available</guid>
+    <pubDate>Tue, 13 Apr 2021 00:08:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

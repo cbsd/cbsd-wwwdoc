@@ -1,4 +1,3 @@
-<!--# include file="/en/_start.html" -->
 <h1><span>FreeBSD clustering: VPC with <strong>CBSD</strong></span></h1>
 <h2><a name="vpc_init_intro">Introduction</a></h2>
 <div class="block">
@@ -235,6 +234,11 @@ gold-hoster:
 </pre>
 </p>
 
+<p>
+Please note that if you want to use the IP address at bridge to routing through it containers and virtual machines, address 
+maybe the initializer via additional parameter <strong>bridge_ips</strong>, for example: cbsd vpc vpc_name=vpc1 mot=init_bridge bridge_ips=10.0.1.1/24
+</p>
+
 <p>It's all! Now <strong>vpc1</strong> with the same settings exists and is available for use as the parent 
 interface for vnet/VIMAGE-based containers and/or virtual network cards for bhyve virtual machines. We just have to check it out:</p>
 
@@ -272,8 +276,22 @@ Since the containers are combined into one L2 network, we can assign any network
 In this example, we use the network 10.10.11.0/24. We can make sure that all containers see each other:
 </p>
 
-<p class="text-center"><img src="/img/vpc_init10.png" alt="" /></p>
+<p class="text-center"><img src="/img/vpc_init10.png" alt="" />
+</p>
+</div>
+<h2><a name="vpc_init_onboot">Init VPC on boot</a></h2>
 
+<div class="block">
+<p>In order for vxlan/bridge and settings to be initialized when the host is restarted, you can use the generation of FreeBSD rc.d scripts that you need to activate via /etc/rc.conf:</p>
+<pre class="cli">
+% cbsd vpc mode=init_rc vpc_name=vpc1
+</pre>
+<p>With this command, in /usr/local/etc/rc.d/ the <strong>cbsd-vpc-vpc1</strong> script will be created, which will raise the entire configuration when you start the server.</p>
+</div>
+
+<h2><a name="conclusion">conclusion</a></h2>
+
+<div class="block">
 <p>Using a distributed L2 network between independent data centers and servers, opens up new possibilities for creating distributed, 
 scalable and fault-tolerant services at the data center and region level. 
 If a failure occurs in one region for various reasons, thanks to a single network, 
@@ -283,7 +301,6 @@ In a virtual network, you can have not only a vnet-based container, but virtual 
 </p>
 <p>
 See this youtube link for a VPC with jail and bhyve on a practical example.
-See <a href="_blank" target="https://youtu.be/_hTAQxxaP8g">this youtube link</a>, which demonstrates VPC with jail and bhyve on a practical example.
+<a href="_blank" target="https://youtu.be/_hTAQxxaP8g">this youtube link</a>, which demonstrates VPC with jail and bhyve on a practical example.
 </p>
 </div>
-<!--# include file="/en/_end.html" -->

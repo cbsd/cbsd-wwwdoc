@@ -1,0 +1,282 @@
+<h1><span>Интеграция <strong>CBSD</strong> с PHPIPAM.</span></h1>
+<h2><a name="cbsd_ipam_intro">Введение</a></h2>
+<div class="block">
+	<p>
+	С увеличением числа работающих виртуальных машин и контейнеров, может возникать проблема инвентаризации и учета используемого адресного пространства.
+	Кроме этого, если кластер насчитывает два и более хостера, становиться проблемой выдавать уникальные непересекаемые между нодами IP адреса для гостевых окружений.
+	Для этих целей, напрашивается какой-нибудь внешний /микро/ сервис, занимающийся учетом IP адресов.
+	</p>
+	<p>
+	В этой статье будут продемонстрированы возможности внешних <strong>CBSD</strong> хуков на примере кластера из 3 физических серверов, расположенных в разных ДЦ, 
+	но организующие единый VPC для виртуальных окружений на базе vxlan и интеграцией с системой IP management на базе <a target="_blank" href="https://phpipam.net/">PHPIPAM</a>.
+	</p>
+	<p>
+	Мы предполагаем, что <strong>CBSD</strong> ноды уже сконфигурированы и между ними организован VPC, 
+	как это описано в статье <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_vpc_ssi.html">VPC с <strong>CBSD</strong> (vxlan)</a>.
+	</p>
+</div>
+<h2><a name="cbsd_ipam_phpipam_install">Установка PHPIPAM</a></h2>
+<div class="block">
+	<p>
+	Устанавливайте PHPIPAM, воспользовавшись любым подходящим для вас способом на выбор: PHPIPAM можно установить из портов:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+make -C /usr/ports/net-mgmt/phpipam install 
+</pre>
+	<p>
+	или через pkg:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+pkg install -y phpipam
+</pre>
+	<p>
+	, либо с <a target="_blank" href="https://github.com/phpipam/phpipam">официального репозитория</a> на GitHub.
+	</p>
+	<p>
+	Кроме этого, для <strong>CBSD</strong> существует  <a href="/<!--#echo var="lang" -->/cbsdfile.html">CBSDfile</a>  для деплоя этого сервиса с нуля через команду `cbsd up`.
+	В этом примере мы пойдем по максимально быстрому пути и воспользуемся тем, что получим уже готовый образ для <strong>CBSD</strong> 
+	(образ, который является результатом команды `cbsd jexport' на контейнер, сформированный <a target="_blank" href="https://github.com/cbsd/cbsdfile-recipes/blob/master/jail/phpipam/CBSDfile">CBSDfile</a>-ом).
+	У нас в наличие три сервера с именами: srv-01, srv-02 и srv-03. Выберем любой из них в качестве хостера для phpipam и получим контейнер:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cbsd repo action=get sources=img name=phpipam
+</pre>
+	<p>
+	<p class="text-center"><img src="/img/phpipam/phpipam1.png" alt="" /></p>
+	запускаем контейнер:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cbsd jstart phpipam
+</pre>
+	<p class="text-center"><img src="/img/phpipam/phpipam2.png" alt="" /></p>
+	<p>
+	Альтернативный вариант через CBSDfile: 
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cd /tmp
+git clone https://github.com/cbsd/cbsdfile-recipes.git
+cd cbsdfile-recipes/jail/phpipam
+cbsd up
+</pre>
+	<p>
+	(при необходимости собрать под альтернативную версию FreeBSD, через аргумент <strong>ver</strong>: cbsd up <strong>ver=12.2</strong>)
+	</p>
+	<p>
+	И открываем страничку в броузере: http://&lt;IP контейнера&gt;
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam3.png" alt="" /></p>
+</div>
+<h2><a name="cbsd_ipam_phpipam_setup">Настройка PHPIPAM</a></h2>
+<div class="block">
+	<p>
+	Авторизовываемся в PHPIPAM от администоратора используя дефолтные данные:
+	<br>
+	<ul>
+		<li>login: <strong>Admin</strong></li>
+		<li>password: <strong>ipamadmin</strong></li>
+	</ul>
+	<p>
+	Меняем пароль ( в нашем случае установим пароль в значение 'qwerty123') и активируем функциональность API для работы с PHPIPAM удаленно.
+	Для этого, кликните на пункт 'phpIPAM Server settings':
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam4.png" alt="" /></p>
+	<p>
+	Установите при необходимости Site URL: в корректное значение. Особенно это важно, если сервис работает за внешним беленсером. Если вы используете беленсер на базе nginx, убедитесь, что конфигурация пропускает соответствующие заголовки:
+	</p>
+	<p>
+	<pre class="cli">
+        location / {
+                proxy_pass http://<UPSTREAM_IP>:80;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+	</pre>
+	</p>
+	<p>
+	Активируйте API features, не забудьте сохранить изменения кнопкой <strong>save</strong> и переходите в настройки <strong>API</strong> через левое меню:
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam5.png" alt="" /></p>
+	<p>
+	Создайте ключ для доступа к API:
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam6.png" alt="" /></p>
+	<p>
+	<p>
+	В качестве App id используйте произвольный уникальный идентификатор (который вам необходимо запомнить для настройки <strong>CBSD</strong> модуля). В нашем случае мы используем ID: <strong>Admin</strong>
+	</p>
+	<p>
+	Установите права доступа в значение: <strong>Read/Write</strong>
+	</p>
+	<p>
+	И установите метод доступа к API через токен: <strong>User token</strong>
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam7.png" alt="" /></p>
+	<p>
+	Также, через меню Subnets, мы должны завести рабочую сеть, которая отдана под виртуальные окружения и которая будет нотифицироваться через API.
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam8.png" alt="" /></p>
+	<br>
+	<p class="text-center"><img src="/img/phpipam/phpipam9.png" alt="" /></p>
+	<p>В данном примере, этой сетью является <strong>CBSD</strong> VPC1: <strong>10.0.1.0/24</strong>
+	</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam10.png" alt="" /></p>
+	</p>
+	<br>
+	<p>На этом конфигурация PHPIPAM завершена.</p>
+</div>
+
+<h2><a name="cbsd_ipam_cbsd_setup">Установка модуля ipam для CBSD</a></h2>
+<div class="block">
+	<p>
+	Получим и активируем ipam модуль для <strong>CBSD</strong> ( внимание, версия <strong>CBSD</strong> должна быть не ниже 13.0.4 ).
+	<pre class="brush:bash;ruler:rule;">
+cbsd module mode=install ipam
+echo 'ipam.d' >> ~cbsd/etc/modules.conf
+cbsd initenv
+</pre>
+
+	<p>
+	Скопируем стандартный конфигурационный файл и откорректируем креденшненелы: 
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cp -a /usr/local/cbsd/modules/ipam.d/etc/ipam.conf ~cbsd/etc
+vi ~cbsd/etc/ipam.conf
+</pre>
+	<p>
+	В нашем случае, PHPIPAM работает по адресу http://10.0.1.7, поэтому конфигурационный файл <em>~cbsd/etc/ipam.conf</em> будет выглядеть следующим образом:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+PHPIPAMURL="http://10.0.1.7"
+PHPIPAMURLAPI="${PHPIPAMURL}/api"
+USER="admin"
+PASS="qwerty123"
+APPID="Admin"
+DEBUG=0
+# PHPIPAM APP Security ( only 'token' is supported at the moment )
+APP_SECURITY="token"
+</pre>
+	<p>
+	Ознакомиться с операциями, которые предоставляет ipam модуль в <strong>CBSD</strong> можно через команду 'cbsd ipam --help'. Как мы видим, возможности покрывают такие операции как:
+	<ul>
+		<li>1) запрос на первый свободный IP адрес в сети;</li>
+		<li>2) создание и/или обновление данных для указанного IP адреса;</li>
+		<li>3) удаление IP адреса;</li>
+	</ul>
+	<p>
+	Эти три действия будут использованы в качестве 'cbsd dhcpd' скрипта, который предлагает свободный IP адрес для jail и виртуальных машин, а также в <strong>create/stop/start/destroy</strong> хуках.
+	В качестве проверки, что PHPIPAM и модуль настроены корректно, вы можете попробовать создать и удалить любую тестовую запись через CLI, например:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cbsd ipam mode=create subnet=10.0.1.0/24 ip4_addr=10.0.1.50 description="jail" note="srv-01.my.domain" hostname="jail1.my.domain" debug=1
+</pre>
+	<p>
+	Если в PHPIPAM ваша запись появилась - осталось дело за малым - вежливо попросить <strong>CBSD</strong> это делать за вас ;-)</p>
+	<p class="text-center"><img src="/img/phpipam/phpipam11.png" alt="" /></p>
+	<p>
+	Для удаления нашей тестовой записи:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cbsd ipam destroy
+</pre>
+</div>
+<h2><a name="cbsd_ipam_cbsd_setup">Настройка CBSD</a></h2>
+<div class="warning">
+	<p>
+	<em>
+	Внимание! Все следующие в этом пункте настройки должны выполнятся одинаково на всех серверах кластера, 
+	поэтому рекомендуется использовать любой удобный config-management аля <strong>Puppet,SaltStack,Chef</strong> или <strong>Ansible</strong>. 
+	Для наглядности, здесь описаны действия для одного хоста, непосредственно через CLI/shell.
+	</em>
+	</p>
+</div>
+<div class="block">
+	<p>
+	<strong>a)</strong> Нам потребуется перенастроить `cbsd dhcpd' на использование внешнего скрипта.
+	</p> 
+	<p>
+	Для этого скопируем дефолтный конфигурационный файл dhcpd.conf и изменим значение 'internal' на внешний скрипт, 
+	который будет обращаться к PHPIPAM. Например, скопируем этот файл как <em>/root/bin/phpiapm.sh</em>:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+cp ~cbsd/etc/defaults/dhcpd.conf ~cbsd/etc/
+vi ~cbsd/etc/dhcpd.conf
+</pre>
+	<p>
+	пример:
+	</p>
+<pre class="cli">
+dhcpd_helper="/root/bin/dhcpd-ipam"
+</pre>
+	<p>
+	Создадим каталог /root/bin и поместим в него скрипт, вызывающий first_free метод, для получения первого свободного IP от PHPIPAM.
+	</p>
+	<p>
+	Пример вызова находится здесь: <em>/usr/local/cbsd/modules/ipam.d/share/dhcpd/dhcpd-ipam</em>:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+mkdir /root/bin
+cp -a /usr/local/cbsd/modules/ipam.d/share/dhcpd/dhcpd-ipam /root/bin/
+</pre>
+	<p>
+	Отредактируем аргумент subnet= в /root/bin/dhcpd-ipam на ту сеть, которую вы используете для виртуальных окружений (и которую конфигурировали в PHPIPAM).
+	</p>
+	<p>
+	В нашем случае, это - <strong>10.0.1.0/24</strong>, соответственно, вид скрипта будет:
+	</p>
+<pre class="cli">
+#!/bin/sh
+
+cbsd ipam mode=firstfreelock subnet=10.0.1.0/24
+</pre>
+	<p>
+	<strong>b)</strong> скопируем скрипты, которые будут запускаться в качестве create/destroy/start/stop хуков окружений.
+	Примеры этих скриптов находятся здесь: <em>/usr/local/cbsd/modules/ipam.d/share</em>.
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+mkdir -p /root/share/cbsd-ipam
+cp -a /usr/local/cbsd/modules/ipam.d/share/*.d /root/share/cbsd-ipam/
+</pre>
+	<p>
+	В /root/share/cbsd-ipam/ у нас теперь находятся три каталога по имени каталогов, которые отрабатывают в <strong>CBSD</strong> при 
+	определенных событиях:
+	<ul>
+		<li><strong>master_create.d</strong> - работает при создании нового окружения;</li>
+		<li><strong>master_poststart.d</strong> - работает после запуска окружения;</li>
+		<li><strong>remove.d</strong> - работает при уничтожении окружения;</li>
+	</ul>
+	</p>
+	<p>
+	Внутри каждого каталога находится выполняемый файл <strong>ipam.sh</strong>, в котором вам необходимо откорректировать рабочую сеть, 
+	которой будем оперировать в PHPIPAM. В нашем случае это <strong>10.0.1.0/24</strong>. Если ваша сеть другая, например <strong>192.168.0.0/16</strong>, то
+	во всех скриптах замените:
+	</p>
+	<p>
+	<strong>1)</strong> строчку <strong>10.0.1.*)</strong> в условии <strong>case</strong> на:<br>
+	192.168.*)<br>
+	</p>
+	<p>
+	<strong>2)</strong> аргумент <strong>subnet</strong> в строке вызова 'cbsd ipam', указав вашу сеть:<br>
+	subnet=192.168.0.0/16
+	</p>
+	Конечно, вы можете написать собственный, более изящный обработчик вместо этих демонстрационных скриптов.
+	</p>
+	<p>
+	На этом все!
+	Теперь, работая с CBSDfile или API или CLI, создавая и удаляя jail или bhyve виртуальные окружения на любом из трех серверов, вы решаете проблемы:
+	</p>
+	<ul>
+		<li>возможных коллизий при выдаче свободных адресов, поскольку теперь эта логика вынесенная за пределы локальных <strong>CBSD</strong>
+			 инсталляций в отдельную сущность/сервис, гарантирующая выдачу свободных IP;</li>
+		<li>автоматического учета адресного пространства и документация, какое виртуальное окружение (<strong>имя</strong>), какого типа (<strong>jail/bhyve</strong>) 
+			взяло тот или иной IP и на какой ноде она запустилась (поле <strong>description</strong> в PHPIPAM будет заполнено именем <strong>CBSD</strong> хостера, на котором осуществлен запуск окружения);</li>
+	</ul>
+	<p>
+	<p class="text-center"><a href="/img/phpipam/phpipam12.png"><img src="/img/phpipam/phpipam12.png" width="1024" height="768"  alt="" /></a></p>
+	</p>
+	<p>
+	Удачи, попутного ветра и легких облаков!
+	</p>
+</div>

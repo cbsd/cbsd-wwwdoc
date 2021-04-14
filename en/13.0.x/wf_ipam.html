@@ -261,7 +261,20 @@ cp -a /usr/local/cbsd/modules/ipam.d/share/*.d /root/share/cbsd-ipam/
 	subnet=192.168.0.0/16
 	</p>
 	Of course, you can write your own, more elegant handler instead of these demonstration scripts.
+	Now, if you do not use <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">your own profiles</a>, just link the scripts to the cbsd directories.
 	</p>
+	<p>For jail:</p>
+	<pre class="brush:bash;ruler:rule;">
+ln -sf /root/share/cbsd-ipam/master_create.d/ipam.sh ~cbsd/share/jail-system-default/master_create.d/ipam.sh
+ln -sf /root/share/cbsd-ipam/master_poststart.d/ipam.sh ~cbsd/share/jail-system-default/master_poststart.d/ipam.sh
+ln -sf /root/share/cbsd-ipam/remove.d/ipam.sh ~cbsd/share/jail-system-default/remove.d/ipam.sh
+</pre>
+	<p>For bhyve:</p>
+	<pre class="brush:bash;ruler:rule;">
+ln -sf /root/share/cbsd-ipam/master_create.d/ipam.sh ~cbsd/share/bhyve-system-default/master_create.d/ipam.sh
+ln -sf /root/share/cbsd-ipam/master_poststart.d/ipam.sh ~cbsd/share/bhyve-system-default/master_poststart.d/ipam.sh
+ln -sf /root/share/cbsd-ipam/remove.d/ipam.sh ~cbsd/share/bhyve-system-default/remove.d/ipam.sh
+</pre>
 	<p>
 	That's all! Now, working with a CBSDfile or API, or CLI, by creating and deleting jail or bhyve virtual environments on any of the three servers, you solve the problems of:
 	</p>

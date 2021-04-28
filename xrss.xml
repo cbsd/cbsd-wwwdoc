@@ -1130,5 +1130,33 @@
     <guid>CBSD 13.0.4 available</guid>
     <pubDate>Tue, 13 Apr 2021 00:08:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD phpIPAM module available</title>
+    <description>CBSD phpIPAM module available&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      https://www.bsdstore.ru/en/13.0.x/wf_ipam_ssi.html&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru/en/13.0.x/wf_ipam_ssi.html</link>
+    <guid>CBSD phpIPAM module available</guid>
+    <pubDate>Thu, 15 Apr 2021 11:46:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.5 release</title>
+    <description>CBSD 13.0.5 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: initial native ZFS encryption support: passphrase method ( #583 )&lt;br /&gt;
+      etcupdate: mode=diff ( suggested by @Peter2121 via #518 )&lt;br /&gt;
+      fix: device-based volume mount on jail start ( reported/fixed by @vgrebenschikov #582 )&lt;br /&gt;
+      fix: cbsd jconstruct missing property descriptions, making it unusable ( reported by @goligo #586 )&lt;br /&gt;
+      fix: qemu-based jail: use /bin location instead of /usr/local/bin ( reported by Bartoletti Loïc )&lt;br /&gt;
+      fix: initenv: Error: incomplete input ( reported by @goligo #584 )&lt;br /&gt;
+      fix: linux profile: apply customskel/skeleton content only once ( reported by @Juronski #589 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.5 available</guid>
+    <pubDate>Wed, 28 Apr 2021 00:08:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

@@ -149,4 +149,12 @@
 	</pre>
 	<p>Then before the next boot, <strong>CBSD</strong> be able to use individual keys for decrypt images for starting and stopping the jails themselves.</p>
 	</div>
+	<h2><a name="native_zfs_enc">Native CBSD encription</a></h2>
+	<div class="block">
+	<p>Starting from the <strong>CBSD</strong> version 13.0.5 and when using FreeBSD 13.0, it is supported by the creation of containers using the native crypting of the ZFS dataset using the passphrase method, for example:</p>
+	<pre class="brush:bash;ruler:true;">
+	% cbsd jcreate jname=xxx zfs_encryption=1 runasap=1
+	% zfs get encryption
+	</pre>
+	</div>
 <!--# include file="_end.html" -->

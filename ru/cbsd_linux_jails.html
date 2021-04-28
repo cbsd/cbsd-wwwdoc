@@ -1,0 +1,16 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+	<h1><span>CBSD и Linux jails</span></h1>
+	<div class="block">
+		<p><strong>CBSD</strong> поддерживает Linux jails (через Linuxulator) и имеет скрипт для получения контейнеров на базе дистрибутивов CentOS, Ubuntu и Debian.</p>
+		<p>Конечно, в силу ограничений Linuxulator вам придется очень хорошо протестировать работу сервисов в подобных контейнерах, поэтому авторами <strong>CBSD</strong> поддержка этой возможности обеспечена,
+		но продуктовые инсталляции лучше разворачивать в полноценной виртуальной машине <strong>bhyve</strong>, с чем вам также поможет <strong>CBSD</strong>.
+		<p>Пример создания Linux контейнеров через CLI</p>
+		<pre class="brush:bash;ruler:true;">
+ cbsd jcreate jname=deb jprofile=debian_buster allow_raw_sockets=1
+ cbsd jcreate jname=ubu jprofile=ubuntu_focal allow_raw_sockets=1
+ cbsd jcreate jname=cent jprofile=centos_7 allow_raw_sockets=1
+		</pre>
+		<p>При первом запуске контейнера, отработает скрипт, скачающий файлы дистрибутива в кеш-директорию: <strong>~cbsd/share/jail-*-rootfs</strong>, в зависимости от дистрибутива.</p>
+	</div>
+<!--# include file="_end.html" -->

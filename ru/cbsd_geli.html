@@ -145,4 +145,12 @@
 	</pre>
 	<p>После чего до перезагрузки, <strong>CBSD</strong> сможет пользоваться индивидуальными ключами для дешифрации образов при запуске и останове клеток самостоятельно.</p>
 	</div>
+	<h2><a name="native_zfs_enc">Нативное криптование ZFS</a></h2>
+	<div class="block">
+	<p>Начиная с версии <strong>CBSD</strong> 13.0.5 и при использовании FreeBSD 13.0, поддерживается создание контейнеров с применением нативного криптования ZFS датасета с использованием фразы, например:
+	<pre class="brush:bash;ruler:true;">
+	% cbsd jcreate jname=xxx zfs_encryption=1 runasap=1
+	% zfs get encryption
+	</pre>
+	</div>
 <!--# include file="_end.html" -->

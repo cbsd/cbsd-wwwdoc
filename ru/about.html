@@ -103,8 +103,12 @@
 		<p><strong>Q:</strong> CBSD</strong> готова к использованию в production?</p>
 		<ul>
 			<li><p>Это зависит только от вас и ваших требований. CBSD существует с 2013 и на данный момент является одной из старейших систем по управлению виртуальными окружениями FreeBSD, при этом она находится в актуальном состоянии и
-			продолжает совершенствоваться. Ряд пользователей успешно применяет CBSD в больших production инсталляциях. </p>
-			<p>Нам также интересно узнать больше о применении CBSD и ClonOS, мы создали <a href="/en/press.html">отдельную страничку</a>, где коллекционируем статьи и обзоры от разных пользователей</p></li>
+			продолжает совершенствоваться. Таким образом, это прошло проверку временем. За этот огромный период по меркам 3rd-party проектов FreeBSD было <a target="_blank" href="https://github.com/cbsd/cbsd/issues?q=is%3Aissue+is%3Aclosed">собрано и обработано</a> большое количество ошибок и пожеланий, отправленных большим количеством пользователей.
+			Ряд пользователей успешно применяет CBSD в больших production инсталляциях. </p>
+			<p>Кроме этого, проект сотрудничает с <a href="/ru/bhyve-cloud.html">некоторыми поставщиками услуг на базе FreeBSD/jail/bhyve</a>, которые используют <strong>CBSD</strong> в продакшене.
+			Это является дополнительным показателем долгосрочных перспектив.</p>
+			<p>Нам также интересно узнать больше о применении CBSD и ClonOS, мы создали <a href="/en/press.html">отдельную страничку</a>, где коллекционируем статьи и обзоры от разных пользователей</p>
+			</li>
 		</ul>
 
 		<p><strong>Q:</strong>
@@ -112,6 +116,7 @@
 		<a target="_blank" href="https://bsdploy.readthedocs.io/en/latest/">bsdploy</a>,
 		<a target="_blank" href="https://github.com/bigdragonsoft/bvm">bvm</a>,
 		<a target="_blank" href="http://chyves.org">chyves</a>,
+		<a target="_blank" href="https://www.freshports.org/sysutils/crate">crate</a>,
 		<a target="_blank" href="http://erdgeist.org/arts/software/ezjail/">ezjail</a>,
 		<a target="_blank" href="https://dreamcat4.github.io/finch/jails-how-to/">finch</a>,
 		<a target="_blank" href="https://github.com/sadaszewski/focker/">focker</a>,
@@ -123,10 +128,14 @@
 		<a target="_blank" href="http://jail-primer.sourceforge.net/">jail-primer</a>,
 		<a target="_blank" href="https://BSDforge.com/projects/sysutils/jailadmin/">jailadmin</a>,
 		<a target="_blank" href="http://anduin.net/jailctl/">jailctl</a>,
+		<a target="_blank" href="https://www.freshports.org/sysutils/jailer">jailer</a>,
 		<a target="_blank" href="http://thewalter.net/stef/freebsd/jails/jailutils/">jailutils</a>,
+		<a target="_blank" href="https://www.freshports.org/sysutils/jest">jest</a>,
+		<a target="_blank" href="https://github.com/mkjail/mkjail/">mkjail</a>,
 		<a target="_blank" href="https://github.com/pizzamig/pot/">pot</a>,
 		<a target="_blank" href="https://git.kevans.dev/kevans/quickjail">quickjail</a>,
 		<a target="_blank" href="http://erdgeist.org/posts/2017/dont-piss-in-my-beer.html">qjail</a>,
+		<a target="_blank" href="https://www.freshports.org/sysutils/runj">runj</a>,
 		<a target="_blank" href="https://blog.project-fifo.net/rvmadm-managing-freebsd-jails/">rvmadm</a>,
 		<a target="_blank" href="https://forums.freebsd.org/threads/introducing-tredly-containers-for-unix-freebsd.56016/">tredly</a>,
 		<a target="_blank" href="https://libvirt.org/drvbhyve.html">virt-manager</a>
@@ -135,7 +144,7 @@
 		zjail,
 		 и прочее: Какого черта так много проектов, какая разница между всеми?</p>
 		<ul>
-			<li><p>Большинство из них родилось и уже умерло. Некоторые проекты рождаются по причине NIH-синдрома. Некоторые умирают из-за отстутствия долгосрочных целей и отсутствия поддержки.
+			<li><p>Большинство из них родилось и уже умерло<img src="/img/rip.png" width="32" height="32"/>. Некоторые проекты рождаются по причине NIH-синдрома. Некоторые умирают из-за отстутствия долгосрочных целей и отсутствия поддержки.
 			Провести сравнение с <strong>CBSD</strong> <a target="_blank" href="https://github.com/cbsd/cbsd/issues/224">достаточно сложно</a>. Короткий ответ: каждый проект имеет свой особенный вектор развития и цели по сравнению с другими; Вы имеете выбор между различными вариантами технологий и реализаций.
 			Основное отличие между CBSD и другими в том, что CBSD позиционируется как комплексное решение с по возможности простым (когда это возможно) интерфейсом управления.
 			CBSD по этой причине значительно крупнее и больше и не всем это подходит. Но мы преследуем разные цели по сравнению с другими и сфокусированы на комплексных кластерных решениях.

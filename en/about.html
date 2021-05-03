@@ -128,7 +128,7 @@ quick creation of the deployment of virtual environments from scratch by manifes
 				<a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">
 Profiles
 				</a>
- for jail creation
+ for jail/bhyve/XEN creation
 			</li>
 			<li>
 import and export of environments into image;
@@ -244,14 +244,7 @@ jexec
 				</a>
 			</li>
 			<li>
-jail: Full or partial jail data encryption (via <strong>GELI</strong> and <strong>native ZFS encryption</strong>);
-			</li>
-			<li>
-jail: 
-				<a href="/<!--#echo var="lang" -->/xorg_in_jail.html">
-XJails
-				</a>
- (Xorg in jail);
+jail: Full or partial jail data encryption (via <a href="/<!--#echo var="lang" -->/cbsd_geli.html"><strong>GELI</strong> and <strong>native ZFS encryption</strong></a>);
 			</li>
 			<li>
 jail: support for no native architectures via qemu user mode (for example jail on arm and mips64 on x86-64 nodes);
@@ -279,7 +272,7 @@ jail: CARP support;
 jail: RACCT/RCTL support;
 			</li>
 			<li>
-jail: Per-jail Traffic Accounting;
+jail: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html">Per-jail Traffic Accounting</a>;
 			</li>
 			<li>
 jail: port expose - network port forwarding into jail;

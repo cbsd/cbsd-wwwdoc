@@ -32,7 +32,7 @@
 			<li>bsdconfig-подобные диалоги текстового интерфейса, что избавляет вас от необходимости учить большое количество команд и аргументов</li>
 			<li>модульная структура - каждая команда - это отдельный файл, что делает большой проект легким в обслуживании. Помимо этого, есть отдельные комплексные модули ( <a target="_blank" href="https://www.bsdstore.ru/en/12.x/wf_k8s_ssi.html">Kubernetes для CBSD</a>, vncterm, noVNC, WS/WSS нотификации, Puppet хелперы )</li>
 			<li>быстрое создание и развертывание виртуальных окружений с&nbsp;нуля по манифесту;</li>
-			<li>Поддержка <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">профилей</a> для создания jail</li>
+			<li>Поддержка <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">профилей</a> для создания jail/bhyve/XEN</li>
 			<li>экспорт и&nbsp;импорт окружений в&nbsp;образ;</li>
 			<li>клонирование окружений (в&nbsp;т.ч. на&nbsp;удалённую машину);</li>
 			<li>холодная миграция окружений с&nbsp;ноды на&nbsp;ноду;</li>
@@ -52,15 +52,14 @@
 			<li>bhyve: менеджмент виртуальных дисков;</li>
 			<li>bhyve: поддержка <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyvenetwork_ssi.html#bhyvenetwork_opt4_sample">VALE support</a>: быстрый NETMAP-based виртуальный свич;</li>
 			<li>jail: выполнение массовых команд в параллельном режиме: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jexec_ssi.html">jexec</a></li>
-			<li>jail: полная или частичная шифрация данных jail (GELI и нативная ZFS шифрация)</li>
-			<li>jail: <a href="/ru/xorg_in_jail.html">XJails</a> (Xorg в jail);</li>
+			<li>jail: полная или частичная шифрация данных jail (<a href="/<!--#echo var="lang" -->/cbsd_geli.html"><strong>GELI</strong> и нативная ZFS шифрация</a>)</li>
 			<li>jail: поддержка ненативных архитектур клеток через Qemu User mode (например, клетки arm и&nbsp;mips64 архитектуры на&nbsp;x86-64&nbsp;ноде);</li>
 			<li>jail: готовый репозиторий для ядер и&nbsp;миров, что делает шаги <strong>buildworld/installworld</strong> необязательными;</li>
 			<li>jail: если шаги <strong>buildworld/installworld</strong> предпринимаются, поддерживается src.conf для кастомизации сборки;</li>
 			<li>jail: base каталог может располагаться на&nbsp;MD/RAM/TMPFS диске, что может быть полезно при большом кол-ве jail-ов с&nbsp;RO-подмонтированной базой;</li>
 			<li>jail: поддержка VIMAGE;</li>
 			<li>jail: поддержка NAT (pf, ipfw, ipfilter);</li>
-			<li>jail: подсчет трафика в&nbsp;jail;</li>
+			<li>jail: <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jailtraffic_ssi.html">подсчет трафика в&nbsp;jail</a>;</li>
 			<li>jail: port expose - проброс сетевых соединений в jail;</li>
 			<li>jail: поддержка CARP;</li>
 			<li>jail: поддержка RACCT/RCTL;</li>

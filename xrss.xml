@@ -1158,5 +1158,21 @@
     <guid>CBSD 13.0.5 available</guid>
     <pubDate>Wed, 28 Apr 2021 00:08:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.6 release</title>
+    <description>CBSD 13.0.6 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: vnet jail: support for fwcounter;&lt;br /&gt;
+      improve help script: filter command list by --module=XX&lt;br /&gt;
+      bugfix: jail etcupdate: fix exclude path when mask '*'is used ( #556 )&lt;br /&gt;
+      bugfix: bhyve: vga params unusable with empty vnc_args;&lt;br /&gt;
+      bugfix: fix jailnic-cfg dialog ( Issue #593 )&lt;br /&gt;
+      bugfix: tools/mountfstab: relative path for nullfs type only;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.6 available</guid>
+    <pubDate>Mod, 10 May 2021 00:07:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

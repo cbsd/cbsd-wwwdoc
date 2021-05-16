@@ -2,20 +2,17 @@
 	<h2><a name="bcheckpoint_cmd">Команда bcheckpoint, bsuspend, bpause</a></h2>
 
 	<div class="block">
-	<p>Для использования этой особенности, bhyve и bhyvectl утилиты должны быть пересобраны с флагом MK_BHYVE_SNAPSHOT=yes:</p>
-	<pre class="brush:bash;ruler:true;">
-cd /usr/src/usr.sbin/bhyve
-make clean
-env MK_BHYVE_SNAPSHOT=yes make
-env MK_BHYVE_SNAPSHOT=yes make install
-env MK_BHYVE_SNAPSHOT=yes clean
-cd /usr/src/usr.sbin/bhyvectl
-env MK_BHYVE_SNAPSHOT=yes make
-env MK_BHYVE_SNAPSHOT=yes make install
-env MK_BHYVE_SNAPSHOT=yes clean
-	</pre>
+	<p>Для использования этой особенности, ядро (модуль vmm.ko) и userland утилиты ( bhyve и bhyvectl ) должны быть пересобраны с флагом BHYVE_SNAPSHOT. Добавьте в /etc/src.conf строчку:</p>
+	<pre class="cli;">
+WITH_BHYVE_SNAPSHOT=yes
+</pre>
+	<p>И в конфигурационный файл ядра опцию:</p>
+	<pre class="cli;">
+options         BHYVE_SNAPSHOT
+</pre>
+
 	<p>Функциональность чекпоинтов (checkpoint) и спящий режим (suspend) виртуальной машины - это заморозка виртуального окружения с сохранением всего состояния на диск, из которого вы можете вновь вернуть систему в прежнее состояние
-	без необходимости перезагрузки окружения</p>
+	без необходимости перезагрузки окружения.</p>
 	<h2>Чекпоинты</h2>
 	<p>В <strong>CBSD</strong> для работы с чекпоинтами служит команда <strong>bcheckpoint</strong>, имеющая следующий синтаксис:</p>
 	<pre class="brush:bash;ruler:true;">

@@ -1172,7 +1172,31 @@
     </description>
     <link>https://www.bsdstore.ru</link>
     <guid>CBSD 13.0.6 available</guid>
-    <pubDate>Mod, 10 May 2021 00:07:00 +0000</pubDate>
+    <pubDate>Mon, 10 May 2021 00:07:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.7 bugfix release</title>
+    <description>CBSD 13.0.7 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bugfix: jail: fix error in jstart ( Issue #595 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.7 available</guid>
+    <pubDate>Tue, 11 May 2021 00:03:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.8 release</title>
+    <description>CBSD 13.0.8 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: jstart: added sysrc params&lt;br /&gt;
+      bugfix: expose did not show rules for bhyve ( Issue #597 )&lt;br /&gt;
+      bhyve: NetBSD 9.2 cloud images&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.8 available</guid>
+    <pubDate>Sun, 30 May 2021 00:03:00 +0000</pubDate>
   </item>
 </channel>
 </rss>

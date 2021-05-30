@@ -1,0 +1,233 @@
+<h2><a name="cmdfile">Using CBSDfile</a></h2>
+<div class="block">
+	<p>You can use CBSDfile to create and remove <strong>CBSD</strong> environments with one command.
+	If you are looking for Vagrant for jail or bhyve, you may like to enjoy a native FreeBSD/CBSD mechanism.
+	</p>
+	<p>We did not invent the wheel relative to the CBSDfile format and we use the SHELL-script function which familiar to most: 
+	describe your application configuration in a function named <strong>jail_xxx</strong> or <strong>bhyve_yyy</strong>.
+	One function is one environment. You can use any parameters from jcreate/jconstruct-tui/jconfig or bcreate/bconstruct-tui/bconfig commands.</p>
+
+	<p>For example, creating a CentOS7 virtual machine through bcreate:</p>
+
+	<pre class="brush:bash;ruler:true;">
+cbsd bcreate jname=c1 vm_ram=4g vm_cpus=2 vm_os_type=linux vm_os_profile="cloud-CentOS-7-x86_64" ci_ip4_addr=10.0.0.110 ip4_addr=10.0.0.110 runasap=1 imgsize=6g
+</pre>
+	<p>In <strong>CBSDfile</strong> format, it can be written as follows:</p>
+	<pre class="brush:bash;ruler:true;">
+bhyve_c1()
+{
+	vm_ram="4g"
+	vm_cpus="2"
+	imgsize="6g"
+	vm_os_type=linux
+	vm_os_profile="cloud-CentOS-7-x86_64"
+	runasap=1
+	ssh_wait=1
+}
+	</pre>
+	<p>We will execute the <strong>cbsd up</strong> command and waiting for the end, you can immediately go to the virtual machine through <strong>cbsd blogin</strong></p>.
+	<p>If you need to perform a number of actions when creating an environment, use <strong>postcreate_XXX</strong> functions.</p>
+	<p>Please note that command like: blogin,jlogin,bexec,jexec,bscp,jscp,bdestroy,jdestroy,bstop/jstop and so on, also support CBSDfile and if you execute the command:
+	<pre class="brush:bash;ruler:true;">
+cbsd blogin
+	</pre>
+	<p>
+	in the directory where <strong>CBSDfile</strong> is located, <strong>CBSD</strong> will use environment from <strong>CBSDfile</strong>, even when <strong>CBSDfile</strong> uses API (see below).</p>
+</div>
+<h2><a name="cmdfile">CBSDfile + API (private cloud)</a></h2>
+<div class="block">
+<p>
+<strong>CBSDfile</strong> can work not only locally, but also with a remote API, which can be any number of nodes.
+By adding only two parameters to the file (<strong>CLOUD_URL</strong> + <strong>CLOUD_KEY</strong>), 
+you will force <strong>CBSDfile</strong> to work with your API service, deploying your environments in your own private cloud!
+In this case, the local copy of the <strong>CBSD</strong> works as a thin client.
+Please read for details:  <a href="/<!--#echo var="lang" -->/cbsd_api_ssi.html">API Module: Private cloud via API</a>
+</p>
+
+<p>
+The main differences of the <strong>CBSDfile</strong> for the API versus local are that instead of <strong>vm_os_type</strong> and <strong>vm_os_profile</strong> for bhyve you use a brief 
+alias: <strong>img=</strong>, which is adjusted name to profile mapping on the server side, 
+and for jail the <strong>imgsize=</strong> parameter is required that it will set a quota for a jail file system.
+And also, network settings (IP address, gateway, masks) with Cloud/API do not play roles, because the IP addresses controlled by server and you cannot ask any address.
+</p>
+
+</div>
+<h2><a name="cmdfile_sample">Examples</a></h2>
+<div class="block">
+	<p>It is best to get acquainted with Cbsdfile, looking at work examples. For example, look at CBSDfile for the deploy of the Gitlab service: <a target="_blank" href="https://github.com/cbsd/cbsdfile-recipes/tree/master/jail/gitlab">https://github.com/cbsd/cbsdfile-recipes/tree/master/jail/gitlab</a>
+	<p>In <strong>jail_</strong> or <strong>bhyve_</strong> functions there is only a description of the environmental parameters.
+	If you need when you turn around the environment to perform a number of actions in it, use the <strong>postcreate_</strong> functions. 
+	This is an ordinary shell function in which you can use <strong>CBSD</strong> commands, where the <strong>jname=</strong> and <strong>cbsd</strong> prefix can be omitted.
+	For example, if in the command line for port forwarding you write:
+
+	<pre class="brush:bash;ruler:true;">
+	cbsd expose jname=jail2 in=2233 out=22
+	</pre>
+	, then in the <strong>CBSDfile</strong> full example will look like:
+	<pre class="brush:bash;ruler:true;">
+	jail_jail2()
+	{
+		ver="native"				# Use the same version for FreeBSD base for jail as your host. You can specify fixed: ver=12.2 or ver=13.0 and so on..
+		ip4_addr="DHCP,DHCPv6"		# You need correct configuration of nodeippool and nodeip6pool via 'cbsd initenv-tui`
+		runasap=1				# Run Jail immediately upon creating
+	}
+
+	postcreate_jail2()
+	{
+		expose in=2233 out=22
+	}
+	</pre>
+	<p>You may want to issue IP addresses not from the global pool, for this you can call cbsd 'dhcpd' script with alternative networks or IP address range, for example:</p>
+	<pre class="brush:bash;ruler:true;">
+	jail_jail2()
+	{
+		ip4_addr=$( dhcpd ip4pool=192.168.0.5-10 )		# Will give an address from the range: 192.168.5-10
+	}
+	</pre>
+	or list of IP addresses (or networks):
+	<pre class="brush:bash;ruler:true;">
+	jail_jail2()
+	{
+		ip4_addr=$( dhcpd ip4pool=10.0.0.2,10.0.0.3,10.0.0.4,10.0.0.190-200,10.1.0.0/24 )
+	}
+	</pre>
+	<p>If you plan to use the <strong>CBSDfile</strong> with API, when copying files from the host, please prefer <strong>jscp</strong> (for jail) and <strong>bscp</strong> (for bhyve), instead of a regular <strong>cp</strong>, 
+	since jscp/bscp scripts supports for CBSDfile/API. In this case, for local operations and cloud, your <strong>CBSDfile</strong> will be the same. For example:</p>
+	<pre class="brush:bash;ruler:true;">
+	jail_jail2()
+	{
+		ip4_addr="DHCP					# You need correct configuration of nodeippool via 'cbsd initenv-tui`
+		runasap=1				# Run Jail immediately upon creating
+	}
+
+	postcreate_jail2()
+	{
+		cp /COPYRIGHT ${data}/root			# This command copies / Copyright inside the container in the / root directory only locally and will not work when Cloud API.
+										# Do not use it. Instead, write:
+		jscp /COPYRIGHT ${jname}/root/			# This command will work equally with a local deployment and Cloud/API
+	}
+	</pre>
+	<p>Also, the parameters that you describe in <strong>jail_</strong> and <strong>bhyve_</strong> functions can be specified in the command line. What can be convenient if you use one <strong>CBSDfile</strong> to generate the several image of different versions, for example, one source:</p>
+	<pre class="brush:bash;ruler:true;">
+	jail_mc()
+	{
+		ip4_addr="DHCP"				# You need correct configuration of nodeippool via 'cbsd initenv-tui`
+		pkglist="shells/bash misc/mc"			# install bash and mc packages
+		runasap=1				# Run Jail immediately upon creating
+	}
+	</pre>
+	<p>
+	By running the `cbsd up ver12.2` or `cbsd up ver=13.0`, you will receive a container with mc/bash for FreeBSD 12.2 or 13.0, without having to edit <strong>CBSDfile</strong>.
+	</p>
+	<p>If you are using <strong>CBSDfile</strong> with the Cloud/API and when creating an environment, you perform a number of actions with it, 
+	make sure that you have <strong>ssh_wait=1</strong> parameter. This will make 'cbsd up' script wait for access via SSH before the <strong>postcreate_XXX</strong> function is performed:</p>
+	<pre class="brush:bash;ruler:true;">
+	jail_jail2()
+	{
+		pkglist="puppet7"				# install puppet agent
+		ssh_wait=1
+	}
+
+	postcreate_jail2()
+	{
+		jscp /path/to/config/puppet.conf ${jname}:/usr/local/etc/puppet/		# copy puppet.conf, in which your Puppet Server is specified
+		jexec /usr/local/bin/puppet agent -t						# apply configuration via Puppet
+	}
+	</pre>
+	<p>In this example, you can create environments that automatically be connected to your configuration via PuppetServer and further control you can be made via Puppet.</p>
+	<p>If you need to perform a sequence of actions via <strong>jexec/bexec</strong>, you can use the <strong>HEREROC</strong> design, instead of a large number of jexec/bexec calls, for example:</p>
+	<pre class="brush:bash;ruler:true;">
+	# for jail:
+	jail_jail2()
+	{
+		pkglist="puppet7"				# install puppet agent
+		ssh_wait=1					# Waiting for the accessibility of the environment before performing postcreate operations (when API used)
+	}
+
+	postcreate_jail2()
+	{
+		jscp /path/to/config/puppet.conf ${jname}:/usr/local/etc/puppet/		# copy puppet.conf, in which your Puppet Server is specified
+		# and perform all subsequent commands in the created environment:
+		jexec &lt;&lt;EOF
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
+whoami
+date
+hostname
+pwd
+EOF
+	}
+
+	# for bhyve:
+	bhyve_vm1()
+	{
+		vm_ram="4g"
+		vm_cpus="2"
+		imgsize="6g"
+		vm_os_type=linux
+		vm_os_profile="cloud-CentOS-7-x86_64"
+		runasap=1
+		ssh_wait=1
+	}
+
+	postcreate_vm1()
+	{
+		# and perform all subsequent commands in the created environment:
+		bexec &lt;&lt;EOF
+# All these commands are performed in a virtual machine:
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
+sudo yum update -y                                                                 #
+sudo yum -y install https://yum.puppet.com/puppet6-release-el-7.noarch.rpm         #    puppet package
+sudo yum install -y puppet-agent                                                   #
+sudo yum clean -y all                                                              #
+EOF
+	}
+</pre>
+	<br><p>A few more examples:</p><br>
+	<p>Example for jail. Create the requirents.txt file in the directory - it will contain a list of PIP modules for Python, with content:</p>
+	<pre class="brush:bash;ruler:true;">
+
+requests
+
+</pre>
+	<p>Create <strong>CBSDfile</strong>:</p>
+	<pre class="brush:bash;ruler:true;">
+	jail_pyjail1()
+	{
+		ip4_addr="DHCP"
+		host_hostname="${jname}.example.com"
+		pkg_bootstrap="1"
+		runasap=1
+		pkglist="www/nginx python37 security/sudo security/ca_root_nss devel/py-pip devel/py-websockets"
+	}
+
+	postcreate_pyjail1()
+	{
+		jscp requirements.txt ${jname}:/tmp/requirements.txt
+		jexec pip install -r /tmp/requirements.txt
+		jexec rm /tmp/requirements.txt
+	}
+	</pre>
+	<p>create and run pyjail1:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd up
+	</pre>
+	<p>or:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd up pyjail1
+	</pre>
+	<p>login into pyjail1:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd jlogin
+	</pre>
+	<p>destroy pyjail1:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd destory
+	</pre>
+	<p>or:</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd destroy pyjail1
+	</pre>
+	<p>Yet another CBSDfile sample <a target="_blank" href="https://github.com/cbsd/cbsd/blob/develop/share/examples/cbsdfile/CBSDfile">CBSDfile</a></p>
+	<p>Look at the demo as it may look for hybrid environments with the creation of Jail and Bhyve at the same time:</p>
+	<p class="text-center"><a target="_blank" href="/gif/cbsdfile.gif"><img src="/gif/cbsdfile.gif"  alt="" width="800" height="600"/></a></p>
+</div>

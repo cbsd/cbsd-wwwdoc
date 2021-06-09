@@ -1,6 +1,9 @@
- arch | name | arch | ver | description | md5sum | flatsize | special |
-amd64_12.2|pgadmin4|amd64|12.2|pgadmin4 UI|73e6cf91102c03ee9738dbdfec4278e1|564133888|0|
-amd64_12.2|rtorrent|amd64|12.2|rtorrent UI|c956bb4ea25283bb86dcedd681030985|1155717120|0|
-amd64_13|pgadmin4|amd64|12.2|pgadmin4 UI|73e6cf91102c03ee9738dbdfec4278e1|564133888|0|
-amd64_13|rtorrent|amd64|13|rtorrent UI|c956bb4ea25283bb86dcedd681030985|1155717120|0|
-amd64_13|redis|amd64|13|redis [forms/puppet]|c956bb4ea25283bb86dcedd681030985|1155717120|forms|
+amd64_12.2|vmagent|amd64|12.2|vmagent service|6d8bb54ac8074792be97270d6a464950|70551280|0|
+amd64_13.0|vmagent|amd64|13.0|vmagent service|8df544c125630341d67888ea1d44b909|71667518|0|
+amd64_14.0|vmagent|amd64|14.0|vmagent service|d1031bc25dc6fb8b39515d46abaea35e|72025194|0|
+amd64_12.2|pgadmin4|amd64|12.2|pgadmin4 service|47854cc8ef3458873d20259f87861193|291531598|0|
+amd64_13.0|pgadmin4|amd64|13.0|pgadmin4 service|16da06329f69ea30db15fdc332c6eeac|297414725|0|
+amd64_14.0|pgadmin4|amd64|14.0|pgadmin4 service|8e1a532a282c23724df2ca4205d2ab4a|296721234|0|
+amd64_12.2|phpipam|amd64|12.2|phpipam service|c15bb887c2aec80d9b3af1be369b92db|104602211|0|
+amd64_13.0|phpipam|amd64|13.0|phpipam service|5f4affa6de8e5690ae85588a74d97a35|106678017|0|
+amd64_14.0|phpipam|amd64|14.0|phpipam service|2e637f1d30f4f9fff4a0c0ac1a973a20|107625738|0|

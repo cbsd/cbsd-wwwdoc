@@ -1,0 +1,234 @@
+<h1><span>An example of <strong>CBSD</strong> integration with MONIT (health-check)</span></h1>
+<h2><a name="cbsd_monit_intro">Intro</a></h2>
+<div class="block">
+	<p>
+	If you look at the <a target="_blank" href="https://wiki.freebsd.org/Jails#Jail_Management_Tools">list of jail management software</a> on FreeBSD,
+	you will probably notice that there is no shortage of such utilities. 
+	Various jail wrappers (also relevant for bhyve/XEN) provide a wide variety of formats for directive, command and argument entries to suit all tastes.
+	However, they all (including <strong>CBSD</strong>, of course) basically offer the same operations and capabilities with minor differences, 
+	namely basic 'create', 'delete', 'start' and 'stop' of environments.
+	But nobody goes further: higher-level entities like controller, supervisor, health-check, DRS, etc. - absent as a class.
+
+	Without modifications, this limits the range of application of jail/bhyve wrappers to the scale of a localhost, 
+	due to the lack of the ability to transparently use a deployment to a group of physical nodes.
+
+	There is a fairly logical explanation for this - in modern realities it is rather rash to try to solve all the problems of the universe with one product.
+	That is why <strong>CBSD</strong> places great emphasis on integration capabilities with tools that extend the capabilities of the CBSD framework to provide additional capabilities to users.
+	</p>
+
+	<p>
+	In this chapter, we solve the issue of monitoring the health of services in containers or virtual machines using <a href="_blank" href="https://mmonit.com/monit/">monit</a>, 
+	followed by restarting the environments under certain conditions.
+	The main actor providing the integration is the export of <strong>CBSD</strong> environment facts, which are dynamic data, 
+	and the presence of <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_jconfig_ssi.html#execscript"><strong>hooks</strong></a> in <strong>CBSD</strong>, 
+	which automates the process of creating and deleting <strong>monit</strong> rules.
+	</p>
+
+	<p>Other chapters in this series:
+	<ul>
+		<li><a href="/<!--#echo var="lang" -->/cbsd_api_ssi.html">API module: private cloud via API</a></li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_vpc_ssi.html">VPC with <strong>CBSD</strong> (vxlan)</a></li>
+		<li><a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_ipam_ssi.html"><strong>CBSD</strong> integration with PHPIPAM (IP management)</a></li>
+		<li><a href="/<!--#echo var="lang" -->/articles/cbsd_vm_hook_dhcpd.html">Example of using CBSD/bhyve and ISC-DHCPD</a></li>
+		<li><a href="/<!--#echo var="lang" -->/articles/cbsd_jail_hook_consul.html">Example of using CBSD/jail and Consul</a></li>
+		<li>DRS for <strong>CBSD</strong></li>
+	</ul>
+	</p>
+	<br>
+	<p>Why <strong>Monit</strong>?
+	When in 2021 we talk about the automatic restart of containers depending on certain conditions, such monstrous Linux-centric solutions as OpenShift, Kubernetes, Systemd... immediately come to mind.
+	</p>
+
+	<p>
+	The FreeBSD camp will likely be closest to using a product from <strong><a target="_blank" href="https://www.hashicorp.com/">HashiCorp</a></strong> called 
+	<a target="_blank" href="https://www.hashicorp.com/products/consul">Consul</a>. <strong>HashiCorp</strong> products are famous for their extremely good integration with each other: 
+	everyone knows a gang of bosom friends: <a target="_blank" href="https://www.hashicorp.com/products/nomad">Nomad</a>, 
+	<a target="_blank" href="https://www.hashicorp.com/products/consul">Consul</a> и <a target="_blank" href="https://www.hashicorp.com/products/vault">Vault</a>.
+	</p>
+
+	<p>
+	This is a good and high-quality modern stack, but we will choose the path of minimalism and simplicity, 
+	where our task is not to choose according to the principle of "what everyone is talking about", 
+	but to get the cheapest and easiest solution to the problem of monitoring and restarting services.
+
+	For these tasks, the <strong>monit</strong> has enough capabilities. 
+	To assess the difference, just look at the difference in the consumed resources of both services:
+	</p>
+
+	<p>
+	<table class="images">
+		<tr class="bg-gray"><td>&nbsp;                        </td><td>monit </td><td>consul                 </td></tr>
+		<tr><td>executable file size:                         </td><td>425 Kb</td><td><strong>78 Mb</strong> </td></tr>
+		<tr><td>RAM consumption without check-rules (default):</td><td>25 Mb  </td><td><strong>80 Mb</strong> </td></tr>
+	</table>
+	<br>
+	<p>
+	<p class="text-center"><a href="/img/monit/monit1.png"><img src="/img/monit/monit1.png" alt="" width="1024" height="600"></a></p>
+	</p>
+	<br>
+	<p>
+	<p class="text-center"><a href="/img/monit/monit2.png"><img src="/img/monit/monit2.png" alt="" width="1024" height="600"></a></p>
+	</p>
+
+	<p>
+	In addition, the purpose of the article is to show the concept itself, which can be easily used with any other, more massive tools.
+	</p>
+</div>
+<h2><a name="cbsd_monit_arch">Idea and architecture</a></h2>
+<div class="block">
+	<p>
+	<strong>monit</strong> works according to the <a target="_blank" href="https://mmonit.com/monit/documentation/monit.html">monitrc</a> configuration file, 
+	which lists the rules for checking certain events and the reaction to them. 
+	Our task is to add rules at runtime when creating a container, 
+	if the container has something to check. 
+	And accordingly, remove from monitoring when the container is stopped or removed. 
+	In response to a failed test, force <strong>monit</strong> to reload the container. 
+	This means that each physical <strong>CBSD</strong> host will run its own unique instance of monit, 
+	which only works with local environments. 
+	Of course, we can get by with one <strong>monit</strong>, which will check everything, 
+	but this will be a single-point-of-failure, which will require additional labor 
+	to ensure the reliability of the external <strong>monit</strong> service itself.
+	</p>
+	<p>
+	We will maintain the configuration of checks for each environment, 
+	regardless of the general configuration, so that the rules always remain with the environment, even if it moves from node to node. 
+	This is <em>especially</em> useful when using <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a> deployments, 
+	where rules and hook scripts can be located in the same directory.
+	</p>
+
+	<p>
+	In this example, we can check the availability of a TCP port or certain content via the HTTP protocol, 
+	therefore, of all the dynamic parameters, the <strong>monit</strong> process will need only two from <strong>CBSD</strong> - 
+	the name of the container (for restarting) and the IP address, the port availability on which will be checked. 
+	To do this, let's prepare a template in the <em>~cbsd/jails-system/JNAME/monit/</em> directory from which, 
+	when starting, stopping or deleting, the working monit configuration will be generated or deleted, 
+	and when updated, the main <strong>monit</strong> process must re-read it. 
+	The simplest implementation as an example is implemented using shell scripting 
+	as a module of the <a target="_blank" href="https://github.com/cbsd/modules-monit">same name</a> for <strong>CBSD</strong>.
+	</p>
+</div>
+<h2><a name="cbsd_monit_monit_install">installing and configuring monit</a></h2>
+<div class="block">
+	<p>Install <strong>monit</strong> via pkg:</p>
+	<pre class="brush:bash;ruler:true;">
+ pkg install -y monit
+	</pre>
+	<p>
+	Copy the example configuration file into the working one and add at the end the directive to include all configuration files 
+	in <em>~cbsd/jails-system/*/monit/monitrc</em> - they will be generated by the module. 
+	Please note that <em>/usr/jails</em> (the <strong>CBSD</strong> working directory) may be different in your case:
+
+	<pre class="brush:bash;ruler:true;">
+ cp -a /usr/local/etc/monitrc.sample /usr/local/etc/monitrc
+ echo 'include /usr/jails/jails-system/*/monit/monitrc' >> /usr/local/etc/monitrc
+	</pre>
+	</p>
+</div>
+
+<h2><a name="cbsd_monit_cbsd_cfg">Configuring CBSD</a></h2>
+<div class="block">
+	<p>
+	Let's install the module as described on the <a target="_blank" href="https://github.com/cbsd/modules-monit">project page</a>:
+	<pre class="brush:bash;ruler:true;">
+  cbsd module mode=install monit
+  echo 'monit.d' >> ~cbsd/etc/modules.conf
+  cbsd initenv
+	</pre>
+	</p>
+
+	<p>
+	Let's copy the scripts that will be launched as destroy/start/stop of environment hooks.
+	Examples of these scripts can be found here: <em>/usr/local/cbsd/modules/monit.d/share</em>.
+	</p>
+
+	<pre class="brush:bash;ruler:rule;">
+mkdir -p /root/share/cbsd-monit
+cp -a /usr/local/cbsd/modules/monit.d/share/*.d /root/share/cbsd-monit/
+	</pre>
+
+	<p>
+	In <em>/root/share/cbsd-monit/</em> we now have three directories named by directories, which are processed in 
+	<strong>CBSD</strong> on certain events:
+	<ul>
+		<li><strong>master_poststart.d</strong> - works after starting the environment;</li>
+		<li><strong>master_create.d</strong> - works when creating a new environment;</li>
+		<li><strong>remove.d</strong> - works when destroying the environment;</li>
+	</ul>
+	</p>
+
+	<p>
+	Inside each directory is an executable file called <strong>monit.sh</strong>, which will do all the work.
+	</p>
+
+	<p>
+	Of course, you can write your own, nicer handler instead of these demo scripts. 
+	Now, if you are not using <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_profiles_ssi.html">your own profiles</a>, 
+	just link the scripts to the <strong>CBSD</strong> directories:
+	</p>
+	<p>for jail:</p>
+	<pre class="brush:bash;ruler:rule;">
+ln -sf /root/share/cbsd-monit/master_poststart.d/monit.sh ~cbsd/share/jail-system-default/master_poststart.d/monit.sh
+ln -sf /root/share/cbsd-monit/master_prestop.d/monit.sh ~cbsd/share/jail-system-default/master_prestop.d/monit.sh
+ln -sf /root/share/cbsd-monit/remove.d/monit.sh ~cbsd/share/jail-system-default/remove.d/monit.sh
+</pre>
+	<p>for bhyve:</p>
+	<pre class="brush:bash;ruler:rule;">
+ln -sf /root/share/cbsd-monit/master_poststart.d/monit.sh ~cbsd/share/bhyve-system-default/master_poststart.d/monit.sh
+ln -sf /root/share/cbsd-monit/master_prestop.d/monit.sh ~cbsd/share/bhyve-system-default/master_prestop.d/monit.sh
+ln -sf /root/share/cbsd-monit/remove.d/monit.sh ~cbsd/share/bhyve-system-default/remove.d/monit.sh
+</pre>
+	</p>
+
+	<p>
+	When starting the container, the script checks for a template in the system environment directory: <em>~cbsd/jails-system/JNAME/monit/monitrc.tpl</em>.
+	If there is one, sed is used to replace the signatures %%JNAME%% and %%IPV4_FIRST%% in the template for the values of the fact variables ${jname} 
+	and ${ipv4_first}, creating the resulting file <em>~cbsd/jails-system/JNAME/monit/monitrc.tpl</em>. 
+	This file is processed through the include we added from the main configuration file <em>/usr/local/etc/monitrc</em>. 
+	Of course, you may want to add and use other facts as needed. 
+	In addition to generating the configuration file, the scripts reload the service to apply the configuration.
+	</p>
+
+	<p>
+	This completes the configuration of <strong>monit</strong> and <strong>CBSD</strong>! 
+	It remains for us to create a configuration for <strong>monit</strong> in the system directory to check certain events, 
+	using the standard <a target="_blank" href="https://mmonit.com/monit/documentation/monit.html">monit documentation</a>.
+	</p>
+</div>
+<h2><a name="cbsd_monit_monit_install">Example</a></h2>
+<div class="block">
+	<p>
+	Let's create a container named <strong>lb1</strong>, 
+	which is supposed to use an nginx-based WEB server as load-balancer. 
+	<strong>monit</strong> will be configured to check the opened 80/tcp port and if the nginx service 
+	for some reason does not serve this port, we will force <strong>monit</strong> to reload the container.
+	</p>
+	<p>Let's create a container with nginx:</p>
+	<pre class="brush:bash;ruler:rule;">
+ cbsd jcreate jname=lb1 pkglist=nginx sysrc=nginx_enable=YES
+	</pre>
+	<p>Let's copy the example to check and restart the container without any modifications to the 
+	<em>~cbsd/jails-system/lb1/monit/</em> directory:
+	</p>
+	<pre class="brush:bash;ruler:rule;">
+ mkdir ~cbsd/jails-system/lb1/monit/
+ cp -a /usr/local/cbsd/modules/monit.d/share/monitrc.tpl ~cbsd/jails-system/lb1/monit/
+	</pre>
+
+	<p>
+	Let's start the container and check the <strong>monit</strong> configuration via 'monit status'. 
+	The service must have a task with the container name <strong>lb1</strong>:
+	<pre class="brush:bash;ruler:rule;">
+ cbsd jstart lb1
+ monit status
+	</pre>
+	<p>
+	<p class="text-center"><img src="/img/monit/monit3.png" alt="" /></p>
+	</p>
+	<p>Now simulate a denial of nginx service, you just need to stop it:</p>
+	<pre class="brush:bash;ruler:rule;">
+cbsd jexec jname=lb1 service nginx stop
+	</pre>
+	<p>and watch what happens next.</p>
+	<center><strong>Good luck, we wish the passing wind and light clouds!</strong></center>
+	</p>
+</div>

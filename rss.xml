@@ -1198,5 +1198,16 @@
     <guid>CBSD 13.0.8 available</guid>
     <pubDate>Sun, 30 May 2021 00:03:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD + monit integration sample</title>
+    <description>CBSD + monit integration sample&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      https://www.bsdstore.ru/en/13.0.x/wf_monit_ssi.html&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru/en/13.0.x/wf_monit_ssi.html</link>
+    <guid>CBSD + monit integration sample</guid>
+    <pubDate>Thu, 10 Jun 2021 01:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

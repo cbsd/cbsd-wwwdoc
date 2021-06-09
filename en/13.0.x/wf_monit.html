@@ -182,7 +182,7 @@ ln -sf /root/share/cbsd-monit/remove.d/monit.sh ~cbsd/share/bhyve-system-default
 	<p>
 	When starting the container, the script checks for a template in the system environment directory: <em>~cbsd/jails-system/JNAME/monit/monitrc.tpl</em>.
 	If there is one, sed is used to replace the signatures %%JNAME%% and %%IPV4_FIRST%% in the template for the values of the fact variables ${jname} 
-	and ${ipv4_first}, creating the resulting file <em>~cbsd/jails-system/JNAME/monit/monitrc.tpl</em>. 
+	and ${ipv4_first}, creating the resulting file <em>~cbsd/jails-system/JNAME/monit/monitrc</em>. 
 	This file is processed through the include we added from the main configuration file <em>/usr/local/etc/monitrc</em>. 
 	Of course, you may want to add and use other facts as needed. 
 	In addition to generating the configuration file, the scripts reload the service to apply the configuration.

@@ -214,7 +214,7 @@ Your first standalone private cluster is ready to serve you!
 {
   "type": "jail",
   "imgsize": "10g",
-  "pubkey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdzM3pm65J28zNt/YcRWSw4NXa8PKU8MhrbA/CShuEm olevole@jhoster1.olevole.ru"
+  "pubkey": "ssh-ed25519 AAAA..XXX your@localhost"
 }
 </pre>
 <p>
@@ -233,13 +233,13 @@ in which you will see all the resources created with your public key.
 So, if you need to destroy the environment, use a GET request for the /destroy endpoint using your hash. Get the md5 sum of your key if you still don't know it;)
 </p>
 <pre class="brush:bash;ruler:true;">
-md5 -qs "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdzM3pm65J28zNt/YcRWSw4NXa8PKU8MhrbA/CShuEm olevole@jhoster1.olevole.ru"
+md5 -qs "ssh-ed25519 AAAA..XXX your@localhost"
 </pre>
 <p>
 use it in your request:
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -H "cid:678851e352136726da5e6c52126eb906" http://172.16.0.5:65531/api/v1/destroy/jail
+curl -H "cid:90af7aa8bc164240521753a105df6a05" http://172.16.0.5:65531/api/v1/destroy/jail
 </pre>
 <p>
 Of course, such a mechanism is only suitable for a private cloud. If you plan to raise 

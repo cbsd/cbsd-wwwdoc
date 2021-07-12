@@ -1209,5 +1209,28 @@
     <guid>CBSD + monit integration sample</guid>
     <pubDate>Thu, 10 Jun 2021 01:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.9 release</title>
+    <description>CBSD 13.0.9 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      find_first_freenic: fix race condition&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.9 available</guid>
+    <pubDate>Sun, 06 Jun 2021 00:03:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.10 release</title>
+    <description>CBSD 13.0.10 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      dhcpdv6: skip/lock file support&lt;br /&gt;
+      up/destroy: update to latest API&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.10 available</guid>
+    <pubDate>Mon, 12 Jul 2021 00:03:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

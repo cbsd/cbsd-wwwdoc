@@ -5,9 +5,29 @@
 by providing a large number of methods for creating environments - <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>, 
 [jb]create commands, which work both in the configuration file and through command line arguments. 
 Finally, you can use interactive dialog menus ([jb]construct-tui). Despite the variety, 
-all of these options require you to log into the server each time via ssh and enter the appropriate commands. 
-The RestAPI service adds another option for managing environments for you, eliminating the need to use ssh, 
-where you interact with the CBSD framework via HTTP / RestAPI requests.
+all of these options require the login to the server each time via SSH to enter the respective commands.
+
+The RestAPI service adds another option for managing environments for you, eliminating the need to use ssh, where you interact with the CBSD framework via HTTP / RestAPI requests or through a thin client.
+Unlike other methods, this level of abstraction solves the following problems:
+<ul>
+	<li>Fully remote control: the client does not need to enter the server and even have an account on the server;</li>
+	<li>Forget about physical servers in general - it does not matter how many physical servers in the cloud. Stop thinking about it. 
+	Work with one input point that will solve all the problems on the placement of the environment for you;</li>
+	<li>Unified Interface - RestAPI (unlike <strong>CBSD</strong>) Many specialists know;</li>
+	<li>Separation of environments on independent namespaces - you can setup a <strong>CBSD</strong> cluster and provide access to the API to your friends or colleagues, 
+	where no one will interfere with each other. Each user works only with their environments;</li>
+	<li>Three (!) works with a cluster/API method are officially supported: platform-dependent - <strong>CBSDFile</strong> (requires <strong>CBSD</strong> as a subtle client) and two independent: 
+	<strong>nubectl</strong> (client available on all modern platforms: Linux, Windows, MacOS) and any curl-like HTTP client with JSON as a payload;</li>
+	<li>Maximum simplicity: You are adjusting only three parameters to get a fully working environment within a few seconds;</li>
+	<li>Extensibility: Custom recommendations for host selection (for example - <strong>DRS</strong>), integration with external services (for example - <strong>IPAM</strong>), extrases (external helpers);</li>
+</ul>
+</p>
+If you encounter these problems and want to relieve your life - then this is an article for you!
+</p>
+<p>
+The API service architecture supports working both on a single node (when the API service and the hypervisor are combined), 
+and allows you to use any number of nodes as hypervisors. 
+We'll start by setting up a stand-alone cluster, especially since when switching to a multi-node option, all of these steps are still required.
 </p>
 <center><br>
 <strong>private FreeBSD multi-node bhyve/jail cloud via API demo:</strong><br>
@@ -291,7 +311,7 @@ Payload example, e.g. centos7.json:
   "ram": "1g",
   "cpus": "2",
   "img": "centos7",
-  "pubkey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdzM3pm65J28zNt/YcRWSw4NXa8PKU8MhrbA/CShuEm olevole@jhoster1.olevole.ru"
+  "pubkey": "ssh-ed25519 AAAA..XXX your@localhost"
 }
 </pre>
 <p>
@@ -304,15 +324,18 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.
 	</div>
 	<h2><a name="cbsdfile"><span><strong>CBSDfile</strong> + API</span></a></h2>
 	<div class="block">
-
-<h3><strong>CBSDfile</strong> + API</h3>
-
-<p>And for a snack, as a berry on the cake</p>
 <p>
 In some cases curl and RestAPI are much more convenient than ssh + `cbsd bcreate / bconstruct-tui`. 
 If you have to deploy a lot of virtual environments and often, you cannot avoid the need to learn and use some high-level language.
 CURL and HTTP requests are well suited if you develop a programmable cloud based on <strong>CBSD</strong>, but it's not very convenient for human.
-As an intermediate option, there is another hybrid and implicit use case for the API - through the <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>. 
+As an intermediate option, we can offer the option of interacting with the API through the <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>.
+</p>
+<p>
+The API-enabled CBSDfile gives you the ability to easily build a private programmable cloud to run virtual environments because you can
+fully describe in one file the finished a service (or several services) in a single virtual environment (or several virtual environments).
+A similar tool is the <strong>nubectl</strong> - thin client, which described below.
+</p>
+<p>
 If you are not familiar with this <strong>CBSD</strong> feature, be sure to check it out. 
 In order to use the <strong>CBSDfile</strong> in your private cloud, you just need to add only two parameters to the beginning of the 
 <strong>CBSDfile</strong> - this is the Endpoint of your API and the key. 

@@ -179,7 +179,7 @@ Of course, substituting your public key as pubkey.
 Let's send it to the endpoint for container creation, where /jail at the end means the name of the environment (arbitrary)
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -X POST -H "Content-Type: application/json" -d @jail.json http://172.16.0.5:65531/api/v1/create/jail
+curl -X POST -H "Content-Type: application/json" -d @jail.json http://127.0.0.1:65531/api/v1/create/jail
 </pre>
 <p>
 In this case, the API will calculate the md5 hash from your pubkey and the result of the check-sum will automatically become your token, 
@@ -196,7 +196,7 @@ md5 -qs "ssh-ed25519 AAAA..XXX your@localhost"
 use it in your request:
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -H "cid:90af7aa8bc164240521753a105df6a05" http://172.16.0.5:65531/api/v1/destroy/jail
+curl -H "cid:90af7aa8bc164240521753a105df6a05" http://127.0.0.1:65531/api/v1/destroy/jail
 </pre>
 <p>
 Of course, such a mechanism is only suitable for a private cloud. If you plan to raise 
@@ -255,7 +255,7 @@ Payload example, e.g. centos7.json:
 And it is created by a similar request as jail:
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.0.5:65531/api/v1/create/cent7
+curl -X POST -H "Content-Type: application/json" -d @centos7.json http://127.0.0.1:65531/api/v1/create/cent7
 </pre>
 
 	</div>

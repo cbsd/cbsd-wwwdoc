@@ -172,7 +172,7 @@ service cbsd-mq-api start
 Отправим его в endpoint по созданию контейнера, где /jail в конце означает имя окружения (произвольное)
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -X POST -H "Content-Type: application/json" -d @jail.json http://172.16.0.5:65531/api/v1/create/jail
+curl -X POST -H "Content-Type: application/json" -d @jail.json http://127.0.0.1:65531/api/v1/create/jail
 </pre>
 <p>
 При этом API подсчитает md5 хеш от вашего pubkey и результат чек-суммы автоматичеки станет вашим токеном, который вы можете использовать для контроля
@@ -189,7 +189,7 @@ md5 -qs "ssh-ed25519 AAAA..XXX your@localhost"
 используйте его в запросе:
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -H "cid:90af7aa8bc164240521753a105df6a05" http://172.16.0.5:65531/api/v1/destroy/jail
+curl -H "cid:90af7aa8bc164240521753a105df6a05" http://127.0.0.1:65531/api/v1/destroy/jail
 </pre>
 <p>
 Разумеется, подобный механизм подходящий только для частного облака. Если вы планируете поднимать сервис для внешних пользователей с подобной схемой, используйте для подтверждения опасных операций более строгие методы валидации, 
@@ -236,7 +236,7 @@ chown cbsd:cbsd ~cbsd/etc/bhyve-api.conf
 И создается аналогичным запросом что и jail:
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -X POST -H "Content-Type: application/json" -d @centos7.json http://172.16.0.5:65531/api/v1/create/cent7
+curl -X POST -H "Content-Type: application/json" -d @centos7.json http://127.0.0.1:65531/api/v1/create/cent7
 </pre>
 
 	</div>

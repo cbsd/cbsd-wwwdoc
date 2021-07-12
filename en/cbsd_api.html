@@ -78,152 +78,89 @@ Let's fix the terminology that will be used in this article.
 
 	<p>Installing and configuring the <strong>CBSD</strong> API in standalone mode.</p>
 	<p>In this example, all operations are performed on one hypervisor, which will act simultaneously as an API and a broker and a <strong>CBSD</strong> hoster, where working environments will be launched.</p>
+	<p>Assuming you have a stock vanilla FreeBSD 13.0+ installation.</p>
 
-<p>1) Install the message broker:</p>
-<pre class="brush:bash;ruler:true;">
-pkg install -y beanstalkd
-</pre>
-<p>Use a flag in rc.conf to specify at which address beanstalkd will wait for connection.
-Since we are all-in-one box, all connections will not go beyond the localhost boundary, 
-so we specify 127.0.0.1 as the listening address:
-</p>
-<pre class="brush:bash;ruler:true;">
-sysrc beanstalkd_flags="-l 172.16.0.5 -p 11300"
-</pre>
-<p>
-let's start the service:
-</p>
-<pre class="brush:bash;ruler:true;">
+	<p>1) Install additional packages:</p>
+	<pre class="brush:bash;ruler:true;">
+pkg install -y cbsd-mq-router cbsd-mq-api beanstalkd git
+	</pre>
+	<p>2) Configure beanstalkd, the broker service.</p>
+	<p>Since all services are on the same server, we will specify the address 127.0.0.1 for incoming connections and start the service:</p>
+	<pre class="brush:bash;ruler:true;">
+sysrc beanstalkd_flags="-l 127.0.0.1 -p 11300"
 service beanstalkd enable
-service beanstalkd start
-</pre>
-<p>
-2) At the time of this posting, cbsd-mq-api is not present in the FreeBSD ports system and is not in the pkg repository. 
-We will get the service through source codes. To do this, we need to install the git package (git-lite is enough) and go:
-</p>
-<pre class="brush:bash;ruler:true;">
-pkg install -y git-lite go
-</pre>
-<p>We will clone the repository, build and install the service:
-</p>
-<pre class="brush:bash;ruler:true;">
-git clone https://github.com/cbsd/cbsd-mq-api.git /root/cbsd-mq-api
-/root/cbsd-mq-api/build.sh
-cp -a /root/cbsd-mq-api/cbsd-mq-api /usr/local/bin
-cp -a /root/cbsd-mq-api/etc/cbsd-mq-api.json /usr/local/etc/
-cp -a /root/cbsd-mq-api/rc.d/cbsd-mq-api /usr/local/etc/rc.d/
-</pre>
-<p>
-3) Install additional files in <strong>CBSD</strong> via the api module:
-</p>
-<pre class="brush:bash;ruler:true;">
+service beanstalkd restart
+	</pre>
+	<p>3) Configure MQ router.</p>
+	<p>First, get hoster FQDN via `hostname` command. Let's say your host has a name: <strong>apitest.my.domain</strong>
+	<p>Open <em>/usr/local/etc/cbsd-mq-router.json</em> in any favorite editor and set "tube" and "reply_tube_prefix" params ( cbsd_<strong>&lt;hostname_without_dot&gt;</strong> and cbsd_<strong>&lt;hostname_without_dot&gt;</strong>_result_id ), e.g:
+	<pre class="brush:bash;ruler:true;">
+{
+    "cbsdenv": "/usr/jails",
+    "cbsdcolor": false,
+    "broker": "beanstalkd",
+    "logfile": "/dev/stdout",
+    "beanstalkd": {
+      "uri": "127.0.0.1:11300",
+      "tube": "cbsd_apitest_my_domain",
+      "reply_tube_prefix": "cbsd_cbsd_apitest_my_domain_result_id",
+      "reconnect_timeout": 5,
+      "reserve_timeout": 5,
+      "publish_timeout": 5,
+      "logdir": "/var/log/cbsdmq"
+    }
+}
+	</pre>
+	<p>4) Start MQ router:</p>
+	<pre class="brush:bash;ruler:true;">
+service cbsd-mq-router enable
+service cbsd-mq-router start
+	</pre>
+	<p>5) Install CBSD API module.</p>
+	<pre class="brush:bash;ruler:true;">
 cbsd module mode=install api
 echo 'api.d' >> ~cbsd/etc/modules.conf
 cbsd initenv
-</pre>
-<p>
-4) We configure the API:
-</p>
-<p>
-Let's create the necessary directory structure for the API:
-</p>
-<pre class="brush:bash;ruler:true;">
-mkdir -p /var/db/cbsd-api ~cbsd/var/db/api/map
-chown -R cbsd:cbsd /var/db/cbsd-api ~cbsd/var/db/api/map
-</pre>
-<p>
-Edit the config file <em>/usr/local/etc/cbsd-mq-api.json</em>:
-</p>
-<p>
-a) The <strong>server_url</strong> parameter must point to the name or IP address of your API service,
- available for external connections. 
- This URL as-is will be substituted as the working endpoint. 
- In our case, in the environment, the working external IP address is 172.16.0.5, 
- so the complete configuration line will look like this:
-</p>
-<pre class="brush:bash;ruler:true;">
-"server_url": "http://172.16.0.5:65531",
-</pre>
-<p>
-let's start the service:
-</p>
-<pre class="brush:bash;ruler:true;">
+	</pre>
+	<p>6) Configure CBSD API module.</p>
+	<p>Copy configuration sample to work dir:</p>
+	<pre class="brush:bash;ruler:true;">
+cp -a /usr/local/cbsd/modules/api.d/etc/api.conf ~cbsd/etc/
+cp -a /usr/local/cbsd/modules/api.d/etc/bhyve-api.conf ~cbsd/etc/
+cp -a /usr/local/cbsd/modules/api.d/etc/jail-api.conf ~cbsd/etc/
+	</pre>
+	<p>Open ~cbsd/etc/api.conf in any favorite editor and set "server_list=" to server FQDN, e.g:</p>
+	<pre class="brush:bash;ruler:true;">
+...
+server_list="apitest.my.domain"
+...
+	</pre>
+	<p>Set 'cbsd' user permission for ~cbsd/etc/api.conf file:</p>
+	<pre class="brush:bash;ruler:true;">
+chown cbsd:cbsd ~cbsd/etc/api.conf
+	</pre>
+	<p>Here you can check that the API module scripts works:</p>
+	<pre class="brush:bash;ruler:true;">
+su -m cbsd -c '/usr/local/cbsd/modules/api.d/misc/recomendation.sh'
+	</pre>
+	<p>must return the host from server_list ( <strong>apitest.my.domain</strong> )</p>
+	<pre class="brush:bash;ruler:true;">
+su -m cbsd -c '/usr/local/cbsd/modules/api.d/misc/freejname.sh'
+	</pre>
+	<p>must return the unique name '<strong>envX</strong>'.
+	<p>7) Configure RestAPI daemon:</p>
+	<pre class="brush:bash;ruler:true;">
+mkdir -p /var/db/cbsd-api /usr/jails/var/db/api/map
+chown -R cbsd:cbsd /var/db/cbsd-api /usr/jails/var/db/api/map
 service cbsd-mq-api enable
 service cbsd-mq-api start
 </pre>
 <p>
-Copy the configuration file for the service and specify at least one <strong>CBSD</strong> hoster in the <strong>server_list=</strong> parameter
-</p>
-<pre class="brush:bash;ruler:true;">
-cp -a /usr/local/cbsd/modules/api.d/etc/api.conf ~cbsd/etc/
-chown cbsd:cbsd ~cbsd/etc/api.conf
-vi ~cbsd/etc/api.conf
-</pre>
-<p>
-The server_list parameter must contain the cluster members (usually hostnames), separated by a space.
- The service uses these names as addressees for sending tasks via beanstalkd.
-</p>
-<p>
-For example, in our case, the name of the <strong>CBSD</strong> node is cloud1.my.domain, so api.conf will contain the line:
-</p>
-</p>
-<pre class="brush:bash;ruler:true;">
-server_list="cloud1.my.domain"
-</pre>
-<p>
-You can check the correctness of issuing recommendations for the host on which to start the new environment 
-by running the script <em>/usr/local/cbsd/modules/api.d/misc/recomendation.sh</em>: it should return the server name.
-</p>
-
-<p>5) Setting up cbsd-mq-router.
-</p>
-<p>Install the service:
-</p>
-<pre class="brush:bash;ruler:true;">
-pkg install -y cbsd-mq-router
-</pre>
-<p>
-Or from the ports tree:
-</p>
-<pre class="brush:bash;ruler:true;">
-env BATCH=no make -C /usr/ports/sysutils/cbsd-mq-router install
-</pre>
-<p>
-Let's edit the file <em>/usr/local/etc/cbsd-mq-router.json</em>, 
-specifying the correct address of our beanstalkd broker in the "uri" parameter in the beanstalkd section, in our case it is:
-</p>
-<pre class="brush:bash;ruler:true;">
-    "uri": "127.0.0.1:11300",
-</pre>
-<p>
-We also need to fix the name of the pipe in the broker to which the custom host's cbsd-mq-router service will subscribe. 
-To do this, change the <strong>tube</strong> and <strong>reply_tube_prefix</strong> parameters in cbsd_<server_name> and cbsd_<server_name>_result_id, 
-respectively, where the server name contains symbols '-' and '.' are converted to '_'.
-</p>
-<p>
-So, having a <strong>CBSD</strong> host named cloud1.my.domain, the file /usr/local/etc/cbsd-mq-router.json should contain the following entries:
-</p>
-<pre class="brush:bash;ruler:true;">
-      "tube": "cbsd_cloud1_my_domain",
-      "reply_tube_prefix": "cbsd_cloud1_my_domain_result_id",
-
-</pre>
-<p>If your <strong>CBSD</strong> working environment is different from the standard <em>/usr/jails</em>, adjust the path in the <strong>cbsdenv</strong> parameter.</p>
-</p>
-<p>
-let's start the service:
-</p>
-<pre class="brush:bash;ruler:true;">
-service cbsd-mq-router enable
-service cbsd-mq-router start
-</pre>
-<p>
-Your first standalone private cluster is ready to serve you!
+Your first standalone private API cluster of VM is ready to serve you!
 </p>
 	</div>
 	<h2><a name="apij"><span>API: jail</span></a></h2>
 	<div class="block">
-
 <h3>Working with JAIL via the API</h3>
 
 <p>Let's create a simple payload to create a container, for example, a jail.json file.

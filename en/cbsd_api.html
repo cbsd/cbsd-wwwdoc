@@ -1,7 +1,7 @@
-	<h1><span>CBSD API module</span></h1>
-	<h2><a name="intro"><span>Intro</span></a></h2>
-	<div class="block">
-<p><strong>CBSD</strong> allows the user to create environments at different levels of abstraction 
+<h1><span>CBSD API module</span></h1>
+<h2><a name="intro"><span>Intro</span></a></h2>
+<div class="block">
+	<p><strong>CBSD</strong> allows the user to create environments at different levels of abstraction 
 by providing a large number of methods for creating environments - <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>, 
 [jb]create commands, which work both in the configuration file and through command line arguments. 
 Finally, you can use interactive dialog menus ([jb]construct-tui). Despite the variety, 
@@ -9,18 +9,19 @@ all of these options require the login to the server each time via SSH to enter 
 
 The RestAPI service adds another option for managing environments for you, eliminating the need to use ssh, where you interact with the CBSD framework via HTTP / RestAPI requests or through a thin client.
 Unlike other methods, this level of abstraction solves the following problems:
-<ul>
-	<li>Fully remote control: the client does not need to enter the server and even have an account on the server;</li>
-	<li>Forget about physical servers in general - it does not matter how many physical servers in the cloud. Stop thinking about it. 
+	<ul>
+		<li>Fully remote control: the client does not need to enter the server and even have an account on the server;</li>
+		<li>Forget about physical servers in general - it does not matter how many physical servers in the cloud. Stop thinking about it. 
 	Work with one input point that will solve all the problems on the placement of the environment for you;</li>
-	<li>Unified Interface - RestAPI (unlike <strong>CBSD</strong>) Many specialists know;</li>
-	<li>Separation of environments on independent namespaces - you can setup a <strong>CBSD</strong> cluster and provide access to the API to your friends or colleagues, 
+		<li>Unified Interface - RestAPI (unlike <strong>CBSD</strong>) Many specialists know;</li>
+		<li>Separation of environments on independent namespaces - you can setup a <strong>CBSD</strong> cluster and provide access to the API to your friends or colleagues, 
 	where no one will interfere with each other. Each user works only with their environments;</li>
-	<li>Three (!) works with a cluster/API method are officially supported: platform-dependent - <strong>CBSDFile</strong> (requires <strong>CBSD</strong> as a subtle client) and two independent: 
-	<strong>nubectl</strong> (client available on all modern platforms: Linux, Windows, MacOS) and any curl-like HTTP client with JSON as a payload;</li>
-	<li>Maximum simplicity: You are adjusting only three parameters to get a fully working environment within a few seconds;</li>
-	<li>Extensibility: Custom recommendations for host selection (for example - <strong>DRS</strong>), integration with external services (for example - <strong>IPAM</strong>), extrases (external helpers);</li>
-</ul>
+		<li>Lack of collisions in container/VM names between namespaces - each user can create a container or VM named 'test' and this will not cause name conflict;</li>
+		<li>Three (!) works with a cluster/API method are officially supported: platform-dependent - <strong>CBSDFile</strong> (requires <strong>CBSD</strong> as a subtle client) and two independent: 
+		<strong>nubectl</strong> (client available on all modern platforms: Linux, Windows, MacOS) and any curl-like HTTP client with JSON as a payload;</li>
+		<li>Maximum simplicity: You are adjusting only three parameters to get a fully working environment within a few seconds;</li>
+		<li>Extensibility: Custom recommendations for host selection (for example - <strong>DRS</strong>), integration with external services (for example - <strong>IPAM</strong>), extrases (external helpers);</li>
+	</ul>
 </p>
 If you encounter these problems and want to relieve your life - then this is an article for you!
 </p>
@@ -158,16 +159,14 @@ service cbsd-mq-api start
 <p>
 Your first standalone private API cluster of VM is ready to serve you!
 </p>
-	</div>
-	<h2><a name="apij"><span>API: jail</span></a></h2>
-	<div class="block">
-<h3>Working with JAIL via the API</h3>
+</div>
 
-<p>Let's create a simple payload to create a container, for example, a jail.json file.
+<h2><a name="japi_curl"><span>create jail with curl</span></a></h2>
+<div class="block">
+<p>
+Let's create a simple minimal payload to create a container, for example, a jail1.json file:
 </p>
-<p>jail.json:</p>
 <pre class="brush:bash;ruler:true;">
-
 {
   "type": "jail",
   "imgsize": "10g",
@@ -175,71 +174,66 @@ Your first standalone private API cluster of VM is ready to serve you!
 }
 </pre>
 <p>
-Of course, substituting your public key as pubkey. 
-Let's send it to the endpoint for container creation, where /jail at the end means the name of the environment (arbitrary)
+Of course, substituting your public key as pubkey.
+Let's send it to the endpoint for container creation, where /jail1 at the end means the name of the environment (arbitrary)
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -X POST -H "Content-Type: application/json" -d @jail.json http://127.0.0.1:65531/api/v1/create/jail
+curl -X POST -H "Content-Type: application/json" -d @jail1.json http://127.0.0.1:65531/api/v1/create/jail1
 </pre>
 <p>
-In this case, the API will calculate the md5 hash from your pubkey and the result of the check-sum will automatically become your token, 
-which you can use to control environments and at the same time will be a kind of namespace in the cluster, 
-in which you will see all the resources created with your public key.
-</p>
+In this case, the API will calculate the MD5 hash from your pubkey and the result will automatically become your token, 
+which you can use to control environments and at the same time will be a kind of namespace in the cluster.
+In it you will see all the resources created with the use of your public key.
 <p>
-So, if you need to destroy the environment, use a GET request for the /destroy endpoint using your hash. Get the md5 sum of your key if you still don't know it;)
+Of course, such a mechanism (pubkey-based token) is only suitable for a private cloud. If you plan to raise 
+a service for external users with a similar scheme, use more stringent validation methods to 
+confirm dangerous operations, for example  <a target="_blank" href="https://en.wikipedia.org/wiki/Time-based_One-Time_Password">TOTP</a>.
+</p>
+<div class="warning">
+<p>
+Please note that the first container can be created not quickly if you have not created a container on the host before: 
+the <strong>CBSD</strong> will download and unpack the base.txz archive for jail base. So make sure the server has an Internet access to 
+receive files from ftp/http.freebsd.org. Either, before the first query, simply 'warm up' system by creating a container via cbsd jcreate/jconstruct-tui.
+</p>
+</div>
+<p>
+Now, knowing the token, you can get the status of your container. Among this information will be a line for connecting through SSH to access the container.
+Get the MD5 sum of your key if you still don't know it ;-)
 </p>
 <pre class="brush:bash;ruler:true;">
 md5 -qs "ssh-ed25519 AAAA..XXX your@localhost"
 </pre>
 <p>
-use it in your request:
+Use it in request:
 </p>
 <pre class="brush:bash;ruler:true;">
-curl -H "cid:90af7aa8bc164240521753a105df6a05" http://127.0.0.1:65531/api/v1/destroy/jail
+curl -H "cid:90af7aa8bc164240521753a105df6a05" http://127.0.0.1:65531/api/v1/status/jail1
 </pre>
+So, if you need to destroy the environment, use a GET request for the /destroy endpoint:
+</p>
+<pre class="brush:bash;ruler:true;">
+curl -H "cid:90af7aa8bc164240521753a105df6a05" http://127.0.0.1:65531/api/v1/destroy/jail1
+</pre>
+<p>Other parameters in payload, which can be useful when creating a container:</p>
 <p>
-Of course, such a mechanism is only suitable for a private cloud. If you plan to raise 
-a service for external users with a similar scheme, use more stringent validation methods to 
-confirm dangerous operations, for example  <a target="_blank" href="https://en.wikipedia.org/wiki/Time-based_One-Time_Password">TOTP</a>.
+<table class="images">
+<tr><td>"host_hostname":</td><td>specify hostname for your container, for example: "foo.example.com"</td></tr>
+<tr><td>"ram":</td><td>restrict jail memory consumption through RACCT, for example:: "1g"</td></tr>
+<tr><td>"cpus":</td><td>limit the number of cores for jail, for example: "2"</td></tr>
+<tr><td>"pkglist":</td><td>list of packages for installation, for example: "misc/mc fping"</td></tr>
+<tr><td>"extras":</td><td>extras (see below)</td></tr>
+<tr><td>"recomendation":</td><td>enter your own recommendation on where to place the container. Instead of automatic selection. For multi-node clusters. For example: "host23.my.domain" (provided that the host23.my.domain host exists)</td></tr>
+</table>
 </p>
-<p>
-A few more words about jail API configuration. 
-A script working with jail via the API can use a configuration file named jail-api.conf, 
-which must be located in the ~cbsd/etc directory. You can see an example of this file here: <em>/usr/local/cbsd/modules/api.d/etc/jail-api.conf</em>
-</p>
-At the moment the file regulates whether to allow the user to specify in the payload the FreeBSD 
-version of the base for the container, the pool of IP addresses and the external IP address 
-for accessing the container given to the user. By default, we do not skip the FreeBSD base 
-version for the container, no matter what value the user sends: the API will create a 
-container for the version of your hypervisor (ver=native). Since the user of the cloud 
-does not influence the issuance of addresses, and <strong>CBSD</strong> does this, 
-you can assign any pool, both external addresses and private ones.
-</p>
-	</div>
-	<h2><a name="apib"><span>API: bhyve</span></a></h2>
-	<div class="block">
-<h3>Working with virtual machines bhyve via API</h3>
+</div>
+<h2><a name="bapi_curl"><span>create bhyve vm with curl</span></a></h2>
+<div class="block">
 <p>
 Working with virtual machines has a similar interface and endpoint, 
 as in the case of jail, but has a slightly different payload for creating an environment. 
-In addition, you must configure to match the name of the requested image with the <strong>CBSD</strong> profile. 
-Like the jail script, the bhyve script also has a configuration file. Copy the example config file:
-</p>
-<pre class="brush:bash;ruler:true;">
-cp -a /usr/local/cbsd/modules/api.d/etc/bhyve-api.conf ~cbsd/etc/
-chown cbsd:cbsd ~cbsd/etc/bhyve-api.conf
-</pre>
-<p>
-As in the case of jail, you can also regulate the rules for issuing IP addresses to virtual machines. 
-And you can control which IP address will be given to the user for SSH access to the created resource 
-- either the direct IP address of the virtual machine will be given, or <strong>CBSD</strong> will 
-create an expose rule for SSH on any free port. In this case, the user will receive the IP address 
-of the hypervisor and the port that will forward requests to the 22/ssh port of the virtual machine.
-</p>
 </p>
 <p>
-Payload example, e.g. centos7.json:
+Payload example, e.g. to create CentOS7 VM, centos7.json:
 </p>
 <pre class="brush:bash;ruler:true;">
 {
@@ -257,10 +251,27 @@ And it is created by a similar request as jail:
 <pre class="brush:bash;ruler:true;">
 curl -X POST -H "Content-Type: application/json" -d @centos7.json http://127.0.0.1:65531/api/v1/create/cent7
 </pre>
-
-	</div>
-	<h2><a name="cbsdfile"><span><strong>CBSDfile</strong> + API</span></a></h2>
-	<div class="block">
+<p>Other parameters in payload, which can be useful when creating a VM:</p>
+<p>
+<table class="images">
+<tr><td>"host_hostname":</td><td>specify hostname for your VM, for example: "foo.example.com"</td></tr>
+<tr><td>"extras":</td><td>extras (see below)</td></tr>
+<tr><td>"recomendation":</td><td>enter your own recommendation on where to place the VM. Instead of automatic selection. For multi-node clusters. For example: "host23.my.domain" (provided that the host23.my.domain host exists)</td></tr>
+</table>
+</p>
+<p>Please note that, unlike classic bcreate/bconstruct-tui, the parameters vm_os_type and vm_os_profile here are consolidated to one "img" parameter for even greater simplicity.
+At the same time, mapping of <strong>&lt;img&gt;</strong> is set in the file that you have copied earlier, it is <em>~cbsd/etc/bhyve-api.conf</em>.
+At the time of writing an article, affordable values as 'img': <strong>'centos7', 'centos8', 'ubuntu', 'debian', 'freebsd_ufs', 'freebsd_zfs'.</strong>
+</p>
+<div class="warning">
+<p>
+Please note that the first VM of each image can be created not quickly if you have not created such profile on a host - <strong>CBSD</strong> will download and unpack the ISO 
+- make sure that the server has an Internet access to receive files. Either, before the first query, simply 'warm up' the system, by creating-run-deleting all OS profiles 
+with which you plan to work through the API.
+</p>
+</div>
+<h2><a name="cbsdfile"><span><strong>CBSDfile</strong> + API</span></a></h2>
+<div class="block">
 <p>
 In some cases curl and RestAPI are much more convenient than ssh + `cbsd bcreate / bconstruct-tui`. 
 If you have to deploy a lot of virtual environments and often, you cannot avoid the need to learn and use some high-level language.

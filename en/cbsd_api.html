@@ -18,7 +18,7 @@ Unlike other methods, this level of abstraction solves the following problems:
 	where no one will interfere with each other. Each user works only with their environments;</li>
 		<li>Lack of collisions in container/VM names between namespaces - each user can create a container or VM named 'test' and this will not cause name conflict;</li>
 		<li>Three (!) works with a cluster/API method are officially supported: platform-dependent - <strong>CBSDFile</strong> (requires <strong>CBSD</strong> as a subtle client) and two independent: 
-		<strong>nubectl</strong> (client available on all modern platforms: Linux, Windows, MacOS) and any curl-like HTTP client with JSON as a payload;</li>
+		<strong><a target="_blank" href="https://github.com/bitcoin-software/nubectl">nubectl</a></strong> (client available on all modern platforms: Linux, Windows, MacOS) and any curl-like HTTP client with JSON as a payload;</li>
 		<li>Maximum simplicity: You are adjusting only three parameters to get a fully working environment within a few seconds;</li>
 		<li>Extensibility: Custom recommendations for host selection (for example - <strong>DRS</strong>), integration with external services (for example - <strong>IPAM</strong>), extrases (external helpers);</li>
 	</ul>
@@ -275,7 +275,7 @@ with which you plan to work through the API.
 <p>
 In some cases curl and RestAPI are much more convenient than ssh + `cbsd bcreate / bconstruct-tui`. 
 If you have to deploy a lot of virtual environments and often, you cannot avoid the need to learn and use some high-level language.
-CURL and HTTP requests are well suited if you develop a programmable cloud based on <strong>CBSD</strong>, but it's not very convenient for human.
+The above method CURL and HTTP requests are well suited if you develop a programmable cloud based on <strong>CBSD</strong>, but it's not very convenient for human.
 As an intermediate option, we can offer the option of interacting with the API through the <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>.
 </p>
 <p>
@@ -290,11 +290,45 @@ In order to use the <strong>CBSDfile</strong> in your private cloud, you just ne
 Having these two options will cause CBSD to switch from a local <strong>CBSD</strong> installation to the cloud when building. 
 And this can provide a completely <a target="_blank" href="https://youtu.be/lLdwzlCQaWY">new level of capabilities</a> (an example of interaction with a multi-node cluster)!
 </p>
+<p>Parameters such as ssh_wait, jscp and jexec (bscp and bexec for bhyve) should also work, which allows you not only to deploy a virtual environment in the cloud, but also to produce a number of operations in it when creating, an example of such a <strong>CBSDfile</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+CLOUD_URL="http://127.0.0.1:65531"
+CLOUD_KEY="ssh-ed25519 AAAA..XXX your@localhost"
+
+jail_rabbitmq1()
+{
+        imgsize="30g"
+        ssh_wait=1
+        pkg_bootstrap=0
+        host_hostname="rabbitmq1.my.domain"
+}
+postcreate_rmqbsd1()
+{
+        jscp prepare.sh ${jname}:prepare.sh
+        jexec /root/prepare.sh
+}
+</pre>
+<p>And put in the same directory with the CBSDfile executable 'prepare.sh' file, which will be copied and running in the created environment.</p>
+<p>In addition to creating and deleting operations, the commands will work with API-enabled CBSDfile: <strong>cbsd login, cbsd status</strong></p>
+</div>
+
+<h2><a name="nubectlapi"><span><strong>nubectl</strong></span></a></h2>
+<div class="block">
+<p>
+Finally, there is another option in the form of a thin client called <a target="_blank" href="https://github.com/bitcoin-Software/Nubectl">nubectl</a>, which is available for all modern OS.
+With it, you can create and delete environments, as well as log-in via ssh for unix-like guests, even if you work on Microsoft Windows.
+</p>
+<p>
+In addition, nubectl supports the description of Infrastructure As a Code via yaml files. Refer to <a target="_blank" href="https://github.com/bitcoin-software/nubectl/blob/master/dist.cloud.yaml">example cloud config</a>.
+</p>
+<br>
+<p class="text-center"><img src="/img/nubectl1.png" alt="" /></p>
+</p>
+</div>
 	</div>
 
 	<h2><a name="mapi"><span>Multinode API</span></a></h2>
-	<div class="block">
-
+<div class="block">
 <h3>Multinode API/<strong>CBSD</strong> cluster</h3>
 <p>
 As stated earlier, the current architecture is capable of serving more than one hypervisor.
@@ -331,4 +365,9 @@ server_list="srv-01.olevole.ru srv-02.olevole.ru srv-03.olevole.ru bob.your-serv
 <img src="/img/cbsd_api1.png" alt="" />
 </p>
 <strong>WIP...</strong>
-	</div>
+</div>
+<h2><a name="myb"><span>MyB: MyBee appliance</span></a></h2>
+<div class="block">
+<p>For those who do not like to configure the system we have prepared an independent FreeBSD distribution with pre-installed <strong>CBSD</strong> and <strong>API</strong> service 
+- you can start working with virtual environments immediately after installing this distribution on bare metal. Please meet: <a target="_blank" href="https://myb.convectix.com"><strong>MyBee</strong></a>.
+</div>

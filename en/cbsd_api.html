@@ -371,3 +371,54 @@ server_list="srv-01.olevole.ru srv-02.olevole.ru srv-03.olevole.ru bob.your-serv
 <p>For those who do not like to configure the system we have prepared an independent FreeBSD distribution with pre-installed <strong>CBSD</strong> and <strong>API</strong> service 
 - you can start working with virtual environments immediately after installing this distribution on bare metal. Please meet: <a target="_blank" href="https://myb.convectix.com"><strong>MyBee</strong></a>.
 </div>
+<h2><a name="advancedcfg"><span>API: advanced/custom configuration</span></a></h2>
+<div class="block">
+<p>
+With the configuration file, you can regulate some behaviors, such as working with IP addresses, redirects, IPv6 preferences, etc.
+By default, <strong>CBSD</strong> picks IP addresses from your <strong>nodeip4pool</strong>.
+The pool is assumed to point to private ( RFC-1918 ) addresses.
+In order for access to the inside of the environment to be available from the outside, <strong>CBSD</strong> automatically 
+finds the first free port and creates a port redirect from the external IP address (<strong>nodeip4</strong>) inside the container. 
+API return SSH connection string as <strong>ssh4_string</strong> : the external address (nodeip) and the new port.
+</p>
+<p>
+If you use external addresses as a pool, or you have direct access ( IPSec / VXLAN / other tunnels ) to the host's private network, 
+you can change the behavior by disabling the selection of a dynamic port and turning off redirection altogether.
+Then, the API will give as ssh[4,6]_string  IP:22 of the virtual machine.
+This is the responsibility of the nodeip_expose=1 parameter in ~cbsd/etc/bhyve-api.conf and ~cbsd/etc/jail-api.conf (for bhyve and jail, respectively).
+</p>
+<p>
+If you are using a cluster with several servers in different datacenters, which are united into one private network in which the environments are running, 
+you may want to change the source of issuing addresses to an external service, as is done <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_ipam_ssi.html"><strong>here</strong></a>.
+</p>
+<p>
+If you want to perform some own custom operations when creating environments - use the ability called 'extras': this is a kind of tags or custom parameters 
+for which you can map any of your operations.
+</p>
+<p>
+For example, by using:
+</p>
+<pre class="brush:bash;ruler:true;">
+extras="dns:my.domain"
+</pre>
+<p>
+You can force the API register in the DNS service name: <strong>my.domain</strong>, which will indicate the created environment.
+Or you may want to use something like:
+</p>
+<pre class="brush:bash;ruler:true;">
+extras="lb:true"
+</pre>
+<p>
+which when creating the environment configures VHOST on an external balancer (haproxy/nginx/..), indicating as an upstream for a virtual host IP address of the created environment.
+</p>
+<p>
+<strong>extras</strong> can be combined: such as writing the form:
+</p>
+<pre class="brush:bash;ruler:true;">
+extras="dns:wordpress.my.domain,lb:true,ipv6:external,letsencrypt:true"
+</pre>
+<p>
+can force the API when creating an environment to register <strong>wordpress.my.domain</strong> in the DNS, create the LetsEncrypt SSL certificate via certbot, add external IPv6 address as well and create and apply
+ a configuration on a balancer.
+</p>
+</div>

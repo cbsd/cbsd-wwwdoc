@@ -7,12 +7,42 @@
 			% cbsd jrctl-tui
 		</pre>
 		<strong>Description</strong>:
-		<p><strong>CBSD</strong> supports many of FreeBSD's mechanisms for enforcing limits on a jail's resource usage.</p>
+		<p><strong>CBSD</strong> supports many of FreeBSD's mechanisms for enforcing limits on a jail's resource usage, such as: zfs quota, <a href="https://man.freebsd.org/rctl/8" target="_blank">rctl(8)</a> и <a href="https://man.freebsd.org/cpuset/1" target="_blank">cpuset</a></p>
+</p>	</div>
+
+	<h2><a name="cpumem">CPU and Memory limits</a></h2>
+	<div class="block">
+		<p>The most popular limitation parameters in the installation are the limits on the consumption of CPU and RAM.</p>
+		<p>You can limit the CPU consumption via RACCT (<strong>cputime=</strong> and <strong>pcpu=</strong> parameters), or use a fixed number of cores allocation (via cpuset) via the <strong>cpu=</strong> parameter.</p>
+
+		<p>In our research and testing, <strong>cpu=</strong> is the most practical and demanded solution.
+		<p>The <strong>cpu=</strong> parameter specifies how many cores the container can recycle. You can immediately create a container limited, for example, to one core:</p>
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jcreate jname=myjail cpu=1 runasap=1
+		</pre>
+		<p>Besides limiting kernels, you may want to limit memory consumption via <strong>vmemoryuse=</strong>:
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jcreate jname=myjail cpu=1 vmemoryuse=1g runasap=1
+		</pre>
+		<p>Or, if you prefer to create environments through the <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>, it might look like this:</p>
+		<pre class="brush:bash;ruler:true;">
+jail_test2()
+{
+        ip4_addr="DHCP"
+        host_hostname="test2.my.domain"
+        pkg_bootstrap="0"
+
+        # LIMIT/QUOTAs:
+        fsquota="10g"           # set ZFS dataset quota
+        cpu="1"                 # only one vCPU allowed!
+        vmemoryuse="512m"       # only 512MB RAM allowed!
+}
+		</pre>
 	</div>
-	
+
 	<h2><a name="filequota">File quotas</a></h2>
 	<div class="block">
-		<p>Floating file quotas are only possible for jails residing on <strong>ZFS</strong>-file system. For systems stored on <strong>UFS</strong> a similar restrictions can be enforced using an md(4)-based vnode file/image and making use of <strong>mdsize</strong> for the jail).</p>
+		<p>Floating file quotas are only possible for jails residing on <strong>ZFS</strong>-file system. The quota is regulated through the <strong>fsquota=</strong> parameter. For systems stored on <strong>UFS</strong> a similar restrictions can be enforced using an md(4)-based vnode file/image and making use of <strong>mdsize</strong> for the jail).</p>
 	</div>
 
 	<h2><a name="renice">Renice prioritization</a></h2>

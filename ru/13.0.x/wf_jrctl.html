@@ -7,12 +7,39 @@
 			% cbsd jrctl-tui
 		</pre>
 		<strong>Описание</strong>:
-		<p><strong>CBSD</strong> поддерживает различные подсистемы FreeBSD для установки лимитов на ресурсы клетки.</p>
+		<p><strong>CBSD</strong> поддерживает различные механизмы FreeBSD для установки лимитов на ресурсы клетки, такие как: zfs quota, <a href="https://man.freebsd.org/rctl/8" target="_blank">rctl(8)</a> и <a href="https://man.freebsd.org/cpuset/1" target="_blank">cpuset</a></p>
 	</div>
-	
+
+	<h2><a name="cpumem">CPU и Memory лимиты</a></h2>
+	<div class="block">
+		<p>Наиболее востребованными в установке параметрами ограничения являются лимиты по потреблению CPU и оперативной памяти. Вы можете ограничивать потребление CPU через RACCT ( параметры cputime и pcpu ), либо использовать выделение фиксированного количества ядер (через cpuset) через параметр <strong>cpu=</strong>.
+		<p>В наших исследованиях и тестированиях <strong>cpu=</strong> является наиболее практичным и востребованным решением. Параметр cpu= указывает, какое количество ядер контейнер может утилизировать. Вы сразу можете создать контейнер, ограниченный, к примеру, одним ядром:
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jcreate jname=myjail cpu=1 runasap=1
+		</pre>
+		<p>Помимо ограничения ядер, вы можете захотеть ограничить потребление памяти через <strong>vmemoryuse=</strong>:
+		<pre class="brush:bash;ruler:true;">
+		% cbsd jcreate jname=myjail cpu=1 vmemoryuse=1g runasap=1
+		</pre>
+		<p>Или, если вы предпочитаете создавать окружения через <a href="/<!--#echo var="lang" -->/cbsdfile.html"><strong>CBSDfile</strong></a>, это может выглядеть так:</p>
+		<pre class="brush:bash;ruler:true;">
+jail_test2()
+{
+        ip4_addr="DHCP"
+        host_hostname="test2.my.domain"
+        pkg_bootstrap="0"
+
+        # LIMIT/QUOTAs:
+        fsquota="10g"           # set ZFS dataset quota
+        cpu="1"                 # only one vCPU allowed!
+        vmemoryuse="512m"       # only 512MB RAM allowed!
+}
+		</pre>
+	</div>
+
 	<h2><a name="filequota">Файловые квоты</a></h2>
 	<div class="block">
-		<p>Плавающие файловые квоты возможны только для клеток, размещенных на <strong>ZFS</strong>-файловой системе. Для систем на <strong>UFS</strong> подобное можно осуществить лишь md(4)-based vnode файл/имидж (параметр <strong>mdsize</strong> у клетки).</p>
+		<p>Плавающие файловые квоты возможны только для клеток, размещенных на <strong>ZFS</strong>-файловой системе через параметр <strong>fsquota=</strong>. Для систем на <strong>UFS</strong> подобное можно осуществить лишь md(4)-based vnode файл/имидж (параметр <strong>mdsize</strong> у клетки).</p>
 	</div>
 	
 	<h2><a name="renice">Приоритезация через renice</a></h2>

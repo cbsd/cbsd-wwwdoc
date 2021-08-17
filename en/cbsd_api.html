@@ -261,7 +261,7 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://127.0.0
 </p>
 <p>Please note that, unlike classic bcreate/bconstruct-tui, the parameters vm_os_type and vm_os_profile here are consolidated to one "img" parameter for even greater simplicity.
 At the same time, mapping of <strong>&lt;img&gt;</strong> is set in the file that you have copied earlier, it is <em>~cbsd/etc/bhyve-api.conf</em>.
-At the time of writing an article, affordable values as 'img': <strong>'centos7', 'centos8', 'ubuntu', 'debian', 'freebsd_ufs', 'freebsd_zfs'.</strong>
+At the time of writing an article, affordable values as 'img': <strong>'centos7', 'centos8', 'ubuntu', 'debian', 'freebsd_ufs', 'freebsd_zfs', 'openbsd', 'netbsd'.</strong>
 </p>
 <div class="warning">
 <p>
@@ -324,6 +324,13 @@ In addition, nubectl supports the description of Infrastructure As a Code via ya
 <br>
 <p class="text-center"><img src="/img/nubectl1.png" alt="" /></p>
 </p>
+<p>Another sample with <strong>nubectl-windows</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+nubectl-windows status --cloudkey="c:\authorized_keys" --cloudurl=http://127.0.0.1:65531
+nubectl-windows create vm --cloudkey="c:\authorized_keys" --cloudurl=http://127.0.0.1:65531
+nubectl-windows ssh vm --cloudkey="c:\authorized_keys" --cloudurl=http://127.0.0.1:65531 [--sshkey=c:\id_ed25519]
+</pre>
+
 </div>
 	</div>
 

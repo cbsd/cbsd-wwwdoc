@@ -248,7 +248,7 @@ curl -X POST -H "Content-Type: application/json" -d @centos7.json http://127.0.0
 </table>
 </p>
 <p>Обратите внимание, что в отличие от классических bcreate/bconstruct-tui, параметры vm_os_type и vm_os_profile здесь консолидированы в один параметр "img" для еще большей простоты. При этом маппинг <strong>&lt;img&gt;</strong> задается в файле, 
-который вы копировали ранее, это <em>~cbsd/etc/bhyve-api.conf</em>. На момент написания статьи, доступные значения в качестве img: <strong>'centos7', 'centos8', 'ubuntu', 'debian', 'freebsd_ufs', 'freebsd_zfs'.</strong>
+который вы копировали ранее, это <em>~cbsd/etc/bhyve-api.conf</em>. На момент написания статьи, доступные значения в качестве img: <strong>'centos7', 'centos8', 'ubuntu', 'debian', 'freebsd_ufs', 'freebsd_zfs', 'openbsd', 'netbsd'.</strong>
 </p>
 <div class="warning">
 <p>
@@ -307,6 +307,12 @@ postcreate_rmqbsd1()
 <br>
 <p class="text-center"><img src="/img/nubectl1.png" alt="" /></p>
 </p>
+<p>Еще пара примеров для <strong>nubectl-windows</strong>:</p>
+<pre class="brush:bash;ruler:true;">
+nubectl-windows status --cloudkey="c:\authorized_keys" --cloudurl=http://127.0.0.1:65531
+nubectl-windows create vm --cloudkey="c:\authorized_keys" --cloudurl=http://127.0.0.1:65531
+nubectl-windows ssh vm --cloudkey="c:\authorized_keys" --cloudurl=http://127.0.0.1:65531 [--sshkey=c:\id_ed25519]
+</pre>
 </div>
 	<h2><a name="multiapi"><span>Multinode API</span></a></h2>
 	<div class="block">

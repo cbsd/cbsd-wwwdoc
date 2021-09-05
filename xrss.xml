@@ -1268,5 +1268,19 @@
     <guid>CBSD 13.0.13 available</guid>
     <pubDate>Thu, 19 Aug 2021 03:22:01 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.14 release</title>
+    <description>CBSD 13.0.14 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      better DragonflyBSD support (build successfylly, srcup, jconstruct/jstart/jstop).&lt;br /&gt;
+      (bhyve) pci bus '3' always reserved for boot device.&lt;br /&gt;
+      bhyve: Linux Rocky 8 cloud image.&lt;br /&gt;
+      bugfix: fix migration for cbsd initenv when alternative workdir is set ( Issue #622 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.14 available</guid>
+    <pubDate>Sun, 05 Sep 2021 03:20:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

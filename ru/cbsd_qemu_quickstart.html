@@ -1,0 +1,69 @@
+<!--# include file="_start.html" -->
+<h1><span><strong>CBSD</strong> QEMU quick start</span></h1>
+
+<h2><a name="knowit">CBSD и QEMU</a></h2>
+<div class="block">
+<table class="images">
+<tr class="bg-gray">
+	<td class="bg-gray">Platform</td><td>QEMU supported</td><td>NVMM supported</td></tr>
+	<td class="bg-gray">DragonflyBSD</td><td bgcolor="#acffac">Y</td><td bgcolor="#acffac">Y</td></tr>
+	<td class="bg-gray">FreeBSD</td><td bgcolor="#acffac">Y</td><td>N</td></tr>
+	<td class="bg-gray">NetBSD</td><td bgcolor="#acffac">Y</td><td class="bg-gray">Y</td></tr>
+</table>
+
+	<p>С <strong>CBSD</strong> версии 13.0.18 добавлена поддержка эмулятора <a target="_blank" href="http://wiki.qemu.org/Main_Page">QEMU</a> и акселератора <a target="_blank" href="https://blog.netbsd.org/tnf/entry/from_zero_to_nvmm">NVMM</a>. Аналогично командам для jail, bhyve и XEN, вы можете создавать и управлять QEMU-based виртуальными машинами через аналогичные команды и диалоговые формы, при этом команды имеют префикс 'q': qstart, qdestroy..</p>
+	<p>На данный момент акселерация NVMM доступна только на платформе <a target="_blank" href="https://www.dragonflybsd.org">DragonFlyBSD</a>. Тем не менее, если вы используете CBSD и QEMU на FreeBSD, вы можете воспользоваться возможностью легкого образа альтернативных
+	архитектур в качестве полноценной виртуальной машины, если <a href="/<!--#echo var="lang" -->/ru/cbsd_qemu_usermode.html">QEMU-usermode jail</a> вам не подходит. Так, на хосте FreeBSD amd64, вы можете без труда запустить и работать с ОС для ARMv8/aarch64 или RISCv64.</p>
+
+	<p>При использовании NVMM, убедитесь что модуль загружен:</p>
+	<pre class="brush:bash;ruler:true;">
+	kldload nvmm
+	</pre>
+
+	<p>Проверить статус NVMM вы можете через команду:</p>
+	<pre class="brush:bash;ruler:true;">
+	nvmmctl identify
+	</pre>
+
+	<div class="warning">
+	<p>Если модуль отсутствует или работает некорректно, создавать ВМ вы сможете, но они будут работать без акселерации</p>
+	</div>
+	<div class="warning">
+	<p>Также, акселерация будет недоступна, если вы запускаете ненативные архитектуры.</p>
+	</div>
+
+	<p>Подробное описание работы с NVMM/QEMU на: <a target="_blank" href="https://www.dragonflybsd.org/docs/docs/howtos/nvmm/">странице проекта DragonflyBSD</a>, <a target="_blank" href="https://www.netbsd.org/docs/guide/en/chap-virt.html">NetBSD guide</a>.</p>
+
+	<p>При работе с эмуляцией не родных архитектур, вам могут потребоваться прошивки и bios для загрузки систем:</p>
+	<p>Например:
+		<ul>
+			<li><strong>u-boot-qemu-arm64</strong>    - Cross-build das u-boot for model qemu-arm64</li>
+			<li><strong>u-boot-qemu-riscv64</strong>  - Cross-build das u-boot for model qemu-riscv64</li>
+			<li><strong>opensbi</strong>              - RISC-V SBI bootloader and firmware</li>
+		</ul>
+	</p>
+</div>
+<h2><a name="qemu-limitationknowit">TODO/Ограничения</a></h2>
+<div class="block">
+	<p>На данный момент, запуск qemu происходит от пользователя 'root';</p>
+	<p>На платформе DragonFlyBSD поддержка HammerFS2 в CBSD находится в разработке: автоматическая работа с PFS/snapshot/COW средствами HammerFS в данный момент невозможа;</p>
+	<p>На платформе FreeBSD в QEMU не поддерживаетсят QXL/Spice протокол;</p>
+</div>
+<h2><a name="knowit">Создание QEMU ВМ</a></h2>
+<div class="block">
+	<p>Вы можете работать с QEMU-based виртуальными машинами через привычные в CBSD методы: TUI интерфейс, CLI интерфейс или <a href="/<!--#echo var="lang" -->/cbsdfile.html">CBSDfile</a>.</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd qconstruct-tui --help
+	cbsd qcreate --help
+	cbsd qstart --help
+	cbsd qdestroy --help
+	</pre>
+</div>
+<h2><a name="qemu-demo">Демо работы с QEMU через CBSD</a></h2>
+<div class="block">
+	<p>Demo of NVMM/QEMU via CBSD on DragonflyBSD 6.1-dev, Demo of running ARMv8 / AARCH64 and RISCv64 virtual machines on FreeBSD amd64 / x86_64:</p>
+	<p>
+	<iframe width="1280" height="720" src="https://www.youtube.com/embed/ACZ2dS1SRcc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	</p>
+</div>
+<!--# include file="_end.html" -->

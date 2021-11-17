@@ -1,0 +1,71 @@
+<!--# include file="_start.html" -->
+<!--# include file="currentver.html" -->
+<!--# include file="/en/translate.html" -->
+<h1><span><strong>CBSD</strong> QEMU quick start</span></h1>
+
+<h2><a name="knowit">CBSD and QEMU</a></h2>
+<div class="block">
+<table class="images">
+<tr class="bg-gray">
+	<td class="bg-gray">Platform</td><td>QEMU supported</td><td>NVMM supported</td></tr>
+	<td class="bg-gray">DragonflyBSD</td><td bgcolor="#acffac">Y</td><td bgcolor="#acffac">Y</td></tr>
+	<td class="bg-gray">FreeBSD</td><td bgcolor="#acffac">Y</td><td>N</td></tr>
+	<td class="bg-gray">NetBSD</td><td bgcolor="#acffac">Y</td><td bgcolor="#acffac">Y</td></tr>
+</table>
+
+	<p><strong>CBSD</strong> version 13.0.18 added support for <a target="_blank" href="http://wiki.qemu.org/Main_Page">QEMU</a> and <a target="_blank" href="https://blog.netbsd.org/tnf/entry/from_zero_to_nvmm">NVMM</a> accelerator. Similar to the commands for jail, bhyve and XEN, you can create and manage QEMU-based virtual machines through similar commands and dialog forms, 
+	while the commands are prefixed with 'q': qstart, qdestroy ..</p>
+	<p>Currently NVMM acceleration is only available on the <a target="_blank" href="https://www.dragonflybsd.org">DragonFlyBSD</a>/<a target="_blank" href="https://www.netbsd.org">NetBSD</a> platform. However, if you are using CBSD and QEMU on FreeBSD, you can take advantage of the lightweight image of the alternate architectures as a full virtual machine if the <a href="/<!--#echo var="lang" -->/cbsd_qemu_usermode.html">QEMU-usermode jail</a> is not for you. So, on a FreeBSD amd64 host, you can easily get up and running with an OS for ARMv8/aarch64 or RISCv64.</p>
+
+	<p>When using NVMM, make sure the module is loaded:</p>
+	<pre class="brush:bash;ruler:true;">
+	kldload nvmm
+	</pre>
+
+	<p>You can check the status of NVMM through the command:</p>
+	<pre class="brush:bash;ruler:true;">
+	nvmmctl identify
+	</pre>
+
+	<div class="warning">
+	<p>If the module is missing or does not work correctly, you can create VMs, but they will work without acceleration.</p>
+	</div>
+	<div class="warning">
+	<p>Also, acceleration will not be available if you are running non-native architectures.</p>
+	</div>
+
+	<p>Detailed description of working with NVMM/QEMU on the: <a target="_blank" href="https://www.dragonflybsd.org/docs/docs/howtos/nvmm/">DragonflyBSD project page</a>, <a target="_blank" href="https://www.netbsd.org/docs/guide/en/chap-virt.html">NetBSD project guide</a></p>
+
+	<p>When working with emulation of non-native architectures, you may need firmware and bios to boot systems:</p>
+	<p>For example:
+		<ul>
+			<li><strong>u-boot-qemu-arm64</strong>    - Cross-build das u-boot for model qemu-arm64</li>
+			<li><strong>u-boot-qemu-riscv64</strong>  - Cross-build das u-boot for model qemu-riscv64</li>
+			<li><strong>opensbi</strong>              - RISC-V SBI bootloader and firmware</li>
+		</ul>
+	</p>
+</div>
+<h2><a name="qemu-limitationknowit">TODO/Limitation</a></h2>
+<div class="block">
+	<p>At the moment, qemu is started from the 'root' user;</p>
+	<p>On the DragonFlyBSD platform, support for HammerFS2 in CBSD is under development: automatic work with PFS / snapshot / COW using HammerFS is currently not possible;</p>
+	<p>On FreeBSD platform, QEMU does not support the QXL/Spice protocol;</p>
+</div>
+<h2><a name="knowit">Creating a QEMU VM</a></h2>
+<div class="block">
+	<p>You can work with QEMU-based virtual machines through the usual CBSD methods: TUI interface, CLI interface, or <a href="/<!--#echo var="lang" -->/cbsdfile.html">CBSDfile</a>.</p>
+	<pre class="brush:bash;ruler:true;">
+	cbsd qconstruct-tui --help
+	cbsd qcreate --help
+	cbsd qstart --help
+	cbsd qdestroy --help
+	</pre>
+</div>
+<h2><a name="qemu-demo">Demo of working with QEMU via CBSD</a></h2>
+<div class="block">
+	<p>Demo of NVMM/QEMU via CBSD on DragonflyBSD 6.1-dev, Demo of running ARMv8 / AARCH64 and RISCv64 virtual machines on FreeBSD amd64 / x86_64:</p>
+	<p>
+	<iframe width="1280" height="720" src="https://www.youtube.com/embed/ACZ2dS1SRcc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	</p>
+</div>
+<!--# include file="_end.html" -->

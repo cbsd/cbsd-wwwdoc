@@ -1282,5 +1282,57 @@
     <guid>CBSD 13.0.14 available</guid>
     <pubDate>Sun, 05 Sep 2021 03:20:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.15 release</title>
+    <description>CBSD 13.0.15 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: add cloud Oracle 7/8 profiles&lt;br /&gt;
+      fix 'cbsd --help' output, pointed by: @bammbr&lt;br /&gt;
+      'cbsd forms': use upper case vars, export params by template&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.15 available</guid>
+    <pubDate>Mon, 20 Sep 2021 03:21:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.16 release</title>
+    <description>CBSD 13.0.16 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fix: perms for .ssh/.rssh dirs&lt;br /&gt;
+      fix: rdr rules for expose when ip4_addr in NIC# form ( Issue #623 )&lt;br /&gt;
+      repo: support for 'ver=native'&lt;br /&gt;
+      fix: jail basejail: proper errcode when base already exist&lt;br /&gt;
+      jail: auto-restart when param change with jset/jcreate jconf= autorestart=1&lt;br /&gt;
+      bhyve: FreeBSD 14-CURRENT cloud images&lt;br /&gt;
+      bhyve: OpenBSD 7.0 cloud image&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.16 available</guid>
+    <pubDate>Fri, 15 Oct 2021 02:35:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.17 release</title>
+    <description>CBSD 13.0.17 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fix: fix/restore bstart inter=X params behavior ( Issue #647 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.17 available</guid>
+    <pubDate>Wed, 27 Oct 2021 02:35:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>And now we have a QEMU/NVMM! YO-HO-HO!!!CBSD 13.0.17 release</title>
+    <description>QEMU/NVMM coming to CBSD&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      QEMU/NVMM coming to CBSD: https://youtu.be/ACZ2dS1SRcc&lt;br /&gt;
+    </description>
+    <link>https://youtu.be/ACZ2dS1SRcc</link>
+    <guid>QEMU/NVMM coming to CBS</guid>
+    <pubDate>Wed, 17 Nov 2021 02:35:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

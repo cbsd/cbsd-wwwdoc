@@ -1324,7 +1324,7 @@
     <pubDate>Wed, 27 Oct 2021 02:35:00 +0000</pubDate>
   </item>
   <item>
-    <title>And now we have a QEMU/NVMM! YO-HO-HO!!!CBSD 13.0.17 release</title>
+    <title>And now we have a QEMU/NVMM! YO-HO-HO!!!</title>
     <description>QEMU/NVMM coming to CBSD&lt;br /&gt;
     &lt;br /&gt;
     &lt;br /&gt;
@@ -1333,6 +1333,18 @@
     <link>https://youtu.be/ACZ2dS1SRcc</link>
     <guid>QEMU/NVMM coming to CBS</guid>
     <pubDate>Wed, 17 Nov 2021 02:35:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.18 release</title>
+    <description>CBSD 13.0.18 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      experimental support for QEMU and NVMM ( DragonFlyBSD only )&lt;br /&gt;
+      cloud init profiles for: Linux Oracle 8.5, Rocky 8.5, Linux CentOS 9 Stream;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.18 available</guid>
+    <pubDate>Fri, 19 Nov 2021 02:31:00 +0000</pubDate>
   </item>
 </channel>
 </rss>

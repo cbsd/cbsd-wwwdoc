@@ -1346,5 +1346,57 @@
     <guid>CBSD 13.0.18 available</guid>
     <pubDate>Fri, 19 Nov 2021 02:31:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.19 release</title>
+    <description>CBSD 13.0.19 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: Plan9front (or 9front) profile&lt;br /&gt;
+      bhyve: bhyve-p9shares: added 9P options/ro mode&lt;br /&gt;
+      bhyve: cloud-init: pass users subnet prefix for a interface (instead of /24 hardcode)&lt;br /&gt;
+      bugfix: bhyve: bhyve-dsk: gpart commit after zvol resize ( Issue #669 )&lt;br /&gt;
+      bhyve: new cloud profiles: CentOS 9 stream, FreeBSD 12.3-RELEASE&lt;br /&gt;
+      jail: debian bullseye profile&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.19 available</guid>
+    <pubDate>Tue, 07 Dec 2021 02:11:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.20 release</title>
+    <description>CBSD 13.0.20 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bugfix: rollback bhyve UEFI firmware&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.20 available</guid>
+    <pubDate>Tue, 14 Dec 2021 02:11:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.21 release</title>
+    <description>CBSD 13.0.21 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: jdestroy bugfix: check for mount before unmount&lt;br /&gt;
+      jail: CBSDfile: use export_jail_data_for_external_hook for jails postcreate func (export CBSD/jail variables)&lt;br /&gt;
+      bhyve: manage Serial data for virtual disk&lt;br /&gt;
+      bhyve: support for UEFI_VARS ( at the moment FreeBSD 14-CURRENT only )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.21 available</guid>
+    <pubDate>Tue, 11 Jan 2022 02:51:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.22 bug release</title>
+    <description>CBSD 13.0.22 bug release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fix efi_firmware migration&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.22 available</guid>
+    <pubDate>Wed, 12 Jan 2022 02:01:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

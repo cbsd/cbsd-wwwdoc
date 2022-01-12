@@ -12,6 +12,38 @@
 </div>
 <h2><a name="release">Релизы</a></h2>
 <div class="block">
+	<p><strong>13.0.22</strong>&nbsp;&mdash; 2022-01-12</p>
+	<ul>
+		<li>fix efi_firmware migration</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.0.21</strong>&nbsp;&mdash; 2022-01-11</p>
+	<ul>
+		<li>jail: jdestroy bugfix: check for mount before unmount</li>
+		<li>jail: CBSDfile: use export_jail_data_for_external_hook for jails postcreate func (export CBSD/jail variables)</li>
+		<li>bhyve: manage Serial data for virtual disk</li>
+		<li>bhyve: support for UEFI_VARS ( at the moment FreeBSD 14-CURRENT only )</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.0.20</strong>&nbsp;&mdash; 2021-12-14</p>
+	<ul>
+		<li>bugfix: rollback bhyve UEFI firmware</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.0.19</strong>&nbsp;&mdash; 2021-12-07</p>
+	<ul>
+		<li>bhyve: Plan9front (or 9front) profile</li>
+		<li>bhyve: bhyve-p9shares: added 9P options/ro mode</li>
+		<li>bhyve: cloud-init: pass users subnet prefix for a interface (instead of /24 hardcode)</li>
+		<li>bugfix: bhyve: bhyve-dsk: gpart commit after zvol resize ( <a href="https://github.com/cbsd/cbsd/issues/647" target="_blank">#669</a> )</li>
+		<li>bhyve: new cloud profiles: CentOS 9 stream, FreeBSD 12.3-RELEASE</li>
+		<li>jail: debian bullseye profile</li>
+	<ul>
+</div>
+<div class="block">
 	<p><strong>13.0.18</strong>&nbsp;&mdash; 2021-11-19</p>
 	<ul>
 		<li><a href="/cbsd_qemu_quickstart.html">experimental support</a> for QEMU and NVMM ( DragonFlyBSD only );</li>

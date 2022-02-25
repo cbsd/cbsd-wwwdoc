@@ -3,10 +3,10 @@
 	<div class="block">
 		<p>So, there are the following network options:</p>
 <ul>
-<li>1) Bridge network: e1000, virtio  ( + NAT )</li>
-<li>2) Point-to-point network from bhyve to hoster via tap: e1000, virtio</li>
-<li>3) Private virtual switch via VALE: only virtio</li>
-<li>4) Pass-thru and SR-IOV ( ppt device )</li>
+<li>- Bridge network: e1000, virtio  ( + NAT )</li>
+<li>- Point-to-point network from bhyve to hoster via tap: e1000, virtio</li>
+<li>- Private virtual switch via VALE: only virtio</li>
+<li>- <a href="/<!--#echo var="lang" -->/<!--#echo var="version" -->/wf_bhyveppt_ssi.html#sriov">Pass-thru and SR-IOV</a> ( ppt device )</li>
 </ul>
 
 <p>Options 1 by default:</p>
@@ -162,8 +162,8 @@ pkg install -y net/vether-kmod
 <p>Now you have gateway from external network stack inside VALE switch.</p>
 <p>now we will create several VMs in the vale1 VALE switch:</p>
 <pre class="brush:bash;ruler:true;">
-cbsd bcreate jname=cent1 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-8.2-x86_64" ci_ip4_addr="10.0.0.100" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
-cbsd bcreate jname=cent2 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-8.2-x86_64" ci_ip4_addr="10.0.0.101" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
+cbsd bcreate jname=cent1 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-stream-9-x86_64" ci_ip4_addr="10.0.0.100" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
+cbsd bcreate jname=cent2 vm_ram=1g vm_cpus=1 imgsize=10g vm_os_type="linux" vm_os_profile="cloud-CentOS-stream-9-x86_64" ci_ip4_addr="10.0.0.101" ip4_gw="10.0.0.1" interface="cbsdvale_vale1" astart=0 runasap=1
 ping -c2 10.0.0.100
 ping -c2 10.0.0.101
 </pre>
@@ -177,4 +177,20 @@ EOF
 </pre>
 <br>
 <p class="text-center"><img src="/img/cbsd_vale_vether1.png" alt="" /></p>
+<h2><a name="bhyvenetwork_opt5">Options 5: Netgraph bridge</a></h2>
+<p>
+CBSD can use netgraph(3) as bhyve network backend. Сurrently only bridge is supported.
+By default CBSD searches for and uses interfaces named <strong>cbsdng_ngX</strong>:
+</p>
+<pre class="brush:bash;ruler:true;">
+# ngctl mkpeer . eiface test ether
+# ngctl mkpeer ngeth0: bridge ether link99
+# ngctl name ngeth0:ether cbsdng_ng1
+# ifconfig ngeth0 192.168.1.1/24 up
+</pre>
+<br>
+<p class="text-center"><img src="/img/cbsdng1.png" alt="" /></p>
+<p>As result:</p>
+<p class="text-center"><img src="/img/cbsdng2.png" alt="" /></p>
+
 </div>

@@ -1,0 +1,215 @@
+<h1><span>Синхронизация jail окружений через csync2 и модуль <strong>CBSD</strong> csync2</span></h1>
+<div class="block">
+<p>
+Сегодня существует множество подходов и инструментов для репликации или распространения данных на файловой системе между различными серверами. 
+В зависимости от поставленной задачи, 
+вы можете использовать: 
+<ul>
+	<li><a target="_blank" href="https://puppet.com/">Puppet</a>;</li>
+	<li><a target="_blank" href="https://saltproject.io/">SaltStack</a>;</li>
+	<li><a target="_blank" href="https://www.chef.io/">Chef</a>;</li>
+	<li><a target="_blank" href="https://www.ansible.com/">Ansible</a>;</li>
+	<li>... and so on...;</li>
+</ul>
+ для доставки конфигурационных файлов.
+
+Также можете выбрать <a target="_blank" href="https://ceph.io/">Ceph</a>, <a target="_blank" href="https://www.gluster.org/">ClusterFS</a> и им подобных для репликации бинарных данных или целых файловых систем; 
+вы можете использовать HASTD или ZFS Send для блочной и дискретной репликации. 
+Но все еще остаются кейсы, когда вместо сложных и монструозных решений, 
+идеально подходят старые добрые легковесные утилиты для синхронизации данных, 
+такие как <a target="_blank" href="https://github.com/LINBIT/csync2">csync2</a> или <a target="_blank" href="https://github.com/lsyncd/lsyncd">lsyncd</a>.
+</p>
+
+<p>
+Конечно, они не годятся для синхронизации нескольких тысяч файлов или высоконагруженных на запись окружений. 
+Но с ситуациями, когда вам необходимо синхронизировать контейнера с небольшим количеством файлов и редкой записью, подобные утилиты справляются идеально. 
+К примеру, у вас есть jail контейнер, обслуживающий статические файлы для WEB сервера и вы хотите с помощью синхронизации растиражировать окружения в большом количестве. 
+<a target="_blank" href="https://github.com/cbsd/modules-csync2">Модуль csync2</a> для <strong>CBSD</strong> является скриптом-оберткой для более комфортного менеджмента конфигурационного файла программы csync2, когда вам необходимо синхронизировать контейнеров на базе jail.
+</p>
+
+<p>
+Как это работает: в системном <strong>CBSD</strong> каталоге каждого jail вы можете сопровождать любую конфигурацию для <strong>csync2</strong>, 
+описывающую списки файлов и директорий контейнера для синхронизаций (или их исключения). 
+Команда 'cbsd csync2' запускается каждую минуту из cron, склеивает эти файлы в один одноименный оригинальный конфигурационный файл <em>/usr/local/etc/csync2.cfg</em> и 
+в зависимости от необходимой частоты синхронизации (может настраиваться для каждого контейнера индивидуально), запускает утилиту <strong>csync2</strong> для того или иного контейнера.
+</p>
+
+<p>
+В качестве примера, давайте создадим два синхронизируемых контейнера с именами '<strong>repl1</strong>' и '<strong>repl2</strong>' между двумя нодами <strong>CBSD</strong>.
+</p>
+
+<br>
+<p>
+1)
+Выполняем установку пакета <strong>csync2</strong> и модуля 'cbsd csync2' на обеих нодах:
+
+<pre class="brush:bash;ruler:true;">
+pkg install -y csync2
+cbsd module mode=install csync2
+echo 'csync2.d' >> ~cbsd/etc/modules.conf
+cbsd initenv
+</pre>
+</p>
+
+<br>
+<p>
+2)
+Скопируем пример конфигурационного файла модуля в рабочий каталог <strong>CBSD</strong>:
+
+<pre class="brush:bash;ruler:true;">
+cp /usr/local/cbsd/modules/csync2.d/etc/csync2.conf ~cbsd/etc/
+</pre>
+<p>
+Конфигурационный файл небольшой и позволяет оперировать параметрами:
+</p>
+<pre class="cli">
+## Каталог для логирования:
+CSYNC2_CBSD_LOG_DIR="/var/log/cbsd-csync2"
+
+## Глобальный csync2 ключ:
+CSYNC2_CBSD_KEY="/usr/local/etc/cbsd_csync2.key"
+
+## Путь к программе csync2 в системе
+CSYNC2_CMD="/usr/local/sbin/csync2"
+
+## Глобальный конфигурационный файл csync2, который в нашем случае будет автоматически генерируемым CBSD модулем csync2
+CSYNC2_CFG_FILE="/usr/local/etc/csync2.cfg"
+
+## Частота запуска операции синхронизации (не путать с частотой запуска 'cbsd csync2' модуля из crontab - см. ниже
+## По-умолчанию, выполняем одну синхронизацию в 10 минут, но если вы хотите для некоторых контейнеров иметь другую частоту, используйте
+## файл ~cbsd/jails-system/%jail%/etc для установки индивидуального для %jail% значения.
+CSYNC2_CBSD_RUN_INTERVAL="10"
+</pre>
+</p>
+
+<br>
+<p>
+3)
+Создадим контейнера '<strong>repl1</strong>' и '<strong>repl2</strong>' на обеих нодах. 
+Имена одинаковые, но будем использовать непересекающиеся IP адреса, поскольку
+в нашем случае сервера расположены в одном сегменте.
+
+<pre class="brush:bash;ruler:true;">
+node1# cbsd jcreate ip4_addr=10.0.100.144 jname=repl1 runasap=1
+node1# cbsd jcreate ip4_addr=10.0.100.145 jname=repl2 runasap=1
+
+node2# cbsd jcreate ip4_addr=10.0.100.146 jname=repl1 runasap=1
+node2# cbsd jcreate ip4_addr=10.0.100.147 jname=repl2 runasap=1
+</pre>
+</p>
+
+<br>
+<p>
+4)
+
+На каждом сервере для каждого контейнера сформируем  <em>/usr/jails/jails-system/%jail%/csync2.cfg</em> конфигурационный файл,
+описывающий директории контейнеров для синхронизации. Мы будем реплицирировать весь контейнер, за исключением каталога
+<em>/var/run/</em> где хранятся <strong>PID</strong> процессов и не будем синхронизировать логи, содержимое файлов которых уникальны для каждого контейнера,
+поскольку мы планируем что все контейнера будут работать.
+
+На <strong>node1</strong>: для контейнера 'repl1' и при условии, что cbsd_workdir установлен в каталог <em>/usr/jails</em>:
+
+<pre class="brush:bash;ruler:true;">
+
+cat &gt; /usr/jails/jails-system/repl1/csync2.cfg &lt;&lt;EOF
+        host node1.my.domain;
+        host node2.my.domain;
+
+        include /usr/jails/jails-data/repl1-data;
+        include /usr/jails/jails-system/repl1/csync2.cfg;
+        exclude /usr/jails/jails-data/repl1-data/var/spool/clientmqueue;
+        exclude /usr/jails/jails-data/repl1-data/var/log/*.log;
+        exclude /usr/jails/jails-data/repl1-data/var/log/*/*.log;
+        exclude /usr/jails/jails-data/var/run;
+
+        action
+        {
+                pattern /usr/jails/jails-data/repl1-data/usr/local/etc/nginx/*;
+                exec "/usr/local/bin/cbsd service jname=repl1 mode=action nginx reload";
+                logfile "/usr/jails/jails-system/repl1/csync2.actions.log";
+                do-local;
+        }
+
+        auto younger;
+EOF
+</pre>
+</p>
+<p>
+такой же конфиг для контейнера 'repl2' с соответствующей разницей в путях директорий:
+</p>
+
+<pre class="brush:bash;ruler:true;">
+
+cat &gt; /usr/jails/jails-system/repl2/csync2.cfg &lt;&lt;EOF
+        host node1.my.domain;
+        host node2.my.domain;
+
+        include /usr/jails/jails-data/repl2-data;
+        include /usr/jails/jails-system/repl2/csync2.cfg;
+        exclude /usr/jails/jails-data/repl2-data/var/spool/clientmqueue;
+        exclude /usr/jails/jails-data/repl2-data/var/log/*.log;
+        exclude /usr/jails/jails-data/repl2-data/var/log/*/*.log;
+        exclude /usr/jails/jails-data/var/run;
+
+        action
+        {
+                pattern /usr/jails/jails-data/repl2-data/usr/local/etc/nginx/*;
+                exec "/usr/local/bin/cbsd service jname=repl2 mode=action nginx reload";
+                logfile "/usr/jails/jails-system/repl2/csync2.actions.log";
+                do-local;
+        }
+
+        auto younger;
+EOF
+</pre>
+
+Обратите внимание на '<strong>node1.my.domain</strong>' и '<strong>node2.my.domain</strong>' - это должны быть IP адреса или корректные DNS имена ваших <strong>CBSD</strong> хостов.
+Кроме этого, мы используем специальную директиву 'action' в качестве примера,которая будет перезагружать сервис nginx в нужном контейнере, если при синхронизации где-то
+были модифицированы конфигурационные файлы HTTP сервера 'nginx', который в нашем случае запущен в каждом контейнере.
+</p>
+
+<br>
+<p>
+5) Повторяем полностью аналогичную настройку из пункта '4' на второй ноде.
+</p>
+
+<br>
+<p>
+6) Сгенерируем на любой из наших хостов глобальный ключ csync2 путем запуска скрипта:
+
+<pre class="brush:bash;ruler:true;">
+cbsd csync2
+</pre>
+<p>
+Если файл <em>/usr/local/etc/cbsd_csync2.key</em> отсутствует (параметр CSYNC2_CBSD_KEY), файл будет сгенерирован.
+Внимание! Вам необходимо распространить этот ключ на все ноды, учавствующие в синхронизации. Конечно, это удобно делать такими инструментами, как: Puppet,Chef,Salt,Ansible.
+</p>
+
+</p>
+
+<br>
+<p>
+7) пометим сервис <strong>csync2</strong> через <em>/etc/rc.conf</em> как активный, на всех нодах:
+
+<pre class="brush:bash;ruler:true;">
+sysrc csync2_enable="YES"
+</pre>
+</p>
+
+<br>
+<p>
+8) Добавим в cron от пользователя 'root' запись для ежеминутного запуска 'cbsd csync2'. Это не означает, что синхронизация будет работать каждую минуту - как мы помним,
+частоту синхронизации мы регулируем параметром CSYNC2_CBSD_RUN_INTERVAL. Делаем на всех нодах вызов 'crontab -e' и добавляем строчку:
+
+<pre class="brush:bash;ruler:true;">
+* * * * * /usr/bin/lockf -s -t0 /tmp/cbsd_csync2.lock /usr/bin/env NOCOLOR=1 /usr/local/bin/cbsd csync2 >> /var/log/cbsd-csync2/csync2.log 2>&1
+</pre>
+
+На этом настройка завершена. Вы можете запустить несколько раз скрипт вручную, чтобы убедится, что все работает корректно:
+
+<pre class="brush:bash;ruler:true;">
+cbsd csync2 verbose=1 force=1
+</pre>
+
+Или наблюдайте логи в каталоге <em>/var/log/cbsd-csync2</em> спустя несколько минут после инсталляции cron.
+</div>

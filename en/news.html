@@ -13,6 +13,71 @@
 </div>
 <h2><a name="release">Releases</a></h2>
 <div class="block">
+	<p><strong>13.1.4</strong>&nbsp;&mdash; 2022-09-06</p>
+	<ul>
+		<li>jrctl: show runtime stats;</li>
+		<li>bhyve: added GPU-GOP UEFI firmware (optional via ports);</li>
+		<li>bhyve: fix check_dmar for AMD;</li>
+		<li>added Arch Linux cloud profile;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.3</strong>&nbsp;&mdash; 2022-07-29</p>
+	<ul>
+		<li>bhyve: bugfix: password args when fbuf absent</li>
+		<li>bstart: can use ISO as disk image via iso2img</li>
+		<li>bhyve/xen/nvmm/qemu: add PLUG mirror to list of mirrors: sponsored by Purdue Linux Users Group ( <a href="https://github.com/cbsd/cbsd-vmprofiles/pull/6">cbsd/cbsd-vmprofiles#6</a> )</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.2</strong>&nbsp;&mdash; 2022-07-12</p>
+	<ul>
+		<li>jail, bhyve, xen, nvmm: add 'flavor' params for create script;</li>
+		<li>bhyve: new cloud profiles: Linux Alma 9, Linux Oracle 9;</li>
+		<li>gen_password: fix password str;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.1</strong>&nbsp;&mdash; 2022-06-20</p>
+	<ul>
+		<li>bugfix: cbsd get-next-nic: fix race: skip list was incorect, fixes for <a href="https://github.com/cbsd/cbsd/issues/695" target="_blank">#695</a>;</li>
+		<li>config max_dsk_count via -default-default.conf;</li>
+		<li>bhyve: fix dsk_controller_args when multiple controllers;</li>
+		<li>bhyve: check for BHYVE_RUN_DIR existance for checkpoints;</li>
+		<li>bhyve: add pid_wait params;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.0</strong>&nbsp;&mdash; 2022-05-16</p>
+	<ul>
+		<li>new cloud images: Home Assistant, Fedora 36, FreeBSD 13.1;</li>
+		<li>expose: support for: mode=add jname=vm1 inaddr=EXT_IP4;</li>
+		<li>jail2iso: check for kernel.gz file ( besides 'kernel' );</li>
+		<li>expose: do not extract nodeip in SQL when inaddr=0 (auto), Issue <a href="https://github.com/cbsd/cbsd/issues/689" target="_blank">#689</a></li></li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.0.28</strong>&nbsp;&mdash; 2022-04-01</p>
+	<ul>
+		<li>bhyve cloud: fix bexec.conf;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.0.27</strong>&nbsp;&mdash; 2022-03-31</p>
+	<ul>
+		<li>fix boot_delay behavior;</li>
+		<li>bhyve: fix user settings in cloud-init profile;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.0.26</strong>&nbsp;&mdash; 2022-03-27</p>
+	<ul>
+		<li>export: tar: use --format gnutar by default;</li>
+		<li>up: fix typo, Issue <a href="https://github.com/cbsd/cbsd/issues/694" target="_blank">#694</a></li>
+		<li>bhyve: fix SQL schema;</li>
+	<ul>
+</div>
+<div class="block">
 	<p><strong>13.0.25</strong>&nbsp;&mdash; 2022-03-22</p>
 	<ul>
 		<li>bhyve: support for raw device, Issue <a href="https://github.com/cbsd/cbsd/issues/686" target="_blank">#686</a></li>

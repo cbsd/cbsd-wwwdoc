@@ -1442,5 +1442,110 @@
     <guid>CBSD 13.0.25 available</guid>
     <pubDate>Tue, 22 Mar 2022 01:01:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.0.26 release</title>
+    <description>CBSD 13.0.26 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      export: tar: use --format gnutar by default;&lt;br /&gt;
+      up: fix typo, Issue https://github.com/cbsd/cbsd/issues/694&lt;br /&gt;
+      bhyve: fix SQL schema&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.26 available</guid>
+    <pubDate>Sun, 27 Mar 2022 01:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.27 release</title>
+    <description>CBSD 13.0.27 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fix boot_delay behavior&lt;br /&gt;
+      bhyve: fix user settings in cloud-init profile&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.27 available</guid>
+    <pubDate>Thu, 31 Mar 2022 01:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.0.28 release</title>
+    <description>CBSD 13.0.28 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve cloud: fix bexec.conf&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.0.28 available</guid>
+    <pubDate>Fri, 01 Apr 2022 01:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.0 release</title>
+    <description>CBSD 13.1.0 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      new cloud images: Home Assistant, Fedora 36, FreeBSD 13.1;&lt;br /&gt;
+      expose: support for: mode=add jname=vm1 inaddr=EXT_IP4;&lt;br /&gt;
+      jail2iso: check for kernel.gz file ( besides 'kernel' );&lt;br /&gt;
+      expose: do not extract nodeip in SQL when inaddr=0 (auto), Issue https://github.com/cbsd/cbsd/issues/689&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.0 available</guid>
+    <pubDate>Mon, 16 May 2022 01:01:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.1 release</title>
+    <description>CBSD 13.1.1 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bugfix: cbsd get-next-nic: fix race: skip list was incorect, fixes for https://github.com/cbsd/cbsd/issues/695;&lt;br /&gt;
+      config max_dsk_count via -default-default.conf;&lt;br /&gt;
+      bhyve: fix dsk_controller_args when multiple controllers;&lt;br /&gt;
+      bhyve: check for BHYVE_RUN_DIR existance for checkpoints;&lt;br /&gt;
+      bhyve: add pid_wait params;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.1 available</guid>
+    <pubDate>Mon, 20 Jun 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.2 release</title>
+    <description>CBSD 13.1.2 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail, bhyve, xen, nvmm: add 'flavor' params for create script;&lt;br /&gt;
+      bhyve: new cloud profiles: Linux Alma 9, Linux Oracle 9;&lt;br /&gt;
+      gen_password: fix password str;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.2 available</guid>
+    <pubDate>Tue, 12 Jul 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.3 release</title>
+    <description>CBSD 13.1.3 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       bhyve: bugfix: password args when fbuf absent&lt;br /&gt;
+       bstart: can use ISO as disk image via iso2img&lt;br /&gt;
+       bhyve/xen/nvmm/qemu: add PLUG mirror to list of mirrors: sponsored by Purdue Linux Users Group ( https://github.com/cbsd/cbsd-vmprofiles/pull/6 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.3 available</guid>
+    <pubDate>Fri, 29 Jul 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.4 release</title>
+    <description>CBSD 13.1.4 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       jrctl: show runtime stats;&lt;br /&gt;
+       bhyve: added GPU-GOP UEFI firmware (optional via ports);&lt;br /&gt;
+       bhyve: fix check_dmar for AMD;&lt;br /&gt;
+       added Arch Linux cloud profile;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.4 available</guid>
+    <pubDate>Tue, 06 Sep 2022 01:00:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

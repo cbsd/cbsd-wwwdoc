@@ -128,9 +128,10 @@ cat &gt; /usr/jails/jails-system/repl1/csync2.cfg &lt;&lt;EOF
         include /usr/jails/jails-data/repl1-data;
         include /usr/jails/jails-system/repl1/csync2.cfg;
         exclude /usr/jails/jails-data/repl1-data/var/spool/clientmqueue;
-        exclude /usr/jails/jails-data/repl1-data/var/log/*.log;
+        exclude /usr/jails/jails-data/repl1-data/var/log/*;
         exclude /usr/jails/jails-data/repl1-data/var/log/*/*.log;
-        exclude /usr/jails/jails-data/var/run;
+        exclude /usr/jails/jails-data/repl1-data/var/run/*;
+        exclude /usr/jails/jails-data/repl1-data/tmp/*;
 
         action
         {
@@ -157,9 +158,10 @@ cat &gt; /usr/jails/jails-system/repl2/csync2.cfg &lt;&lt;EOF
         include /usr/jails/jails-data/repl2-data;
         include /usr/jails/jails-system/repl2/csync2.cfg;
         exclude /usr/jails/jails-data/repl2-data/var/spool/clientmqueue;
-        exclude /usr/jails/jails-data/repl2-data/var/log/*.log;
+        exclude /usr/jails/jails-data/repl2-data/var/log/*;
         exclude /usr/jails/jails-data/repl2-data/var/log/*/*.log;
-        exclude /usr/jails/jails-data/var/run;
+        exclude /usr/jails/jails-data/repl2-data/var/run/*;
+        exclude /usr/jails/jails-data/repl2-data/tmp/*;
 
         action
         {

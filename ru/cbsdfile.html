@@ -3,7 +3,7 @@
 <h2><a name="cmdfile">Использование CBSDfile</a></h2>
 <div class="block">
 	<p>Вы можете использовать CBSDfile для создания и удаления окружений <strong>CBSD</strong> одной командой. Если вы ищите Vagrant для jail или bhyve, возможно вам понравится нативный FreeBSD/CBSD механизм.</p>
-	<p>Мы не стали изобретать колесо относительно формата CBSDfile и используем привычную для большинства форму записи shell-сценарий: описывайте конфигурацию вашего приложения в функции с именем jail_XXX или bhyve_YYY.
+	<p>Мы не стали изобретать колесо относительно формата CBSDfile и не стремимся повторить синтаксис <strong>Dockerfile-like</strong>, а используем привычную для большинства форму записи shell-сценария: описывайте конфигурацию вашего приложения в функции с именем jail_XXX или bhyve_YYY.
 	Одна функция - одно окружение. Вы можете использовать любые параметры из команд jcreate/jconstruct-tui/jconfig и bcreate/bconstruct-tui/bconfig.</p>
 	<p>Например, создание виртуальной машины CentOS7 через bcreate:</p>
 	<pre class="brush:bash;ruler:true;">
@@ -20,6 +20,34 @@ bhyve_c1()
 	vm_os_profile="cloud-CentOS-7-x86_64"
 	runasap=1
 	ssh_wait=1
+}
+	</pre>
+	<p>Кроме того, используя обычный шелл для описания окружения, в отличие от <strong>Dockerfile-like</strong> файлов мы можем использовать привычные <strong>sh</strong> конструкции и использовать различные условия, например, каталоги с CBSDfile может быть общим для нескольких независимых нод, но в зависимости от определенного условия (например по имени ноды), окружения будут использовать разные IP адреса:</p>
+	<pre class="brush:bash;ruler:true;">
+jail_nginx()
+{
+	case "${nodename}" in
+		home.my.domain)
+			ip4_addr="93.100.25.10,2a05:3580:d811:800::2"
+			;;
+		srv-01.convectix.com)
+			# for srv-01.convectix.com
+			ip4_addr="142.132.155.251,2a01:4f8:261:2b85::1,10.0.100.1"
+			;;
+		*)
+			echo "Unkown nodename: $nodename, no ip4_addr profile/settings"
+			ip4_addr="DHCP"
+		    ;;
+	esac
+
+	ver="native"
+
+	interface=0		# with interface=0, IP address 
+					#  should already be initialized, e.g via rc.conf
+	host_hostname="${jname}.convectix.com"
+	astart=1
+	pkg_bootstrap=1
+	pkglist="www/nginx"
 }
 	</pre>
 	<p>Выполним команду <strong>cbsd up</strong> и дождавшись окончания, вы можете сразу зайти в виртуальную машину через <strong>cbsd blogin</strong></p>

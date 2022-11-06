@@ -139,6 +139,7 @@ And also, network settings (IP address, gateway, masks) with Cloud/API do not pl
 		jscp /COPYRIGHT ${jname}/root/			# This command will work equally with a local deployment and Cloud/API
 	}
 	</pre>
+	<p>Another way to customize jail by static files: 'skel' directory. Just put files into skel/ dir hier to overwrite jail content, e.g.: <a target="_blank" href="https://github.com/cbsd/cbsdfile-recipes/tree/master/jail/sambashare/skel">how to drop /usr/local/etc/smb4.conf and /usr/local/etc/pkg/repos/</a> files in Samba jail</p>.
 	<p>Also, the parameters that you describe in <strong>jail_</strong> and <strong>bhyve_</strong> functions can be specified in the command line. What can be convenient if you use one <strong>CBSDfile</strong> to generate the several image of different versions, for example, one source:</p>
 	<pre class="brush:bash;ruler:true;">
 	jail_mc()

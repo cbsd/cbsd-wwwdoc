@@ -13,6 +13,24 @@
 </div>
 <h2><a name="release">Releases</a></h2>
 <div class="block">
+	<p><strong>13.1.16</strong>&nbsp;&mdash; 2022-11-06</p>
+	<ul>
+		<li>bugfix: fix order, reported by @i_safonov;</li>
+		<li>jls new behavior: restrict list to env list, pass filter "parameter=value" as SQL WHERE condition ( (<a href="https://github.com/cbsd/cbsd/issues/712" target="_blank">#712</a>; )</li>
+		<li>jrestart: skip for inactive jails (<a href="https://github.com/cbsd/cbsd/issues/713" target="_blank">#713</a>; )</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.15</strong>&nbsp;&mdash; 2022-10-11</p>
+	<ul>
+		<li>bugfix: jail: target_arch when arch=i386 ( reported by @lbartoletti );</li>
+		<li>bugix: get base.txz on DragonFlyBSD platform ( #710 );</li>
+		<li>bugfix: jail: ip4/ip6 for vnet-based jails ( jstart/jset ), reported by @mekanix ;</li>
+		<li>bugfix: jail: epair leak: better epair cleanup method;</li>
+		<li>bugfix: jail: Mounting via fstab.local, with escaped space in path. (Reported & fixed by @Alexey-Kovalenko via #711);</li>
+	<ul>
+</div>
+<div class="block">
 	<p><strong>13.1.4</strong>&nbsp;&mdash; 2022-09-06</p>
 	<ul>
 		<li>jrctl: show runtime stats;</li>

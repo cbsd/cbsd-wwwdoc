@@ -1547,5 +1547,61 @@
     <guid>CBSD 13.1.4 available</guid>
     <pubDate>Tue, 06 Sep 2022 01:00:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD Marketplace re-lauhcned</title>
+    <description>CBSD Marketplace re-lauhcned&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      CI/regression test + build server + jail template marketplace (for free, of course ;-) for CBSD/ClonOS has been restored! The last time the images were auto-built was in 2016, but was turned off due to a lack of infrastructure.&lt;br /&gt;
+      &lt;br /&gt;
+      The new one is sponsored by the donors of the project!&lt;br /&gt;
+      &lt;br /&gt;
+      URL: https://marketplace.bsdstore.ru/&lt;br /&gt;
+    </description>
+    <link>https://marketplace.bsdstore.ru/</link>
+    <guid>CBSD Marketplace re-lauhcned</guid>
+    <pubDate>Sat, 24 Sep 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.15 release</title>
+    <description>CBSD 13.1.15 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       bugfix: jail: target_arch when arch=i386 ( reported by @lbartoletti );&lt;br /&gt;
+       bugix: get base.txz on DragonFlyBSD platform ( #710 );&lt;br /&gt;
+       bugfix: jail: ip4/ip6 for vnet-based jails ( jstart/jset ), reported by @mekanix ;&lt;br /&gt;
+       bugfix: jail: epair leak: better epair cleanup method;&lt;br /&gt;
+       bugfix: jail: Mounting via fstab.local, with escaped space in path. (Reported and fixed by @Alexey-Kovalenko via #711);&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.15 available</guid>
+    <pubDate>Tue, 11 Oct 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>MyBee 13.1.2 release</title>
+    <description>MyBee 13.1.2 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      'upgrade' script/command to update MyBee (https://github.com/myb-project/guide/blob/main/en/shell.md);&lt;br /&gt;
+       Kubernetes has been updated to v1.25.3;&lt;br /&gt;
+       CBSD has been updated to 13.1.16a;&lt;br /&gt;
+    </description>
+    <link>https://myb.convectix.com/</link>
+    <guid>MyBee 13.1.2 available</guid>
+    <pubDate>Fri, 28 Oct 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.16 release</title>
+    <description>CBSD 13.1.16 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       bugfix: fix order, reported by @i_safonov;&lt;br /&gt;
+       jls new behavior: restrict list to env list, pass filter "parameter=value" as SQL WHERE condition ( #712 );&lt;br /&gt;
+       jrestart: skip for inactive jails  ( #712 );&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.16 available</guid>
+    <pubDate>Sun, 06 Nov 2022 01:00:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

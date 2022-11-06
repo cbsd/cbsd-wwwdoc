@@ -119,6 +119,7 @@ cbsd blogin
 		jscp /COPYRIGHT ${jname}/root/			# эта команда одинаково отработает с локальным деплоем и с API
 	}
 	</pre>
+	<p>Другой метод кастомизации контейнера через статические файлы - использование каталога 'skel'. Просто положите файты в skel/ каталог, соблюдая иерархию каталогов. Например, : <a target="_blank" href="https://github.com/cbsd/cbsdfile-recipes/tree/master/jail/sambashare/skel">как перезаписать /usr/local/etc/smb4.conf и /usr/local/etc/pkg/repos/</a> файлы в Samba контейне</p>.
 	<p>Также, параметры которые вы описываете в jail_ и bhyve_ функциях, можно указывать  в командной строчке. Что может быть удобно, если вы используете один CBSDfile для генерации образа разных версий, например:</p>
 	<pre class="brush:bash;ruler:true;">
 	jail_mc()

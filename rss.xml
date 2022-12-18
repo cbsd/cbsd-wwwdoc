@@ -1603,5 +1603,32 @@
     <guid>CBSD 13.1.16 available</guid>
     <pubDate>Sun, 06 Nov 2022 01:00:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.1.17 release</title>
+    <description>CBSD 13.1.17 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       bhyve: new cloud images: AlmaLinux 9.1, Rocky 9.1, Fedora 37;&lt;br /&gt;
+       jail: use devfs_ruleset=5 by default for vnet;&lt;br /&gt;
+       virtual disks: ZFS: always reserve by default;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.17 available</guid>
+    <pubDate>Tue, 29 Nov 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.18 release</title>
+    <description>CBSD 13.1.18 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       debootstrap exec fixes (reported by @lbartoletti via Telegram)&lt;br /&gt;
+       bhyve: new cloud image: Oracle 9.1&lt;br /&gt;
+       bhyve: new cloud image: FreeBSD 12.4 (ufs/zfs)&lt;br /&gt;
+       initenv: add PRE_CBSD_CMD_PATH + POST_CBSD_CMD_PATH variables&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.18 available</guid>
+    <pubDate>Tue, 06 Dec 2022 01:00:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

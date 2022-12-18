@@ -101,21 +101,37 @@ cbsd jstart jname='lala*'
 	<h2><a name="hier">Иерархия <strong>CBSD</strong> каталога</a></h2>
 	<div class="block">
 		<table class="images">
-			<tr><td class="bg-gray">${workdir}/.rssh/</td><td>Каталог для хранения приватных ключей удаленных нод. Файлы добавляются и удаляются через команду <strong>cbsd node</strong></td></tr>
-			<tr><td class="bg-gray">${workdir}/.ssh</td><td>Здесь хранится приватный и публичный ключ непосредственно данной ноды. Формируется на этапе инициализации при команде cbsd initenv. Именно отсюда будут забирать публичный ключ удаленные хосты по команде cbsd node mode=add. Имя, заданное на этапе initenv в вопросе nodename должен совпадать с написанием  имени в аргументе node= при команде cbsd node mode=add. Имя файла ключа является md5 суммой от этого имени.</td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/.rssh/</strong></td><td>Каталог для хранения приватных ключей удаленных нод. Файлы добавляются и удаляются через команду <strong>cbsd node</strong></td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/.ssh/</strong></td><td>Здесь хранится приватный и публичный ключ непосредственно данной ноды. Формируется на этапе инициализации при команде cbsd initenv. Именно отсюда будут забирать публичный ключ удаленные хосты по команде cbsd node mode=add. Имя, заданное на этапе initenv в вопросе nodename должен совпадать с написанием  имени в аргументе node= при команде cbsd node mode=add. Имя файла ключа является md5 суммой от этого имени. Кроме этого, эта пара ключей используется по-умолчанию при работе с облачными образами виртуальных машин, например, в операциях 'cbsd bexec, cbsd bscp, cbsd blogin'</td></tr>
 			<tr><td class="bg-gray">${workdir}/basejail</td><td>Здесь хранятся готовые к использованию базы и ядра FreeBSD (результат cbsd buildworld/buildkernel, cbsd installworld/installkernel или cbsd repo action=get sources=base/kernel)</td></tr>
 			<tr><td class="bg-gray">${workdir}/etc</td><td>Конфигурационные файлы, необходимые для работы cbsd</td></tr>
 			<tr><td class="bg-gray">${workdir}/export</td><td>Каталог по-умолчанию, в который будет сохраняться экспортированная в файл клетка (при команде cbsd jexport jname=$jname, в этом каталоге появится файл $jname.img)</td></tr>
 			<tr><td class="bg-gray">${workdir}/import</td><td>Каталог по-умолчанию, из которого будет импортирован jail (при cbsd jimport jname=$jname, будет развернута клета $jname)</td></tr>
 			<tr><td class="bg-gray">${workdir}/jails</td><td>В данном каталоге находятся точка монтирования корня для jail-ов, использующих baserw=0.</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-data</td><td>В этом каталоге лежат данные клетки. Именно этим местам необходим бекап для сохранности данных клетки. Также, если клетка использует baserw=1, эти каталоги являются корнем клетки при ее старте</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-fstab</td><td>fstab файл для клеток. Синтаксис обычный для FreeBSD за тем лишь исключением, что путь к точке монтирования пишется относительно корня jail (запись <strong>/usr/ports /usr/ports nullfs rw 0 0</strong> в файле fstab.$jname означает, что из мастер-ноды каталог /usr/ports будет примонтирован при запуске в ${workdir}/jails/$jname/usr/ports)</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-system</td><td>Этот каталог может содержать какие-то вспомогательные скрипты, относящиеся к клетке (например скрипты-wizard-ы для настройки, конфигураторы и пр) а также, сохраняется трафик клетки, если используется ipfw и ее описание. Данный каталог учавствует при jimport/jexport операциях и мигрировании клеток</td></tr>
+			<tr><td class="bg-gray"><font style="color:RED"><strong>${workdir}/jails-data</strong></font></td><td>В этом каталоге лежат данные клетки или виртуальные диски виртуальной машины. Именно этим местам необходим бекап для сохранности данных клетки. Также, если клетка использует baserw=1, эти каталоги являются корнем клетки при ее старте. <font style="color:RED">Обратите внимание!</font> При использовании ZVOL, фактически диски расположены в ZVOL и из каталога jails-data идут лишь символические ссылки - учитывайте это при планировании резервного копирования/DR !.  Этот каталог (или VOLUME, на которые указывают симполические ссылки) подлежит резервному копированию, если вы хотите восставить данные своих виртуальных окружений в случае сбоев.</td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/jails-fstab</strong></td><td>fstab файл для клеток. Синтаксис обычный для FreeBSD за тем лишь исключением, что путь к точке монтирования пишется относительно корня jail (запись <strong>/usr/ports /usr/ports nullfs rw 0 0</strong> в файле fstab.$jname означает, что из мастер-ноды каталог /usr/ports будет примонтирован при запуске в ${workdir}/jails/$jname/usr/ports)</td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/jails-system</strong></td><td>Этот каталог может содержать какие-то вспомогательные скрипты, относящиеся к клетке (например скрипты-wizard-ы для настройки, вспомогательная база данных окружения, конфигураторы и пр) а также, сохраняется трафик клетки, если используется ipfw и ее описание. Данный каталог учавствует при jimport/jexport операциях и мигрировании клеток.  Этот каталог подлежит резервному копированию, если вы хотите восставить работу <strong>CBSD</strong> при сбоях.</td></tr>
+			<tr><td class="bg-gray">${workdir}/vm</td><td>Каталог специфичный для ZFS-based инсталляций при использовании виртуальных машин. Выполняет те же функции, что каталог jails-data, при этом каталог в jails-data становится символической ссылкой на каталоги vm/</td></tr>
 			<tr><td class="bg-gray">${workdir}/var</td><td>Каталог который содержит различную системную информацию cbsd. Например, в ${workdir}/var/db находится инвентаризация локальных и удаленных нод если они были добавлены</td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/var/db</strong></td><td>Здесь размещается основная и самая главная SQLite3 база CBSD, на нее указывает симполическая ссылка <strong>local.sqlite</strong>. Этот каталог подлежит резервному копированию, если вы хотите восставить работу <strong>CBSD</strong> при сбоях.</td></tr>
 			<tr><td class="bg-gray">/usr/local/cbsd</td><td>Копия оригинальных файлов <strong>CBSD</strong> устанавливаемая портом. Также, содержит рабочие скрипты в каталоге <strong>sudoexec</strong></td></tr>
 		</table>
+
+		<p>Например, для ручного переноса контейнера из структуры <strong>CBSD</strong> вам потребуется файл, на который указывает символическая ссылка ~cbsd/var/db/local.sqlite. Ее содержимое (таблица jails, bhyve, xen ..) отвечает за список зарегистрированных окружений, например:</p>
+		<pre>
+sqlite3 ~cbsd/var/db/local.sqlite "SELECT * from jails";
+sqlite3 ~cbsd/var/db/local.sqlite ".schema jails";
+sqlite3 ~cbsd/var/db/local.sqlite ".tables";
+sqlite3 ~cbsd/var/db/local.sqlite ".dump";
+		</pre>
+		<p>Также, вам необходим rootfs контейнера в каталоге ~cbsd/jails-data/JAILNAME-data</p>
+		<p>Что касается виртуальных машин, вам необходимо дополнительно проверить, являются ли диски виртуальных машин ZVOL-based ( zfs list | egrep "dsk[0-9]+.vhd" ), а также, обязательно скопировать ~cbsd/jails-system/ENVNAME/ , где находятся настройки виртуальной машины в файле local.sqlite:</p>
+<pre>
+sqlite3 ~cbsd/jails-system/VMNAME/local.sqlite "SELECT * from settings";
+sqlite3 ~cbsd/jails-system/VMNAME/local.sqlite ".tables";
+sqlite3 ~cbsd/jails-system/VMNAME/local.sqlite ".dump";
+</pre>
 	</div>
-	
 	<h2><a name="traffic">Подсчет трафика jail</a></h2>
 	<div class="block">
 		<p>В данный момент, для подсчета трафика jail используются правила <strong>count</strong> у фильтра <strong>ipfw</strong>. <strong>CBSD</strong> назначает для счетчиков номера правил из диапазона <strong>99&nbsp;— 2000</strong> (можно изменить в cbsd.conf). Поэтому будьте внимательны и следите за тем, чтобы ваши правила IPFW следовали после указанного диапазона.</p>

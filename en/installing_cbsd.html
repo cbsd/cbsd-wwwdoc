@@ -51,7 +51,7 @@
 		</pre>
 		<p>c) create a <strong>CBSD</strong> user (when installing from ports or pkg's this is unnecessary):</p>
 		<pre class="brush:bash;ruler:true;">
-			%  pw useradd cbsd -s /bin/sh -d /nonexistent -c "cbsd user"
+			%  pw useradd cbsd -u 150 -s /bin/sh -d /nonexistent -c "cbsd user"
 		</pre>
 		<p>d) create links of the rc.d scripts to start <strong>CBSD</strong> at system startup and create link to bsdconfig module (when installing from ports and pkg's it is unnecessary):</p>
 		<pre class="brush:bash;ruler:true;">

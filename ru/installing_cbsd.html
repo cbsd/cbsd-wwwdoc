@@ -49,7 +49,7 @@
 		</pre>
 		<p>c) Необходимо создать пользователя cbsd (при установке из портов или пакета, этот шаг не нужен)</p>
 		<pre class="brush:bash;ruler:true;">
-			%  pw useradd cbsd -s /bin/sh -d /nonexistent -c "cbsd user"
+			%  pw useradd cbsd -u 150 -s /bin/sh -d /nonexistent -c "cbsd user"
 		</pre>
 		<p>d) создайте ссылки rc.d скриптов для запуска cbsd при старте системы и ссылку на модуль bsdconfig (при установке из портов этого делать ненужно):</p>
 		<pre class="brush:bash;ruler:true;">

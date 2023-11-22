@@ -22,6 +22,11 @@
 	kldload nvmm
 	</pre>
 
+	<p>Don't forget to add nvmm into auto-load via /boot/loader.conf:</p>
+	<pre>
+	nvmm_load="YES"
+	</pre>
+
 	<p>You can check the status of NVMM through the command:</p>
 	<pre class="brush:bash;ruler:true;">
 	nvmmctl identify
@@ -33,6 +38,11 @@
 	<div class="warning">
 	<p>Also, acceleration will not be available if you are running non-native architectures.</p>
 	</div>
+
+	<p>You need to install QEMU package named 'qemu' (or 'qemu-devel' in some cases):</p>
+	<pre class="brush:bash;ruler:true;">
+	pkg install qemu
+	</pre>
 
 	<p>Detailed description of working with NVMM/QEMU on the: <a target="_blank" href="https://www.dragonflybsd.org/docs/docs/howtos/nvmm/">DragonflyBSD project page</a>, <a target="_blank" href="https://www.netbsd.org/docs/guide/en/chap-virt.html">NetBSD project guide</a></p>
 

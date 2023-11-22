@@ -13,6 +13,149 @@
 </div>
 <h2><a name="release">Releases</a></h2>
 <div class="block">
+	<p><strong>14.0.2</strong>&nbsp;&mdash; 2023-11-21</p>
+	<ul>
+		<li>get-profiles: show {imgsize,vm_ram,vm_cpus}_max= values for cloud profiles</li>
+		<li>bhyve cloud profiles: Rocky 9.3, Alma 9.3, Oracle 9.3, EuroLinux 9.3, FreeBSD 14.0, Fedora39</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>14.0.1</strong>&nbsp;&mdash; 2023-10-10</p>
+	<ul>
+		<li>jexec: fix for Linux jails;</li>
+		<li>bhyve cloud profiles: Debian 11.8.0, 12.2.0;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>14.0.0</strong>&nbsp;&mdash; 2023-09-23</p>
+	<ul>
+		<li>jail: improve linux jail: get rootfs in same way as FreeBSD;</li>
+		<li>jail: get rid of centos_7/kfreebsd linux jails profile;</li>
+		<li>jail: added rocky_8, rocky_9 linux jails profile;</li>
+		<li>bhyve: new cloud image: Devuan 5</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.6</strong>&nbsp;&mdash; 2023-09-02</p>
+	<ul>
+		<li>jails: switch CURRENT/head to 15.0-CURRENT;</li>
+		<li>jexec: (work-around) - disable 'user=XXX' for Linux env;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.5</strong>&nbsp;&mdash; 2023-06-18</p>
+	<ul>
+		<li>jail: fix pkg bootstrap;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.4</strong>&nbsp;&mdash; 2023-06-14</p>
+	<ul>
+		<li>jail: experimental: new source for base: base-in-pkg (for FreeBSD 13.2, FreeBSD 14.0);</li>
+		<li>basejail: no more /usr/home, they move our home!;</li>
+		<li>Debian 12 cloud profile;</li>
+		<li>bugfix: bhyve-dsk: increasing disk size succeeded at failing ( #734 )</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.3</strong>&nbsp;&mdash; 2023-05-14</p>
+	<ul>
+		<li>bugfix: etcupdate: always mount jail's data;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.2</strong>&nbsp;&mdash; 2023-05-10</p>
+	<ul>
+		<li>cbsd-pf.conf: revert cbsd_nat_skip_natip_network settings;</li>
+		<li>improved "bhyve-ppt mode=list" output;</li>
+		<li>bhyve cloud profile: XigmaNAS;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.1</strong>&nbsp;&mdash; 2023-04-19</p>
+	<ul>
+		<li>get-profiles script: show available profiles for virtual machines ( legacy get_bhyve_profiles );;</li>
+		<li>bhyve: new cloud profiles: OpenBSD 7.3, Fedora 38;</li>
+		<li>bhyve: get vm_cpus_max values from 'sysctl -qn hw.vmm.maxcpu' for FreeBSD >= 13.2, pointed by: @Tectu via #670;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.2.0</strong>&nbsp;&mdash; 2023-04-09</p>
+	<ul>
+		<li>Tested with 13.2-RELEASE;</li>
+		<li>check for jname=, reported by @jas_s2r via CBSD Telegram;</li>
+		<li>cbsd-stats: fix pid file;</li>
+		<li>bhyve: inherit nic_address in bhyve.conf;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.25</strong>&nbsp;&mdash; 2023-03-11</p>
+	<ul>
+		<li>media: fix SQLite3 DQS;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.24</strong>&nbsp;&mdash; 2023-03-04</p>
+	<ul>
+		<li>fixes for https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted;</li>
+		<li>fix `cbsd expose mode=clear' regression from 13.1.23;</li>
+		<li>fix: cbsdd: proper -F args for pkill;</li>
+		<li>cbsd expose: validate in/out values, #727</li>
+		<li>mountfstab: jail remount with cbsd configured settings, Issue #729</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.23</strong>&nbsp;&mdash; 2023-02-06</p>
+	<ul>
+		<li>Debian/Ubuntu cloud images: added UEFI VARS;</li>
+		<li>NatCFG: split RDR/NAT rules per file;</li>
+		<li>NatCFG: added 'cbsd_nat_skip_natip_network' + 'cbsd_nat_networks' settings via cbsd-pf.conf to customization of default NAT rules, #634;</li>
+		<li>zfs encryption for jail: add zfs_always_unload_key params to regulate zfs-unload behavior;</li>
+		<li>cbsd initenv: fix ipfw_enable=1;</li>
+		<li>jget/facts: support for nic_address;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.22</strong>&nbsp;&mdash; 2023-02-06</p>
+	<ul>
+		<li>fix: bclone: copy etc/ dir (+ expose + UEFI VARS) as well, reported by: @Phobster via Telegram;</li>
+		<li>bhyve: use UEFI VARS in 13.2, not CURRENT/14-HEAD only;</li>
+		<li>jail jset: permit to jset nic_address</li>
+		<li>jail: umount_cdirs: simplify + handle path with spaces, based on <a href="https://github.com/cbsd/cbsd/pull/714" target="_blank">#714</a>;</li>
+		<li>apply script: apply-reconfigure jail by CBSDfile;</li>
+		<li>fix get-next-nic: try to create interface as test for next available iface;</li>
+		<li>jail: fix errcode for jexec;</li>
+		<li>jail: fix cbsd-statsd-jail startups script, reported by @karandinsa via Telegram;</li>
+		<li>jail: fix cbsd-statsd-jail IPv4 listen, reported by @karandinsa via Telegram;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.21</strong>&nbsp;&mdash; 2023-01-09</p>
+	<ul>
+		<li>fetch: support for SOCKS5_PROXY/http(s)_proxy variables for PROXY: can be set via global.conf;</li>
+		<li>puppet profile jail: switch to apply puppet locally;</li>
+		<li>fix ipfw_enable condition in fwcounter function, reported by @lordnicky via Telegram;</li>
+		<li>DragonflyBSD 6.4.0 cloud image;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.20 bugfix</strong>&nbsp;&mdash; 2022-12-20</p>
+	<ul>
+		<li>bhyve: Debian 11.6.0 cloud image profile;</li>
+		<li>bhyve: GhostBSD 22.11 cloud image profile;</li>
+		<li>pass users /usr/obj via nullfs on DFLY platform;</li>
+		<li>jails: support for single file mount via nullfs ( <a target="_blank" href="https://reviews.freebsd.org/D37478">https://reviews.freebsd.org/D37478</a> );</li>
+		<li>bugfix for zfs-migrator script;</li>
+		<li>fix permission on ~cbsd/.ssh/sockets directory;</li>
+	<ul>
+</div>
+<div class="block">
+	<p><strong>13.1.19 bugfix</strong>&nbsp;&mdash; 2022-12-06</p>
+	<ul>
+		<li>fix: cannot login jails after upgrade <a href="https://github.com/cbsd/cbsd/issues/718" target="_blank">#718</a> ( reported by @Juronski );</li>
+	<ul>
+</div>
+<div class="block">
 	<p><strong>13.1.18</strong>&nbsp;&mdash; 2022-12-06</p>
 	<ul>
 		<li>debootstrap exec fixes (reported by @lbartoletti via Telegram);</li>

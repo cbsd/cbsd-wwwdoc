@@ -221,20 +221,36 @@ cbsd jstart jname='lala*'
 <h2><a name="hier">A brief summary of the filesystem hierarchy <strong>CBSD</strong></a></h2>
 	<div class="block">
 		<table class="images">
-			<tr><td class="bg-gray">${workdir}/.rssh/</td><td>This directory stores the private keys of remote nodes. The files are added and removed via the command <strong>cbsd node</strong></td></tr>
-      <tr><td class="bg-gray">${workdir}/.ssh</td><td>This directory stores the private and public keys of the nodes. The directory is created during initialization with the command <strong><em>cbsd initenv</em></strong>. This is also where the public key comes from when the command <strong>cbsd node mode=add</strong> is issued to copy the pub key to a remote host. The Key file name is the md5 sum of the nodename. In addition, this key pair is used by default when working with cloud images of virtual machines, For example, in the operations 'cbsd bexec, cbsd bscp, cbsd blogin'</td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/.rssh/</strong></td><td>This directory stores the private keys of remote nodes. The files are added and removed via the command <strong>cbsd node</strong></td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/.ssh</strong></td><td>This directory stores the private and public keys of the nodes. The directory is created during initialization with the command <strong><em>cbsd initenv</em></strong>. This is also where the public key comes from when the command <strong>cbsd node mode=add</strong> is issued to copy the pub key to a remote host. The Key file name is the md5 sum of the nodename. In addition, this key pair is used by default when working with cloud images of virtual machines, For example, in the operations 'cbsd bexec, cbsd bscp, cbsd blogin'</td></tr>
 			<tr><td class="bg-gray">${workdir}/basejail</td><td>This directory is used to store the bases and kernels for FreeBSD that are used when creating baserw=0 jails. These are generated via cbsd buildworld/buildkernel, cbsd installworld/installkernel, or cbsd repo action=get sources=base/kernel)</td></tr>
 			<tr><td class="bg-gray">${workdir}/etc</td><td>Configuration files needed to run <strong>CBSD</strong></td></tr>
 			<tr><td class="bg-gray">${workdir}/export</td><td>The default directory that will be stored in a file exported by the jail (a cbsd jexport jname=$jname, this directory will file $jname.img)</td></tr>
 			<tr><td class="bg-gray">${workdir}/import</td><td>The default directory containing data to be imported to a jail (a cbsd jimport jname=$jname, will be deployed jail $jname)</td></tr>
 			<tr><td class="bg-gray">${workdir}/jails</td><td>This directory contains the mount point for the root jails that use baserw=0.</td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-data</td><td>This directory stores all jail data. Backup these directories to take a backup of the jails (including fstab and rc.conf files). Note: if a jail uses baserw=1, these directories are the root of the jail when it starts.</td></tr>
-      <tr><td class="bg-gray">${workdir}/jails-fstab</td><td>The fstab file for the jails. The syntax for regular FreeBSD with the only exception that the path to the mount point is written relative to the root <em>jail</em> (record <strong>/usr/ports /usr/ports nullfs rw 0 0 </strong> in the file fstab.$jname means that of the master node directory /usr/ports will be mounted at startup in ${workdir}/jails/$jname/usr/ports)</td></tr>
-      <tr><td class="bg-gray">${workdir}/jails-rcconf</td><td>rc.conf files for jail creation. These parameters can be changed using $editor, or via the command <strong><em>cbsd jset $jname param=val</em></strong> (eg <em>cbsd jset jname=$jname ip="192.168.0.2/24"</em>). To change these settings, the jail should be turned <strong>off</strong>. </td></tr>
-			<tr><td class="bg-gray">${workdir}/jails-system</td><td> This directory may contain some helper scripts related to the jail (eg wizards to configure, configurators, etc) as well as the preserved jail traffic when using ipfw and its description. This catalog participates in jimport/jexport operations and migration of jail </td></tr>
+			<tr><td class="bg-gray"><font style="color:RED"><strong>${workdir}/jails-data</strong></font></td><td>This directory stores all jail/VM data. Backup these directories to take a backup of the jails (including fstab and rc.conf files). Note: if a jail uses baserw=1, these directories are the root of the jail when it starts. <font style="color:red">Pay attention!</font> when using ZVOL, in fact, the virtual disk are located in/as ZVOL and jails-data/ENV has only symbolic links - please take into consideration this when planning backup/DR!. This directory (or volume, which indicate symlinks to) is subject to backup copying if you want to restore your virtual environment in the case of failures.</td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/jails-fstab</strong></td><td>The fstab file for the jails. The syntax for regular FreeBSD with the only exception that the path to the mount point is written relative to the root <em>jail</em> (record <strong>/usr/ports /usr/ports nullfs rw 0 0 </strong> in the file fstab.$jname means that of the master node directory /usr/ports will be mounted at startup in ${workdir}/jails/$jname/usr/ports)</td></tr>
+			<tr><td class="bg-gray">${workdir}/jails-rcconf</td><td>rc.conf files for jail creation. These parameters can be changed using $editor, or via the command <strong><em>cbsd jset $jname param=val</em></strong> (eg <em>cbsd jset jname=$jname ip="192.168.0.2/24"</em>). To change these settings, the jail should be turned <strong>off</strong>. </td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/jails-system</strong></td><td> This directory may contain some helper scripts related to the jail (eg wizards to configure, configurators, etc) as well as the preserved jail traffic when using ipfw and its description. This catalog participates in jimport/jexport operations and migration of jail. This catalog is subject to backup copying if you want to restore the <strong>CBSD</strong> during failures. </td></td></tr>
 			<tr><td class="bg-gray">${workdir}/var</td><td> This directory contains system information for <strong>CBSD</strong>. For example, in ${workdir}/var/db is an inventory of local and remote nodes that were added. </td></tr>
+			<tr><td class="bg-gray"><strong>${workdir}/var/db</strong></td><td> The main and the most important SQLite3 CBSD base, it is indicated by a sympathetic link <strong>local.sqlite</strong>. This catalog is subject to backup copying if you want to restore the <strong>CBSD</strong> during failures. </td></tr>
 			<tr><td class="bg-gray">/usr/local/cbsd</td><td> A copy of the original files installed by the <strong>CBSD</strong> port. The working scripts for sudoexec can also be found here. </td></tr>
 		</table>
+	<p>For example, for manual transfer of a container/VM from the <strong>CBSD</strong> structure, you need a SQLite3 database indicated by a symbolic link ~cbsd/var/db/local.sqlite. Its contents (table jails, bhyve, xen ..) is responsible for the list of registered environment, for example:</p>
+	<pre>
+sqlite3 ~cbsd/var/db/local.sqlite "SELECT * from jails";
+sqlite3 ~cbsd/var/db/local.sqlite ".schema jails";
+sqlite3 ~cbsd/var/db/local.sqlite ".tables";
+sqlite3 ~cbsd/var/db/local.sqlite ".dump";
+	</pre>
+	<p>Also, you need a rootfs container in the ~cbsd/jails-data/JAILNAME-data directory</p>
+	<p>As for virtual machines, you need to additionally check whether the discs of virtual machines ZVOL-based ( zfs list | egrep "dsk [0-9]+.vhd"), as well as, be sure to copy ~cbsd/jails-system/ENVNAME/, where there are a virtual machine settings in the local.sqlite file:</p>
+<pre>
+sqlite3 ~cbsd/jails-system/VMNAME/local.sqlite "SELECT * from settings";
+sqlite3 ~cbsd/jails-system/VMNAME/local.sqlite ".tables";
+sqlite3 ~cbsd/jails-system/VMNAME/local.sqlite ".dump";
+</pre>
+
   </div>
 <h2><a name="traffic">Counting jail traffic</a></h2>
     <div class="block">

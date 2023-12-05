@@ -71,6 +71,16 @@
 		<pre class="brush:bash;ruler:true;">
 			% env workdir="/usr/jails" /usr/local/cbsd/sudoexec/initenv
 		</pre>
+
+		<div class="warning">
+Attention! If you are using a ZFS-based platform, before initialization it is highly recommended to create a separate dataset for the CBSD working directory in order to avoid possible conflicts and influences when operating various 
+automatic snapshot systems (and also to facilitate the migration of the CBSD working directory to other servers), for example:
+		</div>
+		<pre class="brush:bash;ruler:true;">
+# zfs create zroot/jails
+# zfs set mountpoint=/usr/jails zroot/jails
+		</pre>
+
 		<p>The start dialogue will appear with questions on how to configure <strong>CBSD</strong>. Pressing Enter with no entered values will set system defaults. Once done updating <strong>CBSD</strong> it is necessary to run initenv again. After the first run of initenv it can be started through <strong>CBSD</strong> without specifying the <strong>env</strong> variable again and the working dir variable will be stored in <em>/etc/rc.conf</em>.</p>
 		<p>On first initialization the following questions will be asked:</p>
 		<ul>

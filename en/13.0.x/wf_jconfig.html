@@ -39,21 +39,24 @@
 	
 	<h2><a name="fstab">Mounting File Systems in jail</a></h2>
 	<div class="block">
-		<p>Each jail can have your fstab file, which lists the file systems that are mounted jail is startup. System records (they are managed by <strong>CBSD</strong> and edit this file inappropriately) are located in the file <em>$workdir/jails-fstab/fstab.name</em> and the same syntax to format the file system <strong>/etc/fstab</strong> with the exception that as a mount point is the path relative to the root jail, not the master system.</p>
-		<p>For user entries, you can use the file in the same directory with the extension <em>.local</em>. For example, if you want to make between <strong>jail1</strong> and <strong>jail2</strong> a shared directory (via nullfs), which physically located in the master node (e.g.: <em>/usr/home/sharefs</em>), the files <em>$workdir/jails-fstab/fstab.jail1.local</em> and <em>$workdir/jails-fstab/fstab.jail2.local</em> should have:</p>
+		<p>Each jail can have your fstab file, which lists the file systems that are mounted jail is startup. System records (they are managed by <strong>CBSD</strong> and edit this file inappropriately) are located in the file <em>$workdir/jails-fstab/fstab</em> and 
+		the same syntax to format the file system <strong>/etc/fstab</strong> with the exception that as a mount point is the path relative to the root jail, not the master system.</p>
+		<p>For user entries, you can use the file in the same directory with the extension <em>.local</em>. 
+		For example, if you want to make between <strong>jail1</strong> and <strong>jail2</strong> a shared directory (via nullfs), which physically located in the master node (e.g.: <em>/home/sharefs</em>), 
+		the files <em>$workdir/jails-fstab/jail1/fstab.local</em> and <em>$workdir/jails-fstab/jail2/fstab.local</em> should have:</p>
 		<pre class="brush:bash;ruler:true;">
-			/usr/home/sharefs /usr/home/sharefs nullfs rw 0 0
+			/home/sharefs /home/sharefs nullfs rw 0 0
 		</pre>
-		<p>If you want to mount tmpfs to /tmp dir in jail1 (those actually in /usr/jails/jails/jail1/tmp), then the entry in the <em>$workdir/jails-fstab/fstab.jail1.local</em> should have:</p>
+		<p>If you want to mount tmpfs to /tmp dir in jail1 (those actually in /usr/jails/jails/jail1/tmp), then the entry in the <em>$workdir/jails-fstab/jail1/fstab.local</em> should have:</p>
 		<pre class="brush:bash;ruler:true;">
 			tmpfs /tmp tmpfs rw 0 0
 		</pre>
 		<p>both entries perform the same action as commands:</p>
 		<pre class="brush:bash;ruler:true;">
-			mount -t nullfs -o rw /usr/home/sharefs /jailroot/usr/home/sharefs
+			mount -t nullfs -o rw /home/sharefs /jailroot/home/sharefs
 			mount -t tmpfs -o rw tmpfs /jailroot/tmp
 		</pre>
-		<p>If you want to mount into <strong>jail2</strong> a directory from <strong>jail1</strong>, jail1 path should point to the directory containing the data jail1 (and their mount points ${workdir}/jails/jail1). For example entry <em>$workdir/jails-fstab/fstab.jail2.local</em>:</p>
+		<p>If you want to mount into <strong>jail2</strong> a directory from <strong>jail1</strong>, jail1 path should point to the directory containing the data jail1 (and their mount points ${workdir}/jails/jail1). For example entry <em>$workdir/jails-fstab/jail2/fstab.local</em>:</p>
 		<pre class="brush:bash;ruler:true;">
 			/usr/jails/jails-data/jail1-data/usr/local/www /usr/local/www nullfs ro 0 0
 		</pre>
@@ -61,17 +64,17 @@
 		<p>There are flaws when mounting via <strong>mount -t /type/</strong> does not work or mounting must be done in a non-standard way. In this case, use the 'external' reserved word, where the 'source' field will point to your external script, the output of which should be a mounted directory.</p>
 		<p>An example of such an entry in fstab.local:</p>
 		<pre>
-		/root/ntfs-3g.sh        /usr/home/web/downloads external rw 0 0
+		/root/ntfs-3g.sh        /home/web/downloads external rw 0 0
 		</pre>
-		<p>and an example working script /root/ntfs-3g.sh for this entry: <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v13.0.0/share/examples/jails-fstab/ntfs-3g.sh">ntfs-3g.sh</a>, which mounts an external USB drive directly into the container.</p>
+		<p>and an example working script /root/ntfs-3g.sh for this entry: <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v13.1.1/share/examples/jails-fstab/ntfs-3g.sh">ntfs-3g.sh</a>, which mounts an external USB drive directly into the container.</p>
 	</div>
 	<h2><a name="allow_zfs">Presentation of ZFS file systems in jail</a></h2>
 	<div class="block">
-		<p>If you want to attach separate ZFS filesystems in jail (ie, want to be able to perform in jail zfs mount), ZFS dataset must list in <em>$workdir/jails-fstab/fstab.$jname.local</em> file with specifying the keyword zfs in FStype field. For example, if you want to present the file system ZFS: <strong>zroot/jail1_webfs</strong> for jail jail1 <em>$workdir/jails-fstab/fstab.jail1.local</em> must have:</p>
+		<p>If you want to attach separate ZFS filesystems in jail (ie, want to be able to perform in jail zfs mount), ZFS dataset must list in <em>$workdir/jails-fstab/$jname/fstab.local</em> file with specifying the keyword zfs in FStype field. For example, if you want to present the file system ZFS: <strong>zroot/jail1_webfs</strong> for jail jail1 <em>$workdir/jails-fstab/jail1/fstab.local</em> must have:</p>
 		<pre class="brush:bash;ruler:true;">
-			zroot/jail1_webfs /usr/home/web zfs rw 0 0
+			zroot/jail1_webfs /home/web zfs rw 0 0
 		</pre>
-		<p><em>Note:</em> mount point (/usr/home/web in this example) is not important</p>
+		<p><em>Note:</em> mount point (/home/web in this example) is not important</p>
 		<p><em>Note:</em> jail must have <em>allow_zfs</em> paramaters set to 1, what can be done via <strong>cbsd jconfig jname=$jname</strong></p>
 		<p>In fact, it makes <strong>CBSD</strong> execute commands:</p>
 		<pre class="brush:bash;ruler:true;">

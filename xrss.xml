@@ -1630,5 +1630,249 @@
     <guid>CBSD 13.1.18 available</guid>
     <pubDate>Tue, 06 Dec 2022 01:00:00 +0000</pubDate>
   </item>
+  <item>
+    <title>CBSD 13.1.19 bugfix release</title>
+    <description>CBSD 13.1.19 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+       fix: cannot login jails after upgrade #718 ( reported by @Juronski );&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.19 available</guid>
+    <pubDate>Fri, 06 Dec 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.20 bugfix release</title>
+    <description>CBSD 13.1.20 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bhyve: Debian 11.6.0 cloud image profile;&lt;br /&gt;
+      bhyve: GhostBSD 22.11 cloud image profile;&lt;br /&gt;
+      pass users /usr/obj via nullfs on DFLY platform;&lt;br /&gt;
+      jails: support for single file mount via nullfs ( https://reviews.freebsd.org/D37478 );&lt;br /&gt;
+      bugfix for zfs-migrator script;&lt;br /&gt;
+      fix permission on ~cbsd/.ssh/sockets directory;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.20 available</guid>
+    <pubDate>Tue, 20 Dec 2022 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.21 release</title>
+    <description>CBSD 13.1.21 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fetch: support for SOCKS5_PROXY/http(s)_proxy variables for PROXY: can be set via global.conf;&lt;br /&gt;
+      puppet profile jail: switch to apply puppet locally;&lt;br /&gt;
+      fix ipfw_enable condition in fwcounter function, reported by @lordnicky via Telegram;&lt;br /&gt;
+      DragonflyBSD 6.4.0 cloud image;&lt;br /&gt;
+      bhyve: Debian 11.6.0 cloud image profile;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.21 available</guid>
+    <pubDate>Mon, 09 Jan 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.22 release</title>
+    <description>CBSD 13.1.22 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fix: bclone: copy etc/ dir (+ expose + UEFI VARS) as well, reported by: @Phobster via Telegram;&lt;br /&gt;
+      bhyve: use UEFI VARS in 13.2, not CURRENT/14-HEAD only;&lt;br /&gt;
+      jail jset: permit to jset nic_address&lt;br /&gt;
+      jail: umount_cdirs: simplify + handle path with spaces, based on #714;&lt;br /&gt;
+      apply script: apply-reconfigure jail by CBSDfile;&lt;br /&gt;
+      fix get-next-nic: try to create interface as test for next available iface;&lt;br /&gt;
+      jail: fix errcode for jexec;&lt;br /&gt;
+      jail: fix cbsd-statsd-jail startups script, reported by @karandinsa via Telegram;&lt;br /&gt;
+      jail: fix cbsd-statsd-jail IPv4 listen, reported by @karandinsa via Telegram;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.22 available</guid>
+    <pubDate>Mon, 06 Feb 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.23 release</title>
+    <description>CBSD 13.1.23 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+     Debian/Ubuntu cloud images: added UEFI VARS;&lt;br /&gt;
+     NatCFG: split RDR/NAT rules per file;&lt;br /&gt;
+     NatCFG: added 'cbsd_nat_skip_natip_network' + 'cbsd_nat_networks' settings via cbsd-pf.conf to customization of default NAT rules, #634;&lt;br /&gt;
+     zfs encryption for jail: add zfs_always_unload_key params to regulate zfs-unload behavior;&lt;br /&gt;
+     cbsd initenv: fix ipfw_enable=1;&lt;br /&gt;
+     jget/facts: support for nic_address;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.23 available</guid>
+    <pubDate>Tue, 21 Feb 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.24 release</title>
+    <description>CBSD 13.1.24 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      fixes for https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted;&lt;br /&gt;
+      fix `cbsd expose mode=clear' regression from 13.1.23;&lt;br /&gt;
+      fix: cbsdd: proper -F args for pkill;&lt;br /&gt;
+      cbsd expose: validate in/out values, #727&lt;br /&gt;
+      mountfstab: jail remount with cbsd configured settings, Issue #729&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.24 available</guid>
+    <pubDate>Sat, 04 Mar 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.1.25 release</title>
+    <description>CBSD 13.1.25 bugfix release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      media: fix SQLite3 DQS;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.1.25 available</guid>
+    <pubDate>Sat, 11 Mar 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.0 release</title>
+    <description>CBSD 13.2.0 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      Tested with 13.2-RELEASE;&lt;br /&gt;
+      check for jname=, reported by @jas_s2r via CBSD Telegram;&lt;br /&gt;
+      cbsd-stats: fix pid file;&lt;br /&gt;
+      bhyve: inherit nic_address in bhyve.conf;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.0 available</guid>
+    <pubDate>Sun, 09 Apr 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.1 release</title>
+    <description>CBSD 13.2.1 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      get-profiles script: show available profiles for virtual machines ( legacy get_bhyve_profiles );&lt;br /&gt;
+      bhyve: new cloud profiles: OpenBSD 7.3, Fedora 38;&lt;br /&gt;
+      bhyve: get vm_cpus_max values from sysctl -qn hw.vmm.maxcpu for FreeBSD >= 13.2, pointed by: @Tectu via #670&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.1 available</guid>
+    <pubDate>Wed, 19 Apr 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>MyBee 13.2.0 release</title>
+    <description>MyBee 13.2.0 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      based on FreeBSD 13.2-RELEASE&lt;br /&gt;
+      Kubernetes has been updated to v1.27.1&lt;br /&gt;
+      CBSD has been updated to 13.2.1&lt;br /&gt;
+      added profile: OpenBSD OpenBSD 7.3&lt;br /&gt;
+      added profile: Linux Fedora Server 38&lt;br /&gt;
+    </description>
+    <link>https://myb.convectix.com/</link>
+    <guid>MyBee 13.2.0 available</guid>
+    <pubDate>Mon, 24 Apr 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.2 release</title>
+    <description>CBSD 13.2.2 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      cbsd-pf.conf: revert cbsd_nat_skip_natip_network settings;&lt;br /&gt;
+      improved "bhyve-ppt mode=list" output;&lt;br /&gt;
+      bhyve cloud profile: XigmaNAS;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.2 available</guid>
+    <pubDate>Wed, 10 May 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.3 release</title>
+    <description>CBSD 13.2.3 release
+    &lt;br /&gt;
+    &lt;br /&gt;
+      bugfix: etcupdate: always mount jail's data;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.3 available</guid>
+    <pubDate>Sun, 14 May 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.4 release</title>
+    <description>CBSD 13.2.4 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: experimental: new source for base: base-in-pkg (for FreeBSD 13.2, FreeBSD 14.0);&lt;br /&gt;
+      basejail: no more /usr/home, they move our home!;&lt;br /&gt;
+      Debian 12 cloud profile;&lt;br /&gt;
+      bugfix: bhyve-dsk: increasing disk size succeeded at failing ( #734 )&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.4 available</guid>
+    <pubDate>Web, 14 Jun 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.5 release</title>
+    <description>CBSD 13.2.5 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: fix pkg bootstrap;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.5 available</guid>
+    <pubDate>Sun, 18 Jun 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 13.2.6 release</title>
+    <description>CBSD 13.2.6 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jails: switch CURRENT/head to 15.0-CURRENT;&lt;br /&gt;
+      jexec: (work-around) - disable 'user=XXX' for Linux env;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 13.2.6 available</guid>
+    <pubDate>Sat, 02 Sep 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 14.0.0 release</title>
+    <description>CBSD 14.0.0 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jail: improve linux jail: get rootfs in same way as FreeBSD;&lt;br /&gt;
+      jail: get rid of centos_7/kfreebsd linux jails profile;&lt;br /&gt;
+      jail: added rocky_8, rocky_9 linux jails profile;&lt;br /&gt;
+      bhyve: new cloud image: Devuan 5&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 14.0.0 available</guid>
+    <pubDate>Sat, 23 Sep 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 14.0.1 release</title>
+    <description>CBSD 14.0.1 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      jexec: fix for Linux jails;&lt;br /&gt;
+      bhyve cloud profiles: Debian 11.8.0, 12.2.0;&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 14.0.1 available</guid>
+    <pubDate>Tue, 10 Oct 2023 01:00:00 +0000</pubDate>
+  </item>
+  <item>
+    <title>CBSD 14.0.2 release</title>
+    <description>CBSD 14.0.2 release&lt;br /&gt;
+    &lt;br /&gt;
+    &lt;br /&gt;
+      get-profiles: show {imgsize,vm_ram,vm_cpus}_max= values for cloud profiles&lt;br /&gt;
+      bhyve cloud profiles: Rocky 9.3, Alma 9.3, Oracle 9.3, EuroLinux 9.3, FreeBSD 14.0, Fedora39&lt;br /&gt;
+    </description>
+    <link>https://www.bsdstore.ru</link>
+    <guid>CBSD 14.0.2 available</guid>
+    <pubDate>Tue, 21 Nov 2023 01:00:00 +0000</pubDate>
+  </item>
 </channel>
 </rss>

@@ -34,21 +34,25 @@
 	
 	<h2><a name="fstab">Монтирование файловых систем в jail</a></h2>
 	<div class="block">
-		<p>Каждый jail может иметь свой fstab файл, в котором перечисляются файловые системы, монтирующиеся в jail при запуске клетки.  Системные записи (ими управляет <strong>CBSD</strong> и править этот файл ненадо) располагаются в файле <em><strong>$workdir/jails-fstab/</strong>fstab.name</em> и совпадает по синтаксису с форматом системного файла <strong>/etc/fstab</strong> с тем исключением,  что в качестве точки монтирования указывается путь относительно корня JAIL, а не мастер системы. Для пользовательских записей, вы можете использовать файл в том же каталоге с расширением <em>.local</em>. Например, если вы хотите сделать между клетками jail1 и jail2 один общий каталог (через nullfs), который физически расположен в мастер ноде (например <em>/usr/home/sharefs</em>), в файлах <em><strong>$workdir/jails-fstab/</strong>fstab.jail1.local</em> и <em><strong>$workdir/jails-fstab/</strong>fstab.jail2.local</em> должна присутствовать строчка:</p>
+		<p>Каждый jail может иметь свой fstab файл, в котором перечисляются файловые системы, монтирующиеся в jail при запуске клетки.  Системные записи (ими управляет <strong>CBSD</strong> и править этот файл ненадо) располагаются в файле <em><strong>$workdir/jails-fstab/</strong>fstab</em> и совпадает по синтаксису с форматом системного файла <strong>/etc/fstab</strong> с тем исключением,  что в качестве точки монтирования указывается путь относительно корня JAIL, а не мастер системы. 
+		Для пользовательских записей, вы можете использовать файл в том же каталоге с расширением <em>.local</em>. Например, если вы хотите сделать между клетками jail1 и jail2 один общий каталог (через nullfs), 
+		который физически расположен в мастер ноде (например <em>/home/sharefs</em>), в файлах <em><strong>$workdir/jails-fstab/jail1/</strong>fstab.local</em> и <em><strong>$workdir/jails-fstab/jail2/</strong>fstab.local</em> должна 
+		присутствовать строчка:</p>
 		<pre class="brush:bash;ruler:true;">
-			/usr/home/sharefs /usr/home/sharefs nullfs rw 0 0
+			/home/sharefs /home/sharefs nullfs rw 0 0
 		</pre>
-		<p>если вы хотите смонтировать в каталог /tmp клетки jail1 <strong>tmpfs</strong> (те, фактически в /usr/jails/jails/jail1/tmp), то запись в <em><strong>$workdir/jails-fstab/</strong>fstab.jail1.local</em> должна выглядить так:</p>
+		<p>если вы хотите смонтировать в каталог /tmp клетки jail1 <strong>tmpfs</strong> (те, фактически в /usr/jails/jails/jail1/tmp), то запись в <em><strong>$workdir/jails-fstab/jail1/</strong>fstab.local</em> должна 
+		выглядить так:</p>
 		<pre class="brush:bash;ruler:true;">
 			tmpfs /tmp tmpfs rw 0 0
 		</pre>
 		<p>обе записи выполняют действие, аналогичное командам:</p>
 		<pre class="brush:bash;ruler:true;">
-			mount -t nullfs -o rw /usr/home/sharefs /jailroot/usr/home/sharefs
+			mount -t nullfs -o rw /home/sharefs /jailroot/home/sharefs
 			mount -t tmpfs -o rw tmpfs /jailroot/tmp
 		</pre>
 
-		<p>Если вы хотите смонтировать в jail2 каталог из jail1, путь к jail1 должен указывать на каталог содержащий данные jail1 (а их точки монтирования ${workdir}/jails/jail1). Например запись в <em><strong>$workdir/jails-fstab/</strong>fstab.jail2.local</em>:</p>
+		<p>Если вы хотите смонтировать в jail2 каталог из jail1, путь к jail1 должен указывать на каталог содержащий данные jail1 (а их точки монтирования ${workdir}/jails/jail1). Например запись в <em><strong>$workdir/jails-fstab/jail2/</strong>fstab.local</em>:</p>
 		<pre class="brush:bash;ruler:true;">
 			/usr/jails/jails-data/jail1-data/usr/local/www /usr/local/www nullfs ro 0 0
 		</pre>
@@ -56,17 +60,17 @@
 		<p>Бывают случаи, когда монтирование через <strong>mount -t /type/</strong> не работает или монтирование должно происходить нестандартным способом. В этом случае используйте зарезервированное слово 'external', где поле 'source' будет указывать на ваш внешний скрипт, результат работы которого должен быть смонтированный каталог.</p>
 		<p>Пример такой записи в fstab.local:</p>
 		<pre>
-		/root/ntfs-3g.sh        /usr/home/web/downloads external rw 0 0
+		/root/ntfs-3g.sh        /home/web/downloads external rw 0 0
 		</pre>
-		<p>и пример рабочего скрипта /root/ntfs-3g.sh для этой записи: <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v13.0.0/share/examples/jails-fstab/ntfs-3g.sh">ntfs-3g.sh</a>, который монтирует внешний USB-диск напрямую в.</p>
+		<p>и пример рабочего скрипта /root/ntfs-3g.sh для этой записи: <a target="_blank" href="https://github.com/cbsd/cbsd/blob/v14.1.1/share/examples/jails-fstab/ntfs-3g.sh">ntfs-3g.sh</a>, который монтирует внешний USB-диск напрямую в.</p>
 	</div>
 	<h2><a name="allow_zfs">Презентация ZFS файловых систем в jail</a></h2>
 	<div class="block">
-		<p>Если вы хотите привязать отдельные ZFS файловые системы в jail ( тоесть, хотите иметь возможности внутри jail выполнить zfs mount ),  список ZFS необходимо перечислить в <em><strong>$workdir/jails-fstab/</strong>fstab.$jname.local</em> файле, указав в поле FStype ключевое слово zfs. Например, если вы хотите презентовать файловую систему ZFS: <strong>zroot/jail1_webfs</strong> для клетки jail1, запись в <em><strong>$workdir/jails-fstab/</strong>fstab.jail1.local</em> должна выглядеть так:</p>
+		<p>Если вы хотите привязать отдельные ZFS файловые системы в jail ( тоесть, хотите иметь возможности внутри jail выполнить zfs mount ),  список ZFS необходимо перечислить в <em><strong>$workdir/jails-fstab/$jname</strong>fstab.local</em> файле, указав в поле FStype ключевое слово zfs. Например, если вы хотите презентовать файловую систему ZFS: <strong>zroot/jail1_webfs</strong> для клетки jail1, запись в <em><strong>$workdir/jails-fstab/jail1/</strong>fstab.local</em> должна выглядеть так:</p>
 			<pre class="brush:bash;ruler:true;">
-			zroot/jail1_webfs /usr/home/web zfs rw 0 0
+			zroot/jail1_webfs /home/web zfs rw 0 0
 		</pre>
-		<p><em>Примечание:</em> точка монтирования (/usr/home/web в данном примере) роли не играет</p>
+		<p><em>Примечание:</em> точка монтирования (/home/web в данном примере) роли не играет</p>
 		<p><em>Примечание2:</em> клетка должна иметь параметр <em>allow_zfs</em> установленным в 1, что можно сделать через <strong>cbsd jconfig jname=$jname</strong></p>
 		<p>Фактически, это заставляет <strong>CBSD</strong> выполнить команды:</p>
 		<pre class="brush:bash;ruler:true;">
